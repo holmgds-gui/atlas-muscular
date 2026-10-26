@@ -1,0 +1,724 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Atlas Muscular</title>
+<meta name="description" content="Boneco anatômico clicável com exercícios ordenados por estudos de EMG.">
+<meta name="theme-color" content="#0E1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Atlas Muscular">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}
+body{margin:0}
+[hidden]{display:none!important}
+img{max-width:100%}
+</style>
+<style>
+/* Layout: figure stage on the left (top on phones), ranked exercise panel on the right (below on phones). */
+:root{
+  --bg:#E9ECEF; --surface:#F7F8F9; --ink:#1A1F26; --muted:#5B6470; --line:#CDD2D8;
+  --skin:#D6DADF; --m:#AEB6C0; --m-hi:#C3CAD2; --m-lo:#97A0AB; --m-edge:#E9ECEF; --fiber:rgba(26,31,38,.13);
+  --target:#D3222A; --target-hi:#F04A50; --target-lo:#A0141B;
+  --syn:#F08A24; --syn-soft:rgba(240,138,36,.55);
+  --chip:#E1E5E9; --focus:#1A1F26;
+  --f-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
+  --skin:#1E242C; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
+  --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
+  --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
+  --chip:#1F262E; --focus:#E7EAEE; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
+  --skin:#1E242C; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
+  --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
+  --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
+  --chip:#1F262E; --focus:#E7EAEE; color-scheme:dark}
+
+html{height:100%}body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;overflow:hidden;-webkit-tap-highlight-color:transparent}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+
+.app{height:100%;display:grid;grid-template-rows:auto 1fr;min-height:0}
+header{display:flex;align-items:center;gap:12px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--surface)}
+.brand{display:flex;align-items:baseline;gap:8px;min-width:0}
+.brand h1{margin:0;font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.brand h1 b{color:var(--target);font-weight:700}
+.brand small{color:var(--muted);font-size:12px;white-space:nowrap}
+.search{position:relative;margin-left:auto;flex:1;max-width:380px;min-width:0}
+.search input{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px 9px 34px;font-size:15px}
+.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted)}
+.results{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);max-height:60vh;overflow:auto;z-index:20}
+.results button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 14px;border-bottom:1px solid var(--line)}
+.results button:last-child{border-bottom:0}
+.results button:hover,.results button:focus-visible{background:var(--chip)}
+.results .r-n{font-weight:600;font-size:14px}
+.results .r-s{font-size:12px;color:var(--muted)}
+.results .empty{padding:12px 14px;color:var(--muted);font-size:13px}
+
+main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
+.stage{display:flex;flex-direction:column;min-height:0;min-width:0}
+.bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px}
+.seg{display:inline-flex;background:var(--chip);border-radius:10px;padding:3px}
+.seg button{border:0;background:none;padding:6px 14px;border-radius:8px;font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.zoom{display:inline-flex;gap:4px}
+.zoom button{border:1px solid var(--line);background:var(--surface);border-radius:8px;min-width:34px;height:32px;font-weight:600}
+.legend{margin-left:auto;display:flex;gap:14px;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.legend .lt{background:var(--target)} .legend .ls{background:var(--syn)}
+.canvas{flex:1;min-height:0;position:relative}
+#fig{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+.hint{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:10px;font-size:12px;color:var(--muted);pointer-events:none}
+
+/* figure */
+.skin{fill:var(--skin)}
+.m{fill:url(#gM);stroke:var(--m-edge);stroke-width:1.6;stroke-linejoin:round;transition:fill .18s}
+.fib{pointer-events:none}
+@media (hover:hover){[data-m]:hover .m{fill:var(--m-hi)}}
+[data-m].on .m{fill:url(#gT)}
+[data-m].syn .m{fill:url(#gS)}
+.vlabel{font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.2em;fill:var(--muted)}
+.detail{fill:none;stroke:var(--m-edge);stroke-width:1.4;pointer-events:none}
+
+/* panel */
+.panel{border-left:1px solid var(--line);background:var(--surface);display:flex;flex-direction:column;min-height:0}
+.p-head{padding:16px 18px 12px;border-bottom:1px solid var(--line);display:grid;gap:10px}
+.p-top{display:flex;align-items:flex-start;gap:10px}
+.p-top > div{min-width:0;flex:1}
+.eyebrow{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--target)}
+.p-title{margin:2px 0 0;font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1.02;text-wrap:balance}
+.p-latin{margin:4px 0 0;font-size:13px;color:var(--muted);font-style:italic}
+.clear{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 10px;font-size:13px}
+.chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;border:1px solid var(--line);background:var(--bg);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--muted)}
+.chips button[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
+.p-body{flex:1;overflow:auto;padding:14px 18px 24px;display:grid;gap:10px;align-content:start;-webkit-overflow-scrolling:touch}
+.status{font-size:13px;color:var(--muted);line-height:1.4}
+.status b{color:var(--syn)}
+.link{border:0;background:none;padding:0;color:var(--ink);font-weight:600;text-decoration:underline;text-underline-offset:3px}
+
+.ex{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;text-align:left;width:100%;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.ex:hover{border-color:var(--muted)}
+.ex.sel{border-color:var(--syn);box-shadow:inset 0 0 0 1px var(--syn)}
+.rank{grid-row:span 3;font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1;color:var(--muted);min-width:28px;font-variant-numeric:tabular-nums}
+.ex:first-child .rank{color:var(--target)}
+.ex-n{font-weight:600;font-size:15px;line-height:1.25}
+.ex-en{font-size:12px;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.tag{font-size:11px;font-weight:600;letter-spacing:.03em;border-radius:6px;padding:3px 7px;background:var(--chip);color:var(--muted)}
+.tag.emg{background:var(--ink);color:var(--surface)}
+.tag.bio{background:none;border:1px solid var(--line)}
+.tag.stat{background:none;color:var(--target);border:1px solid var(--target)}
+.syns{grid-column:2;display:none;flex-wrap:wrap;gap:5px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)}
+.ex.sel .syns{display:flex}
+.syns span{font-size:12px;border-radius:6px;padding:2px 8px;background:var(--syn-soft);color:var(--ink)}
+.syns em{font-style:normal;font-size:12px;color:var(--muted);width:100%}
+
+.note{font-size:13px;color:var(--muted);line-height:1.45;border-left:3px solid var(--line);padding:2px 0 2px 10px}
+.empty{padding:20px;text-align:center;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:14px}
+.empty button{margin-top:10px;border:0;background:var(--ink);color:var(--surface);border-radius:8px;padding:7px 12px}
+
+.groups{display:grid;gap:16px}
+.group h3{margin:0 0 6px;font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.group div{display:flex;flex-wrap:wrap;gap:6px}
+.group button{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 10px;font-size:13px}
+.group button:hover{border-color:var(--target)}
+
+details.about{border-top:1px solid var(--line);padding-top:12px;margin-top:6px;font-size:13px;color:var(--muted)}
+details.about summary{cursor:pointer;font-weight:600;color:var(--ink)}
+details.about ul{padding-left:18px;margin:8px 0 0;display:grid;gap:4px}
+details.about p{margin:8px 0 0;line-height:1.45}
+
+/* phones and narrow windows */
+@media (max-width:900px){
+  main{grid-template-columns:minmax(0,1fr);grid-template-rows:minmax(300px,52%) minmax(0,1fr)}
+  .panel{border-left:0;border-top:1px solid var(--line)}
+  .seg .both{display:none}
+  .legend{display:none}
+  .brand small{display:none}
+  .p-head{padding:12px 16px 10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .p-body{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .p-title{font-size:24px}
+  .bar{padding-block:8px}
+  .hint{display:none}
+  main{grid-template-rows:minmax(320px,56%) minmax(0,1fr)}
+}
+@media (max-width:480px){.brand h1{font-size:19px}}
+@media (prefers-reduced-motion:reduce){.m{transition:none}}
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand"><h1>Atlas <b>Muscular</b></h1><small>ranking por EMG</small></div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+      <input id="q" type="search" placeholder="Buscar músculo ou exercício" autocomplete="off" aria-label="Buscar músculo ou exercício">
+      <div class="results" id="results" hidden></div>
+    </div>
+  </header>
+  <main>
+    <section class="stage" aria-label="Boneco anatômico">
+      <div class="bar">
+        <div class="seg" role="group" aria-label="Vista">
+          <button id="vFront" data-v="front" aria-pressed="true">Frente</button>
+          <button id="vBack" data-v="back" aria-pressed="false">Costas</button>
+          <button id="vBoth" class="both" data-v="both" aria-pressed="false">Ambos</button>
+        </div>
+        <div class="zoom">
+          <button id="zIn" aria-label="Aproximar">+</button>
+          <button id="zOut" aria-label="Afastar">−</button>
+          <button id="zReset" aria-label="Enquadrar">⤢</button>
+        </div>
+        <div class="legend"><span><i class="lt"></i>Músculo alvo</span><span><i class="ls"></i>Sinergista</span></div>
+      </div>
+      <div class="canvas">
+        <svg id="fig" preserveAspectRatio="xMidYMid meet" aria-label="Boneco com músculos clicáveis"></svg>
+        <div class="hint" id="hint">Toque num músculo · pinça para zoom · arraste para mover</div>
+      </div>
+    </section>
+    <aside class="panel">
+      <div class="p-head">
+        <div class="p-top">
+          <div>
+            <div class="eyebrow" id="cat">Escolha um músculo</div>
+            <h2 class="p-title" id="title">Toque no boneco</h2>
+            <p class="p-latin" id="latin">O músculo fica vermelho e a lista mostra os exercícios em ordem.</p>
+          </div>
+          <button class="clear" id="clear" hidden>Limpar</button>
+        </div>
+        <div class="chips" id="chips" role="group" aria-label="Equipamento"></div>
+      </div>
+      <div class="p-body" id="body"></div>
+    </aside>
+  </main>
+</div>
+
+<script>
+/* ------------------------------------------------------------------ data */
+const EQ = {H:"Halteres",P:"Polia / Cabo",B:"Barra",M:"Máquina",C:"Peso corporal"};
+const SRC = {
+  ace_peito:"ACE (2012): EMG do peitoral em 9 exercícios de peito",
+  ace_biceps:"ACE (2014): EMG do bíceps em 8 exercícios",
+  ace_triceps:"ACE (2012): EMG do tríceps em 8 exercícios",
+  ace_ombro:"ACE (2014): EMG dos três deltoides em 10 exercícios",
+  ace_abs:"ACE (2001): EMG do reto abdominal e oblíquos em 13 exercícios",
+  ace_gluteo:"ACE (2006): EMG do glúteo máximo e médio",
+  contreras:"Contreras et al. (2015): elevação pélvica vs agachamento",
+  mcallister:"McAllister et al. (2014): EMG dos isquiotibiais em 4 exercícios",
+  andersen:"Andersen et al. (2014): largura da pegada na puxada",
+  ekstrom:"Ekstrom et al. (2003): exercícios para trapézio e serrátil",
+  reinold:"Reinold et al. (2004): manguito rotador e deltoide",
+  distefano:"Distefano et al. (2009): glúteos em exercícios comuns",
+  serner:"Serner et al. (2014): exercícios de adutores",
+  ridao:"Rodríguez-Ridao et al. (2020): inclinação do banco no supino"
+};
+/* exercise: [pt, en, eq, evidence (E = ranking de estudo EMG, B = biomecânica), synergists, stat?] */
+const M = {
+  peito_superior:{n:"Peitoral superior",l:"Pectoralis major, parte clavicular",c:"Peito",s:["ridao","ace_peito"],x:[
+    ["Supino inclinado com barra (≈30°)","Incline barbell bench press","B","E",["ombro_frontal","triceps_lateral","triceps_medial"]],
+    ["Supino inclinado com halteres (≈30°)","Incline dumbbell press","H","B",["ombro_frontal","triceps_lateral"]],
+    ["Supino inclinado no Smith ou máquina","Incline Smith / machine press","M","B",["ombro_frontal","triceps_lateral"]],
+    ["Crucifixo na polia, de baixo para cima","Low-to-high cable fly","P","B",["ombro_frontal","biceps_curta"]],
+    ["Supino reto com barra","Flat barbell bench press","B","E",["ombro_frontal","triceps_lateral","peito_medial"]]]},
+  peito_medial:{n:"Peitoral médio",l:"Pectoralis major, parte esternocostal",c:"Peito",s:["ace_peito"],x:[
+    ["Supino reto com barra","Barbell bench press","B","E",["ombro_frontal","triceps_lateral","triceps_medial"],"100% (referência)"],
+    ["Voador (pec deck)","Pec deck","M","E",["ombro_frontal"],"98% do supino"],
+    ["Crossover com tronco inclinado à frente","Bent-forward cable crossover","P","E",["ombro_frontal","peito_inferior"],"93% do supino"],
+    ["Supino sentado na máquina","Seated chest press","M","E",["ombro_frontal","triceps_lateral"]],
+    ["Crucifixo inclinado com halteres","Incline dumbbell fly","H","E",["ombro_frontal","peito_superior"]],
+    ["Mergulho nas paralelas","Dips","C","E",["triceps_lateral","ombro_frontal","peito_inferior"]],
+    ["Flexão de braço","Push-up","C","E",["triceps_lateral","ombro_frontal","serratil"]]]},
+  peito_inferior:{n:"Peitoral inferior",l:"Pectoralis major, parte abdominal",c:"Peito",s:[],x:[
+    ["Supino declinado com barra","Decline barbell bench press","B","B",["triceps_lateral","ombro_frontal","peito_medial"]],
+    ["Mergulho nas paralelas, tronco à frente","Chest dips (forward lean)","C","B",["triceps_lateral","triceps_longa","ombro_frontal"]],
+    ["Crossover de cima para baixo","High-to-low cable crossover","P","B",["peito_medial","ombro_frontal"]],
+    ["Supino declinado com halteres","Decline dumbbell press","H","B",["triceps_lateral","ombro_frontal"]]]},
+  ombro_frontal:{n:"Deltoide anterior",l:"Deltoideus, parte clavicular",c:"Ombros",s:["ace_ombro"],x:[
+    ["Desenvolvimento com halteres","Dumbbell shoulder press","H","E",["ombro_lateral","triceps_lateral","triceps_longa","trapezio_superior"]],
+    ["Desenvolvimento em pé com barra","Barbell overhead press","B","B",["ombro_lateral","triceps_lateral","trapezio_superior","abdomen_supra"]],
+    ["Desenvolvimento na máquina","Machine shoulder press","M","B",["ombro_lateral","triceps_lateral"]],
+    ["Elevação frontal com halteres","Dumbbell front raise","H","B",["peito_superior","ombro_lateral"]],
+    ["Supino inclinado com halteres","Incline dumbbell press","H","B",["peito_superior","triceps_lateral"]]]},
+  ombro_lateral:{n:"Deltoide lateral",l:"Deltoideus, parte acromial",c:"Ombros",s:["ace_ombro"],x:[
+    ["Remada inclinada a 45° (peito apoiado, cotovelos abertos)","45° incline row","H","E",["ombro_posterior","trapezio_medio","romboides","biceps_longa"]],
+    ["Elevação lateral com cotovelo flexionado","Bent-arm lateral raise","H","E",["trapezio_superior","ombro_frontal"]],
+    ["Elevação lateral na polia","Cable lateral raise","P","B",["trapezio_superior"]],
+    ["Elevação lateral na máquina","Machine lateral raise","M","B",["trapezio_superior"]],
+    ["Desenvolvimento com halteres","Dumbbell shoulder press","H","B",["ombro_frontal","triceps_lateral"]],
+    ["Remada alta com barra","Barbell upright row","B","E",["trapezio_superior","biceps_longa"]]]},
+  ombro_posterior:{n:"Deltoide posterior",l:"Deltoideus, parte espinal",c:"Ombros",s:["ace_ombro"],x:[
+    ["Remada inclinada a 45° (peito apoiado, cotovelos abertos)","45° incline row","H","E",["ombro_lateral","trapezio_medio","romboides","biceps_longa"]],
+    ["Elevação lateral sentado, tronco inclinado","Seated rear lateral raise","H","E",["trapezio_medio","romboides","infraespinhal"]],
+    ["Crucifixo inverso na máquina","Reverse pec deck","M","B",["trapezio_medio","romboides","infraespinhal"]],
+    ["Face pull na polia com corda","Rope face pull","P","B",["infraespinhal","trapezio_medio","trapezio_inferior"]],
+    ["Crucifixo inverso unilateral na polia","Single-arm cable rear delt fly","P","B",["trapezio_medio","infraespinhal"]]]},
+  biceps_longa:{n:"Bíceps, cabeça longa",l:"Biceps brachii, caput longum",c:"Braços",s:["ace_biceps"],x:[
+    ["Rosca concentrada","Concentration curl","H","E",["biceps_curta","braquial","antebraco_flexores"]],
+    ["Rosca inclinada com halteres","Incline dumbbell curl","H","B",["biceps_curta","braquial"]],
+    ["Rosca direta, pegada fechada","Close-grip barbell curl","B","B",["biceps_curta","braquial","antebraco_flexores"]],
+    ["Rosca na polia baixa","Cable curl","P","B",["biceps_curta","braquial"]],
+    ["Barra fixa supinada","Chin-up","C","B",["dorsal_superior","biceps_curta","braquial","redondo_maior"]]]},
+  biceps_curta:{n:"Bíceps, cabeça curta",l:"Biceps brachii, caput breve",c:"Braços",s:["ace_biceps"],x:[
+    ["Rosca concentrada","Concentration curl","H","E",["biceps_longa","braquial","antebraco_flexores"]],
+    ["Rosca Scott","Preacher curl","B","B",["biceps_longa","braquial"]],
+    ["Rosca spider","Spider curl","H","B",["biceps_longa","braquial"]],
+    ["Rosca direta, pegada aberta","Wide-grip barbell curl","B","B",["biceps_longa","antebraco_flexores"]],
+    ["Rosca Scott na máquina","Machine preacher curl","M","B",["biceps_longa","braquial"]]]},
+  braquial:{n:"Braquial",l:"Brachialis",c:"Braços",s:[],x:[
+    ["Rosca martelo","Hammer curl","H","B",["antebraco_braquiorradial","biceps_longa"]],
+    ["Rosca martelo cruzada","Cross-body hammer curl","H","B",["antebraco_braquiorradial","biceps_longa"]],
+    ["Rosca martelo na polia com corda","Rope hammer curl","P","B",["antebraco_braquiorradial","biceps_longa"]],
+    ["Rosca inversa (pegada pronada)","Reverse curl","B","B",["antebraco_braquiorradial","antebraco_extensores"]]]},
+  triceps_longa:{n:"Tríceps, cabeça longa",l:"Triceps brachii, caput longum",c:"Braços",s:["ace_triceps"],x:[
+    ["Flexão diamante","Triangle push-up","C","E",["triceps_lateral","triceps_medial","peito_medial","ombro_frontal"]],
+    ["Tríceps francês na polia (acima da cabeça)","Overhead cable extension","P","B",["triceps_lateral","triceps_medial"]],
+    ["Tríceps testa com barra W","EZ-bar skullcrusher","B","E",["triceps_lateral","triceps_medial"]],
+    ["Tríceps coice","Triceps kickback","H","E",["triceps_lateral","triceps_medial","ombro_posterior"]],
+    ["Tríceps francês com halter","Overhead dumbbell extension","H","E",["triceps_lateral","triceps_medial"]]]},
+  triceps_lateral:{n:"Tríceps, cabeça lateral",l:"Triceps brachii, caput laterale",c:"Braços",s:["ace_triceps"],x:[
+    ["Flexão diamante","Triangle push-up","C","E",["triceps_longa","triceps_medial","peito_medial","ombro_frontal"]],
+    ["Tríceps coice","Triceps kickback","H","E",["triceps_longa","triceps_medial"]],
+    ["Mergulho nas paralelas","Dips","C","E",["peito_inferior","ombro_frontal","triceps_medial"]],
+    ["Tríceps na polia com barra","Bar pushdown","P","E",["triceps_medial","triceps_longa"]],
+    ["Tríceps na polia com corda","Rope pushdown","P","E",["triceps_medial","triceps_longa"]],
+    ["Supino fechado","Close-grip bench press","B","E",["peito_medial","ombro_frontal","triceps_medial"]]]},
+  triceps_medial:{n:"Tríceps, cabeça medial",l:"Triceps brachii, caput mediale",c:"Braços",s:["ace_triceps"],x:[
+    ["Flexão diamante","Triangle push-up","C","E",["triceps_lateral","triceps_longa","peito_medial"]],
+    ["Tríceps coice","Triceps kickback","H","E",["triceps_lateral","triceps_longa"]],
+    ["Tríceps na polia, pegada supinada","Reverse-grip pushdown","P","B",["triceps_lateral","antebraco_extensores"]],
+    ["Supino fechado","Close-grip bench press","B","E",["peito_medial","ombro_frontal","triceps_lateral"]]]},
+  antebraco_braquiorradial:{n:"Braquiorradial",l:"Brachioradialis",c:"Antebraço",s:[],x:[
+    ["Rosca martelo","Hammer curl","H","B",["braquial","biceps_longa"]],
+    ["Rosca inversa","Reverse curl","B","B",["braquial","antebraco_extensores"]],
+    ["Rosca Zottman","Zottman curl","H","B",["biceps_longa","biceps_curta","braquial"]]]},
+  antebraco_flexores:{n:"Flexores do punho",l:"Flexor carpi radialis e ulnaris",c:"Antebraço",s:[],x:[
+    ["Rosca de punho com barra","Barbell wrist curl","B","B",["antebraco_braquiorradial"]],
+    ["Rosca de punho na polia","Cable wrist curl","P","B",["antebraco_braquiorradial"]],
+    ["Caminhada do fazendeiro","Farmer's walk","H","B",["trapezio_superior","antebraco_extensores","abdomen_supra"]]]},
+  antebraco_extensores:{n:"Extensores do punho",l:"Extensor carpi radialis e ulnaris",c:"Antebraço",s:[],x:[
+    ["Extensão de punho com barra","Reverse wrist curl","B","B",["antebraco_braquiorradial"]],
+    ["Extensão de punho com halter","Dumbbell wrist extension","H","B",["antebraco_braquiorradial"]],
+    ["Rolo de punho","Wrist roller","B","B",["antebraco_flexores","ombro_frontal"]]]},
+  trapezio_superior:{n:"Trapézio superior",l:"Trapezius, parte descendente",c:"Costas",s:["ekstrom"],x:[
+    ["Encolhimento de ombros","Shoulder shrug","B","E",["antebraco_flexores"]],
+    ["Encolhimento com halteres","Dumbbell shrug","H","B",["antebraco_flexores"]],
+    ["Caminhada do fazendeiro","Farmer's walk","H","B",["antebraco_flexores","abdomen_supra"]],
+    ["Remada alta","Upright row","B","B",["ombro_lateral","biceps_longa"]]]},
+  trapezio_medio:{n:"Trapézio médio",l:"Trapezius, parte transversa",c:"Costas",s:["ekstrom"],x:[
+    ["Abdução horizontal deitado de bruços","Prone horizontal abduction","H","E",["ombro_posterior","romboides","infraespinhal"]],
+    ["Remada com peito apoiado","Chest-supported row","H","B",["romboides","ombro_posterior","biceps_longa"]],
+    ["Remada curvada com barra","Barbell bent-over row","B","B",["dorsal_superior","romboides","ombro_posterior","lombar_eretores"]],
+    ["Face pull","Face pull","P","B",["ombro_posterior","infraespinhal","trapezio_inferior"]]]},
+  trapezio_inferior:{n:"Trapézio inferior",l:"Trapezius, parte ascendente",c:"Costas",s:["ekstrom"],x:[
+    ["Elevação em Y deitado de bruços","Prone Y raise","H","E",["trapezio_medio","ombro_posterior","infraespinhal"]],
+    ["Face pull","Face pull","P","B",["ombro_posterior","infraespinhal","trapezio_medio"]],
+    ["Barra fixa pronada","Pull-up","C","B",["dorsal_superior","redondo_maior","biceps_longa"]]]},
+  romboides:{n:"Romboides",l:"Rhomboideus major e minor",c:"Costas",s:[],x:[
+    ["Remada com peito apoiado","Chest-supported row","H","B",["trapezio_medio","ombro_posterior","biceps_longa"]],
+    ["Remada baixa na polia","Seated cable row","P","B",["dorsal_superior","trapezio_medio","biceps_longa"]],
+    ["Crucifixo inverso na máquina","Reverse pec deck","M","B",["ombro_posterior","trapezio_medio"]]]},
+  infraespinhal:{n:"Infraespinhal e redondo menor",l:"Infraspinatus, teres minor",c:"Costas",s:["reinold"],x:[
+    ["Rotação externa deitado de lado","Side-lying external rotation","H","E",["ombro_posterior"]],
+    ["Rotação externa na polia","Cable external rotation","P","B",["ombro_posterior"]],
+    ["Face pull","Face pull","P","B",["ombro_posterior","trapezio_medio","trapezio_inferior"]]]},
+  redondo_maior:{n:"Redondo maior",l:"Teres major",c:"Costas",s:[],x:[
+    ["Puxada frontal","Lat pulldown","M","B",["dorsal_superior","biceps_longa","romboides"]],
+    ["Remada unilateral com halter","One-arm dumbbell row","H","B",["dorsal_inferior","dorsal_superior","biceps_longa"]],
+    ["Pullover na polia","Cable pullover","P","B",["dorsal_superior","triceps_longa"]]]},
+  dorsal_superior:{n:"Grande dorsal superior",l:"Latissimus dorsi, fibras torácicas",c:"Costas",s:["andersen"],x:[
+    ["Barra fixa pronada","Pull-up","C","B",["redondo_maior","biceps_longa","trapezio_inferior"]],
+    ["Puxada frontal, pegada média","Lat pulldown, medium grip","M","E",["redondo_maior","biceps_longa","romboides"]],
+    ["Puxada frontal, pegada aberta","Lat pulldown, wide grip","M","E",["redondo_maior","biceps_longa","trapezio_medio"]],
+    ["Remada unilateral com halter","One-arm dumbbell row","H","B",["dorsal_inferior","romboides","biceps_longa"]],
+    ["Pullover na polia","Cable pullover","P","B",["redondo_maior","triceps_longa"]]]},
+  dorsal_inferior:{n:"Grande dorsal inferior",l:"Latissimus dorsi, fibras lombares e ilíacas",c:"Costas",s:[],x:[
+    ["Remada unilateral com halter","One-arm dumbbell row","H","B",["dorsal_superior","redondo_maior","biceps_longa"]],
+    ["Puxada unilateral na polia","Single-arm cable pulldown","P","B",["dorsal_superior","redondo_maior"]],
+    ["Remada baixa, pegada fechada","Close-grip seated row","P","B",["dorsal_superior","romboides","biceps_longa"]],
+    ["Pullover na polia","Cable pullover","P","B",["redondo_maior","triceps_longa"]]]},
+  lombar_eretores:{n:"Eretores da espinha",l:"Erector spinae",c:"Costas",s:[],x:[
+    ["Levantamento terra","Deadlift","B","B",["gluteo_maximo","isquio_biceps_femoral","isquio_semitendineo","trapezio_superior"]],
+    ["Extensão lombar a 45°","45° back extension","C","B",["gluteo_maximo","isquio_semitendineo"]],
+    ["Bom dia com barra","Good morning","B","B",["isquio_biceps_femoral","gluteo_maximo"]]]},
+  serratil:{n:"Serrátil anterior",l:"Serratus anterior",c:"Peito",s:["ekstrom"],x:[
+    ["Soco do serrátil (protração deitado)","Supine serratus punch","H","E",["ombro_frontal"]],
+    ["Elevação no plano da escápula acima de 120°","Scaption above 120°","H","E",["ombro_frontal","ombro_lateral","trapezio_superior"]],
+    ["Flexão com protração final (push-up plus)","Push-up plus","C","B",["peito_medial","triceps_lateral","ombro_frontal"]]]},
+  abdomen_supra:{n:"Reto abdominal, parte superior",l:"Rectus abdominis",c:"Abdômen",s:["ace_abs"],x:[
+    ["Abdominal bicicleta","Bicycle crunch","C","E",["obliquos","abdomen_infra"]],
+    ["Elevação de pernas na cadeira (captain's chair)","Captain's chair","M","E",["abdomen_infra","obliquos"]],
+    ["Abdominal na bola suíça","Stability-ball crunch","C","E",["abdomen_infra"]],
+    ["Abdominal com pernas na vertical","Vertical leg crunch","C","E",["abdomen_infra"]],
+    ["Abdominal na polia ajoelhado","Kneeling cable crunch","P","B",["abdomen_infra","obliquos"]],
+    ["Abdominal tradicional","Traditional crunch","C","E",["abdomen_infra"]]]},
+  abdomen_infra:{n:"Reto abdominal, parte inferior",l:"Rectus abdominis",c:"Abdômen",s:[],x:[
+    ["Elevação de pernas na cadeira (captain's chair)","Captain's chair","M","B",["abdomen_supra","obliquos"]],
+    ["Elevação de pernas na barra","Hanging leg raise","C","B",["abdomen_supra","obliquos","antebraco_flexores"]],
+    ["Abdominal reverso","Reverse crunch","C","B",["abdomen_supra","obliquos"]],
+    ["Abdominal bicicleta","Bicycle crunch","C","B",["obliquos","abdomen_supra"]]]},
+  obliquos:{n:"Oblíquos",l:"Obliquus externus e internus",c:"Abdômen",s:["ace_abs"],x:[
+    ["Elevação de pernas na cadeira (captain's chair)","Captain's chair","M","E",["abdomen_infra","abdomen_supra"]],
+    ["Abdominal bicicleta","Bicycle crunch","C","E",["abdomen_supra","abdomen_infra"]],
+    ["Abdominal reverso","Reverse crunch","C","E",["abdomen_infra"]],
+    ["Prancha","Plank (hover)","C","E",["abdomen_supra","abdomen_infra","serratil"]],
+    ["Pallof press na polia","Pallof press","P","B",["abdomen_supra"]]]},
+  gluteo_maximo:{n:"Glúteo máximo",l:"Gluteus maximus",c:"Quadril",s:["contreras","ace_gluteo"],x:[
+    ["Elevação pélvica com barra","Barbell hip thrust","B","E",["isquio_biceps_femoral","quad_vasto_lateral","lombar_eretores"],"2× o agachamento (média)"],
+    ["Extensão de quadril em quatro apoios","Quadruped hip extension","C","E",["isquio_semitendineo","isquio_biceps_femoral"]],
+    ["Agachamento livre","Back squat","B","E",["quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","adutores","lombar_eretores"]],
+    ["Subida no banco (step-up)","Step-up","H","E",["quad_vasto_lateral","quad_vasto_medial","gluteo_medio"]],
+    ["Afundo","Lunge","H","E",["quad_vasto_lateral","quad_vasto_medial","gluteo_medio","adutores"]],
+    ["Leg press","Leg press","M","E",["quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral"]]]},
+  gluteo_medio:{n:"Glúteo médio e mínimo",l:"Gluteus medius, gluteus minimus",c:"Quadril",s:["distefano","ace_gluteo"],x:[
+    ["Abdução de quadril deitado de lado","Side-lying hip abduction","C","E",["abdutores"]],
+    ["Extensão de quadril em quatro apoios","Quadruped hip extension","C","E",["gluteo_maximo","isquio_semitendineo"]],
+    ["Subida no banco (step-up)","Step-up","H","E",["gluteo_maximo","quad_vasto_lateral"]],
+    ["Afundo","Lunge","H","E",["gluteo_maximo","quad_vasto_lateral","adutores"]],
+    ["Cadeira abdutora","Hip abduction machine","M","B",["abdutores"]]]},
+  abdutores:{n:"Tensor da fáscia lata",l:"Tensor fasciae latae",c:"Quadril",s:[],x:[
+    ["Cadeira abdutora","Hip abduction machine","M","B",["gluteo_medio"]],
+    ["Abdução de quadril na polia","Cable hip abduction","P","B",["gluteo_medio"]],
+    ["Caminhada lateral com elástico","Banded lateral walk","C","B",["gluteo_medio","gluteo_maximo"]]]},
+  adutores:{n:"Adutores",l:"Adductor longus, brevis e magnus",c:"Coxas",s:["serner"],x:[
+    ["Prancha de Copenhagen","Copenhagen adduction","C","E",["obliquos"]],
+    ["Cadeira adutora","Hip adduction machine","M","B",[]],
+    ["Agachamento sumô","Sumo squat","H","B",["gluteo_maximo","quad_vasto_medial"]]]},
+  quad_reto_femoral:{n:"Reto femoral",l:"Rectus femoris",c:"Coxas",s:[],x:[
+    ["Cadeira extensora","Leg extension","M","B",["quad_vasto_lateral","quad_vasto_medial"]],
+    ["Agachamento sissy","Sissy squat","C","B",["quad_vasto_lateral","quad_vasto_medial"]],
+    ["Agachamento livre","Back squat","B","B",["quad_vasto_lateral","gluteo_maximo","adutores"]],
+    ["Leg press","Leg press","M","B",["quad_vasto_lateral","quad_vasto_medial","gluteo_maximo"]]]},
+  quad_vasto_lateral:{n:"Vasto lateral",l:"Vastus lateralis",c:"Coxas",s:[],x:[
+    ["Agachamento livre","Back squat","B","B",["quad_reto_femoral","gluteo_maximo","adutores"]],
+    ["Agachamento hack","Hack squat","M","B",["quad_vasto_medial","gluteo_maximo"]],
+    ["Leg press","Leg press","M","B",["quad_vasto_medial","gluteo_maximo"]],
+    ["Cadeira extensora","Leg extension","M","B",["quad_reto_femoral","quad_vasto_medial"]]]},
+  quad_vasto_medial:{n:"Vasto medial",l:"Vastus medialis",c:"Coxas",s:[],x:[
+    ["Agachamento livre profundo","Deep back squat","B","B",["quad_vasto_lateral","gluteo_maximo","adutores"]],
+    ["Agachamento hack","Hack squat","M","B",["quad_vasto_lateral","gluteo_maximo"]],
+    ["Afundo búlgaro","Bulgarian split squat","H","B",["gluteo_maximo","quad_vasto_lateral"]],
+    ["Cadeira extensora","Leg extension","M","B",["quad_reto_femoral","quad_vasto_lateral"]]]},
+  isquio_biceps_femoral:{n:"Bíceps femoral",l:"Biceps femoris",c:"Coxas",s:["mcallister"],x:[
+    ["Stiff (levantamento terra romeno)","Romanian deadlift","B","E",["gluteo_maximo","isquio_semitendineo","lombar_eretores"]],
+    ["Glute-ham raise","Glute-ham raise","M","E",["isquio_semitendineo","panturrilha_gastro"]],
+    ["Bom dia com barra","Good morning","B","E",["gluteo_maximo","lombar_eretores"]],
+    ["Mesa flexora","Lying leg curl","M","E",["isquio_semitendineo","panturrilha_gastro"]]]},
+  isquio_semitendineo:{n:"Semitendíneo e semimembranáceo",l:"Semitendinosus, semimembranosus",c:"Coxas",s:["mcallister"],x:[
+    ["Glute-ham raise","Glute-ham raise","M","E",["isquio_biceps_femoral","panturrilha_gastro"]],
+    ["Stiff (levantamento terra romeno)","Romanian deadlift","B","E",["isquio_biceps_femoral","gluteo_maximo","lombar_eretores"]],
+    ["Mesa flexora","Lying leg curl","M","E",["isquio_biceps_femoral","panturrilha_gastro"]],
+    ["Flexão nórdica","Nordic curl","C","B",["isquio_biceps_femoral","panturrilha_gastro"]]]},
+  panturrilha_gastro:{n:"Gastrocnêmio",l:"Gastrocnemius",c:"Panturrilhas",s:[],x:[
+    ["Panturrilha em pé na máquina","Standing calf raise","M","B",["panturrilha_soleo"]],
+    ["Panturrilha no leg press","Leg press calf raise","M","B",["panturrilha_soleo"]],
+    ["Panturrilha unilateral com halter","Single-leg dumbbell calf raise","H","B",["panturrilha_soleo"]]]},
+  panturrilha_soleo:{n:"Sóleo",l:"Soleus",c:"Panturrilhas",s:[],x:[
+    ["Panturrilha sentado na máquina","Seated calf raise","M","B",["panturrilha_gastro"]],
+    ["Panturrilha sentado com halteres nos joelhos","Seated dumbbell calf raise","H","B",["panturrilha_gastro"]]]}
+};
+const GROUPS = ["Peito","Ombros","Braços","Antebraço","Costas","Abdômen","Quadril","Coxas","Panturrilhas"];
+
+/* ---------------------------------------------------------------- figure
+   Left half of each view is drawn once and mirrored. Limb muscles are drawn
+   in a local frame along the limb axis (−x = lateral, +x = medial). */
+const FR = {
+  t:"", ua:"translate(180,166) rotate(28)", fa:"translate(110,298) rotate(24)",
+  hd:"translate(59,412) rotate(20)", th:"translate(212,470) rotate(6)", sh:"translate(192,662) rotate(2)"
+};
+const SKIN = [
+  ["t","M250,100 L238,100 C238,118 236,128 230,134 C214,142 196,144 180,150 C168,156 166,176 176,196 C182,206 186,212 186,220 C188,260 196,300 198,340 C198,370 192,392 194,420 C196,446 210,466 238,480 L250,482 Z"],
+  ["ua","M-23,-8 C-31,30 -28,100 -20,154 L18,154 C22,100 25,40 22,-4 C10,-14 -10,-14 -23,-8 Z"],
+  ["fa","M-21,-4 C-25,30 -21,80 -12,124 L9,124 C15,80 21,30 19,-4 Z"],
+  ["hd","M-12,-6 C-17,14 -15,34 -9,50 C-5,57 4,57 8,50 C13,34 15,14 12,-6 Z M10,8 C18,14 20,24 16,32 L11,26 Z"],
+  ["th","M-37,-8 C-41,60 -35,140 -23,194 L21,194 C27,140 33,60 37,2 L37,-10 Z"],
+  ["sh","M-23,-8 C-29,40 -25,110 -13,182 L9,182 C17,110 23,40 21,-8 Z M-13,178 C-17,192 -15,202 -6,206 L15,206 C17,198 13,186 9,178 Z"]
+];
+const FRONT = [
+  ["t","trapezio_superior","M238,112 C234,126 220,138 194,145 C204,150 216,150 226,147 C234,143 240,134 242,124 Z",30],
+  ["t","ombro_lateral","M176,150 C160,152 146,164 138,184 C132,198 132,210 136,218 C140,224 144,230 147,234 C148,214 152,188 166,160 C170,155 173,152 176,150 Z",72],
+  ["t","ombro_frontal","M178,150 C186,150 192,154 192,160 C188,176 182,196 176,214 C168,226 156,232 148,236 C150,212 156,186 168,160 C171,155 174,152 178,150 Z",62],
+  ["t","peito_superior","M248,150 C230,148 208,148 195,152 C194,160 192,168 189,176 C188,182 186,188 184,194 C204,188 226,184 248,184 Z",8],
+  ["t","peito_medial","M248,187 C226,187 204,191 183,198 C182,204 182,208 184,212 C200,226 224,234 248,234 Z",-4],
+  ["t","peito_inferior","M248,237 C226,237 206,232 188,220 C194,236 208,250 224,256 C236,259 244,258 248,256 Z",-22],
+  ["t","dorsal_superior","M182,224 C178,248 180,276 188,302 L192,298 C188,276 186,250 186,226 Z",80],
+  ["t","serratil","M188,226 C186,242 188,258 192,272 L206,266 C202,262 199,258 198,254 L209,250 C204,246 200,242 198,238 L205,234 C199,231 193,228 188,226 Z",-20],
+  ["t","obliquos","M208,268 C214,270 220,272 224,276 C224,310 224,350 226,380 C228,398 230,412 232,424 C218,414 206,400 200,384 C198,360 198,320 194,286 C198,276 202,270 208,268 Z",55],
+  ["t","abdomen_supra","M247,262 L247,292 C238,293 230,292 226,289 C224,276 225,268 229,262 Z M247,296 L247,326 C238,327 230,326 226,323 C224,310 225,302 229,296 Z",90],
+  ["t","abdomen_infra","M247,330 L247,360 C238,361 230,360 226,357 C224,344 225,336 229,330 Z M247,364 L247,440 C240,438 234,430 230,418 C227,400 226,380 227,366 C232,364 240,364 247,364 Z",90],
+  ["t","abdutores","M196,404 C188,420 184,440 186,470 C194,462 200,446 204,430 C202,420 200,410 196,404 Z",95],
+  ["ua","biceps_longa","M-1,78 C-13,80 -21,94 -21,112 C-21,128 -15,140 -4,148 L-1,148 Z",90],
+  ["ua","biceps_curta","M1,78 C13,80 21,94 21,112 C21,128 15,140 4,148 L1,148 Z",90],
+  ["ua","braquial","M-23,104 C-27,120 -24,140 -15,154 L-6,152 C-15,142 -21,126 -23,104 Z",88],
+  ["fa","antebraco_braquiorradial","M-20,4 C-24,30 -20,66 -11,104 L-4,102 C-5,66 -6,30 -7,4 Z",90],
+  ["fa","antebraco_flexores","M-5,4 C6,2 17,8 18,18 C16,52 10,84 0,112 C-2,80 -3,40 -5,4 Z",96],
+  ["th","adutores","M10,-2 C22,2 34,12 36,30 C34,62 26,92 15,108 C13,70 12,32 10,2 Z",112],
+  ["th","quad_vasto_lateral","M-34,10 C-42,60 -40,122 -27,178 C-21,187 -15,185 -13,173 C-17,120 -18,64 -16,8 Z",96],
+  ["th","quad_reto_femoral","M-13,2 C-17,50 -14,116 -6,158 C-2,166 5,164 7,154 C11,112 11,54 7,2 C1,-3 -8,-3 -13,2 Z",90],
+  ["th","quad_vasto_medial","M13,112 C24,126 27,152 21,177 C13,188 3,184 -2,174 C4,165 9,154 11,144 C12,132 12,120 13,112 Z",70],
+  ["sh","panturrilha_gastro","M8,10 C21,28 24,70 16,114 C9,104 5,62 4,20 Z",90],
+  ["sh","panturrilha_soleo","M-19,34 C-25,80 -22,126 -13,156 C-8,126 -8,80 -11,34 Z",90]
+];
+const BACK = [
+  ["t","trapezio_superior","M250,104 L240,104 C238,124 228,138 202,146 C190,149 182,150 178,152 C196,160 222,164 250,166 Z",25],
+  ["t","trapezio_medio","M250,168 C224,166 200,162 182,156 C186,170 196,184 208,194 L250,198 Z",0],
+  ["t","trapezio_inferior","M250,200 L212,196 C222,226 236,262 250,290 Z",-60],
+  ["t","romboides","M210,200 C216,214 221,226 225,238 C219,240 213,240 209,238 C206,224 204,212 202,200 Z",-35],
+  ["t","infraespinhal","M184,164 C180,180 180,196 186,212 C193,215 200,213 204,206 C200,198 197,190 194,180 C191,173 188,168 184,164 Z",-15],
+  ["t","redondo_maior","M184,216 C178,222 176,230 180,238 C190,238 200,232 210,224 C204,220 194,218 184,216 Z",-25],
+  ["t","ombro_lateral","M176,151 C160,153 146,164 138,184 C132,200 132,212 136,220 L147,236 C148,212 152,188 160,166 C164,158 170,153 176,151 Z",72],
+  ["t","ombro_posterior","M178,152 C182,156 183,164 182,172 C180,190 176,208 168,222 C160,228 154,232 148,236 C150,214 154,190 162,168 C166,160 172,154 178,152 Z",40],
+  ["t","dorsal_superior","M182,242 C184,264 192,288 204,304 C216,298 228,288 238,280 C232,266 226,254 218,244 C206,246 194,246 182,242 Z",-30],
+  ["t","dorsal_inferior","M190,306 C194,334 196,362 198,392 C210,382 222,368 230,352 C232,330 235,308 238,284 C226,294 214,302 204,308 Z",-55],
+  ["t","lombar_eretores","M248,294 C242,302 237,322 235,350 C233,388 236,414 244,432 L248,432 Z",90],
+  ["t","gluteo_medio","M196,410 C190,424 188,440 190,454 C204,444 220,436 236,432 C226,420 212,412 196,410 Z",20],
+  ["t","gluteo_maximo","M236,436 C216,440 198,450 191,464 C185,486 191,508 206,520 C224,528 244,520 248,500 L248,446 C246,440 242,437 236,436 Z",30],
+  ["ua","triceps_lateral","M-3,76 C-15,80 -24,96 -24,114 C-23,126 -18,132 -11,134 L-3,116 Z",90],
+  ["ua","triceps_longa","M0,74 C12,76 22,90 22,108 C22,122 16,130 7,134 L0,116 Z",90],
+  ["ua","triceps_medial","M-12,137 C-16,144 -11,154 0,156 C9,154 14,145 9,137 C2,141 -5,141 -12,137 Z",90],
+  ["fa","antebraco_extensores","M-20,4 C-24,30 -20,70 -9,110 L4,110 C11,70 17,30 16,4 Z",92],
+  ["th","isquio_biceps_femoral","M-35,54 C-39,90 -34,142 -20,184 L-10,182 C-12,140 -11,96 -6,58 Z",92],
+  ["th","isquio_semitendineo","M-3,58 C-8,96 -8,140 -6,184 L5,186 C17,150 25,104 25,64 C17,58 7,56 -3,58 Z",88],
+  ["sh","panturrilha_soleo","M-19,104 C-21,130 -16,150 -10,160 L10,160 C16,150 20,130 19,110 C12,120 -12,120 -19,104 Z",90],
+  ["sh","panturrilha_gastro","M-3,8 C-17,20 -23,60 -17,100 C-11,108 -6,106 -3,96 Z M3,8 C18,18 24,60 18,104 C12,112 6,110 3,98 Z",90]
+];
+
+const NS="http://www.w3.org/2000/svg";
+const svg=document.getElementById("fig");
+const BOX={front:[24,-30,452,918],back:[564,-30,452,918],both:[24,-30,992,918]};
+const VG={};
+const inViews={};
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e}
+
+function buildDefs(){
+  const d=el("defs",{},svg);
+  const grad=(id,a,b,c)=>{const g=el("linearGradient",{id,x1:"0",y1:"0",x2:"1",y2:"1"},d);
+    [[0,a],[.55,b],[1,c]].forEach(([o,v])=>{const s=el("stop",{offset:o},g);s.style.stopColor=`var(${v})`})};
+  grad("gM","--m-hi","--m","--m-lo");grad("gT","--target-hi","--target","--target-lo");
+  const gs=el("linearGradient",{id:"gS",x1:"0",y1:"0",x2:"1",y2:"1"},d);
+  [[0,.85],[1,.6]].forEach(([o,op])=>{const s=el("stop",{offset:o},gs);s.style.stopColor="var(--syn)";s.style.stopOpacity=op});
+  return d;
+}
+const fibCache={};
+function fibPattern(defs,a){
+  const key="f"+String(a).replace("-","n");
+  if(!fibCache[key]){
+    const p=el("pattern",{id:key,width:"5",height:"5",patternUnits:"userSpaceOnUse",patternTransform:`rotate(${a-90})`},defs);
+    const l=el("line",{x1:"0",y1:"0",x2:"0",y2:"5","stroke-width":"0.9"},p);l.style.stroke="var(--fiber)";
+    fibCache[key]=1;
+  }
+  return `url(#${key})`;
+}
+function drawView(defs,name,list,dx){
+  const root=el("g",{transform:`translate(${dx},0)`},svg);VG[name]=root;
+  el("text",{x:250,y:-12,"text-anchor":"middle",class:"vlabel"},root).textContent=name==="front"?"FRENTE":"COSTAS";
+  el("ellipse",{cx:250,cy:58,rx:31,ry:38,class:"skin"},root);
+  el("path",{d:"M236,88 L264,88 L266,122 L234,122 Z",class:"skin"},root);
+  const halves=[el("g",{},root),el("g",{transform:"matrix(-1,0,0,1,500,0)"},root)];
+  // body silhouette
+  halves.forEach(h=>SKIN.forEach(([f,d])=>el("path",{d,class:"skin",transform:FR[f]},h)));
+  if(name==="front"){
+    el("path",{d:"M222,62 C218,58 220,48 222,52 M278,62 C282,58 280,48 278,52",class:"detail"},root);
+  }else{
+    el("path",{d:"M250,170 L250,440",class:"detail"},root);
+  }
+  // muscles, both sides
+  halves.forEach(h=>{
+    list.forEach(([f,id,d,a])=>{
+      const g=el("g",{"data-m":id,transform:FR[f]},h);
+      el("path",{d,class:"m"},g);
+      if(a!==undefined)el("path",{d,class:"fib",fill:fibPattern(defs,a)},g);
+      (inViews[id]=inViews[id]||new Set()).add(name);
+    });
+  });
+}
+const defs=buildDefs();
+drawView(defs,"front",FRONT,0);
+drawView(defs,"back",BACK,540);
+document.querySelectorAll("[data-m]").forEach(g=>{
+  const t=el("title",{},g);t.textContent=M[g.dataset.m].n;g.insertBefore(t,g.firstChild);
+});
+
+/* ------------------------------------------------------- view, zoom, pan */
+let view=(()=>{try{return localStorage.getItem("atlas-view")||"front"}catch(e){return "front"}})();
+let vb=[...BOX[view]];
+const narrow=()=>matchMedia("(max-width:900px)").matches;
+function applyVB(){svg.setAttribute("viewBox",vb.map(n=>n.toFixed(2)).join(" "))}
+function setView(v,keepZoom){
+  if(v==="both"&&narrow())v="front";
+  view=v;try{localStorage.setItem("atlas-view",v)}catch(e){}
+  document.querySelectorAll(".seg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v));
+  VG.front.style.display=(v==="back")?"none":"";VG.back.style.display=(v==="front")?"none":"";
+  if(!keepZoom){vb=[...BOX[v]];applyVB()}
+}
+function toSvg(cx,cy){const p=svg.createSVGPoint();p.x=cx;p.y=cy;return p.matrixTransform(svg.getScreenCTM().inverse())}
+function zoomAt(f,cx,cy){
+  const base=BOX[view];const minW=base[2]/6;
+  let nw=Math.min(base[2],Math.max(minW,vb[2]/f));const k=nw/vb[2];
+  const p=(cx===undefined)?{x:vb[0]+vb[2]/2,y:vb[1]+vb[3]/2}:toSvg(cx,cy);
+  vb=[p.x-(p.x-vb[0])*k,p.y-(p.y-vb[1])*k,vb[2]*k,vb[3]*k];clampVB();applyVB();
+}
+function clampVB(){
+  const b=BOX[view];
+  if(vb[2]>=b[2]-0.5){vb=[...b];return}
+  vb[0]=Math.min(Math.max(vb[0],b[0]-vb[2]*0.3),b[0]+b[2]-vb[2]*0.7);
+  vb[1]=Math.min(Math.max(vb[1],b[1]-vb[3]*0.3),b[1]+b[3]-vb[3]*0.7);
+}
+document.querySelectorAll(".seg button").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.v)));
+document.getElementById("zIn").onclick=()=>zoomAt(1.4);
+document.getElementById("zOut").onclick=()=>zoomAt(1/1.4);
+document.getElementById("zReset").onclick=()=>{vb=[...BOX[view]];applyVB()};
+svg.addEventListener("wheel",e=>{e.preventDefault();zoomAt(e.deltaY<0?1.15:1/1.15,e.clientX,e.clientY)},{passive:false});
+
+const ptrs=new Map();let gesture=null;
+svg.addEventListener("pointerdown",e=>{
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  try{svg.setPointerCapture(e.pointerId)}catch(_){}
+  if(ptrs.size===1){gesture={type:"tap",sx:e.clientX,sy:e.clientY,target:e.target.closest("[data-m]"),vb0:[...vb],t:Date.now()}}
+  else if(ptrs.size===2){const [a,b]=[...ptrs.values()];gesture={type:"pinch",d0:Math.hypot(a.x-b.x,a.y-b.y),vb0:[...vb],mid:{x:(a.x+b.x)/2,y:(a.y+b.y)/2}}}
+});
+svg.addEventListener("pointermove",e=>{
+  if(!ptrs.has(e.pointerId)||!gesture)return;
+  ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  const scale=vb[2]/svg.getBoundingClientRect().width*Math.max(1,(svg.getBoundingClientRect().width/svg.getBoundingClientRect().height)/(vb[2]/vb[3]));
+  if(gesture.type!=="pinch"&&ptrs.size===1){
+    const dx=e.clientX-gesture.sx,dy=e.clientY-gesture.sy;
+    if(gesture.type==="tap"&&Math.hypot(dx,dy)>8)gesture.type="pan";
+    if(gesture.type==="pan"){
+      const k=svgUnitsPerPx(gesture.vb0);
+      vb=[gesture.vb0[0]-dx*k,gesture.vb0[1]-dy*k,vb[2],vb[3]];clampVB();applyVB();
+    }
+  }else if(gesture.type==="pinch"&&ptrs.size===2){
+    const [a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);
+    vb=[...gesture.vb0];applyVB();zoomAt(d/gesture.d0,gesture.mid.x,gesture.mid.y);
+  }
+});
+function svgUnitsPerPx(box){const r=svg.getBoundingClientRect();return Math.max(box[2]/r.width,box[3]/r.height)}
+function endPtr(e){
+  if(!ptrs.has(e.pointerId))return;
+  ptrs.delete(e.pointerId);
+  if(gesture&&gesture.type==="tap"&&ptrs.size===0){
+    if(gesture.target)selectMuscle(gesture.target.dataset.m,true);
+  }
+  if(ptrs.size===0)gesture=null;
+  else if(ptrs.size===1&&gesture&&gesture.type==="pinch"){const p=[...ptrs.values()][0];gesture={type:"pan",sx:p.x,sy:p.y,vb0:[...vb]}}
+}
+svg.addEventListener("pointerup",endPtr);svg.addEventListener("pointercancel",endPtr);
+svg.addEventListener("dblclick",e=>{e.preventDefault()});
+
+/* --------------------------------------------------------------- panel */
+let cur=null, curEx=null, eq="all";
+const $=id=>document.getElementById(id);
+function chips(){
+  const all=[["all","Todos"],...Object.entries(EQ)];
+  $("chips").innerHTML=all.map(([k,v])=>`<button data-eq="${k}" aria-pressed="${eq===k}">${v}</button>`).join("");
+  $("chips").querySelectorAll("button").forEach(b=>b.onclick=()=>{eq=b.dataset.eq;curEx=null;paint();chips();render()});
+}
+function paint(){
+  document.querySelectorAll("[data-m]").forEach(g=>g.classList.remove("on","syn"));
+  if(!cur)return;
+  const list=filtered();const ex=curEx!==null?list[curEx]:null;
+  if(ex)ex[4].forEach(s=>{if(s!==cur)document.querySelectorAll(`[data-m="${s}"]`).forEach(g=>g.classList.add("syn"))});
+  document.querySelectorAll(`[data-m="${cur}"]`).forEach(g=>g.classList.add("on"));
+}
+const filtered=()=>cur?M[cur].x.filter(x=>eq==="all"||x[2]===eq):[];
+function selectMuscle(id,fromFigure){
+  if(!M[id])return;
+  cur=id;curEx=null;
+  if(!fromFigure&&view!=="both"&&!inViews[id].has(view))setView(inViews[id].has("front")?"front":"back");
+  paint();render();$("body").scrollTop=0;
+}
+function selectExercise(i){curEx=(curEx===i)?null:i;paint();render(false)}
+function shortName(id){return M[id].n}
+function render(scroll=true){
+  const body=$("body");
+  if(!cur){
+    $("cat").textContent="Escolha um músculo";$("title").textContent="Toque no boneco";
+    $("latin").textContent="O músculo fica vermelho e a lista mostra os exercícios em ordem.";
+    $("clear").hidden=true;
+    body.innerHTML=`<div class="groups">${GROUPS.map(g=>`<div class="group"><h3>${g}</h3><div>${
+      Object.entries(M).filter(([,m])=>m.c===g).map(([id,m])=>`<button data-go="${id}">${m.n}</button>`).join("")}</div></div>`).join("")}</div>${about()}`;
+    body.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>selectMuscle(b.dataset.go));
+    return;
+  }
+  const m=M[cur];
+  $("cat").textContent=m.c;$("title").textContent=m.n;$("latin").textContent=m.l;$("clear").hidden=false;
+  const list=filtered();
+  let html="";
+  if(!list.length){
+    html=`<div class="empty">Nenhum exercício com ${EQ[eq].toLowerCase()} para este músculo.<br><button id="allEq">Mostrar todos</button></div>`;
+  }else{
+    const ex=curEx!==null?list[curEx]:null;
+    let other="";
+    if(ex&&view!=="both"){
+      const ov=view==="front"?"back":"front";
+      const hid=ex[4].filter(s=>s!==cur&&!inViews[s].has(view)&&inViews[s].has(ov));
+      if(hid.length)other=` <button class="link" id="swap" data-v="${ov}">${hid.length===1?"1 sinergista":hid.length+" sinergistas"} na vista de ${ov==="back"?"costas":"frente"} →</button>`;
+    }
+    html+=`<p class="status">${ex?`Sinergistas de <b>${ex[0]}</b> marcados em laranja no boneco.${other}`:"Toque num exercício para ver os sinergistas no boneco."}</p>`;
+    html+=list.map((x,i)=>{
+      const [pt,en,q,ev,syn,stat]=x;
+      return `<button class="ex${curEx===i?" sel":""}" data-i="${i}" aria-pressed="${curEx===i}">
+        <span class="rank">${i+1}</span>
+        <span class="ex-n">${pt}</span>
+        <span class="ex-en">${en}</span>
+        <span class="tags"><span class="tag">${EQ[q]}</span>${ev==="E"?`<span class="tag emg">Estudo EMG</span>`:`<span class="tag bio">Biomecânica</span>`}${stat?`<span class="tag stat">${stat}</span>`:""}</span>
+        <span class="syns"><em>Sinergistas</em>${syn.length?syn.map(s=>`<span>${shortName(s)}</span>`).join(""):"<span>Isolado</span>"}</span>
+      </button>`}).join("");
+  }
+  html+=`<p class="note">${m.s.length?`Ordem baseada em: ${m.s.map(k=>SRC[k]).join("; ")}. Itens marcados "Biomecânica" não entraram nesses estudos e foram encaixados pela mecânica do movimento.`:"Não há estudo de EMG que compare estes exercícios entre si para este músculo. A ordem segue a mecânica do movimento e a prática comum de treino."}</p>`;
+  body.innerHTML=html;
+  const a=$("allEq");if(a)a.onclick=()=>{eq="all";chips();render()};
+  const sw=$("swap");if(sw)sw.onclick=()=>{setView(sw.dataset.v);render(false)};
+  body.querySelectorAll(".ex").forEach(b=>b.onclick=()=>selectExercise(+b.dataset.i));
+}
+function about(){return `<details class="about"><summary>Como o ranking funciona</summary>
+  <p>A ordem segue estudos de eletromiografia (EMG) que mediram a ativação do músculo em vários exercícios. Quando um estudo publicou o valor, ele aparece no cartão (ex.: "98% do supino").</p>
+  <p><b>Estudo EMG</b>: o exercício foi medido num estudo. <b>Biomecânica</b>: não há medição comparável; a posição vem da mecânica do movimento.</p>
+  <p>EMG mede ativação durante a série, não crescimento muscular. Use o ranking como guia, não como regra.</p>
+  <ul>${Object.values(SRC).map(s=>`<li>${s}</li>`).join("")}</ul></details>`}
+$("clear").onclick=()=>{cur=null;curEx=null;paint();render()};
+
+/* --------------------------------------------------------------- search */
+const q=$("q"),res=$("results");
+const norm=s=>s.normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+q.addEventListener("input",()=>{
+  const t=norm(q.value.trim());
+  if(!t){res.hidden=true;return}
+  const hits=Object.entries(M).filter(([,m])=>norm(m.n+" "+m.l+" "+m.c).includes(t)||m.x.some(x=>norm(x[0]+" "+x[1]).includes(t)));
+  res.innerHTML=hits.length?hits.slice(0,12).map(([id,m])=>{
+    const ex=m.x.find(x=>norm(x[0]+" "+x[1]).includes(t));
+    return `<button data-go="${id}"><div class="r-n">${m.n}</div><div class="r-s">${ex&&!norm(m.n).includes(t)?"Exercício: "+ex[0]:m.c+" · "+m.x.length+" exercícios"}</div></button>`}).join("")
+    :`<div class="empty">Nada encontrado para "${q.value}".</div>`;
+  res.hidden=false;
+  res.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{selectMuscle(b.dataset.go);res.hidden=true;q.value="";q.blur()});
+});
+document.addEventListener("pointerdown",e=>{if(!e.target.closest(".search"))res.hidden=true});
+q.addEventListener("keydown",e=>{if(e.key==="Escape"){res.hidden=true;q.blur()}if(e.key==="Enter"){const b=res.querySelector("[data-go]");if(b)b.click()}});
+
+/* ----------------------------------------------------------------- init */
+chips();setView(view);render();
+if(narrow())q.placeholder="Buscar";
+matchMedia("(max-width:900px)").addEventListener("change",()=>setView(view));
+</script>
+<script>
+if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}))}
+</script>
+</body>
+</html>
