@@ -279,7 +279,16 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   #tab-atlas.idle .p-latin,#tab-atlas.idle .chips,#tab-atlas.idle .p-body{display:none}
   #tab-atlas.idle .p-head{border-bottom:0;padding-block:10px}
   #tab-atlas.idle .p-title{font-size:20px}
-  #tab-atlas.covered .stage{flex-basis:0}
+  #tab-atlas.covered{display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);grid-template-areas:"fig head" "body body";background:var(--surface)}
+  #tab-atlas.covered .stage{grid-area:fig;height:196px;align-self:start;cursor:zoom-in}
+  #tab-atlas.covered .bar,#tab-atlas.covered .hint{display:none}
+  #tab-atlas.covered .panel{display:contents}
+  #tab-atlas.covered .p-head{grid-area:head;padding-left:6px;border-bottom:0;min-width:0}
+  #tab-atlas.covered .p-top{flex-wrap:wrap;gap:8px}
+  #tab-atlas.covered .p-top > div{flex-basis:100%}
+  #tab-atlas.covered .p-top .clear{padding:5px 10px}
+  #tab-atlas.covered .p-title{font-size:22px}
+  #tab-atlas.covered .p-body{grid-area:body;border-top:1px solid var(--line);background:var(--surface)}
   .p-top .clear{flex:none}
 }
 @media (min-width:901px){.listbtn{display:none!important}}
@@ -337,7 +346,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
           </div>
           <button class="clear" id="clear" hidden>Limpar</button>
           <button class="clear listbtn" id="listBtn" hidden>Ver lista</button>
-          <button class="clear listbtn" id="peekBtn" hidden>Ver boneco</button>
+          <button class="clear listbtn" id="peekBtn" hidden>Ampliar boneco</button>
         </div>
         <div class="chips" id="chips" role="group" aria-label="Equipamento"></div>
       </div>
@@ -1003,7 +1012,7 @@ document.querySelectorAll(".seg [data-v]").forEach(b=>b.addEventListener("click"
 document.getElementById("zIn").onclick=()=>zoomAt(1.4);
 document.getElementById("zOut").onclick=()=>zoomAt(1/1.4);
 document.getElementById("zReset").onclick=()=>{vb=[...BOX[view]];applyVB()};
-svg.addEventListener("wheel",e=>{e.preventDefault();zoomAt(e.deltaY<0?1.15:1/1.15,e.clientX,e.clientY)},{passive:false});
+svg.addEventListener("wheel",e=>{e.preventDefault();if(document.getElementById("tab-atlas").classList.contains("covered"))return;zoomAt(e.deltaY<0?1.15:1/1.15,e.clientX,e.clientY)},{passive:false});
 
 const ptrs=new Map();let gesture=null;
 svg.addEventListener("pointerdown",e=>{
@@ -1014,6 +1023,7 @@ svg.addEventListener("pointerdown",e=>{
 });
 svg.addEventListener("pointermove",e=>{
   if(!ptrs.has(e.pointerId)||!gesture)return;
+  if(document.getElementById("tab-atlas").classList.contains("covered"))return;
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   const scale=vb[2]/svg.getBoundingClientRect().width*Math.max(1,(svg.getBoundingClientRect().width/svg.getBoundingClientRect().height)/(vb[2]/vb[3]));
   if(gesture.type!=="pinch"&&ptrs.size===1){
@@ -1033,7 +1043,7 @@ function endPtr(e){
   if(!ptrs.has(e.pointerId))return;
   ptrs.delete(e.pointerId);
   if(gesture&&gesture.type==="tap"&&ptrs.size===0){
-    if(gesture.target)onFigTap(gesture.target);
+    if(gesture.target||document.getElementById("tab-atlas").classList.contains("covered"))onFigTap(gesture.target||svg);
   }
   if(ptrs.size===0)gesture=null;
   else if(ptrs.size===1&&gesture&&gesture.type==="pinch"){const p=[...ptrs.values()][0];gesture={type:"pan",sx:p.x,sy:p.y,vb0:[...vb]}}
@@ -1154,6 +1164,8 @@ function viewsOf(ids){const s=new Set();ids.forEach(i=>(inViews[i]||[]).forEach(
 function ensureVisible(vs){if(view!=="both"&&vs.size&&!vs.has(view))setView(vs.has("front")?"front":"back")}
 
 function onFigTap(t){
+  if($("tab-atlas").classList.contains("covered")){peek=true;render();return}
+  if(!t.dataset)return;
   if(t.dataset.j)return selectJoint(t.dataset.j,true);
   if(model==="bas")return selectGroup(TOB[t.dataset.m],true);
   selectMuscle(t.dataset.m,true);
@@ -1220,9 +1232,11 @@ function updateIdle(){
   const sel=model==="art"?curJ:cur;if(sel)listOpen=false;
   if(sel!==lastSel){peek=false;lastSel=sel}
   $("tab-atlas").classList.toggle("idle",!sel&&!listOpen);
-  $("tab-atlas").classList.toggle("covered",!!sel&&!peek);
+  const cov=!!sel&&!peek;
+  if(cov&&!$("tab-atlas").classList.contains("covered")&&matchMedia("(max-width:900px)").matches){vb=[...BOX[view]];applyVB()}
+  $("tab-atlas").classList.toggle("covered",cov);
   const lb=$("listBtn");lb.hidden=!!sel;lb.textContent=listOpen?"Fechar lista":"Ver lista";
-  const pb=$("peekBtn");pb.hidden=!sel;pb.textContent=peek?"Esconder boneco":"Ver boneco";
+  const pb=$("peekBtn");pb.hidden=!sel;pb.textContent=peek?"Diminuir boneco":"Ampliar boneco";
 }
 function render(){renderPanel();updateIdle()}
 function renderPanel(){
@@ -1259,7 +1273,7 @@ function renderPanel(){
       const hid=ex[4].filter(s=>{const id=model==="bas"?TOB[s]:s;if(id===cur)return false;const vs=viewsOf(model==="bas"?BASIC[id].m:[id]);return !vs.has(view)&&vs.has(ov)});
       if(hid.length)other=` <button class="link" id="swap" data-v="${ov}">Ver sinergistas na vista de ${ov==="back"?"costas":"frente"} →</button>`;
     }
-    html+=`<p class="status">${ex?`Sinergistas de <b>${esc(ex[0])}</b> marcados em laranja.${matchMedia("(max-width:900px)").matches&&!peek?" Toque em Ver boneco para ver.":""}${other}`:"Toque num exercício para ver os sinergistas. Use + para mandar para o treino ou a ficha."}</p>`;
+    html+=`<p class="status">${ex?`Sinergistas de <b>${esc(ex[0])}</b> marcados em laranja.${matchMedia("(max-width:900px)").matches&&!peek?" Toque no boneco pequeno para ampliar.":""}${other}`:"Toque num exercício para ver os sinergistas. Use + para mandar para o treino ou a ficha."}</p>`;
     html+=list.map(exCard).join("");
   }
   html+=`<p class="note">${model==="bas"?"Lista combinada das partes deste grupo, alternando o 1º de cada parte, depois o 2º, e assim por diante. Para ver cada parte separada, use o modelo Detalhado. ":""}${srcs.length?`Fontes: ${srcs.map(k=>SRC[k]).join("; ")}. A ordem segue o estímulo estimado: primeiro o que estudos de crescimento mostraram, depois a ativação medida por EMG, depois a mecânica do movimento.`:"Não há estudo de EMG comparando estes exercícios entre si. A ordem segue a mecânica do movimento e a prática comum de treino."}</p>`;
