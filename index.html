@@ -29,7 +29,7 @@ img{max-width:100%}
   --skin:#D6DADF; --m:#AEB6C0; --m-hi:#C3CAD2; --m-lo:#97A0AB; --m-edge:#E9ECEF; --fiber:rgba(26,31,38,.13);
   --target:#D3222A; --target-hi:#F04A50; --target-lo:#A0141B;
   --syn:#F08A24; --syn-soft:rgba(240,138,36,.55);
-  --chip:#E1E5E9; --focus:#1A1F26; --bl:72%; --bl-hi:64%;
+  --chip:#E1E5E9; --focus:#1A1F26;
   --f-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
   --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -38,13 +38,13 @@ img{max-width:100%}
   --skin:#1E242C; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
-  --chip:#1F262E; --focus:#E7EAEE; --bl:36%; --bl-hi:44%; color-scheme:dark}}
+  --chip:#1F262E; --focus:#E7EAEE; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
   --skin:#1E242C; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
-  --chip:#1F262E; --focus:#E7EAEE; --bl:36%; --bl-hi:44%; color-scheme:dark}
+  --chip:#1F262E; --focus:#E7EAEE; color-scheme:dark}
 
 html{height:100%}body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;overflow:hidden;-webkit-tap-highlight-color:transparent}
@@ -229,7 +229,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(86px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--surface);padding:10px 16px;border-radius:10px;font-size:14px;z-index:60;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
 
 /* ---- exercise card add button ---- */
-.ex{grid-template-columns:auto minmax(0,1fr) auto;cursor:pointer}
+.ex{grid-template-columns:auto minmax(0,1fr) auto;cursor:pointer;box-sizing:border-box}
 .addx{grid-column:3;grid-row:1 / span 2;align-self:start;border:1px solid var(--line);background:var(--surface);border-radius:8px;width:36px;height:36px;font-size:20px;line-height:1;padding:0;color:var(--ink)}
 .syns{grid-column:2 / span 2}
 
@@ -244,11 +244,6 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .jt .jd{fill:var(--surface);stroke:var(--syn);stroke-width:3}
 .jt.on .jd{fill:var(--target);stroke:var(--target-hi)}
 @media (hover:hover){.jt:hover .jd{fill:var(--syn-soft)}}
-.mode-bas .m{fill:hsl(var(--gh,210) 24% var(--bl));stroke:hsl(var(--gh,210) 24% var(--bl));stroke-width:2.4}
-.mode-bas .fib{display:none}
-@media (hover:hover){.mode-bas [data-m]:hover .m{fill:hsl(var(--gh,210) 30% var(--bl-hi));stroke:hsl(var(--gh,210) 30% var(--bl-hi))}}
-.mode-bas [data-m].on .m{fill:url(#gT);stroke:var(--target)}
-.mode-bas [data-m].syn .m{fill:url(#gS);stroke:var(--syn)}
 .jl{background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
 .jl h4{margin:0 0 8px;font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.1em;text-transform:uppercase}
 .jl.warm h4{color:var(--syn)} .jl.mob h4{color:var(--ink)} .jl.str h4{color:var(--target)}
@@ -262,7 +257,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   .btabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .btabs button[aria-current="page"]{color:var(--target)}
   .seg.model{width:100%}
-  .seg.model button{flex:1;padding:6px 4px;font-size:14px}
+  .seg.model button{flex:1;padding:6px 4px;font-size:14px;letter-spacing:.03em}
   .fi{grid-template-columns:minmax(0,1fr) 58px 70px}
   .fi-act{grid-column:1 / -1;justify-content:flex-end}
   .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
@@ -988,8 +983,6 @@ const BASIC={
   panturrilha:{n:"Panturrilha",m:["panturrilha_gastro","panturrilha_soleo"]}
 };
 const TOB={};for(const [g,o] of Object.entries(BASIC))o.m.forEach(m=>TOB[m]=g);
-const HUE={peito:205,ombro:170,biceps:262,triceps:140,antebraco:228,trapezio:188,costas:282,lombar:112,abdomen:215,gluteo:155,quadriceps:245,posterior:128,adutores:300,panturrilha:192};
-document.querySelectorAll("[data-m]").forEach(g=>g.style.setProperty("--gh",HUE[TOB[g.dataset.m]]));
 /* merged list: rank 1 of each part, then rank 2 of each part, and so on */
 function basicList(g){
   const lists=BASIC[g].m.map(id=>M[id].x);const out=[],seen=new Set();
