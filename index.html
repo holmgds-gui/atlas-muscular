@@ -268,6 +268,19 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 }
 @media (min-width:901px){.modal{align-items:center}.sheet{border-radius:16px}}
+
+/* phone: figure fills the screen until something is picked */
+@media (max-width:900px){
+  #tab-atlas{display:flex;flex-direction:column}
+  #tab-atlas .stage{flex:0 0 56%;min-height:0;transition:flex-basis .35s ease}
+  #tab-atlas .panel{flex:1 1 0;min-height:0}
+  #tab-atlas.idle .stage{flex-basis:calc(100% - 84px)}
+  #tab-atlas.idle .p-latin,#tab-atlas.idle .chips,#tab-atlas.idle .p-body{display:none}
+  #tab-atlas.idle .p-head{border-bottom:0;padding-block:10px}
+  #tab-atlas.idle .p-title{font-size:20px}
+}
+@media (min-width:901px){.listbtn{display:none!important}}
+@media (prefers-reduced-motion:reduce){#tab-atlas .stage{transition:none}}
 </style>
 </head>
 <body>
@@ -320,6 +333,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
             <p class="p-latin" id="latin">O músculo fica vermelho e a lista mostra os exercícios em ordem.</p>
           </div>
           <button class="clear" id="clear" hidden>Limpar</button>
+          <button class="clear listbtn" id="listBtn" hidden>Ver lista</button>
         </div>
         <div class="chips" id="chips" role="group" aria-label="Equipamento"></div>
       </div>
@@ -1100,7 +1114,7 @@ drawJoints();
 let model=LS.get("atlas-model","det");if(!["det","bas","art"].includes(model))model="det";
 let cur=null,curEx=null,curJ=null,eq="all";
 function setModel(m){
-  model=m;LS.set("atlas-model",m);cur=null;curEx=null;curJ=null;
+  model=m;LS.set("atlas-model",m);cur=null;curEx=null;curJ=null;listOpen=false;
   svg.classList.toggle("mode-bas",m==="bas");svg.classList.toggle("mode-art",m==="art");
   document.querySelectorAll("[data-model]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.model===m));
   $("hint").textContent=m==="art"?"Toque numa articulação · pinça para zoom · arraste para mover":"Toque num músculo · pinça para zoom · arraste para mover";
@@ -1172,7 +1186,14 @@ function exCard(x,i){
 }
 function head(cat,title,latin,clear){$("cat").textContent=cat;$("title").textContent=title;$("latin").textContent=latin;$("clear").hidden=!clear}
 
-function render(){
+let listOpen=false;
+function updateIdle(){
+  const sel=model==="art"?!!curJ:!!cur;if(sel)listOpen=false;
+  $("tab-atlas").classList.toggle("idle",!sel&&!listOpen);
+  const lb=$("listBtn");lb.hidden=sel;lb.textContent=listOpen?"Fechar lista":"Ver lista";
+}
+function render(){renderPanel();updateIdle()}
+function renderPanel(){
   const body=$("body");
   $("chips").hidden=(model==="art");$("legend").hidden=(model==="art");
   if(model==="art")return renderJoint(body);
@@ -1238,6 +1259,7 @@ function about(){return `<details class="about"><summary>Como o ranking funciona
   <p>EMG mede ativação durante a série, não crescimento muscular. Use o ranking como guia, não como regra.</p>
   <ul>${Object.values(SRC).map(s=>`<li>${s}</li>`).join("")}</ul></details>`}
 $("clear").onclick=()=>{cur=null;curEx=null;curJ=null;paint();render()};
+$("listBtn").onclick=()=>{listOpen=!listOpen;updateIdle()};
 
 /* ---------------------------------------------------------- search */
 const q=$("q"),res=$("results");
