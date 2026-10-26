@@ -272,13 +272,15 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 
 /* phone: figure fills the screen until something is picked */
 @media (max-width:900px){
-  #tab-atlas{display:flex;flex-direction:column}
+  #tab-atlas{display:flex;flex-direction:column;align-self:stretch;height:100%}
   #tab-atlas .stage{flex:0 0 56%;min-height:0;transition:flex-basis .35s ease}
   #tab-atlas .panel{flex:1 1 0;min-height:0}
   #tab-atlas.idle .stage{flex-basis:calc(100% - 84px)}
   #tab-atlas.idle .p-latin,#tab-atlas.idle .chips,#tab-atlas.idle .p-body{display:none}
   #tab-atlas.idle .p-head{border-bottom:0;padding-block:10px}
   #tab-atlas.idle .p-title{font-size:20px}
+  #tab-atlas.covered .stage{flex-basis:0}
+  .p-top .clear{flex:none}
 }
 @media (min-width:901px){.listbtn{display:none!important}}
 @media (prefers-reduced-motion:reduce){#tab-atlas .stage{transition:none}}
@@ -335,6 +337,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
           </div>
           <button class="clear" id="clear" hidden>Limpar</button>
           <button class="clear listbtn" id="listBtn" hidden>Ver lista</button>
+          <button class="clear listbtn" id="peekBtn" hidden>Ver boneco</button>
         </div>
         <div class="chips" id="chips" role="group" aria-label="Equipamento"></div>
       </div>
@@ -1212,10 +1215,14 @@ function exCard(x,i){
 function head(cat,title,latin,clear){$("cat").textContent=cat;$("title").textContent=title;$("latin").textContent=latin;$("clear").hidden=!clear}
 
 let listOpen=false;
+let peek=false,lastSel=null;
 function updateIdle(){
-  const sel=model==="art"?!!curJ:!!cur;if(sel)listOpen=false;
+  const sel=model==="art"?curJ:cur;if(sel)listOpen=false;
+  if(sel!==lastSel){peek=false;lastSel=sel}
   $("tab-atlas").classList.toggle("idle",!sel&&!listOpen);
-  const lb=$("listBtn");lb.hidden=sel;lb.textContent=listOpen?"Fechar lista":"Ver lista";
+  $("tab-atlas").classList.toggle("covered",!!sel&&!peek);
+  const lb=$("listBtn");lb.hidden=!!sel;lb.textContent=listOpen?"Fechar lista":"Ver lista";
+  const pb=$("peekBtn");pb.hidden=!sel;pb.textContent=peek?"Esconder boneco":"Ver boneco";
 }
 function render(){renderPanel();updateIdle()}
 function renderPanel(){
@@ -1252,7 +1259,7 @@ function renderPanel(){
       const hid=ex[4].filter(s=>{const id=model==="bas"?TOB[s]:s;if(id===cur)return false;const vs=viewsOf(model==="bas"?BASIC[id].m:[id]);return !vs.has(view)&&vs.has(ov)});
       if(hid.length)other=` <button class="link" id="swap" data-v="${ov}">Ver sinergistas na vista de ${ov==="back"?"costas":"frente"} →</button>`;
     }
-    html+=`<p class="status">${ex?`Sinergistas de <b>${esc(ex[0])}</b> marcados em laranja.${other}`:"Toque num exercício para ver os sinergistas. Use + para mandar para o treino ou a ficha."}</p>`;
+    html+=`<p class="status">${ex?`Sinergistas de <b>${esc(ex[0])}</b> marcados em laranja.${matchMedia("(max-width:900px)").matches&&!peek?" Toque em Ver boneco para ver.":""}${other}`:"Toque num exercício para ver os sinergistas. Use + para mandar para o treino ou a ficha."}</p>`;
     html+=list.map(exCard).join("");
   }
   html+=`<p class="note">${model==="bas"?"Lista combinada das partes deste grupo, alternando o 1º de cada parte, depois o 2º, e assim por diante. Para ver cada parte separada, use o modelo Detalhado. ":""}${srcs.length?`Fontes: ${srcs.map(k=>SRC[k]).join("; ")}. A ordem segue o estímulo estimado: primeiro o que estudos de crescimento mostraram, depois a ativação medida por EMG, depois a mecânica do movimento.`:"Não há estudo de EMG comparando estes exercícios entre si. A ordem segue a mecânica do movimento e a prática comum de treino."}</p>`;
@@ -1287,6 +1294,7 @@ function about(){return `<details class="about"><summary>Como o ranking funciona
   <ul>${Object.values(SRC).map(s=>`<li>${s}</li>`).join("")}</ul></details>`}
 $("clear").onclick=()=>{cur=null;curEx=null;curJ=null;paint();render()};
 $("listBtn").onclick=()=>{listOpen=!listOpen;updateIdle()};
+$("peekBtn").onclick=()=>{peek=!peek;render()};
 
 /* ---------------------------------------------------------- search */
 const q=$("q"),res=$("results");
