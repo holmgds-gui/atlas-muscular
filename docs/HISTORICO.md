@@ -38,6 +38,14 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - 299 de 359 entradas mudaram.
   - Regra para estabilizadores: só entram quando o exercício treina o músculo de propósito.
 
+- **Variações (pedido do dono: "puxada alta pegada pronada, supinada, neutra, aberta, fechada, na máquina, polia, halter…")**:
+  - Os 248 exercícios viraram **98 famílias** com variações de pegada, largura, equipamento, banco, posição e lado: **1.325 combinações**.
+  - Cada lista mostra um cartão por exercício; ao abrir, aparecem os botões e uma explicação curta de cada escolha (ex.: "Supinada: mais bíceps e dorsal inferior").
+  - O alvo e os sinergistas mudam no boneco na hora. A posição e o selo do ranking valem para a variação do estudo, e o cartão avisa quando você muda.
+  - Busca com nomes de academia ("puxada alta", "pulldown", "pulley", "voador", "serrote", "graviton") e com variações ("crucifixo inclinado máquina", "stiff unilateral").
+  - Novos exercícios e variações que faltavam: crucifixo inclinado na máquina, agachamento pêndulo, leg press horizontal, puxada na máquina articulada e unilateral, abdominal canivete, levantamento terra parcial, entre outros.
+  - A variação escolhida vai para o treino; treinos antigos continuam funcionando pelo nome antigo.
+
 ## 4. Corpos
 
 - Botão ♂/♀, válido nos três modelos. O app lembra a escolha.

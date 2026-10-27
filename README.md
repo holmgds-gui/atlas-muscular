@@ -1,6 +1,6 @@
 # Atlas Muscular
 
-Boneco anatômico clicável, com corpo masculino ou feminino (botão ♂/♀). Toque num músculo para ver os exercícios em ordem de estímulo (estudos de crescimento, EMG e biomecânica). Toque num exercício para ver os sinergistas em laranja.
+Boneco anatômico clicável, com corpo masculino ou feminino (botão ♂/♀). Toque num músculo para ver os exercícios em ordem de estímulo (estudos de crescimento, EMG e biomecânica). Toque num exercício para ver os sinergistas em laranja e escolher a variação (pegada, largura, equipamento, banco, posição, lado): 98 exercícios, 1.325 variações.
 
 - **Atlas**: modelos Detalhado, Básico e Articulações (aquecimento, mobilidade e alongamento).
 - **Meus treinos**: monte treinos com nome e exercícios e escolha os dias da semana de cada um (um dia pode ter mais de um treino).

@@ -309,6 +309,22 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   .p-top .clear{flex:none}
 }
 @media (min-width:901px){.listbtn{display:none!important}}
+/* ---- exercise variations ---- */
+.vars{grid-column:2 / span 2;display:grid;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
+.vax{display:grid;gap:4px}
+.vlab{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:600;color:var(--muted)}
+.vopts{display:flex;flex-wrap:wrap;gap:5px}
+.vopts button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 10px;font-size:13px;line-height:1.2;cursor:pointer}
+.vopts button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.vnotes{grid-column:2 / span 2;margin:6px 0 0;padding-left:18px;display:grid;gap:3px;font-size:13px;line-height:1.4;color:var(--ink)}
+.vpre{grid-column:2 / span 2;font-size:12px;color:var(--muted);margin-top:4px}
+.vpre.warn{color:var(--target);font-weight:600}
+.syns span.tg{background:color-mix(in srgb,var(--target) 18%,transparent)}
+.pfam{display:grid;gap:8px}
+.pfam.open{border:1px solid var(--line);border-radius:12px;padding:6px;background:var(--surface)}
+.pfam .vars{grid-column:auto;margin:0;padding:4px 6px 0}
+.pfoot{display:flex;gap:10px;align-items:center;justify-content:space-between;padding:0 6px 4px}
+.plist .pfam > button{text-align:left;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 12px}
 /* ---- meus treinos / hoje ---- */
 .wkgrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .wk{background:var(--bg);border-radius:8px;padding:7px 3px;display:grid;gap:3px;text-align:center;align-content:start;min-width:0}
@@ -560,408 +576,346 @@ const SRC = {
   kassiano:"Kassiano et al. (2025): rosca Scott vs rosca inclinada, crescimento por região",
   lat25:"Estudo de 2025 (Frontiers in Physiology): elevação lateral com halter vs polia, crescimento"
 };
-/* exercise: [pt, en, eq, evidence (H = estudo de hipertrofia, E = estudo de EMG, B = biomecânica), synergists, stat?]
-   Order: estimated stimulus for this muscle. Growth studies decide first, then EMG rankings, then mechanics. */
+/* ---------------------------------------------------------- exercise families & variations
+   Each family (FAMS) has target muscles (p), synergists (s) and variation axes (ax: [key, label, split, options]).
+   An option can change the muscles with mods: *x target · ~x synergist (front) · ^x synergist (front) · +x add · -x remove.
+   Lists in M hold [ref, evidence, stat?]; ref = "family|axis=option,...", the variation the ranking refers to. */
+const MC={"ps":"peito_superior","pm":"peito_medial","pi":"peito_inferior","of":"ombro_frontal","ol":"ombro_lateral","op":"ombro_posterior","bl":"biceps_longa","bc":"biceps_curta","br":"braquial","tl":"triceps_longa","tlat":"triceps_lateral","tmed":"triceps_medial","brr":"antebraco_braquiorradial","afl":"antebraco_flexores","aex":"antebraco_extensores","ts":"trapezio_superior","tmid":"trapezio_medio","ti":"trapezio_inferior","rb":"romboides","ie":"infraespinhal","rm":"redondo_maior","ds":"dorsal_superior","di":"dorsal_inferior","le":"lombar_eretores","sa":"serratil","as":"abdomen_supra","ai":"abdomen_infra","ob":"obliquos","gm":"gluteo_maximo","gmed":"gluteo_medio","tfl":"abdutores","ad":"adutores","rf":"quad_reto_femoral","vl":"quad_vasto_lateral","vm":"quad_vasto_medial","bf":"isquio_biceps_femoral","st":"isquio_semitendineo","ga":"panturrilha_gastro","so":"panturrilha_soleo"};
+const FAMS=[{"id":"supino","n":"Supino","en":"Bench press","aka":["supino","bench","chest press","supino maquina","supino articulado","supino smith","supino reto","supino inclinado","supino declinado"],"p":"pm","s":"ps pi of tlat tmed","d":{"b":"re","e":"ba","w":"md","g":"pr"},"eq0":"B","ax":[["b","Banco",1,[{"k":"re","n":"reto","suf":" reto"},{"k":"in","n":"inclinado","m":"*ps ~pm ^of -pi","t":"Inclinado (~30°): mais peitoral superior e deltoide anterior (Rodríguez-Ridao 2020).","suf":" inclinado"},{"k":"de","n":"declinado","m":"*pi -ps ^tlat","t":"Declinado: mais peitoral inferior e tríceps, menos ombro.","suf":" declinado"}]],["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"ha","n":"halteres","eq":"H","t":"Halteres: mais amplitude embaixo e cada lado trabalha sozinho."},{"k":"sm","n":"Smith","eq":"M","t":"Smith: trilho fixo, mais estável."},{"k":"ma","n":"máquina","eq":"M","t":"Máquina: mais estável, fácil de levar perto da falha."}]],["w","Largura",0,[{"k":"md","n":"média","q":1},{"k":"ab","n":"aberta","m":"^of -tmed","t":"Pegada aberta: menos tríceps; mais carga no peito e no ombro."},{"k":"fe","n":"fechada","m":"*tlat *tmed ^tl","t":"Pegada fechada: o tríceps vira músculo principal.","nm":"Supino fechado"}]],["g","Pegada",0,[{"k":"pr","n":"pronada","q":1},{"k":"ne","n":"neutra (halteres)","m":"^tlat ^of","t":"Neutra: cotovelos junto ao corpo, mais tríceps e mais confortável para o ombro."},{"k":"su","n":"supinada (invertida)","m":"*ps ^of","t":"Supinada (invertida): mais peitoral superior."}]]]},{"id":"crucifixo","n":"Crucifixo","en":"Chest fly","aka":["crucifixo","voador","pec deck","peck deck","fly","crossover","cross over","crucifixo maquina"],"p":"pm","s":"ps pi of bc","d":{"b":"re","e":"ma","l":"bi"},"eq0":"H","ax":[["b","Banco / direção",1,[{"k":"re","n":"reto","t":"Na polia: cabos na altura do peito.","suf":" reto"},{"k":"in","n":"inclinado","m":"*ps ~pm ^of -pi","t":"Inclinado ou polia de baixo para cima: mais peitoral superior.","suf":" inclinado"},{"k":"de","n":"declinado","m":"*pi -ps","t":"Declinado, polia de cima para baixo ou tronco inclinado à frente: mais peitoral inferior.","suf":" declinado"}]],["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H","t":"Halteres: mais tensão com o peito alongado, embaixo."},{"k":"po","n":"polia (crossover)","eq":"P","t":"Polia: tensão no movimento todo."},{"k":"ma","n":"máquina (voador)","eq":"M","t":"Máquina: estável, fácil de ir perto da falha."}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"landmine","n":"Supino no landmine","en":"Landmine press","aka":["landmine"],"p":"ps of","s":"sa tlat tmed pm","d":{"e":"lm","l":"bi"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"lm","n":"landmine","eq":"B"}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"flexao","n":"Flexão de braço","en":"Push-up","aka":["flexao","flexão","push up","apoio"],"p":"pm","s":"ps of tlat tmed sa","d":{"b":"ch","w":"md","e":"co"},"eq0":"C","ax":[["b","Inclinação",1,[{"k":"ch","n":"no chão","q":1},{"k":"pe","n":"pés elevados","m":"*ps ~pm ^of","t":"Pés elevados: mais peitoral superior e ombro.","nm":"Flexão declinada"},{"k":"ma","n":"mãos elevadas","m":"*pi -ps","t":"Mãos elevadas: mais fácil e mais peitoral inferior.","nm":"Flexão inclinada"}]],["w","Mãos",1,[{"k":"md","n":"largura dos ombros","q":1},{"k":"ab","n":"abertas","m":"-tmed","t":"Mãos abertas: mais peito, menos tríceps."},{"k":"fe","n":"juntas (diamante)","m":"*tlat *tl *tmed ~pm","t":"Mãos juntas: tríceps vira o principal.","nm":"Flexão diamante"}]],["e","Apoio",0,[{"k":"co","n":"chão","eq":"C","q":1},{"k":"bo","n":"bola suíça","eq":"C","m":"+as","t":"Instável: mais abdômen."},{"k":"tr","n":"suspensa (TRX)","eq":"K","m":"+as","t":"Suspensa: mais estabilidade de ombro e abdômen."}]]]},{"id":"mergulho","n":"Mergulho","en":"Dips","aka":["mergulho","paralelas","dips","triceps banco","mergulho no banco"],"p":"tlat tl tmed","s":"pm pi of","d":{"p":"er","e":"co"},"eq0":"C","ax":[["p","Tronco",1,[{"k":"er","n":"tronco reto","t":"Tronco reto: mais tríceps.","q":1},{"k":"fr","n":"tronco à frente","m":"*pi *pm ~tmed ~tl ~tlat ^of","t":"Tronco à frente: mais peito (inferior)."}]],["e","Equipamento",1,[{"k":"co","n":"paralelas","eq":"C","q":1},{"k":"ma","n":"máquina / assistido","eq":"M"},{"k":"bc","n":"banco (atrás do corpo)","eq":"C","m":"-pm ^of","t":"No banco: mais tríceps e ombro; desça só até onde o ombro não incomoda.","nm":"Mergulho no banco"}]]]},{"id":"desenv","n":"Desenvolvimento","en":"Shoulder press","aka":["desenvolvimento","militar","overhead press","arnold","press de ombro"],"p":"of ol","s":"tlat tl ts sa ps","d":{"e":"ha","p":"se","g":"pr","l":"bi"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H"},{"k":"ba","n":"barra","eq":"B"},{"k":"ma","n":"máquina","eq":"M"},{"k":"sm","n":"Smith","eq":"M"}]],["p","Posição",0,[{"k":"se","n":"sentado"},{"k":"pe","n":"em pé","m":"+as","t":"Em pé: mais abdômen e estabilidade."}]],["g","Pegada",0,[{"k":"pr","n":"pronada","q":1},{"k":"ne","n":"neutra","m":"^tlat","t":"Neutra: mais confortável para o ombro, mais deltoide anterior."},{"k":"ar","n":"Arnold (girando)","t":"Arnold: gira as palmas no caminho, mais amplitude para o deltoide anterior.","nm":"Desenvolvimento Arnold"}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"elevfront","n":"Elevação frontal","en":"Front raise","aka":["elevacao frontal","front raise"],"p":"of","s":"ps ol sa ts bl","d":{"e":"ha","g":"pr","l":"bi"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H"},{"k":"po","n":"polia","eq":"P"},{"k":"an","n":"anilha","eq":"K"},{"k":"ba","n":"barra","eq":"B"}]],["g","Pegada",0,[{"k":"pr","n":"pronada","q":1},{"k":"ne","n":"neutra"},{"k":"su","n":"supinada","m":"^ps ^bl","t":"Supinada: um pouco mais peitoral superior e bíceps."}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"pike","n":"Flexão pike","en":"Pike push-up","aka":["pike","flexao de ombro"],"p":"of","s":"tlat tl ps ol sa ts","d":{"b":"ch"},"eq0":"C","ax":[["b","Pés",0,[{"k":"ch","n":"pés no chão","q":1},{"k":"pe","n":"pés elevados","m":"*ol","t":"Pés elevados: mais carga, mais perto de um desenvolvimento."}]]]},{"id":"elevlat","n":"Elevação lateral","en":"Lateral raise","aka":["elevacao lateral","lateral raise","abducao de ombro"],"p":"ol","s":"ts of sa op","d":{"e":"ha","p":"pe","c":"es","l":"bi"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H"},{"k":"po","n":"polia","eq":"P"},{"k":"ma","n":"máquina","eq":"M"},{"k":"el","n":"elástico","eq":"K"}]],["p","Posição",0,[{"k":"pe","n":"em pé"},{"k":"se","n":"sentado","t":"Sentado: menos impulso do corpo."},{"k":"la","n":"inclinado para o lado","t":"Inclinado para o lado (lean-away): mais tensão no começo do movimento."},{"k":"ld","n":"deitado de lado","t":"Deitado de lado: tensão maior embaixo."},{"k":"ct","n":"cabo por trás do corpo","t":"Cabo por trás do corpo: mais tensão com o deltoide alongado."}]],["c","Cotovelo",0,[{"k":"es","n":"levemente dobrado","q":1},{"k":"fl","n":"dobrado a 90°","t":"Cotovelo dobrado: alavanca menor, mais leve para o ombro."}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"yraise","n":"Elevação em Y","en":"Y raise","aka":["y raise","elevacao y"],"p":"ti ol","s":"tmid sa op ie ts","d":{"e":"po"},"eq0":"P","ax":[["e","Equipamento",0,[{"k":"po","n":"polia (em pé)","eq":"P","m":"^sa ^of"},{"k":"ha","n":"halteres (deitado de bruços)","eq":"H","m":"^tmid ^ie -sa","t":"De bruços: mais trapézio inferior e médio."}]]]},{"id":"iyt","n":"Elevações I-Y-T de bruços","en":"Prone I-Y-T raises","aka":["iyt","i y t"],"p":"tmid ti","s":"op rb ie ol","d":{"e":"ha"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres leves","eq":"H"},{"k":"co","n":"sem peso","eq":"C"}]]]},{"id":"tbrucos","n":"Abdução horizontal deitado de bruços (T)","en":"Prone horizontal abduction","aka":["t raise"],"p":"tmid","s":"op rb ie ol","d":{"e":"ha"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres leves","eq":"H"},{"k":"co","n":"sem peso","eq":"C"}]]]},{"id":"remalta","n":"Remada alta","en":"Upright row","aka":["remada alta","upright row"],"p":"ol ts","s":"of bl br tmid","d":{"e":"ba","w":"md"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"bw","n":"barra W","eq":"B"},{"k":"ha","n":"halteres","eq":"H"},{"k":"po","n":"polia","eq":"P"},{"k":"sm","n":"Smith","eq":"M"}]],["w","Largura",0,[{"k":"md","n":"média","q":1},{"k":"ab","n":"aberta","m":"^op","t":"Aberta: mais deltoide lateral e mais seguro para o ombro."},{"k":"fe","n":"fechada","m":"*ts ~ol","t":"Fechada: mais trapézio superior; pode incomodar o ombro."}]]]},{"id":"crucinv","n":"Crucifixo inverso","en":"Reverse fly","aka":["crucifixo inverso","voador inverso","peck deck inverso","rear delt","pull apart"],"p":"op","s":"tmid rb ie ol","d":{"e":"ma","p":"se","l":"bi"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ma","n":"máquina (voador inverso)","eq":"M"},{"k":"ha","n":"halteres","eq":"H"},{"k":"po","n":"polia","eq":"P"},{"k":"el","n":"elástico","eq":"K"}]],["p","Posição",0,[{"k":"se","n":"sentado"},{"k":"in","n":"peito apoiado no banco inclinado","t":"Peito apoiado: sem ajuda da lombar."},{"k":"pe","n":"em pé"},{"k":"cr","n":"polia cruzada","t":"Polia cruzada: tensão o tempo todo no deltoide posterior."}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"facepull","n":"Face pull","en":"Face pull","aka":["face pull","puxada para o rosto"],"p":"op ie","s":"tmid rb ti ol","d":{"e":"po","p":"pe"},"eq0":"P","ax":[["e","Equipamento",0,[{"k":"po","n":"polia com corda","eq":"P"},{"k":"el","n":"elástico","eq":"K"}]],["p","Posição",0,[{"k":"pe","n":"em pé"},{"k":"se","n":"sentado"}]]]},{"id":"rotext","n":"Rotação externa","en":"External rotation","aka":["rotacao externa","manguito","external rotation"],"p":"ie","s":"op","d":{"e":"po","p":"pe"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"po","n":"polia","eq":"P"},{"k":"el","n":"elástico","eq":"K"},{"k":"ha","n":"halter","eq":"H"}]],["p","Posição",0,[{"k":"pe","n":"em pé, braço colado"},{"k":"ld","n":"deitado de lado"},{"k":"90","n":"braço a 90°","m":"+ti","t":"Braço a 90°: posição de arremesso, mais trapézio inferior."}]]]},{"id":"cuban","n":"Cuban press","en":"Cuban press","aka":["cuban"],"p":"ie op","s":"ol ts tmid of","d":{"e":"ha"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H"},{"k":"bw","n":"barra W","eq":"B"}]]]},{"id":"rosca","n":"Rosca direta","en":"Biceps curl","aka":["rosca","rosca direta","curl","rosca alternada","rosca martelo","rosca inversa","rosca barra w"],"p":"bl bc","s":"br brr","d":{"g":"su","e":"ba","w":"md","p":"fr","l":"bi"},"eq0":"P","ax":[["g","Pegada",1,[{"k":"su","n":"supinada","q":1},{"k":"ne","n":"neutra (martelo)","m":"*br *brr ~bc ~bl","t":"Martelo: mais braquial e braquiorradial.","nm":"Rosca martelo"},{"k":"pr","n":"pronada (inversa)","m":"*brr *br +aex ~bc ~bl","t":"Inversa: mais braquiorradial e extensores do punho; carga menor.","nm":"Rosca inversa"}]],["e","Equipamento",0,[{"k":"ba","n":"barra reta","eq":"B"},{"k":"bw","n":"barra W","eq":"B"},{"k":"ha","n":"halteres","eq":"H"},{"k":"po","n":"polia","eq":"P","t":"Polia: tensão constante, inclusive embaixo."}]],["w","Largura",0,[{"k":"md","n":"média","q":1},{"k":"ab","n":"aberta","m":"^bc","t":"Aberta: um pouco mais cabeça curta."},{"k":"fe","n":"fechada","m":"^bl","t":"Fechada: um pouco mais cabeça longa."}]],["p","Braço",0,[{"k":"fr","n":"à frente","q":1},{"k":"cz","n":"cruzando o corpo","m":"^br","t":"Cruzando o corpo (martelo): mais braquial."}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"scott","n":"Rosca Scott","en":"Preacher curl","aka":["scott","preacher","rosca scott"],"p":"bc bl","s":"br brr","d":{"g":"su","e":"bw","l":"bi"},"eq0":"B","ax":[["g","Pegada",1,[{"k":"su","n":"supinada","t":"Scott: mais crescimento perto do cotovelo (Kassiano 2025).","q":1},{"k":"ne","n":"neutra (martelo)","m":"*br *brr ~bc ~bl","t":"Martelo no Scott: braquial bem isolado.","nm":"Rosca martelo no Scott"}]],["e","Equipamento",0,[{"k":"bw","n":"barra W","eq":"B"},{"k":"ha","n":"halter","eq":"H"},{"k":"ma","n":"máquina","eq":"M"},{"k":"po","n":"polia","eq":"P"}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"rinclinada","n":"Rosca inclinada","en":"Incline curl","aka":["rosca inclinada","bayesian","rosca bayesiana"],"p":"bl bc","s":"br brr","d":{"e":"ha","l":"bi"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres (banco inclinado)","eq":"H","t":"Braço atrás do corpo: mais crescimento na parte de cima do bíceps (Kassiano 2025)."},{"k":"po","n":"polia de costas (Bayesian)","eq":"P","t":"Bayesian: braço atrás do corpo com tensão constante."}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"concentrada","n":"Rosca concentrada","en":"Concentration curl","aka":["concentrada"],"p":"bl bc","s":"br brr","d":{"e":"ha"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halter","eq":"H"},{"k":"po","n":"polia","eq":"P"}]]]},{"id":"spider","n":"Rosca spider","en":"Spider curl","aka":["spider"],"p":"bc bl","s":"br brr","d":{"e":"ha"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H"},{"k":"bw","n":"barra W","eq":"B"}]]]},{"id":"roscaalta","n":"Rosca na polia alta (duplo bíceps)","en":"High-cable curl","aka":["rosca polia alta","duplo biceps"],"p":"bc bl","s":"br brr","d":{"e":"po","l":"bi"},"eq0":"P","ax":[["e","Equipamento",0,[{"k":"po","n":"polia","eq":"P"}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"drag","n":"Rosca drag (barra rente ao corpo)","en":"Drag curl","aka":["drag curl"],"p":"bl bc","s":"br brr op","d":{"e":"ba"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"ba","n":"barra reta","eq":"B"},{"k":"bw","n":"barra W","eq":"B"}]]]},{"id":"r21","n":"Rosca 21","en":"21s curl","aka":["21"],"p":"bl bc","s":"br brr","d":{"e":"ba"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"ba","n":"barra reta","eq":"B"},{"k":"bw","n":"barra W","eq":"B"},{"k":"ha","n":"halteres","eq":"H"}]]]},{"id":"zottman","n":"Rosca Zottman","en":"Zottman curl","aka":["zottman"],"p":"bl bc br brr","s":"aex","d":{"e":"ha"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H"}]]]},{"id":"pushdown","n":"Tríceps na polia","en":"Triceps pushdown","aka":["triceps pulley","triceps polia","pulley","pushdown","triceps corda","triceps barra"],"p":"tlat tl tmed","s":"","d":{"g":"co","l":"bi"},"eq0":"P","ax":[["g","Pegada",0,[{"k":"ba","n":"barra (pronada)","t":"Barra: costuma permitir mais carga; mais cabeça lateral."},{"k":"co","n":"corda (neutra)","t":"Corda: abre no fim, contração mais forte embaixo."},{"k":"su","n":"barra supinada","m":"*tmed","t":"Supinada: carga menor, mais cabeça medial."}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"frances","n":"Tríceps francês (acima da cabeça)","en":"Overhead triceps extension","aka":["frances","francês","overhead","triceps testa em pe","extensao acima da cabeca"],"p":"tl tlat tmed","s":"","d":{"e":"po","p":"pe","l":"bi"},"eq0":"P","ax":[["e","Equipamento",0,[{"k":"po","n":"polia","eq":"P","t":"Acima da cabeça: cabeça longa alongada, ~1,4× o crescimento da polia normal (Maeo 2022)."},{"k":"ha","n":"halter","eq":"H"},{"k":"bw","n":"barra W","eq":"B"}]],["p","Posição",0,[{"k":"se","n":"sentado"},{"k":"pe","n":"em pé"}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"testa","n":"Tríceps testa","en":"Skull crusher","aka":["testa","skull crusher","triceps deitado"],"p":"tl tlat tmed","s":"","d":{"e":"bw","b":"re"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"ba","n":"barra reta","eq":"B"},{"k":"bw","n":"barra W","eq":"B"},{"k":"ha","n":"halteres","eq":"H"},{"k":"po","n":"polia","eq":"P"}]],["b","Banco",0,[{"k":"re","n":"reto"},{"k":"in","n":"inclinado","t":"Inclinado: cabeça longa mais alongada."},{"k":"de","n":"declinado","t":"Declinado: tensão maior perto do fim."}]]]},{"id":"coice","n":"Tríceps coice","en":"Triceps kickback","aka":["coice","kickback triceps"],"p":"tl tlat tmed","s":"op","d":{"e":"ha","l":"bi"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halter","eq":"H"},{"k":"po","n":"polia","eq":"P"}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"jm","n":"JM press","en":"JM press","aka":["jm"],"p":"tl tlat tmed","s":"pm of","d":{"e":"ba"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"sm","n":"Smith","eq":"M"}]]]},{"id":"tmaq","n":"Tríceps na máquina","en":"Triceps extension machine","aka":["triceps maquina"],"p":"tmed tlat tl","s":"","d":{"e":"ma"},"eq0":"M","ax":[["e","Equipamento",0,[{"k":"ma","n":"máquina","eq":"M"}]]]},{"id":"punho","n":"Rosca de punho","en":"Wrist curl","aka":["punho","rosca punho","extensao de punho","flexao de punho","wrist"],"p":"afl","s":"","d":{"g":"su","e":"ba","p":"fr"},"eq0":"B","ax":[["g","Palma",1,[{"k":"su","n":"para cima (flexores)","q":1},{"k":"pr","n":"para baixo (extensores)","m":"*aex -afl","t":"Palma para baixo: trabalha os extensores do punho.","nm":"Extensão de punho"}]],["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"ha","n":"halteres","eq":"H"},{"k":"po","n":"polia","eq":"P"}]],["p","Posição",0,[{"k":"fr","n":"antebraço no banco","q":1},{"k":"ct","n":"barra por trás das costas","t":"Por trás das costas: deixa usar mais carga."}]]]},{"id":"farmer","n":"Caminhada do fazendeiro","en":"Farmer's walk","aka":["fazendeiro","farmer"],"p":"afl ts","s":"aex ob le as gmed","d":{"e":"ha","l":"bi"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H"},{"k":"kb","n":"kettlebell","eq":"K"},{"k":"hx","n":"barra hexagonal","eq":"B"}]],["l","Lado",0,[{"k":"bi","n":"dois lados","q":1},{"k":"un","n":"um lado (mala)","m":"^ob","t":"Carregar de um lado só: muito mais oblíquo."}]]]},{"id":"hang","n":"Pendurar na barra fixa","en":"Dead hang","aka":["pendurar","dead hang"],"p":"afl","s":"aex ds rm ti","d":{"l":"bi"},"eq0":"C","ax":[["l","Mãos",0,[{"k":"bi","n":"duas mãos","q":1},{"k":"un","n":"uma mão","t":"Uma mão: pegada muito mais exigida."}]]]},{"id":"roller","n":"Rolo de punho","en":"Wrist roller","aka":["rolo de punho"],"p":"afl aex","s":"of ol ts","d":{},"eq0":"K","ax":[]},{"id":"encolh","n":"Encolhimento","en":"Shrug","aka":["encolhimento","shrug"],"p":"ts","s":"tmid rb afl","d":{"e":"ba"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"ha","n":"halteres","eq":"H"},{"k":"hx","n":"barra hexagonal","eq":"B"},{"k":"sm","n":"Smith","eq":"M"},{"k":"ma","n":"máquina","eq":"M"},{"k":"po","n":"polia","eq":"P"}]]]},{"id":"terra","n":"Levantamento terra","en":"Deadlift","aka":["terra","deadlift","levantamento terra"],"p":"le gm bf st","s":"ad vl vm ts ds","d":{"st":"co","e":"ba"},"eq0":"B","ax":[["st","Estilo",1,[{"k":"co","n":"convencional","q":1},{"k":"su","n":"sumô (pés afastados)","m":"*ad ^vl ^vm","t":"Sumô: mais adutores e quadríceps, costas mais retas.","nm":"Levantamento terra sumô"}]],["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"hx","n":"barra hexagonal","eq":"B","m":"^vl ^vm","t":"Barra hexagonal: mais quadríceps, menos lombar."},{"k":"ha","n":"halteres","eq":"H"}]]]},{"id":"stiff","n":"Stiff (terra romeno)","en":"Romanian deadlift","aka":["stiff","rdl","terra romeno"],"p":"bf st gm","s":"le ad","d":{"e":"ba","l":"bi"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"ha","n":"halteres","eq":"H"},{"k":"sm","n":"Smith","eq":"M"},{"k":"kb","n":"kettlebell","eq":"K"}]],["l","Pernas",0,[{"k":"bi","n":"duas pernas","q":1},{"k":"un","n":"uma perna","m":"*gmed","t":"Uma perna: muito glúteo médio para equilibrar."}]]]},{"id":"bomdia","n":"Bom dia","en":"Good morning","aka":["bom dia","good morning"],"p":"le bf st","s":"gm ad","d":{"e":"ba"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"sm","n":"Smith","eq":"M"},{"k":"el","n":"elástico","eq":"K"}]]]},{"id":"remcurv","n":"Remada curvada","en":"Bent-over row","aka":["remada curvada","bent over","remada cavalinho","t-bar","pendlay","yates"],"p":"ds tmid rb","s":"di op rm bl br le","d":{"e":"ba","g":"pr","w":"md"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"ha","n":"halteres","eq":"H"},{"k":"sm","n":"Smith","eq":"M"},{"k":"tb","n":"cavalinho (T)","eq":"B","t":"Cavalinho: pegada neutra/fechada, fácil de pôr carga."}]],["g","Pegada",0,[{"k":"pr","n":"pronada","m":"^op ^tmid","t":"Pronada: cotovelos mais abertos, mais trapézio médio e deltoide posterior."},{"k":"ne","n":"neutra","t":"Neutra: posição natural, equilíbrio entre dorsal e meio das costas."},{"k":"su","n":"supinada","m":"^di ^bl ^bc","t":"Supinada: cotovelos junto ao corpo, mais dorsal inferior e bíceps."}]],["w","Largura",0,[{"k":"md","n":"média","q":1},{"k":"ab","n":"aberta","m":"^tmid ^op ^ts -di","t":"Aberta: mais trapézio e deltoide (Padovan, Coratella et al.)."},{"k":"fe","n":"fechada","m":"*di ^bl","t":"Fechada: mais grande dorsal (Padovan, Coratella et al.)."}]]]},{"id":"rembaixa","n":"Remada baixa","en":"Seated row","aka":["remada baixa","remada sentada","seated row","remada triangulo","remada no cabo"],"p":"ds tmid rb","s":"di rm op bl br","d":{"e":"po","g":"ne","w":"md","l":"bi"},"eq0":"P","ax":[["e","Equipamento",0,[{"k":"po","n":"polia","eq":"P"},{"k":"ma","n":"máquina","eq":"M"}]],["g","Pegada",0,[{"k":"pr","n":"pronada","m":"^op ^tmid","t":"Pronada: cotovelos mais abertos, mais trapézio médio e deltoide posterior."},{"k":"ne","n":"neutra","t":"Neutra: posição natural, equilíbrio entre dorsal e meio das costas."},{"k":"su","n":"supinada","m":"^di ^bl ^bc","t":"Supinada: cotovelos junto ao corpo, mais dorsal inferior e bíceps."}]],["w","Largura",0,[{"k":"md","n":"média","q":1},{"k":"ab","n":"aberta","m":"^tmid ^op ^ts -di","t":"Aberta: mais trapézio e deltoide (Padovan, Coratella et al.)."},{"k":"fe","n":"fechada","m":"*di ^bl","t":"Fechada: mais grande dorsal (Padovan, Coratella et al.)."}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"remapoiada","n":"Remada com peito apoiado","en":"Chest-supported row","aka":["remada apoiada","remada maquina","remada articulada","hammer row","remada 45"],"p":"tmid rb ds","s":"di op rm bl br","d":{"c":"fe","e":"ma","g":"ne","l":"bi"},"eq0":"H","ax":[["c","Cotovelos",1,[{"k":"fe","n":"junto ao corpo","m":"^di","q":1},{"k":"ab","n":"abertos (para os lados)","m":"*op *ol ~ds -di -rm ^ie","t":"Cotovelos abertos: vira exercício de deltoide posterior e lateral, trapézio médio e romboides.","nm":"Remada com cotovelos abertos"}]],["e","Equipamento",0,[{"k":"ha","n":"halteres (banco inclinado)","eq":"H"},{"k":"ma","n":"máquina articulada","eq":"M"},{"k":"ba","n":"barra / cavalinho apoiado","eq":"B"}]],["g","Pegada",0,[{"k":"pr","n":"pronada","m":"^op ^tmid","t":"Pronada: cotovelos mais abertos, mais trapézio médio e deltoide posterior."},{"k":"ne","n":"neutra","t":"Neutra: posição natural, equilíbrio entre dorsal e meio das costas."},{"k":"su","n":"supinada","m":"^di ^bl ^bc","t":"Supinada: cotovelos junto ao corpo, mais dorsal inferior e bíceps."}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"al","n":"alternado","t":"Alternado: um braço de cada vez, mais foco em cada lado."},{"k":"un","n":"um braço","t":"Unilateral: mais foco e amplitude em cada lado."}]]]},{"id":"serrote","n":"Remada unilateral (serrote)","en":"One-arm row","aka":["serrote","remada unilateral","one arm row","meadows"],"p":"ds di","s":"rm rb tmid op bl br","d":{"e":"ha"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halter (apoiado no banco)","eq":"H"},{"k":"po","n":"polia baixa","eq":"P"},{"k":"lm","n":"landmine (Meadows)","eq":"B","m":"^op","t":"Meadows: pegada pronada na ponta da barra, um pouco mais deltoide posterior."}]]]},{"id":"reminv","n":"Remada invertida","en":"Inverted row","aka":["remada invertida","australiana"],"p":"ds tmid rb","s":"di op rm bl br","d":{"e":"co","g":"pr"},"eq0":"C","ax":[["e","Equipamento",0,[{"k":"co","n":"barra (Smith ou rack)","eq":"C"},{"k":"tr","n":"argolas / TRX","eq":"K"}]],["g","Pegada",0,[{"k":"pr","n":"pronada","m":"^op ^tmid","t":"Pronada: cotovelos mais abertos, mais trapézio médio e deltoide posterior."},{"k":"ne","n":"neutra","t":"Neutra: posição natural, equilíbrio entre dorsal e meio das costas."},{"k":"su","n":"supinada","m":"^di ^bl ^bc","t":"Supinada: cotovelos junto ao corpo, mais dorsal inferior e bíceps."}]]]},{"id":"barrafixa","n":"Barra fixa","en":"Pull-up","aka":["barra fixa","pull up","chin up","graviton","barra"],"p":"ds di","s":"rm bl bc br brr ti rb","d":{"g":"pr","w":"md","e":"co"},"eq0":"C","ax":[["g","Pegada",0,[{"k":"pr","n":"pronada","t":"Pronada: mais grande dorsal que a supinada (Lusk 2010).","q":1},{"k":"su","n":"supinada","m":"^bc ^bl ^br ^di","t":"Supinada: mais bíceps e dorsal inferior; cotovelos junto ao corpo."},{"k":"ne","n":"neutra","m":"^br ^brr","t":"Neutra: mais braquial e braquiorradial; confortável para o ombro."}]],["w","Largura",0,[{"k":"md","n":"média","q":1},{"k":"ab","n":"aberta","m":"^ti ^rb ^op -bc","t":"Aberta: ativação do dorsal parecida com a média (Andersen 2014); um pouco mais trapézio inferior e romboides, menos amplitude."},{"k":"fe","n":"fechada","m":"^bl ^bc","t":"Fechada: mais amplitude, cotovelos junto ao corpo, mais bíceps."}]],["e","Carga",0,[{"k":"co","n":"peso do corpo","eq":"C"},{"k":"ma","n":"assistida (graviton)","eq":"M","t":"Assistida: mesma ação com menos peso."},{"k":"lt","n":"com peso extra","eq":"K"}]]]},{"id":"puxada","n":"Puxada alta","en":"Lat pulldown","aka":["puxada","puxada alta","puxada frontal","pulldown","pull down","lat pulldown","pulley","pulley frente","puxador"],"p":"ds di","s":"rm bl bc br ti rb brr","d":{"g":"pr","w":"md","e":"po","l":"bi"},"eq0":"M","ax":[["g","Pegada",0,[{"k":"pr","n":"pronada","t":"Pronada: mais grande dorsal que a supinada (Lusk 2010).","q":1},{"k":"su","n":"supinada","m":"^bc ^bl ^br ^di","t":"Supinada: mais bíceps e dorsal inferior; cotovelos junto ao corpo."},{"k":"ne","n":"neutra","m":"^br ^brr","t":"Neutra: mais braquial e braquiorradial; confortável para o ombro."}]],["w","Largura",0,[{"k":"md","n":"média","q":1},{"k":"ab","n":"aberta","m":"^ti ^rb ^op -bc","t":"Aberta: ativação do dorsal parecida com a média (Andersen 2014); um pouco mais trapézio inferior e romboides, menos amplitude."},{"k":"fe","n":"fechada","m":"^bl ^bc","t":"Fechada: mais amplitude, cotovelos junto ao corpo, mais bíceps."}]],["e","Equipamento",0,[{"k":"po","n":"polia","eq":"P"},{"k":"ma","n":"máquina articulada","eq":"M"}]],["l","Braços",0,[{"k":"bi","n":"dois braços","q":1},{"k":"un","n":"um braço","m":"^di","t":"Um braço: mais amplitude, mais dorsal inferior."}]]]},{"id":"escap","n":"Depressão escapular na barra fixa","en":"Scapular pull-up","aka":["escapular"],"p":"ti","s":"ds sa rm afl","d":{},"eq0":"C","ax":[]},{"id":"pullover","n":"Pullover","en":"Pullover","aka":["pullover","pull over","puxada braco estendido","straight arm"],"p":"ds di rm","s":"tl op pi pm sa","d":{"e":"po","g":"co"},"eq0":"P","ax":[["e","Equipamento",1,[{"k":"po","n":"polia (braços estendidos)","eq":"P","m":"-pm -sa","t":"Polia em pé: tensão o tempo todo no dorsal."},{"k":"ha","n":"halter (deitado)","eq":"H","m":"^pm ^pi ^sa -op","t":"Deitado com halter: mais peitoral e serrátil, mais alongamento."},{"k":"ma","n":"máquina","eq":"M","m":"-pm -sa"}]],["g","Pegador",0,[{"k":"co","n":"corda","q":1},{"k":"ba","n":"barra"}]]]},{"id":"extlombar","n":"Extensão lombar","en":"Back extension","aka":["extensao lombar","hiperextensao","banco romano","super homem","superman"],"p":"le gm","s":"bf st","d":{"p":"45","e":"co"},"eq0":"C","ax":[["p","Posição",0,[{"k":"45","n":"banco a 45°"},{"k":"90","n":"banco romano (90°)"},{"k":"ch","n":"no chão (super-homem)","m":"+ti +op","t":"No chão: mais leve, também trabalha o meio das costas.","nm":"Super-homem no chão"}]],["e","Carga",0,[{"k":"co","n":"peso do corpo","eq":"C"},{"k":"an","n":"anilha no peito","eq":"K"}]]]},{"id":"birddog","n":"Bird-dog (quatro apoios)","en":"Bird-dog","aka":["bird dog","perdigueiro"],"p":"le gm","s":"as ob of bf","d":{},"eq0":"C","ax":[]},{"id":"socoserr","n":"Soco do serrátil","en":"Serratus punch","aka":["soco serratil","serratil"],"p":"sa","s":"of ps pm","d":{"e":"ha"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halter (deitado)","eq":"H"},{"k":"po","n":"polia (em pé)","eq":"P"}]]]},{"id":"scaption","n":"Elevação no plano da escápula acima de 120°","en":"Scaption above 120°","aka":["scaption"],"p":"sa","s":"ol of ts ti","d":{},"eq0":"H","ax":[]},{"id":"pushplus","n":"Flexão com protração (push-up plus)","en":"Push-up plus","aka":["push up plus"],"p":"sa","s":"pm ps of tlat tmed","d":{},"eq0":"C","ax":[]},{"id":"prancprot","n":"Prancha com protração","en":"Plank protraction","aka":["prancha protracao"],"p":"sa","s":"as ob of pm","d":{},"eq0":"C","ax":[]},{"id":"wallslide","n":"Deslizamento na parede com rolo","en":"Wall slide","aka":["wall slide"],"p":"sa","s":"ti of ol ts","d":{},"eq0":"C","ax":[]},{"id":"crunch","n":"Abdominal","en":"Crunch","aka":["abdominal","crunch","abdominal supra","abdominal polia","abdominal maquina","abdominal declinado"],"p":"as","s":"ai ob","d":{"e":"co","v":"tr"},"eq0":"C","ax":[["e","Onde",1,[{"k":"co","n":"no chão","eq":"C"},{"k":"bo","n":"bola suíça","eq":"C","t":"Bola: mais amplitude, abdômen alongado embaixo."},{"k":"po","n":"polia ajoelhado","eq":"P","t":"Polia: dá para aumentar a carga."},{"k":"ma","n":"máquina","eq":"M"},{"k":"dc","n":"banco declinado","eq":"C","m":"^rf","t":"Declinado subindo o tronco todo: mais flexor do quadril.","nm":"Abdominal declinado"}]],["v","Estilo",0,[{"k":"tr","n":"tradicional","q":1},{"k":"br","n":"braços estendidos","t":"Braços estendidos acima da cabeça: alavanca maior, mais difícil."},{"k":"pv","n":"pernas na vertical","t":"Pernas para cima: mais parte de baixo do abdômen."},{"k":"ca","n":"empurrando os calcanhares","t":"Calcanhares no chão: menos flexor do quadril."}]]]},{"id":"bicicleta","n":"Abdominal bicicleta","en":"Bicycle crunch","aka":["bicicleta"],"p":"as ob","s":"ai rf","d":{},"eq0":"C","ax":[]},{"id":"reverso","n":"Abdominal reverso","en":"Reverse crunch","aka":["abdominal reverso","infra"],"p":"ai","s":"as ob","d":{"e":"co"},"eq0":"C","ax":[["e","Onde",0,[{"k":"co","n":"no chão","eq":"C"},{"k":"dc","n":"banco declinado","eq":"C","t":"Declinado: mais difícil."}]]]},{"id":"elevpernas","n":"Elevação de pernas","en":"Leg raise","aka":["elevacao de pernas","leg raise","captain","paralela abdominal","abdominal infra","elevacao de joelhos"],"p":"ai","s":"as ob rf","d":{"e":"ba","j":"es"},"eq0":"M","ax":[["e","Onde",0,[{"k":"ba","n":"pendurado na barra","eq":"C","m":"+afl +ds","t":"Pendurado: mais difícil, também exige pegada."},{"k":"ca","n":"cadeira (paralelas)","eq":"M","m":"*as *ob","t":"Captain's chair: muito reto abdominal e oblíquos (ACE)."},{"k":"ch","n":"deitado no chão","eq":"C"}]],["j","Pernas",0,[{"k":"es","n":"estendidas"},{"k":"fl","n":"joelhos dobrados","t":"Joelhos dobrados: mais fácil.","nm":"Elevação de joelhos"}]]]},{"id":"dragon","n":"Dragon flag","en":"Dragon flag","aka":["dragon flag"],"p":"ai as","s":"ob ds rf sa","d":{},"eq0":"C","ax":[]},{"id":"tesoura","n":"Tesoura (flutter kicks)","en":"Flutter kicks","aka":["tesoura","flutter"],"p":"ai","s":"as rf ob","d":{},"eq0":"C","ax":[]},{"id":"prancha","n":"Prancha","en":"Plank","aka":["prancha","plank"],"p":"as ob","s":"ai sa gm of rf","d":{"v":"an"},"eq0":"C","ax":[["v","Apoio",0,[{"k":"an","n":"antebraços","q":1},{"k":"ma","n":"mãos (braços estendidos)","m":"^sa"}]]]},{"id":"pranchalat","n":"Prancha lateral","en":"Side plank","aka":["prancha lateral","side plank"],"p":"ob","s":"gmed as tfl sa","d":{"v":"pa"},"eq0":"C","ax":[["v","Variação",1,[{"k":"pa","n":"parada","q":1},{"k":"ab","n":"com abdução da perna de cima","m":"*gmed ^tfl","t":"Levantando a perna: glúteo médio vira o principal.","nm":"Prancha lateral com abdução de perna"}]]]},{"id":"lenhador","n":"Lenhador (woodchopper)","en":"Woodchopper","aka":["lenhador","woodchopper"],"p":"ob","s":"as of ds sa","d":{"e":"po","v":"cb"},"eq0":"P","ax":[["e","Equipamento",0,[{"k":"po","n":"polia","eq":"P"},{"k":"el","n":"elástico","eq":"K"},{"k":"ha","n":"halter","eq":"H"}]],["v","Direção",0,[{"k":"cb","n":"de cima para baixo"},{"k":"bc","n":"de baixo para cima","m":"^of"}]]]},{"id":"pallof","n":"Pallof press","en":"Pallof press","aka":["pallof","anti rotacao"],"p":"ob","s":"as sa of","d":{"e":"po"},"eq0":"P","ax":[["e","Equipamento",0,[{"k":"po","n":"polia","eq":"P"},{"k":"el","n":"elástico","eq":"K"}]]]},{"id":"twist","n":"Rotação russa","en":"Russian twist","aka":["rotacao russa","russian twist"],"p":"ob","s":"as ai rf","d":{"e":"an"},"eq0":"K","ax":[["e","Carga",0,[{"k":"co","n":"sem peso","eq":"C"},{"k":"an","n":"anilha / halter","eq":"K"},{"k":"bo","n":"bola de peso","eq":"K"}]]]},{"id":"wiper","n":"Limpador de para-brisa na barra","en":"Windshield wipers","aka":["limpador","windshield"],"p":"ob","s":"ai as ds afl rf","d":{},"eq0":"C","ax":[]},{"id":"sidebend","n":"Flexão lateral do tronco","en":"Side bend","aka":["flexao lateral","side bend"],"p":"ob","s":"le","d":{"e":"ha"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halter","eq":"H"},{"k":"po","n":"polia","eq":"P"}]]]},{"id":"roda","n":"Roda abdominal","en":"Ab wheel rollout","aka":["roda","rodinha","ab wheel"],"p":"as","s":"ai ob ds sa rf","d":{"p":"jo","e":"ro"},"eq0":"K","ax":[["p","Posição",0,[{"k":"jo","n":"de joelhos","q":1},{"k":"pe","n":"em pé","t":"Em pé: muito mais difícil."}]],["e","Equipamento",0,[{"k":"ro","n":"rodinha","eq":"K"},{"k":"ba","n":"barra com anilhas","eq":"B"}]]]},{"id":"hipthrust","n":"Elevação pélvica","en":"Hip thrust","aka":["elevacao pelvica","hip thrust","ponte","ponte de gluteo","glute bridge"],"p":"gm","s":"bf st ad gmed vl vm le","d":{"ap":"bc","e":"ba","l":"bi"},"eq0":"B","ax":[["ap","Apoio",1,[{"k":"bc","n":"costas no banco","q":1},{"k":"ch","n":"no chão (ponte)","m":"-vl -vm -le","t":"No chão: amplitude menor, bom para começar.","nm":"Ponte de glúteo"}]],["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"ma","n":"máquina","eq":"M"},{"k":"sm","n":"Smith","eq":"M"},{"k":"ha","n":"halter","eq":"H"},{"k":"co","n":"peso do corpo","eq":"C"}]],["l","Pernas",0,[{"k":"bi","n":"duas pernas","q":1},{"k":"un","n":"uma perna","m":"+gmed","t":"Uma perna em pé ou apoiada: mais glúteo médio para equilibrar; corrige diferença entre os lados."}]]]},{"id":"coicegl","n":"Coice (extensão de quadril)","en":"Hip extension / kickback","aka":["coice","kickback","gluteo 4 apoios","gluteo maquina","extensao de quadril","gluteo na polia"],"p":"gm","s":"bf st gmed le","d":{"e":"po","j":"es"},"eq0":"C","ax":[["e","Equipamento",0,[{"k":"po","n":"polia (em pé)","eq":"P"},{"k":"ma","n":"máquina de glúteo","eq":"M"},{"k":"4w","n":"máquina de 4 posições","eq":"M"},{"k":"co","n":"quatro apoios","eq":"C","m":"*gmed","t":"Quatro apoios: muito glúteo máximo e médio (ACE)."},{"k":"cn","n":"caneleira","eq":"K"}]],["j","Joelho",0,[{"k":"es","n":"estendido","m":"^bf ^st","q":1},{"k":"fl","n":"dobrado","m":"-bf -st","t":"Joelho dobrado: menos posterior de coxa, mais glúteo."}]]]},{"id":"swing","n":"Kettlebell swing","en":"Kettlebell swing","aka":["swing","kettlebell"],"p":"gm bf st","s":"le ad vl vm as","d":{"e":"kb"},"eq0":"K","ax":[["e","Equipamento",0,[{"k":"kb","n":"kettlebell","eq":"K"},{"k":"ha","n":"halter","eq":"H"}]]]},{"id":"abducao","n":"Abdução de quadril","en":"Hip abduction","aka":["abducao","abdutora","cadeira abdutora","abducao polia"],"p":"gmed tfl","s":"gm","d":{"e":"ma","p":"er"},"eq0":"C","ax":[["e","Equipamento",0,[{"k":"ma","n":"cadeira abdutora","eq":"M"},{"k":"po","n":"polia","eq":"P"},{"k":"el","n":"elástico","eq":"K"},{"k":"co","n":"deitado de lado","eq":"C"}]],["p","Tronco",0,[{"k":"er","n":"ereto","q":1},{"k":"fr","n":"inclinado à frente","m":"^gm","t":"Tronco à frente na cadeira: mais glúteo máximo (parte de cima)."}]]]},{"id":"lateralwalk","n":"Caminhada lateral com elástico","en":"Banded lateral walk","aka":["caminhada lateral","monster walk"],"p":"gmed tfl","s":"gm","d":{},"eq0":"K","ax":[]},{"id":"ostra","n":"Ostra com elástico","en":"Clamshell","aka":["ostra","clamshell"],"p":"gmed","s":"gm","d":{},"eq0":"K","ax":[]},{"id":"hidrante","n":"Hidrante (quatro apoios)","en":"Fire hydrant","aka":["hidrante"],"p":"tfl gmed","s":"gm","d":{},"eq0":"C","ax":[]},{"id":"joelhopolia","n":"Elevação de joelho na polia","en":"Cable knee raise","aka":["flexao de quadril"],"p":"tfl rf","s":"ai","d":{},"eq0":"P","ax":[]},{"id":"aducao","n":"Adução de quadril","en":"Hip adduction","aka":["aducao","adutora","cadeira adutora"],"p":"ad","s":"","d":{"e":"ma"},"eq0":"M","ax":[["e","Equipamento",0,[{"k":"ma","n":"cadeira adutora","eq":"M"},{"k":"po","n":"polia","eq":"P"},{"k":"bo","n":"bola entre os joelhos","eq":"K","nm":"Apertar bola entre os joelhos"}]]]},{"id":"copenhagen","n":"Prancha de Copenhagen","en":"Copenhagen adduction","aka":["copenhagen"],"p":"ad","s":"ob as","d":{},"eq0":"C","ax":[]},{"id":"agach","n":"Agachamento","en":"Squat","aka":["agachamento","squat","agachamento livre","goblet","agachamento frontal","agachamento sumo","belt squat"],"p":"vl vm gm","s":"rf ad le bf gmed","d":{"e":"ba","am":"pa","pe":"md"},"eq0":"B","ax":[["e","Equipamento",0,[{"k":"ba","n":"barra nas costas","eq":"B"},{"k":"bf","n":"barra na frente (frontal)","eq":"B","m":"^rf ^as -bf","t":"Frontal: tronco mais reto, mais quadríceps.","nm":"Agachamento frontal"},{"k":"ha","n":"halter / goblet","eq":"H"},{"k":"sm","n":"Smith","eq":"M"},{"k":"ct","n":"no cinto (belt squat)","eq":"M","m":"-le","t":"No cinto: carga sem pesar na coluna."}]],["am","Profundidade",0,[{"k":"pa","n":"até o paralelo"},{"k":"pr","n":"profundo (completo)","m":"^gm ^ad","t":"Profundo: mais glúteo e adutores (Kubo 2019)."}]],["pe","Pés",0,[{"k":"md","n":"largura dos ombros","q":1},{"k":"su","n":"afastados (sumô)","m":"*ad ^gm","t":"Pés afastados: mais adutores.","nm":"Agachamento sumô"}]]]},{"id":"hack","n":"Agachamento hack","en":"Hack squat","aka":["hack","pendulo","pêndulo","agachamento maquina"],"p":"vl vm","s":"rf gm ad","d":{"e":"ma","pe":"me"},"eq0":"M","ax":[["e","Máquina",0,[{"k":"ma","n":"hack","eq":"M"},{"k":"pd","n":"pêndulo","eq":"M","t":"Pêndulo: muito quadríceps com o joelho bem dobrado."}]],["pe","Pés",0,[{"k":"me","n":"pés no meio","q":1},{"k":"al","n":"pés altos","m":"^gm","t":"Pés altos: mais glúteo."},{"k":"bx","n":"pés baixos","m":"-gm","t":"Pés baixos: mais quadríceps."}]]]},{"id":"legpress","n":"Leg press","en":"Leg press","aka":["leg press","leg 45","leg horizontal"],"p":"vl vm","s":"rf gm ad bf","d":{"e":"45","pe":"me","l":"bi"},"eq0":"M","ax":[["e","Máquina",0,[{"k":"45","n":"45°","eq":"M"},{"k":"ho","n":"horizontal (sentado)","eq":"M"}]],["pe","Pés",1,[{"k":"me","n":"pés no meio","q":1},{"k":"al","n":"pés altos","m":"*gm ^bf","t":"Pés altos: mais glúteo e posterior de coxa."},{"k":"bx","n":"pés baixos","m":"-gm -bf","t":"Pés baixos: joelho vai mais à frente, mais quadríceps."},{"k":"ab","n":"pés afastados","m":"^ad","t":"Pés afastados: mais adutores."}]],["l","Pernas",0,[{"k":"bi","n":"duas pernas","q":1},{"k":"un","n":"uma perna","t":"Uma perna: corrige diferença entre os lados."}]]]},{"id":"sissy","n":"Agachamento sissy","en":"Sissy squat","aka":["sissy"],"p":"rf vl vm","s":"","d":{"e":"co"},"eq0":"C","ax":[["e","Equipamento",0,[{"k":"co","n":"peso do corpo","eq":"C"},{"k":"ma","n":"máquina / apoio","eq":"M"}]]]},{"id":"espanhol","n":"Agachamento espanhol (com faixa)","en":"Spanish squat","aka":["espanhol"],"p":"vm vl rf","s":"","d":{},"eq0":"K","ax":[]},{"id":"afundo","n":"Afundo","en":"Lunge","aka":["afundo","passada","avanco","avanço","lunge","bulgaro","búlgaro"],"p":"gm vl vm","s":"rf gmed ad bf","d":{"dir":"fr","e":"ha"},"eq0":"H","ax":[["dir","Tipo",1,[{"k":"fr","n":"para a frente","q":1},{"k":"tr","n":"para trás","t":"Para trás: mais fácil para o joelho.","nm":"Afundo reverso"},{"k":"an","n":"andando","t":"Andando: mais equilíbrio e glúteo.","nm":"Afundo andando"},{"k":"bu","n":"búlgaro (pé de trás no banco)","t":"Búlgaro: muita carga numa perna, glúteo e quadríceps alongados.","nm":"Afundo búlgaro"}]],["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H"},{"k":"ba","n":"barra","eq":"B"},{"k":"sm","n":"Smith","eq":"M"},{"k":"co","n":"peso do corpo","eq":"C"}]]]},{"id":"stepup","n":"Subida no banco (step-up)","en":"Step-up","aka":["step up","subida no banco"],"p":"gm vl vm","s":"rf gmed ad bf","d":{"e":"ha"},"eq0":"H","ax":[["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H"},{"k":"ba","n":"barra","eq":"B"},{"k":"co","n":"peso do corpo","eq":"C"}]]]},{"id":"pistol","n":"Agachamento unilateral","en":"Single-leg squat","aka":["pistol","agachamento unilateral"],"p":"gm vl vm","s":"rf gmed ad bf","d":{},"eq0":"C","ax":[]},{"id":"aflateral","n":"Afundo lateral","en":"Lateral lunge","aka":["afundo lateral","cossaco"],"p":"ad gm","s":"vl vm gmed","d":{"v":"la","e":"ha"},"eq0":"H","ax":[["v","Tipo",0,[{"k":"la","n":"lateral","q":1},{"k":"co","n":"cossaco (bem fundo)","t":"Cossaco: mais amplitude para os adutores.","nm":"Agachamento cossaco"}]],["e","Equipamento",0,[{"k":"ha","n":"halteres","eq":"H"},{"k":"co","n":"peso do corpo","eq":"C"}]]]},{"id":"extensora","n":"Cadeira extensora","en":"Leg extension","aka":["extensora","cadeira extensora","leg extension"],"p":"rf vl vm","s":"","d":{"p":"re","l":"bi"},"eq0":"M","ax":[["p","Encosto",0,[{"k":"rc","n":"reclinado","m":"*rf","t":"Encosto para trás (quadril estendido): mais reto femoral (Larsen 2024)."},{"k":"re","n":"normal (90°)"}]],["l","Pernas",0,[{"k":"bi","n":"duas pernas","q":1},{"k":"un","n":"uma perna","t":"Uma perna: corrige diferença entre os lados."}]]]},{"id":"flexora","n":"Cadeira flexora","en":"Leg curl","aka":["flexora","cadeira flexora","mesa flexora","leg curl"],"p":"bf st","s":"ga","d":{"p":"se","l":"bi"},"eq0":"M","ax":[["p","Posição",0,[{"k":"se","n":"sentado (cadeira)","t":"Sentado: posterior mais alongado, cresce mais (Maeo 2021)."},{"k":"de","n":"deitado (mesa)","nm":"Mesa flexora"},{"k":"pe","n":"em pé","nm":"Flexora em pé"}]],["l","Pernas",0,[{"k":"bi","n":"duas pernas","q":1},{"k":"un","n":"uma perna","t":"Uma perna: corrige diferença entre os lados."}]]]},{"id":"nordica","n":"Flexão nórdica","en":"Nordic curl","aka":["nordica","nordic"],"p":"bf st","s":"ga gm","d":{},"eq0":"C","ax":[]},{"id":"ghr","n":"Glute-ham raise","en":"Glute-ham raise","aka":["ghr","glute ham"],"p":"bf st","s":"ga gm le","d":{},"eq0":"M","ax":[]},{"id":"flexbola","n":"Flexão de pernas na bola suíça","en":"Stability-ball leg curl","aka":["flexora bola"],"p":"st bf","s":"ga gm","d":{"l":"bi"},"eq0":"C","ax":[["l","Pernas",0,[{"k":"bi","n":"duas pernas","q":1},{"k":"un","n":"uma perna","m":"+gmed","t":"Uma perna em pé ou apoiada: mais glúteo médio para equilibrar; corrige diferença entre os lados."}]]]},{"id":"vup","n":"Abdominal canivete (V-up)","en":"V-up","aka":["canivete","v up","v-up"],"p":"as ai","s":"ob rf","d":{"j":"es"},"eq0":"C","ax":[["j","Pernas",0,[{"k":"es","n":"estendidas","q":1},{"k":"fl","n":"joelhos dobrados","t":"Joelhos dobrados: mais fácil."}]]]},{"id":"rackpull","n":"Levantamento terra parcial (rack pull)","en":"Rack pull","aka":["rack pull","terra parcial"],"p":"le ts gm","s":"bf st ds afl","d":{"e":"ba"},"eq0":null,"ax":[["e","Equipamento",0,[{"k":"ba","n":"barra","eq":"B"},{"k":"hx","n":"barra hexagonal","eq":"B"}]]]},{"id":"pant","n":"Panturrilha","en":"Calf raise","aka":["panturrilha","gemeos","calf","burrinho","panturrilha sentado","panturrilha em pe"],"p":"ga so","s":"","d":{"p":"pe","e":"ma","j":"es","l":"bi"},"eq0":"M","ax":[["p","Posição",1,[{"k":"pe","n":"em pé","t":"Em pé (joelho estendido): cresce o gastrocnêmio; sentado quase não (Kinoshita 2023).","nm":"Panturrilha em pé"},{"k":"se","n":"sentado","m":"~ga","t":"Sentado: joelho dobrado, foca o sóleo.","nm":"Panturrilha sentado"},{"k":"lp","n":"no leg press","nm":"Panturrilha no leg press"},{"k":"bu","n":"burrinho","nm":"Panturrilha burrinho"}]],["e","Equipamento",0,[{"k":"ma","n":"máquina","eq":"M"},{"k":"sm","n":"Smith","eq":"M"},{"k":"ha","n":"halteres","eq":"H"},{"k":"co","n":"degrau sem carga","eq":"C"}]],["j","Joelho",0,[{"k":"es","n":"estendido","q":1},{"k":"fl","n":"dobrado","m":"~ga","t":"Joelho dobrado: mais sóleo."}]],["l","Pernas",0,[{"k":"bi","n":"duas pernas","q":1},{"k":"un","n":"uma perna","m":"+gmed","t":"Uma perna em pé ou apoiada: mais glúteo médio para equilibrar; corrige diferença entre os lados."}]]]},{"id":"corda","n":"Pular corda","en":"Jump rope","aka":["corda"],"p":"ga so","s":"","d":{},"eq0":"K","ax":[]}];
+const LEGACY={"Supino inclinado com barra (≈30°)":"supino|b=in,e=ba,w=md,g=pr","Crucifixo inclinado com halteres":"crucifixo|b=in,e=ha,l=bi","Supino inclinado com halteres (≈30°)":"supino|b=in,e=ha,w=md,g=pr","Supino inclinado no Smith":"supino|b=in,e=sm,w=md,g=pr","Supino inclinado na máquina articulada":"supino|b=in,e=ma,w=md,g=pr","Crucifixo inclinado na polia":"crucifixo|b=in,e=po,l=bi","Crucifixo na polia, de baixo para cima":"crucifixo|b=in,e=po,l=bi","Supino com pegada invertida":"supino|b=re,e=ba,w=md,g=su","Supino no landmine":"landmine|e=lm,l=bi","Flexão declinada (pés elevados)":"flexao|b=pe,w=md,e=co","Supino reto com barra":"supino|b=re,e=ba,w=md,g=pr","Voador (pec deck)":"crucifixo|b=re,e=ma,l=bi","Crossover com tronco inclinado à frente":"crucifixo|b=de,e=po,l=bi","Supino sentado na máquina":"supino|b=re,e=ma,w=md,g=pr","Mergulho nas paralelas":"mergulho|p=er,e=co","Flexão de braço":"flexao|b=ch,w=md,e=co","Flexão na bola suíça":"flexao|b=ch,w=md,e=bo","Flexão suspensa (TRX)":"flexao|b=ch,w=md,e=tr","Supino reto com halteres":"supino|b=re,e=ha,w=md,g=pr","Crucifixo reto com halteres":"crucifixo|b=re,e=ha,l=bi","Crossover na polia média":"crucifixo|b=re,e=po,l=bi","Supino reto na máquina articulada":"supino|b=re,e=ma,w=md,g=pr","Supino reto no Smith":"supino|b=re,e=sm,w=md,g=pr","Supino declinado com barra":"supino|b=de,e=ba,w=md,g=pr","Mergulho nas paralelas, tronco à frente":"mergulho|p=fr,e=co","Crossover de cima para baixo":"crucifixo|b=de,e=po,l=bi","Supino declinado com halteres":"supino|b=de,e=ha,w=md,g=pr","Supino declinado na máquina":"supino|b=de,e=ma,w=md,g=pr","Crucifixo declinado com halteres":"crucifixo|b=de,e=ha,l=bi","Mergulho na máquina":"mergulho|p=fr,e=ma","Flexão inclinada (mãos elevadas)":"flexao|b=ma,w=md,e=co","Desenvolvimento com halteres":"desenv|e=ha,p=se,g=pr,l=bi","Elevação frontal com halteres":"elevfront|e=ha,g=pr,l=bi","Desenvolvimento em pé com barra":"desenv|e=ba,p=pe,g=pr,l=bi","Desenvolvimento sentado com barra":"desenv|e=ba,p=se,g=pr,l=bi","Desenvolvimento Arnold":"desenv|e=ha,p=se,g=ar,l=bi","Desenvolvimento na máquina":"desenv|e=ma,p=se,g=pr,l=bi","Elevação frontal na polia":"elevfront|e=po,g=pr,l=bi","Elevação frontal com anilha":"elevfront|e=an,g=pr,l=bi","Flexão pike":"pike|b=ch","Supino inclinado com halteres":"supino|b=in,e=ha,w=md,g=pr","Elevação lateral com halteres":"elevlat|e=ha,p=pe,c=es,l=bi","Elevação lateral na polia":"elevlat|e=po,p=pe,c=es,l=un","Remada inclinada a 45° (peito apoiado, cotovelos abertos)":"remapoiada|c=ab,e=ha,g=pr,l=bi","Elevação lateral com cotovelo flexionado":"elevlat|e=ha,p=pe,c=fl,l=bi","Elevação lateral na polia, por trás do corpo":"elevlat|e=po,p=ct,c=es,l=un","Elevação lateral sentado":"elevlat|e=ha,p=se,c=es,l=bi","Elevação lateral na máquina":"elevlat|e=ma,p=se,c=es,l=bi","Elevação lateral inclinado para o lado (lean-away)":"elevlat|e=ha,p=la,c=es,l=un","Elevação lateral deitado de lado":"elevlat|e=ha,p=ld,c=es,l=un","Elevação em Y na polia":"yraise|e=po","Remada alta com pegada aberta":"remalta|e=ba,w=ab","Remada alta com barra":"remalta|e=ba,w=md","Elevação lateral sentado, tronco inclinado":"crucinv|e=ha,p=se,l=bi","Crucifixo inverso na máquina":"crucinv|e=ma,p=se,l=bi","Face pull na polia com corda":"facepull|e=po,p=pe","Crucifixo inverso unilateral na polia":"crucinv|e=po,p=pe,l=un","Crucifixo inverso cruzado na polia":"crucinv|e=po,p=cr,l=bi","Crucifixo inverso no banco inclinado":"crucinv|e=ha,p=in,l=bi","Remada com cotovelos abertos":"remapoiada|c=ab,e=ba,g=pr,l=bi","Crucifixo inverso com elástico (pull-apart)":"crucinv|e=el,p=pe,l=bi","Rosca inclinada com halteres":"rinclinada|e=ha,l=bi","Rosca concentrada":"concentrada|e=ha","Rosca na polia baixa":"rosca|g=su,e=po,w=md,p=fr,l=bi","Rosca direta com barra W, pegada fechada":"rosca|g=su,e=bw,w=fe,p=fr,l=bi","Barra fixa supinada":"barrafixa|g=su,w=md,e=co","Rosca Bayesian na polia (de costas para o cabo)":"rinclinada|e=po,l=un","Rosca drag (barra rente ao corpo)":"drag|e=ba","Rosca alternada com supinação":"rosca|g=su,e=ha,w=md,p=fr,l=al","Rosca martelo":"rosca|g=ne,e=ha,w=md,p=fr,l=bi","Rosca 21":"r21|e=ba","Rosca Scott":"scott|g=su,e=bw,l=bi","Rosca direta com barra W, pegada aberta":"rosca|g=su,e=bw,w=ab,p=fr,l=bi","Rosca direta com barra reta":"rosca|g=su,e=ba,w=md,p=fr,l=bi","Rosca spider":"spider|e=ha","Rosca Scott na polia":"scott|g=su,e=po,l=bi","Rosca Scott na máquina":"scott|g=su,e=ma,l=bi","Rosca na polia alta (duplo bíceps)":"roscaalta|e=po,l=bi","Rosca Scott unilateral com halter":"scott|g=su,e=ha,l=un","Rosca na polia baixa, pegada aberta":"rosca|g=su,e=po,w=ab,p=fr,l=bi","Rosca martelo cruzada":"rosca|g=ne,e=ha,w=md,p=cz,l=al","Rosca martelo na polia com corda":"rosca|g=ne,e=po,w=md,p=fr,l=bi","Rosca inversa com barra W":"rosca|g=pr,e=bw,w=md,p=fr,l=bi","Rosca martelo no banco Scott":"scott|g=ne,e=ha,l=un","Rosca inversa na polia":"rosca|g=pr,e=po,w=md,p=fr,l=bi","Rosca Zottman":"zottman|e=ha","Tríceps francês na polia (acima da cabeça)":"frances|e=po,p=pe,l=bi","Flexão diamante":"flexao|b=ch,w=fe,e=co","Tríceps coice":"coice|e=ha,l=bi","Tríceps francês com halter":"frances|e=ha,p=pe,l=bi","Tríceps testa com barra":"testa|e=ba,b=re","Tríceps na polia com corda":"pushdown|g=co,l=bi","Tríceps testa no banco inclinado":"testa|e=bw,b=in","Extensão unilateral acima da cabeça":"frances|e=ha,p=pe,l=un","JM press":"jm|e=ba","Tríceps francês com barra W":"frances|e=bw,p=pe,l=bi","Tríceps na polia com barra":"pushdown|g=ba,l=bi","Supino fechado":"supino|b=re,e=ba,w=fe,g=pr","Tríceps na polia unilateral, pegada neutra":"pushdown|g=co,l=un","Mergulho no banco":"mergulho|p=er,e=bc","Tríceps na máquina (mergulho sentado)":"mergulho|p=er,e=ma","Tríceps na polia, pegada supinada":"pushdown|g=su,l=bi","Tríceps unilateral na polia, pegada supinada":"pushdown|g=su,l=un","Tríceps testa declinado com halteres":"testa|e=ha,b=de","Tríceps na máquina":"tmaq|e=ma","Rosca inversa com barra":"rosca|g=pr,e=ba,w=md,p=fr,l=bi","Rosca de punho com barra":"punho|g=su,e=ba,p=fr","Rosca de punho por trás das costas":"punho|g=su,e=ba,p=ct","Rosca de punho com halter":"punho|g=su,e=ha,p=fr","Rosca de punho na polia":"punho|g=su,e=po,p=fr","Caminhada do fazendeiro":"farmer|e=ha,l=bi","Pendurar na barra fixa":"hang|l=bi","Rolo de punho":"roller|","Extensão de punho com barra":"punho|g=pr,e=ba,p=fr","Extensão de punho com halter":"punho|g=pr,e=ha,p=fr","Extensão de punho na polia":"punho|g=pr,e=po,p=fr","Encolhimento de ombros com barra":"encolh|e=ba","Encolhimento com halteres":"encolh|e=ha","Encolhimento na barra hexagonal":"encolh|e=hx","Encolhimento no Smith ou máquina":"encolh|e=sm","Encolhimento na polia":"encolh|e=po","Remada alta":"remalta|e=ba,w=md","Levantamento terra":"terra|st=co,e=ba","Elevações I-Y-T deitado de bruços":"iyt|e=ha","Abdução horizontal deitado de bruços":"tbrucos|e=ha","Remada curvada com barra":"remcurv|e=ba,g=pr,w=md","Remada baixa sentado na polia":"rembaixa|e=po,g=ne,w=md,l=bi","Remada invertida":"reminv|e=co,g=pr","Remada com peito apoiado":"remapoiada|c=fe,e=ha,g=ne,l=bi","Remada na máquina articulada":"remapoiada|c=fe,e=ma,g=ne,l=bi","Remada cavalinho (T-bar)":"remcurv|e=tb,g=ne,w=fe","Face pull":"facepull|e=po,p=pe","Elevação em Y deitado de bruços":"yraise|e=ha","Depressão escapular na barra fixa":"escap|","Barra fixa pronada":"barrafixa|g=pr,w=md,e=co","Puxada frontal":"puxada|g=pr,w=md,e=po,l=bi","Remada unilateral com halter":"serrote|e=ha","Rotação externa deitado de lado":"rotext|e=ha,p=ld","Rotação externa na polia":"rotext|e=po,p=pe","Rotação externa a 90° na polia":"rotext|e=po,p=90","Rotação externa com elástico":"rotext|e=el,p=pe","Cuban press":"cuban|e=ha","Puxada com braços estendidos":"pullover|e=po,g=ba","Pullover na polia":"pullover|e=po,g=co","Pullover com halter":"pullover|e=ha,g=co","Puxada frontal, pegada média":"puxada|g=pr,w=md,e=po,l=bi","Puxada frontal, pegada aberta":"puxada|g=pr,w=ab,e=po,l=bi","Puxada frontal, pegada fechada":"puxada|g=pr,w=fe,e=po,l=bi","Puxada unilateral na polia":"puxada|g=pr,w=md,e=po,l=un","Remada baixa, pegada fechada":"rembaixa|e=po,g=ne,w=fe,l=bi","Remada Meadows (landmine unilateral)":"serrote|e=lm","Remada unilateral na polia baixa":"rembaixa|e=po,g=ne,w=md,l=un","Extensão lombar a 45°":"extlombar|p=45,e=co","Extensão lombar no banco romano (90°)":"extlombar|p=90,e=co","Bom dia com barra":"bomdia|e=ba","Stiff (levantamento terra romeno)":"stiff|e=ba,l=bi","Super-homem no chão":"extlombar|p=ch,e=co","Bird-dog (quatro apoios)":"birddog|","Soco do serrátil (protração deitado)":"socoserr|e=ha","Elevação no plano da escápula acima de 120°":"scaption|","Flexão com protração final (push-up plus)":"pushplus|","Soco à frente na polia":"socoserr|e=po","Prancha com protração":"prancprot|","Deslizamento na parede com rolo":"wallslide|","Abdominal bicicleta":"bicicleta|","Elevação de pernas na cadeira (captain's chair)":"elevpernas|e=ca,j=fl","Abdominal na bola suíça":"crunch|e=bo,v=tr","Abdominal com pernas na vertical":"crunch|e=co,v=pv","Abdominal com braços estendidos":"crunch|e=co,v=br","Abdominal reverso":"reverso|e=co","Abdominal empurrando os calcanhares":"crunch|e=co,v=ca","Prancha":"prancha|v=an","Abdominal tradicional":"crunch|e=co,v=tr","Abdominal na polia ajoelhado":"crunch|e=po,v=tr","Abdominal na máquina":"crunch|e=ma,v=tr","Roda abdominal":"roda|p=jo,e=ro","Abdominal declinado":"crunch|e=dc,v=tr","Elevação de pernas na barra":"elevpernas|e=ba,j=es","Elevação de joelhos na barra":"elevpernas|e=ba,j=fl","Abdominal reverso no banco declinado":"reverso|e=dc","Elevação de pernas deitado":"elevpernas|e=ch,j=es","Dragon flag":"dragon|","Tesoura (flutter kicks)":"tesoura|","Prancha lateral":"pranchalat|v=pa","Lenhador na polia (woodchopper)":"lenhador|e=po,v=cb","Pallof press na polia":"pallof|e=po","Rotação russa":"twist|e=an","Limpador de para-brisa na barra":"wiper|","Flexão lateral com halter":"sidebend|e=ha","Elevação pélvica com barra":"hipthrust|ap=bc,e=ba,l=bi","Agachamento livre profundo":"agach|e=ba,am=pr,pe=md","Extensão de quadril em quatro apoios":"coicegl|e=co,j=fl","Agachamento livre":"agach|e=ba,am=pa,pe=md","Subida no banco (step-up)":"stepup|e=ha","Afundo":"afundo|dir=fr,e=ha","Agachamento unilateral":"pistol|","Extensão de quadril na máquina de 4 posições":"coicegl|e=4w,j=es","Leg press":"legpress|e=45,pe=me,l=bi","Elevação pélvica na máquina":"hipthrust|ap=bc,e=ma,l=bi","Afundo búlgaro":"afundo|dir=bu,e=ha","Coice na polia (extensão de quadril)":"coicegl|e=po,j=es","Ponte de glúteo no chão":"hipthrust|ap=ch,e=co,l=bi","Kettlebell swing":"swing|e=kb","Abdução de quadril deitado de lado":"abducao|e=co,p=er","Cadeira abdutora":"abducao|e=ma,p=er","Abdução de quadril na polia":"abducao|e=po,p=er","Caminhada lateral com elástico":"lateralwalk|","Ostra com elástico":"ostra|","Stiff unilateral":"stiff|e=ha,l=un","Prancha lateral com abdução de perna":"pranchalat|v=ab","Hidrante (quatro apoios)":"hidrante|","Elevação de joelho na polia":"joelhopolia|","Prancha de Copenhagen":"copenhagen|","Cadeira adutora":"aducao|e=ma","Adução de quadril na polia":"aducao|e=po","Agachamento sumô":"agach|e=ha,am=pa,pe=su","Levantamento terra sumô":"terra|st=su,e=ba","Afundo lateral":"aflateral|v=la,e=ha","Agachamento cossaco":"aflateral|v=co,e=co","Apertar bola entre os joelhos":"aducao|e=bo","Cadeira extensora reclinada (encosto para trás)":"extensora|p=rc,l=bi","Cadeira extensora":"extensora|p=re,l=bi","Agachamento sissy":"sissy|e=co","Agachamento frontal":"agach|e=bf,am=pa,pe=md","Afundo reverso":"afundo|dir=tr,e=ha","Agachamento hack":"hack|e=ma,pe=me","Agachamento no cinto (belt squat)":"agach|e=ct,am=pa,pe=md","Afundo andando":"afundo|dir=an,e=ha","Leg press com pés baixos":"legpress|e=45,pe=bx,l=bi","Agachamento espanhol (com faixa)":"espanhol|","Cadeira flexora (sentado)":"flexora|p=se,l=bi","Glute-ham raise":"ghr|","Mesa flexora":"flexora|p=de,l=bi","Flexão nórdica":"nordica|","Flexora em pé unilateral":"flexora|p=pe,l=un","Flexão de pernas na bola suíça":"flexbola|l=bi","Panturrilha em pé na máquina":"pant|p=pe,e=ma,j=es,l=bi","Panturrilha no leg press (joelhos estendidos)":"pant|p=lp,e=ma,j=es,l=bi","Panturrilha burrinho":"pant|p=bu,e=ma,j=es,l=bi","Panturrilha em pé no Smith":"pant|p=pe,e=sm,j=es,l=bi","Panturrilha unilateral com halter":"pant|p=pe,e=ha,j=es,l=un","Panturrilha no degrau sem carga":"pant|p=pe,e=co,j=es,l=bi","Pular corda":"corda|","Panturrilha sentado na máquina":"pant|p=se,e=ma,j=es,l=bi","Panturrilha sentado com halteres nos joelhos":"pant|p=se,e=ha,j=es,l=bi","Panturrilha no leg press (joelhos flexionados)":"pant|p=lp,e=ma,j=fl,l=bi","Panturrilha em pé com joelhos flexionados":"pant|p=pe,e=co,j=fl,l=bi","Panturrilha sentado no Smith":"pant|p=se,e=sm,j=es,l=bi"};
+const FAMBY=Object.fromEntries(FAMS.map(f=>[f.id,f]));
+const RESC=new Map();
+function parseRef(ref){if(!ref)return null;const [id,rest]=String(ref).split("|");const f=FAMBY[id];if(!f)return null;const sel={...f.d};
+  (rest||"").split(",").filter(Boolean).forEach(kv=>{const [k,v]=kv.split("=");if(f.ax.some(a=>a[0]===k&&a[3].some(o=>o.k===v)))sel[k]=v});return {f,sel}}
+const mkRef=(f,sel)=>f.id+"|"+f.ax.map(a=>a[0]+"="+sel[a[0]]).join(",");
+function resolveV(f,sel){const key=mkRef(f,sel);if(RESC.has(key))return RESC.get(key);
+  let p=f.p.split(" ").filter(Boolean),s=f.s.split(" ").filter(Boolean);const rm=(a,x)=>a.filter(y=>y!==x);
+  for(const [k,,,opts] of f.ax){const op=opts.find(o=>o.k===sel[k]);if(!op||!op.m)continue;
+    for(const t of op.m.split(" ")){const c=t.slice(1),o=t[0];
+      if(o==="*"){s=rm(s,c);if(!p.includes(c))p.push(c)}else if(o==="~"){p=rm(p,c);s=rm(s,c);s.unshift(c)}
+      else if(o==="^"){if(!p.includes(c)){s=rm(s,c);s.unshift(c)}}else if(o==="+"){if(!p.includes(c)&&!s.includes(c))s.push(c)}else if(o==="-"){p=rm(p,c);s=rm(s,c)}}}
+  const r={p:p.map(c=>MC[c]),s:s.map(c=>MC[c])};RESC.set(key,r);return r}
+function vName(f,sel){let base=f.n,suf="";const parts=[];
+  for(const [k,,,opts] of f.ax){const op=opts.find(o=>o.k===sel[k]);if(!op)continue;
+    if(op.nm){base=op.nm;continue}if(op.suf){suf+=op.suf;continue}if(op.q||opts.length<2)continue;parts.push(op.n)}
+  if(base!==f.n)suf=suf.replace(" reto","");
+  return base+suf+(parts.length?" · "+parts.join(" · "):"")}
+function vEq(f,sel){for(const [k,,,opts] of f.ax){const op=opts.find(o=>o.k===sel[k]);if(op&&op.eq)return op.eq}return f.eq0||"K"}
+const vNotes=(f,sel)=>f.ax.map(([k,,,opts])=>opts.find(o=>o.k===sel[k])).filter(o=>o&&o.t).map(o=>o.t);
+const splitKey=(f,sel)=>f.id+"|"+f.ax.filter(a=>a[2]).map(a=>sel[a[0]]).join(",");
+function fillEntry(e){const v=resolveV(e.f,e.sel);e[0]=vName(e.f,e.sel);e[1]=e.f.en;e[2]=vEq(e.f,e.sel);e[3]=e.ev;
+  e[4]=[...v.p,...v.s].filter(m=>m!==e.host);e[5]=e.stat;e[6]=mkRef(e.f,e.sel);e.p=v.p;e.s=v.s;return e}
+function mkEntry(host,ref,ev,stat){const r=parseRef(ref);const e=[];e.f=r.f;e.pre={...r.sel};e.sel={...r.sel};e.host=host;e.ev=ev;e.stat=stat||null;return fillEntry(e)}
+/* names saved in treinos -> family + variation (old names via LEGACY, new names via an index of all combinations) */
+let NAMEIDX=null;
+function refByName(name){if(!name)return null;if(LEGACY[name])return LEGACY[name];
+  if(!NAMEIDX){NAMEIDX=new Map();for(const k in LEGACY)NAMEIDX.set(norm(k),LEGACY[k]);
+    for(const f of FAMS){const rec=(i,sel)=>{if(i===f.ax.length){const nm=norm(vName(f,sel));if(!NAMEIDX.has(nm))NAMEIDX.set(nm,mkRef(f,sel));return}
+      for(const o of f.ax[i][3])rec(i+1,{...sel,[f.ax[i][0]]:o.k})};rec(0,{})}}
+  return NAMEIDX.get(norm(name))||null}
+function exInfo(name,ref){const r=parseRef(ref)||parseRef(refByName(name));if(!r)return null;const v=resolveV(r.f,r.sel);return {f:r.f,sel:r.sel,p:v.p,s:v.s}}
+/* search: every word must appear in the family's name, gym names or option labels; words that match an option select it */
+const OSYN={un:"unilateral",al:"alternado alternada",bi:"bilateral"};
+/* words that select an option; words of the exercise's own name never select one (e.g. "supino" must not pick "Supino fechado") */
+const optWords=(o,f)=>{const own=f?new Set(norm(f.n).split(/\s+/)):null;return norm(o.n+" "+(o.nm||"")+" "+(OSYN[o.k]||"")).split(/[\s()/]+/).filter(w=>w&&!(own&&own.has(w)))};
+function famText(f){return f._t||(f._t=norm([f.n,f.en,...f.aka,...f.ax.map(a=>a[1]),...f.ax.flatMap(a=>a[3].map(o=>optWords(o,f).join(" ")))].join(" ")))}
+const STOPW=new Set(["com","de","da","do","das","dos","na","no","nas","nos","em","para","pra","e","a","o","as","os","um","uma","the","with"]);
+function famSearch(q){const toks=norm(q).split(/[\s,·()]+/).filter(t=>t.length>1&&!STOPW.has(t));if(!toks.length)return [];
+  const out=[];for(const f of FAMS){const tx=famText(f);if(!toks.every(t=>tx.includes(t)))continue;
+    const core=norm([f.n,f.en,...f.aka].join(" "));const score=toks.filter(t=>core.includes(t)).length;if(!score)continue;
+    const sel={...f.d},set=new Set();for(const t of toks){if(core.includes(t)&&!f.ax.some(a=>a[3].some(o=>optWords(o,f).includes(t))))continue;
+      for(const [k,,,opts] of f.ax){const o=opts.find(o=>optWords(o,f).includes(t));if(o){sel[k]=o.k;set.add(k);break}}}
+    /* axes the user did not mention follow the usual version of that exercise (the ranked one) */
+    let best=null;for(const [id,m] of Object.entries(M))m.x.forEach((e,i)=>{if(e.f!==f||splitKey(f,e.pre)!==splitKey(f,sel))return;
+      const sc=(e.p.includes(id)?0:100)+i+f.ax.filter(([k])=>e.pre[k]!==f.d[k]).length*3+[...set].filter(k=>e.pre[k]!==sel[k]).length*50;
+      if(!best||sc<best[0])best=[sc,e]});
+    if(best)for(const [k] of f.ax)if(!set.has(k))sel[k]=best[1].pre[k];
+    const phrase=norm(q).trim();const exact=[f.n,...f.aka].some(a=>norm(a)===phrase)?40:[f.n,f.en,...f.aka].some(a=>norm(a).includes(phrase))?20:0;
+    out.push({f,sel,score:score*10+exact+(norm(f.n).startsWith(toks[0])?5:0)})}
+  return out.sort((a,b)=>b.score-a.score)}
 const M = {
   peito_superior:{n:"Peitoral superior",l:"Pectoralis major, parte clavicular",c:"Peito",s:["chaves","ridao","ace_peito"],x:[
-    ["Supino inclinado com barra (≈30°)","Incline barbell bench press","B","H",["ombro_frontal","peito_medial","triceps_lateral","triceps_medial"],"mais peitoral superior que o reto"],
-    ["Crucifixo inclinado com halteres","Incline dumbbell fly","H","E",["peito_medial","ombro_frontal","biceps_curta"]],
-    ["Supino inclinado com halteres (≈30°)","Incline dumbbell press","H","B",["ombro_frontal","peito_medial","triceps_lateral","triceps_medial"]],
-    ["Supino inclinado no Smith","Incline Smith machine press","M","B",["ombro_frontal","peito_medial","triceps_lateral","triceps_medial"]],
-    ["Supino inclinado na máquina articulada","Incline chest press machine","M","B",["ombro_frontal","peito_medial","triceps_lateral","triceps_medial"]],
-    ["Crucifixo inclinado na polia","Incline cable fly","P","B",["peito_medial","ombro_frontal","biceps_curta"]],
-    ["Crucifixo na polia, de baixo para cima","Low-to-high cable fly","P","B",["ombro_frontal","peito_medial","biceps_curta"]],
-    ["Supino com pegada invertida","Reverse-grip bench press","B","B",["ombro_frontal","peito_medial","triceps_lateral","triceps_medial"]],
-    ["Supino no landmine","Landmine press","B","B",["ombro_frontal","serratil","triceps_lateral","triceps_medial","peito_medial"]],
-    ["Flexão declinada (pés elevados)","Decline push-up","C","B",["peito_medial","ombro_frontal","triceps_lateral","triceps_medial","serratil"]],
-    ["Supino reto com barra","Flat barbell bench press","B","H",["peito_medial","peito_inferior","ombro_frontal","triceps_lateral","triceps_medial"],"menos que o inclinado"]]},
+    ["supino|b=in,e=ba,w=md,g=pr","H","mais peitoral superior que o reto"],
+    ["crucifixo|b=in,e=ha,l=bi","E"],
+    ["supino|b=re,e=ba,w=md,g=su","B"],
+    ["landmine|e=lm,l=bi","B"],
+    ["flexao|b=pe,w=md,e=co","B"]]},
   peito_medial:{n:"Peitoral médio",l:"Pectoralis major, parte esternocostal",c:"Peito",s:["ace_peito"],x:[
-    ["Supino reto com barra","Barbell bench press","B","E",["peito_superior","peito_inferior","ombro_frontal","triceps_lateral","triceps_medial"],"100% (referência)"],
-    ["Voador (pec deck)","Pec deck","M","E",["peito_superior","peito_inferior","ombro_frontal"],"98% do supino"],
-    ["Crossover com tronco inclinado à frente","Bent-forward cable crossover","P","E",["peito_inferior","ombro_frontal"],"93% do supino"],
-    ["Supino sentado na máquina","Seated chest press","M","E",["peito_superior","peito_inferior","ombro_frontal","triceps_lateral","triceps_medial"]],
-    ["Crucifixo inclinado com halteres","Incline dumbbell fly","H","E",["peito_superior","ombro_frontal","biceps_curta"]],
-    ["Mergulho nas paralelas","Dips","C","E",["triceps_lateral","triceps_longa","triceps_medial","peito_inferior","ombro_frontal"]],
-    ["Flexão de braço","Push-up","C","E",["peito_superior","ombro_frontal","triceps_lateral","triceps_medial","serratil"]],
-    ["Flexão na bola suíça","Stability-ball push-up","C","E",["peito_superior","ombro_frontal","triceps_lateral","triceps_medial","serratil","abdomen_supra"]],
-    ["Flexão suspensa (TRX)","Suspended push-up","K","E",["peito_superior","ombro_frontal","triceps_lateral","triceps_medial","serratil","abdomen_supra"]],
-    ["Supino reto com halteres","Flat dumbbell bench press","H","B",["peito_superior","peito_inferior","ombro_frontal","triceps_lateral","triceps_medial"]],
-    ["Crucifixo reto com halteres","Flat dumbbell fly","H","B",["peito_superior","peito_inferior","ombro_frontal","biceps_curta"]],
-    ["Crossover na polia média","Mid-pulley cable fly","P","B",["peito_superior","peito_inferior","ombro_frontal"]],
-    ["Supino reto na máquina articulada","Hammer chest press","M","B",["peito_superior","peito_inferior","ombro_frontal","triceps_lateral","triceps_medial"]],
-    ["Supino reto no Smith","Smith machine bench press","M","B",["peito_superior","peito_inferior","ombro_frontal","triceps_lateral","triceps_medial"]]]},
+    ["supino|b=re,e=ba,w=md,g=pr","E","100% (referência)"],
+    ["crucifixo|b=re,e=ma,l=bi","E","98% do supino"],
+    ["crucifixo|b=de,e=po,l=bi","E","93% do supino"],
+    ["crucifixo|b=in,e=ha,l=bi","E"],
+    ["mergulho|p=er,e=co","E"],
+    ["flexao|b=ch,w=md,e=co","E"]]},
   peito_inferior:{n:"Peitoral inferior",l:"Pectoralis major, parte abdominal",c:"Peito",s:[],x:[
-    ["Supino declinado com barra","Decline barbell bench press","B","B",["peito_medial","triceps_lateral","triceps_medial","ombro_frontal"]],
-    ["Mergulho nas paralelas, tronco à frente","Chest dips (forward lean)","C","B",["peito_medial","ombro_frontal","triceps_lateral","triceps_longa","triceps_medial"]],
-    ["Crossover de cima para baixo","High-to-low cable crossover","P","B",["peito_medial","ombro_frontal"]],
-    ["Supino declinado com halteres","Decline dumbbell press","H","B",["peito_medial","triceps_lateral","triceps_medial","ombro_frontal"]],
-    ["Supino declinado na máquina","Decline chest press machine","M","B",["peito_medial","triceps_lateral","triceps_medial","ombro_frontal"]],
-    ["Crucifixo declinado com halteres","Decline dumbbell fly","H","B",["peito_medial","ombro_frontal","biceps_curta"]],
-    ["Mergulho na máquina","Assisted / machine dip","M","B",["peito_medial","triceps_lateral","triceps_medial","ombro_frontal"]],
-    ["Flexão inclinada (mãos elevadas)","Incline push-up","C","B",["peito_medial","ombro_frontal","triceps_lateral","triceps_medial","serratil"]]]},
+    ["supino|b=de,e=ba,w=md,g=pr","B"],
+    ["mergulho|p=fr,e=co","B"],
+    ["crucifixo|b=de,e=po,l=bi","B"],
+    ["mergulho|p=fr,e=ma","B"],
+    ["flexao|b=ma,w=md,e=co","B"]]},
   ombro_frontal:{n:"Deltoide anterior",l:"Deltoideus, parte clavicular",c:"Ombros",s:["ace_ombro"],x:[
-    ["Desenvolvimento com halteres","Dumbbell shoulder press","H","E",["ombro_lateral","triceps_lateral","triceps_longa","trapezio_superior","serratil","peito_superior"]],
-    ["Elevação frontal com halteres","Dumbbell front raise","H","E",["peito_superior","ombro_lateral","serratil","trapezio_superior","biceps_longa"]],
-    ["Desenvolvimento em pé com barra","Barbell overhead press","B","B",["ombro_lateral","triceps_lateral","triceps_longa","trapezio_superior","serratil","peito_superior"]],
-    ["Desenvolvimento sentado com barra","Seated barbell press","B","B",["ombro_lateral","triceps_lateral","triceps_longa","trapezio_superior","serratil","peito_superior"]],
-    ["Desenvolvimento Arnold","Arnold press","H","B",["ombro_lateral","triceps_lateral","triceps_longa","trapezio_superior","serratil","peito_superior"]],
-    ["Desenvolvimento na máquina","Machine shoulder press","M","B",["ombro_lateral","triceps_lateral","triceps_longa","trapezio_superior","serratil","peito_superior"]],
-    ["Supino no landmine","Landmine press","B","B",["peito_superior","serratil","triceps_lateral","triceps_medial","peito_medial"]],
-    ["Elevação frontal na polia","Cable front raise","P","B",["peito_superior","ombro_lateral","serratil","trapezio_superior","biceps_longa"]],
-    ["Elevação frontal com anilha","Plate front raise","K","B",["peito_superior","ombro_lateral","serratil","trapezio_superior","biceps_longa"]],
-    ["Flexão pike","Pike push-up","C","B",["triceps_lateral","triceps_longa","peito_superior","ombro_lateral","serratil","trapezio_superior"]],
-    ["Supino inclinado com halteres","Incline dumbbell press","H","B",["peito_superior","peito_medial","triceps_lateral","triceps_medial"]]]},
+    ["desenv|e=ha,p=se,g=pr,l=bi","E"],
+    ["elevfront|e=ha,g=pr,l=bi","E"],
+    ["landmine|e=lm,l=bi","B"],
+    ["pike|b=ch","B"],
+    ["supino|b=in,e=ha,w=md,g=pr","B"]]},
   ombro_lateral:{n:"Deltoide lateral",l:"Deltoideus, parte acromial",c:"Ombros",s:["lat25","ace_ombro","coratella"],x:[
-    ["Elevação lateral com halteres","Dumbbell lateral raise","H","H",["trapezio_superior","ombro_frontal","serratil","ombro_posterior"],"cresce igual à polia"],
-    ["Elevação lateral na polia","Cable lateral raise","P","H",["trapezio_superior","ombro_frontal","serratil","ombro_posterior"],"cresce igual ao halter"],
-    ["Remada inclinada a 45° (peito apoiado, cotovelos abertos)","45° incline row","H","E",["ombro_posterior","trapezio_medio","romboides","infraespinhal","biceps_longa","braquial"]],
-    ["Elevação lateral com cotovelo flexionado","Bent-arm lateral raise","H","E",["trapezio_superior","ombro_frontal","serratil","ombro_posterior"]],
-    ["Elevação lateral na polia, por trás do corpo","Behind-the-back cable lateral raise","P","B",["trapezio_superior","ombro_frontal","serratil","ombro_posterior"]],
-    ["Elevação lateral sentado","Seated dumbbell lateral raise","H","B",["trapezio_superior","ombro_frontal","serratil","ombro_posterior"]],
-    ["Elevação lateral na máquina","Machine lateral raise","M","B",["trapezio_superior","ombro_frontal","serratil","ombro_posterior"]],
-    ["Elevação lateral inclinado para o lado (lean-away)","Lean-away lateral raise","H","B",["trapezio_superior","ombro_frontal","serratil","ombro_posterior"]],
-    ["Elevação lateral deitado de lado","Lying lateral raise","H","B",["trapezio_superior","ombro_frontal","serratil","ombro_posterior"]],
-    ["Elevação em Y na polia","Cable Y raise","P","B",["trapezio_inferior","serratil","ombro_frontal","trapezio_superior","trapezio_medio"]],
-    ["Desenvolvimento com halteres","Dumbbell shoulder press","H","B",["ombro_frontal","triceps_lateral","triceps_longa","trapezio_superior","serratil","peito_superior"]],
-    ["Remada alta com pegada aberta","Wide-grip upright row","B","B",["trapezio_superior","ombro_frontal","biceps_longa","braquial","trapezio_medio"]],
-    ["Remada alta com barra","Barbell upright row","B","E",["trapezio_superior","ombro_frontal","biceps_longa","braquial","trapezio_medio"]]]},
+    ["elevlat|e=ha,p=pe,c=es,l=bi","H","cresce igual à polia"],
+    ["remapoiada|c=ab,e=ha,g=pr,l=bi","E"],
+    ["yraise|e=po","B"],
+    ["desenv|e=ha,p=se,g=pr,l=bi","B"],
+    ["remalta|e=ba,w=ab","B"]]},
   ombro_posterior:{n:"Deltoide posterior",l:"Deltoideus, parte espinal",c:"Ombros",s:["ace_ombro"],x:[
-    ["Remada inclinada a 45° (peito apoiado, cotovelos abertos)","45° incline row","H","E",["ombro_lateral","trapezio_medio","romboides","infraespinhal","biceps_longa","braquial"]],
-    ["Elevação lateral sentado, tronco inclinado","Seated rear lateral raise","H","E",["trapezio_medio","romboides","infraespinhal","ombro_lateral"]],
-    ["Crucifixo inverso na máquina","Reverse pec deck","M","B",["trapezio_medio","romboides","infraespinhal","ombro_lateral"]],
-    ["Face pull na polia com corda","Rope face pull","P","B",["infraespinhal","trapezio_medio","romboides","trapezio_inferior","ombro_lateral"]],
-    ["Crucifixo inverso unilateral na polia","Single-arm cable rear delt fly","P","B",["trapezio_medio","romboides","infraespinhal","ombro_lateral"]],
-    ["Crucifixo inverso cruzado na polia","Cable reverse crossover","P","B",["trapezio_medio","romboides","infraespinhal","ombro_lateral"]],
-    ["Crucifixo inverso no banco inclinado","Chest-supported rear delt fly","H","B",["trapezio_medio","romboides","infraespinhal","ombro_lateral"]],
-    ["Remada com cotovelos abertos","Wide-elbow rear delt row","B","B",["trapezio_medio","romboides","infraespinhal","ombro_lateral","biceps_longa","braquial"]],
-    ["Crucifixo inverso com elástico (pull-apart)","Band pull-apart","K","B",["trapezio_medio","romboides","infraespinhal","ombro_lateral"]]]},
+    ["remapoiada|c=ab,e=ha,g=pr,l=bi","E"],
+    ["crucinv|e=ha,p=se,l=bi","E"],
+    ["facepull|e=po,p=pe","B"]]},
   biceps_longa:{n:"Bíceps, cabeça longa",l:"Biceps brachii, caput longum",c:"Braços",s:["kassiano","ace_biceps"],x:[
-    ["Rosca inclinada com halteres","Incline dumbbell curl","H","H",["biceps_curta","braquial","antebraco_braquiorradial"],"mais crescimento na parte de cima"],
-    ["Rosca concentrada","Concentration curl","H","E",["biceps_curta","braquial","antebraco_braquiorradial"]],
-    ["Rosca na polia baixa","Cable curl","P","E",["biceps_curta","braquial","antebraco_braquiorradial"]],
-    ["Rosca direta com barra W, pegada fechada","Close-grip EZ-bar curl","B","E",["biceps_curta","braquial","antebraco_braquiorradial"]],
-    ["Barra fixa supinada","Chin-up","C","E",["dorsal_superior","dorsal_inferior","biceps_curta","redondo_maior","braquial","antebraco_braquiorradial"]],
-    ["Rosca Bayesian na polia (de costas para o cabo)","Bayesian cable curl","P","B",["biceps_curta","braquial","antebraco_braquiorradial"]],
-    ["Rosca drag (barra rente ao corpo)","Barbell drag curl","B","B",["biceps_curta","braquial","antebraco_braquiorradial","ombro_posterior"]],
-    ["Rosca alternada com supinação","Alternating supinating curl","H","B",["biceps_curta","braquial","antebraco_braquiorradial"]],
-    ["Rosca martelo","Hammer curl","H","B",["braquial","antebraco_braquiorradial","biceps_curta"]],
-    ["Rosca 21","21s curl","B","B",["biceps_curta","braquial","antebraco_braquiorradial"]]]},
+    ["rinclinada|e=ha,l=bi","H","mais crescimento na parte de cima"],
+    ["concentrada|e=ha","E"],
+    ["rosca|g=su,e=po,w=md,p=fr,l=bi","E"],
+    ["barrafixa|g=su,w=md,e=co","E"],
+    ["drag|e=ba","B"],
+    ["rosca|g=ne,e=ha,w=md,p=fr,l=bi","B"],
+    ["r21|e=ba","B"]]},
   biceps_curta:{n:"Bíceps, cabeça curta",l:"Biceps brachii, caput breve",c:"Braços",s:["kassiano","ace_biceps"],x:[
-    ["Rosca Scott","Preacher curl","B","H",["biceps_longa","braquial","antebraco_braquiorradial"],"mais crescimento perto do cotovelo"],
-    ["Rosca concentrada","Concentration curl","H","E",["biceps_longa","braquial","antebraco_braquiorradial"]],
-    ["Rosca direta com barra W, pegada aberta","Wide-grip EZ-bar curl","B","E",["biceps_longa","braquial","antebraco_braquiorradial"]],
-    ["Rosca direta com barra reta","Barbell curl","B","E",["biceps_longa","braquial","antebraco_braquiorradial"]],
-    ["Rosca spider","Spider curl","H","B",["biceps_longa","braquial","antebraco_braquiorradial"]],
-    ["Rosca Scott na polia","Cable preacher curl","P","B",["biceps_longa","braquial","antebraco_braquiorradial"]],
-    ["Rosca Scott na máquina","Machine preacher curl","M","B",["biceps_longa","braquial","antebraco_braquiorradial"]],
-    ["Rosca na polia alta (duplo bíceps)","High-cable curl","P","B",["biceps_longa","braquial","antebraco_braquiorradial"]],
-    ["Rosca Scott unilateral com halter","Single-arm dumbbell preacher curl","H","B",["biceps_longa","braquial","antebraco_braquiorradial"]],
-    ["Rosca na polia baixa, pegada aberta","Wide-grip cable curl","P","B",["biceps_longa","braquial","antebraco_braquiorradial"]]]},
+    ["scott|g=su,e=bw,l=bi","H","mais crescimento perto do cotovelo"],
+    ["concentrada|e=ha","E"],
+    ["rosca|g=su,e=bw,w=ab,p=fr,l=bi","E"],
+    ["spider|e=ha","B"],
+    ["roscaalta|e=po,l=bi","B"]]},
   braquial:{n:"Braquial",l:"Brachialis",c:"Braços",s:[],x:[
-    ["Rosca martelo","Hammer curl","H","B",["antebraco_braquiorradial","biceps_longa","biceps_curta"]],
-    ["Rosca martelo cruzada","Cross-body hammer curl","H","B",["antebraco_braquiorradial","biceps_longa","biceps_curta"]],
-    ["Rosca martelo na polia com corda","Rope hammer curl","P","B",["antebraco_braquiorradial","biceps_longa","biceps_curta"]],
-    ["Rosca inversa com barra W","Reverse EZ-bar curl","B","B",["antebraco_braquiorradial","antebraco_extensores","biceps_longa","biceps_curta"]],
-    ["Rosca martelo no banco Scott","Preacher hammer curl","H","B",["antebraco_braquiorradial","biceps_longa","biceps_curta"]],
-    ["Rosca inversa na polia","Cable reverse curl","P","B",["antebraco_braquiorradial","antebraco_extensores","biceps_longa","biceps_curta"]],
-    ["Rosca Zottman","Zottman curl","H","B",["biceps_longa","biceps_curta","antebraco_braquiorradial","antebraco_extensores"]]]},
+    ["rosca|g=ne,e=ha,w=md,p=fr,l=bi","B"],
+    ["rosca|g=pr,e=bw,w=md,p=fr,l=bi","B"],
+    ["scott|g=ne,e=ha,l=un","B"],
+    ["zottman|e=ha","B"]]},
   triceps_longa:{n:"Tríceps, cabeça longa",l:"Triceps brachii, caput longum",c:"Braços",s:["maeo22","ace_triceps"],x:[
-    ["Tríceps francês na polia (acima da cabeça)","Overhead cable extension","P","H",["triceps_lateral","triceps_medial"],"≈1,4× o crescimento do tríceps na polia"],
-    ["Flexão diamante","Triangle push-up","C","E",["triceps_lateral","triceps_medial","peito_medial","ombro_frontal","serratil","peito_superior"]],
-    ["Tríceps coice","Triceps kickback","H","E",["triceps_lateral","triceps_medial","ombro_posterior"]],
-    ["Mergulho nas paralelas","Dips","C","E",["triceps_lateral","triceps_medial","peito_medial","peito_inferior","ombro_frontal"]],
-    ["Tríceps francês com halter","Overhead dumbbell extension","H","E",["triceps_lateral","triceps_medial"]],
-    ["Tríceps testa com barra","Lying barbell triceps extension","B","E",["triceps_lateral","triceps_medial"]],
-    ["Tríceps na polia com corda","Rope pushdown","P","E",["triceps_lateral","triceps_medial"]],
-    ["Tríceps testa no banco inclinado","Incline skullcrusher","B","B",["triceps_lateral","triceps_medial"]],
-    ["Extensão unilateral acima da cabeça","Single-arm overhead extension","H","B",["triceps_lateral","triceps_medial"]],
-    ["JM press","JM press","B","B",["triceps_lateral","triceps_medial","peito_medial","ombro_frontal"]],
-    ["Tríceps francês com barra W","EZ-bar overhead extension","B","B",["triceps_lateral","triceps_medial"]]]},
+    ["frances|e=po,p=pe,l=bi","H","≈1,4× o crescimento do tríceps na polia"],
+    ["flexao|b=ch,w=fe,e=co","E"],
+    ["coice|e=ha,l=bi","E"],
+    ["mergulho|p=er,e=co","E"],
+    ["testa|e=ba,b=re","E"],
+    ["pushdown|g=co,l=bi","E"],
+    ["jm|e=ba","B"]]},
   triceps_lateral:{n:"Tríceps, cabeça lateral",l:"Triceps brachii, caput laterale",c:"Braços",s:["maeo22","ace_triceps"],x:[
-    ["Tríceps francês na polia (acima da cabeça)","Overhead cable extension","P","H",["triceps_longa","triceps_medial"],"≈1,4× o crescimento do tríceps na polia"],
-    ["Flexão diamante","Triangle push-up","C","E",["triceps_longa","triceps_medial","peito_medial","ombro_frontal","serratil","peito_superior"]],
-    ["Tríceps coice","Triceps kickback","H","E",["triceps_longa","triceps_medial","ombro_posterior"]],
-    ["Mergulho nas paralelas","Dips","C","E",["triceps_longa","triceps_medial","peito_medial","peito_inferior","ombro_frontal"]],
-    ["Tríceps na polia com barra","Bar pushdown","P","E",["triceps_longa","triceps_medial"]],
-    ["Tríceps na polia com corda","Rope pushdown","P","E",["triceps_longa","triceps_medial"]],
-    ["Supino fechado","Close-grip bench press","B","E",["triceps_medial","triceps_longa","peito_medial","ombro_frontal","peito_superior"]],
-    ["Tríceps testa com barra","Lying barbell triceps extension","B","E",["triceps_longa","triceps_medial"]],
-    ["Tríceps na polia unilateral, pegada neutra","Single-arm cable pushdown","P","B",["triceps_longa","triceps_medial"]],
-    ["Mergulho no banco","Bench dip","C","B",["triceps_medial","triceps_longa","ombro_frontal","peito_inferior"]],
-    ["Tríceps na máquina (mergulho sentado)","Seated dip machine","M","B",["triceps_medial","triceps_longa","peito_inferior","ombro_frontal"]]]},
+    ["frances|e=po,p=pe,l=bi","H","≈1,4× o crescimento do tríceps na polia"],
+    ["flexao|b=ch,w=fe,e=co","E"],
+    ["coice|e=ha,l=bi","E"],
+    ["mergulho|p=er,e=co","E"],
+    ["pushdown|g=ba,l=bi","E"],
+    ["supino|b=re,e=ba,w=fe,g=pr","E"],
+    ["testa|e=ba,b=re","E"],
+    ["mergulho|p=er,e=bc","B"],
+    ["mergulho|p=er,e=ma","B"]]},
   triceps_medial:{n:"Tríceps, cabeça medial",l:"Triceps brachii, caput mediale",c:"Braços",s:["maeo22","ace_triceps"],x:[
-    ["Tríceps francês na polia (acima da cabeça)","Overhead cable extension","P","H",["triceps_longa","triceps_lateral"],"≈1,4× o crescimento do tríceps na polia"],
-    ["Flexão diamante","Triangle push-up","C","E",["triceps_lateral","triceps_longa","peito_medial","ombro_frontal","serratil","peito_superior"]],
-    ["Tríceps coice","Triceps kickback","H","E",["triceps_longa","triceps_lateral","ombro_posterior"]],
-    ["Supino fechado","Close-grip bench press","B","E",["triceps_lateral","triceps_longa","peito_medial","ombro_frontal","peito_superior"]],
-    ["Tríceps na polia, pegada supinada","Reverse-grip pushdown","P","B",["triceps_lateral","triceps_longa"]],
-    ["Tríceps unilateral na polia, pegada supinada","Single-arm reverse-grip pushdown","P","B",["triceps_lateral","triceps_longa"]],
-    ["Tríceps testa declinado com halteres","Decline dumbbell extension","H","B",["triceps_lateral","triceps_longa"]],
-    ["Tríceps na máquina","Triceps extension machine","M","B",["triceps_lateral","triceps_longa"]]]},
+    ["frances|e=po,p=pe,l=bi","H","≈1,4× o crescimento do tríceps na polia"],
+    ["flexao|b=ch,w=fe,e=co","E"],
+    ["coice|e=ha,l=bi","E"],
+    ["supino|b=re,e=ba,w=fe,g=pr","E"],
+    ["pushdown|g=su,l=bi","B"],
+    ["testa|e=ha,b=de","B"],
+    ["tmaq|e=ma","B"]]},
   antebraco_braquiorradial:{n:"Braquiorradial",l:"Brachioradialis",c:"Antebraço",s:[],x:[
-    ["Rosca martelo","Hammer curl","H","B",["braquial","biceps_longa","biceps_curta"]],
-    ["Rosca inversa com barra","Reverse barbell curl","B","B",["braquial","antebraco_extensores","biceps_longa","biceps_curta"]],
-    ["Rosca martelo na polia com corda","Rope hammer curl","P","B",["braquial","biceps_longa","biceps_curta"]],
-    ["Rosca inversa na polia","Cable reverse curl","P","B",["braquial","antebraco_extensores","biceps_longa","biceps_curta"]],
-    ["Rosca Zottman","Zottman curl","H","B",["biceps_longa","biceps_curta","braquial","antebraco_extensores"]],
-    ["Rosca martelo cruzada","Cross-body hammer curl","H","B",["braquial","biceps_longa","biceps_curta"]]]},
+    ["rosca|g=ne,e=ha,w=md,p=fr,l=bi","B"],
+    ["rosca|g=pr,e=ba,w=md,p=fr,l=bi","B"],
+    ["zottman|e=ha","B"]]},
   antebraco_flexores:{n:"Flexores do punho",l:"Flexor carpi radialis e ulnaris",c:"Antebraço",s:[],x:[
-    ["Rosca de punho com barra","Barbell wrist curl","B","B",[]],
-    ["Rosca de punho por trás das costas","Behind-the-back wrist curl","B","B",[]],
-    ["Rosca de punho com halter","Dumbbell wrist curl","H","B",[]],
-    ["Rosca de punho na polia","Cable wrist curl","P","B",[]],
-    ["Caminhada do fazendeiro","Farmer's walk","H","B",["trapezio_superior","antebraco_extensores","obliquos","lombar_eretores","abdomen_supra","gluteo_medio"]],
-    ["Pendurar na barra fixa","Dead hang","C","B",["antebraco_extensores","dorsal_superior","redondo_maior","trapezio_inferior"]],
-    ["Rolo de punho","Wrist roller","K","B",["antebraco_extensores","ombro_frontal","ombro_lateral","trapezio_superior"]]]},
+    ["punho|g=su,e=ba,p=fr","B"],
+    ["farmer|e=ha,l=bi","B"],
+    ["hang|l=bi","B"],
+    ["roller|","B"]]},
   antebraco_extensores:{n:"Extensores do punho",l:"Extensor carpi radialis e ulnaris",c:"Antebraço",s:[],x:[
-    ["Extensão de punho com barra","Reverse wrist curl","B","B",[]],
-    ["Extensão de punho com halter","Dumbbell wrist extension","H","B",[]],
-    ["Extensão de punho na polia","Cable wrist extension","P","B",[]],
-    ["Rolo de punho","Wrist roller","K","B",["antebraco_flexores","ombro_frontal","ombro_lateral","trapezio_superior"]],
-    ["Rosca inversa com barra","Reverse barbell curl","B","B",["antebraco_braquiorradial","braquial","biceps_longa","biceps_curta"]]]},
+    ["punho|g=pr,e=ba,p=fr","B"],
+    ["roller|","B"],
+    ["rosca|g=pr,e=ba,w=md,p=fr,l=bi","B"]]},
   trapezio_superior:{n:"Trapézio superior",l:"Trapezius, parte descendente",c:"Costas",s:["ekstrom"],x:[
-    ["Encolhimento de ombros com barra","Barbell shrug","B","E",["trapezio_medio","romboides","antebraco_flexores"]],
-    ["Encolhimento com halteres","Dumbbell shrug","H","B",["trapezio_medio","romboides","antebraco_flexores"]],
-    ["Encolhimento na barra hexagonal","Trap bar shrug","B","B",["trapezio_medio","romboides","antebraco_flexores"]],
-    ["Encolhimento no Smith ou máquina","Smith / machine shrug","M","B",["trapezio_medio","romboides","antebraco_flexores"]],
-    ["Encolhimento na polia","Cable shrug","P","B",["trapezio_medio","romboides","antebraco_flexores"]],
-    ["Caminhada do fazendeiro","Farmer's walk","H","B",["antebraco_flexores","antebraco_extensores","obliquos","lombar_eretores","abdomen_supra","gluteo_medio"]],
-    ["Remada alta","Upright row","B","B",["ombro_lateral","ombro_frontal","biceps_longa","braquial","trapezio_medio"]],
-    ["Levantamento terra","Deadlift","B","B",["lombar_eretores","gluteo_maximo","isquio_biceps_femoral","isquio_semitendineo","adutores","quad_vasto_lateral","quad_vasto_medial","dorsal_superior"]]]},
+    ["encolh|e=ba","E"],
+    ["farmer|e=ha,l=bi","B"],
+    ["remalta|e=ba,w=md","B"],
+    ["terra|st=co,e=ba","B"],
+    ["rackpull|e=ba","B"]]},
   trapezio_medio:{n:"Trapézio médio",l:"Trapezius, parte transversa",c:"Costas",s:["uwl","ekstrom"],x:[
-    ["Elevações I-Y-T deitado de bruços","Prone I-Y-T raises","H","E",["trapezio_inferior","ombro_posterior","romboides","infraespinhal","ombro_lateral"]],
-    ["Abdução horizontal deitado de bruços","Prone horizontal abduction","H","E",["ombro_posterior","romboides","infraespinhal","ombro_lateral"]],
-    ["Remada curvada com barra","Barbell bent-over row","B","E",["dorsal_superior","romboides","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial","lombar_eretores"]],
-    ["Remada baixa sentado na polia","Seated cable row","P","E",["dorsal_superior","dorsal_inferior","romboides","redondo_maior","ombro_posterior","biceps_longa","braquial"]],
-    ["Remada invertida","Inverted row","C","E",["dorsal_superior","dorsal_inferior","romboides","ombro_posterior","redondo_maior","biceps_longa","braquial"]],
-    ["Remada com peito apoiado","Chest-supported row","H","B",["romboides","dorsal_superior","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial"]],
-    ["Remada na máquina articulada","Machine row","M","B",["romboides","dorsal_superior","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial"]],
-    ["Remada cavalinho (T-bar)","T-bar row","B","B",["dorsal_superior","romboides","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial","lombar_eretores"]],
-    ["Face pull","Face pull","P","B",["ombro_posterior","infraespinhal","romboides","trapezio_inferior","ombro_lateral"]],
-    ["Crucifixo inverso na máquina","Reverse pec deck","M","B",["ombro_posterior","romboides","infraespinhal","ombro_lateral"]]]},
+    ["iyt|e=ha","E"],
+    ["tbrucos|e=ha","E"],
+    ["remcurv|e=ba,g=pr,w=md","E"],
+    ["rembaixa|e=po,g=ne,w=md,l=bi","E"],
+    ["reminv|e=co,g=pr","E"],
+    ["remapoiada|c=fe,e=ha,g=ne,l=bi","B"],
+    ["facepull|e=po,p=pe","B"],
+    ["crucinv|e=ma,p=se,l=bi","B"]]},
   trapezio_inferior:{n:"Trapézio inferior",l:"Trapezius, parte ascendente",c:"Costas",s:["uwl","ekstrom"],x:[
-    ["Elevações I-Y-T deitado de bruços","Prone I-Y-T raises","H","E",["trapezio_medio","ombro_posterior","romboides","infraespinhal","ombro_lateral"]],
-    ["Elevação em Y deitado de bruços","Prone Y raise","H","E",["trapezio_medio","ombro_lateral","ombro_posterior","infraespinhal","romboides"]],
-    ["Elevação em Y na polia","Cable Y raise","P","B",["ombro_lateral","serratil","ombro_frontal","trapezio_superior","trapezio_medio"]],
-    ["Face pull","Face pull","P","B",["ombro_posterior","infraespinhal","trapezio_medio","romboides","ombro_lateral"]],
-    ["Depressão escapular na barra fixa","Scapular pull-up","C","B",["dorsal_superior","serratil","redondo_maior","antebraco_flexores"]],
-    ["Barra fixa pronada","Pull-up","C","B",["dorsal_superior","dorsal_inferior","redondo_maior","biceps_longa","biceps_curta","braquial","romboides","antebraco_braquiorradial"]],
-    ["Puxada frontal","Lat pulldown","M","B",["dorsal_superior","dorsal_inferior","redondo_maior","biceps_longa","biceps_curta","braquial","romboides","antebraco_braquiorradial"]]]},
+    ["iyt|e=ha","E"],
+    ["yraise|e=ha","E"],
+    ["facepull|e=po,p=pe","B"],
+    ["escap|","B"],
+    ["barrafixa|g=pr,w=md,e=co","B"],
+    ["puxada|g=pr,w=md,e=po,l=bi","B"]]},
   romboides:{n:"Romboides",l:"Rhomboideus major e minor",c:"Costas",s:[],x:[
-    ["Remada com peito apoiado","Chest-supported row","H","B",["trapezio_medio","dorsal_superior","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial"]],
-    ["Remada baixa sentado na polia","Seated cable row","P","B",["dorsal_superior","dorsal_inferior","trapezio_medio","redondo_maior","ombro_posterior","biceps_longa","braquial"]],
-    ["Remada curvada com barra","Barbell bent-over row","B","B",["dorsal_superior","trapezio_medio","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial","lombar_eretores"]],
-    ["Remada na máquina articulada","Machine row","M","B",["trapezio_medio","dorsal_superior","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial"]],
-    ["Remada cavalinho (T-bar)","T-bar row","B","B",["dorsal_superior","trapezio_medio","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial","lombar_eretores"]],
-    ["Remada invertida","Inverted row","C","B",["dorsal_superior","dorsal_inferior","trapezio_medio","ombro_posterior","redondo_maior","biceps_longa","braquial"]],
-    ["Remada unilateral com halter","One-arm dumbbell row","H","B",["dorsal_superior","dorsal_inferior","redondo_maior","trapezio_medio","ombro_posterior","biceps_longa","braquial"]],
-    ["Crucifixo inverso na máquina","Reverse pec deck","M","B",["ombro_posterior","trapezio_medio","infraespinhal","ombro_lateral"]],
-    ["Face pull","Face pull","P","B",["ombro_posterior","infraespinhal","trapezio_medio","trapezio_inferior","ombro_lateral"]]]},
+    ["remapoiada|c=fe,e=ha,g=ne,l=bi","B"],
+    ["rembaixa|e=po,g=ne,w=md,l=bi","B"],
+    ["remcurv|e=ba,g=pr,w=md","B"],
+    ["reminv|e=co,g=pr","B"],
+    ["serrote|e=ha","B"],
+    ["crucinv|e=ma,p=se,l=bi","B"],
+    ["facepull|e=po,p=pe","B"]]},
   infraespinhal:{n:"Infraespinhal e redondo menor",l:"Infraspinatus, teres minor",c:"Costas",s:["reinold"],x:[
-    ["Rotação externa deitado de lado","Side-lying external rotation","H","E",["ombro_posterior"]],
-    ["Rotação externa na polia","Cable external rotation","P","B",["ombro_posterior"]],
-    ["Rotação externa a 90° na polia","90° cable external rotation","P","B",["ombro_posterior","trapezio_inferior"]],
-    ["Rotação externa com elástico","Band external rotation","K","B",["ombro_posterior"]],
-    ["Face pull","Face pull","P","B",["ombro_posterior","trapezio_medio","romboides","trapezio_inferior","ombro_lateral"]],
-    ["Cuban press","Cuban press","H","B",["ombro_posterior","ombro_lateral","trapezio_superior","trapezio_medio","ombro_frontal"]]]},
+    ["rotext|e=ha,p=ld","E"],
+    ["facepull|e=po,p=pe","B"],
+    ["cuban|e=ha","B"]]},
   redondo_maior:{n:"Redondo maior",l:"Teres major",c:"Costas",s:[],x:[
-    ["Puxada frontal","Lat pulldown","M","B",["dorsal_superior","dorsal_inferior","biceps_longa","biceps_curta","braquial","trapezio_inferior","romboides","antebraco_braquiorradial"]],
-    ["Barra fixa pronada","Pull-up","C","B",["dorsal_superior","dorsal_inferior","biceps_longa","biceps_curta","braquial","trapezio_inferior","romboides","antebraco_braquiorradial"]],
-    ["Remada unilateral com halter","One-arm dumbbell row","H","B",["dorsal_superior","dorsal_inferior","romboides","trapezio_medio","ombro_posterior","biceps_longa","braquial"]],
-    ["Puxada com braços estendidos","Straight-arm pulldown","P","B",["dorsal_superior","dorsal_inferior","triceps_longa","ombro_posterior","peito_inferior"]],
-    ["Pullover na polia","Cable pullover","P","B",["dorsal_superior","dorsal_inferior","triceps_longa","ombro_posterior","peito_inferior"]],
-    ["Pullover com halter","Dumbbell pullover","H","B",["dorsal_superior","dorsal_inferior","peito_medial","peito_inferior","triceps_longa","serratil"]],
-    ["Remada baixa sentado na polia","Seated cable row","P","B",["dorsal_superior","dorsal_inferior","trapezio_medio","romboides","ombro_posterior","biceps_longa","braquial"]]]},
+    ["puxada|g=pr,w=md,e=po,l=bi","B"],
+    ["barrafixa|g=pr,w=md,e=co","B"],
+    ["serrote|e=ha","B"],
+    ["pullover|e=po,g=ba","B"],
+    ["pullover|e=ha,g=co","B"],
+    ["rembaixa|e=po,g=ne,w=md,l=bi","B"]]},
   dorsal_superior:{n:"Grande dorsal superior",l:"Latissimus dorsi, fibras torácicas",c:"Costas",s:["uwl","andersen"],x:[
-    ["Barra fixa pronada","Pull-up","C","E",["dorsal_inferior","redondo_maior","biceps_longa","biceps_curta","braquial","trapezio_inferior","romboides","antebraco_braquiorradial"]],
-    ["Barra fixa supinada","Chin-up","C","E",["dorsal_inferior","biceps_longa","biceps_curta","redondo_maior","braquial","antebraco_braquiorradial"]],
-    ["Puxada frontal, pegada média","Lat pulldown, medium grip","M","E",["dorsal_inferior","redondo_maior","biceps_longa","biceps_curta","braquial","trapezio_inferior","romboides","antebraco_braquiorradial"]],
-    ["Puxada frontal, pegada aberta","Lat pulldown, wide grip","M","E",["dorsal_inferior","redondo_maior","trapezio_inferior","romboides","ombro_posterior","biceps_longa","braquial"]],
-    ["Puxada frontal, pegada fechada","Lat pulldown, narrow grip","M","E",["dorsal_inferior","redondo_maior","biceps_longa","biceps_curta","braquial","antebraco_braquiorradial","romboides"]],
-    ["Remada curvada com barra","Barbell bent-over row","B","E",["trapezio_medio","romboides","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial","lombar_eretores"]],
-    ["Remada baixa sentado na polia","Seated cable row","P","E",["dorsal_inferior","trapezio_medio","romboides","redondo_maior","ombro_posterior","biceps_longa","braquial"]],
-    ["Remada invertida","Inverted row","C","E",["dorsal_inferior","trapezio_medio","romboides","ombro_posterior","redondo_maior","biceps_longa","braquial"]],
-    ["Remada unilateral com halter","One-arm dumbbell row","H","B",["dorsal_inferior","redondo_maior","romboides","trapezio_medio","ombro_posterior","biceps_longa","braquial"]],
-    ["Remada na máquina articulada","Machine row","M","B",["trapezio_medio","romboides","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial"]],
-    ["Remada cavalinho (T-bar)","T-bar row","B","B",["trapezio_medio","romboides","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial","lombar_eretores"]],
-    ["Puxada com braços estendidos","Straight-arm pulldown","P","B",["dorsal_inferior","redondo_maior","triceps_longa","ombro_posterior","peito_inferior"]],
-    ["Pullover na polia","Cable pullover","P","B",["dorsal_inferior","redondo_maior","triceps_longa","ombro_posterior","peito_inferior"]]]},
+    ["barrafixa|g=pr,w=md,e=co","E"],
+    ["puxada|g=pr,w=md,e=po,l=bi","E"],
+    ["remcurv|e=ba,g=pr,w=md","E"],
+    ["rembaixa|e=po,g=ne,w=md,l=bi","E"],
+    ["reminv|e=co,g=pr","E"],
+    ["serrote|e=ha","B"],
+    ["remapoiada|c=fe,e=ma,g=ne,l=bi","B"],
+    ["pullover|e=po,g=ba","B"]]},
   dorsal_inferior:{n:"Grande dorsal inferior",l:"Latissimus dorsi, fibras lombares e ilíacas",c:"Costas",s:[],x:[
-    ["Remada unilateral com halter","One-arm dumbbell row","H","B",["dorsal_superior","redondo_maior","romboides","trapezio_medio","ombro_posterior","biceps_longa","braquial"]],
-    ["Puxada unilateral na polia","Single-arm cable pulldown","P","B",["dorsal_superior","redondo_maior","biceps_longa","braquial"]],
-    ["Remada baixa, pegada fechada","Close-grip seated row","P","B",["dorsal_superior","redondo_maior","romboides","trapezio_medio","ombro_posterior","biceps_longa","braquial"]],
-    ["Remada Meadows (landmine unilateral)","Meadows row","B","B",["dorsal_superior","redondo_maior","romboides","trapezio_medio","ombro_posterior","biceps_longa","braquial"]],
-    ["Puxada com braços estendidos","Straight-arm pulldown","P","B",["dorsal_superior","redondo_maior","triceps_longa","ombro_posterior","peito_inferior"]],
-    ["Barra fixa supinada","Chin-up","C","B",["dorsal_superior","biceps_longa","biceps_curta","redondo_maior","braquial","antebraco_braquiorradial"]],
-    ["Pullover na polia","Cable pullover","P","B",["dorsal_superior","redondo_maior","triceps_longa","ombro_posterior","peito_inferior"]],
-    ["Remada unilateral na polia baixa","Single-arm low cable row","P","B",["dorsal_superior","redondo_maior","romboides","trapezio_medio","ombro_posterior","biceps_longa","braquial"]]]},
+    ["serrote|e=ha","B"],
+    ["puxada|g=pr,w=md,e=po,l=un","B"],
+    ["rembaixa|e=po,g=ne,w=fe,l=bi","B"],
+    ["pullover|e=po,g=ba","B"],
+    ["barrafixa|g=su,w=md,e=co","B"]]},
   lombar_eretores:{n:"Eretores da espinha",l:"Erector spinae",c:"Costas",s:[],x:[
-    ["Levantamento terra","Deadlift","B","B",["gluteo_maximo","isquio_biceps_femoral","isquio_semitendineo","adutores","quad_vasto_lateral","quad_vasto_medial","trapezio_superior","dorsal_superior"]],
-    ["Extensão lombar a 45°","45° back extension","C","B",["gluteo_maximo","isquio_biceps_femoral","isquio_semitendineo"]],
-    ["Extensão lombar no banco romano (90°)","Roman chair back extension","C","B",["gluteo_maximo","isquio_biceps_femoral","isquio_semitendineo"]],
-    ["Bom dia com barra","Good morning","B","B",["isquio_biceps_femoral","isquio_semitendineo","gluteo_maximo","adutores"]],
-    ["Stiff (levantamento terra romeno)","Romanian deadlift","B","B",["isquio_biceps_femoral","isquio_semitendineo","gluteo_maximo","adutores"]],
-    ["Super-homem no chão","Superman","C","B",["gluteo_maximo","isquio_biceps_femoral","isquio_semitendineo","trapezio_inferior","ombro_posterior"]],
-    ["Bird-dog (quatro apoios)","Bird-dog","C","B",["gluteo_maximo","abdomen_supra","obliquos","ombro_frontal","isquio_biceps_femoral"]],
-    ["Remada curvada com barra","Barbell bent-over row","B","B",["dorsal_superior","trapezio_medio","romboides","dorsal_inferior","ombro_posterior","redondo_maior","biceps_longa","braquial"]]]},
+    ["terra|st=co,e=ba","B"],
+    ["extlombar|p=45,e=co","B"],
+    ["bomdia|e=ba","B"],
+    ["stiff|e=ba,l=bi","B"],
+    ["birddog|","B"],
+    ["remcurv|e=ba,g=pr,w=md","B"],
+    ["rackpull|e=ba","B"]]},
   serratil:{n:"Serrátil anterior",l:"Serratus anterior",c:"Peito",s:["ekstrom"],x:[
-    ["Soco do serrátil (protração deitado)","Supine serratus punch","H","E",["ombro_frontal","peito_superior","peito_medial"]],
-    ["Elevação no plano da escápula acima de 120°","Scaption above 120°","H","E",["ombro_lateral","ombro_frontal","trapezio_superior","trapezio_inferior"]],
-    ["Flexão com protração final (push-up plus)","Push-up plus","C","B",["peito_medial","peito_superior","ombro_frontal","triceps_lateral","triceps_medial"]],
-    ["Soco à frente na polia","Cable serratus punch","P","B",["ombro_frontal","peito_superior","peito_medial"]],
-    ["Prancha com protração","Plank protraction","C","B",["abdomen_supra","obliquos","ombro_frontal","peito_medial"]],
-    ["Deslizamento na parede com rolo","Wall slide","C","B",["trapezio_inferior","ombro_frontal","ombro_lateral","trapezio_superior"]],
-    ["Pullover com halter","Dumbbell pullover","H","B",["dorsal_superior","dorsal_inferior","redondo_maior","peito_medial","peito_inferior","triceps_longa"]]]},
+    ["socoserr|e=ha","E"],
+    ["scaption|","E"],
+    ["pushplus|","B"],
+    ["prancprot|","B"],
+    ["wallslide|","B"],
+    ["pullover|e=ha,g=co","B"]]},
   abdomen_supra:{n:"Reto abdominal, parte superior",l:"Rectus abdominis",c:"Abdômen",s:["ace_abs"],x:[
-    ["Abdominal bicicleta","Bicycle crunch","C","E",["obliquos","abdomen_infra","quad_reto_femoral"]],
-    ["Elevação de pernas na cadeira (captain's chair)","Captain's chair","M","E",["abdomen_infra","obliquos","quad_reto_femoral"]],
-    ["Abdominal na bola suíça","Stability-ball crunch","C","E",["abdomen_infra","obliquos"]],
-    ["Abdominal com pernas na vertical","Vertical leg crunch","C","E",["abdomen_infra","obliquos"]],
-    ["Abdominal com braços estendidos","Long-arm crunch","C","E",["abdomen_infra","obliquos"]],
-    ["Abdominal reverso","Reverse crunch","C","E",["abdomen_infra","obliquos"]],
-    ["Abdominal empurrando os calcanhares","Crunch with heel push","C","E",["abdomen_infra","obliquos"]],
-    ["Prancha","Plank (hover)","C","E",["obliquos","abdomen_infra","serratil","gluteo_maximo","ombro_frontal","quad_reto_femoral"]],
-    ["Abdominal tradicional","Traditional crunch","C","E",["abdomen_infra","obliquos"]],
-    ["Abdominal na polia ajoelhado","Kneeling cable crunch","P","B",["abdomen_infra","obliquos"]],
-    ["Abdominal na máquina","Ab crunch machine","M","B",["abdomen_infra","obliquos"]],
-    ["Roda abdominal","Ab wheel rollout","K","B",["abdomen_infra","obliquos","dorsal_superior","serratil","quad_reto_femoral"]],
-    ["Abdominal declinado","Decline sit-up","C","B",["quad_reto_femoral","abdomen_infra","obliquos"]]]},
+    ["bicicleta|","E"],
+    ["elevpernas|e=ca,j=fl","E"],
+    ["crunch|e=bo,v=tr","E"],
+    ["crunch|e=co,v=pv","E"],
+    ["reverso|e=co","E"],
+    ["prancha|v=an","E"],
+    ["crunch|e=po,v=tr","B"],
+    ["crunch|e=ma,v=tr","B"],
+    ["roda|p=jo,e=ro","B"],
+    ["crunch|e=dc,v=tr","B"],
+    ["vup|j=es","B"]]},
   abdomen_infra:{n:"Reto abdominal, parte inferior",l:"Rectus abdominis",c:"Abdômen",s:[],x:[
-    ["Elevação de pernas na cadeira (captain's chair)","Captain's chair","M","B",["abdomen_supra","obliquos","quad_reto_femoral"]],
-    ["Elevação de pernas na barra","Hanging leg raise","C","B",["abdomen_supra","obliquos","quad_reto_femoral","antebraco_flexores","dorsal_superior"]],
-    ["Elevação de joelhos na barra","Hanging knee raise","C","B",["abdomen_supra","obliquos","quad_reto_femoral","antebraco_flexores","dorsal_superior"]],
-    ["Abdominal reverso","Reverse crunch","C","B",["abdomen_supra","obliquos"]],
-    ["Abdominal reverso no banco declinado","Decline reverse crunch","C","B",["abdomen_supra","obliquos"]],
-    ["Elevação de pernas deitado","Lying leg raise","C","B",["abdomen_supra","quad_reto_femoral","obliquos"]],
-    ["Dragon flag","Dragon flag","C","B",["abdomen_supra","obliquos","dorsal_superior","quad_reto_femoral","serratil"]],
-    ["Abdominal bicicleta","Bicycle crunch","C","B",["abdomen_supra","obliquos","quad_reto_femoral"]],
-    ["Tesoura (flutter kicks)","Flutter kicks","C","B",["abdomen_supra","quad_reto_femoral","obliquos"]]]},
+    ["elevpernas|e=ca,j=fl","B"],
+    ["reverso|e=co","B"],
+    ["dragon|","B"],
+    ["bicicleta|","B"],
+    ["tesoura|","B"],
+    ["vup|j=es","B"]]},
   obliquos:{n:"Oblíquos",l:"Obliquus externus e internus",c:"Abdômen",s:["ace_abs"],x:[
-    ["Elevação de pernas na cadeira (captain's chair)","Captain's chair","M","E",["abdomen_infra","abdomen_supra","quad_reto_femoral"]],
-    ["Abdominal bicicleta","Bicycle crunch","C","E",["abdomen_supra","abdomen_infra","quad_reto_femoral"]],
-    ["Abdominal reverso","Reverse crunch","C","E",["abdomen_infra","abdomen_supra"]],
-    ["Prancha","Plank (hover)","C","E",["abdomen_supra","abdomen_infra","serratil","gluteo_maximo","ombro_frontal","quad_reto_femoral"]],
-    ["Abdominal com pernas na vertical","Vertical leg crunch","C","E",["abdomen_supra","abdomen_infra"]],
-    ["Prancha lateral","Side plank","C","B",["gluteo_medio","abdomen_supra","abdutores","serratil"]],
-    ["Lenhador na polia (woodchopper)","Cable woodchopper","P","B",["abdomen_supra","ombro_frontal","dorsal_superior","serratil"]],
-    ["Pallof press na polia","Pallof press","P","B",["abdomen_supra","serratil","ombro_frontal"]],
-    ["Rotação russa","Russian twist","K","B",["abdomen_supra","abdomen_infra","quad_reto_femoral"]],
-    ["Limpador de para-brisa na barra","Hanging windshield wipers","C","B",["abdomen_infra","abdomen_supra","dorsal_superior","antebraco_flexores","quad_reto_femoral"]],
-    ["Flexão lateral com halter","Dumbbell side bend","H","B",["lombar_eretores"]]]},
+    ["elevpernas|e=ca,j=fl","E"],
+    ["bicicleta|","E"],
+    ["reverso|e=co","E"],
+    ["prancha|v=an","E"],
+    ["crunch|e=co,v=pv","E"],
+    ["pranchalat|v=pa","B"],
+    ["lenhador|e=po,v=cb","B"],
+    ["pallof|e=po","B"],
+    ["twist|e=an","B"],
+    ["wiper|","B"],
+    ["sidebend|e=ha","B"]]},
   gluteo_maximo:{n:"Glúteo máximo",l:"Gluteus maximus",c:"Quadril",s:["kubo","plotkin","contreras","delgado","ace_gluteo"],x:[
-    ["Elevação pélvica com barra","Barbell hip thrust","B","H",["isquio_biceps_femoral","isquio_semitendineo","adutores","gluteo_medio","quad_vasto_lateral","quad_vasto_medial","lombar_eretores"],"cresce igual ao agachamento"],
-    ["Agachamento livre profundo","Deep back squat","B","H",["quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","adutores","lombar_eretores","isquio_biceps_femoral","gluteo_medio"],"mais glúteo que meio agachamento"],
-    ["Extensão de quadril em quatro apoios","Quadruped hip extension","C","E",["isquio_biceps_femoral","isquio_semitendineo","gluteo_medio","lombar_eretores"]],
-    ["Stiff (levantamento terra romeno)","Romanian deadlift","B","E",["isquio_biceps_femoral","isquio_semitendineo","lombar_eretores","adutores"]],
-    ["Agachamento livre","Back squat","B","E",["quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","adutores","lombar_eretores","isquio_biceps_femoral","gluteo_medio"]],
-    ["Subida no banco (step-up)","Step-up","H","E",["quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","gluteo_medio","adutores","isquio_biceps_femoral"]],
-    ["Afundo","Lunge","H","E",["quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","gluteo_medio","adutores","isquio_biceps_femoral"]],
-    ["Agachamento unilateral","Single-leg squat","C","E",["quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","gluteo_medio","adutores","isquio_biceps_femoral"]],
-    ["Extensão de quadril na máquina de 4 posições","Four-way hip machine","M","E",["isquio_biceps_femoral","isquio_semitendineo","gluteo_medio"]],
-    ["Leg press","Leg press","M","E",["quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","adutores","isquio_biceps_femoral"]],
-    ["Elevação pélvica na máquina","Hip thrust machine","M","B",["isquio_biceps_femoral","isquio_semitendineo","adutores","gluteo_medio","quad_vasto_lateral","quad_vasto_medial","lombar_eretores"]],
-    ["Afundo búlgaro","Bulgarian split squat","H","B",["quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","gluteo_medio","adutores","isquio_biceps_femoral"]],
-    ["Coice na polia (extensão de quadril)","Cable kickback","P","B",["isquio_biceps_femoral","isquio_semitendineo","gluteo_medio"]],
-    ["Ponte de glúteo no chão","Glute bridge","C","B",["isquio_biceps_femoral","isquio_semitendineo","adutores"]],
-    ["Kettlebell swing","Kettlebell swing","K","B",["isquio_biceps_femoral","isquio_semitendineo","lombar_eretores","adutores","quad_vasto_lateral","quad_vasto_medial","abdomen_supra"]]]},
+    ["hipthrust|ap=bc,e=ba,l=bi","H","cresce igual ao agachamento"],
+    ["agach|e=ba,am=pr,pe=md","H","mais glúteo que meio agachamento"],
+    ["coicegl|e=co,j=fl","E"],
+    ["stiff|e=ba,l=bi","E"],
+    ["stepup|e=ha","E"],
+    ["afundo|dir=fr,e=ha","E"],
+    ["pistol|","E"],
+    ["legpress|e=45,pe=me,l=bi","E"],
+    ["afundo|dir=bu,e=ha","B"],
+    ["hipthrust|ap=ch,e=co,l=bi","B"],
+    ["swing|e=kb","B"]]},
   gluteo_medio:{n:"Glúteo médio e mínimo",l:"Gluteus medius, gluteus minimus",c:"Quadril",s:["distefano","ace_gluteo"],x:[
-    ["Abdução de quadril deitado de lado","Side-lying hip abduction","C","E",["abdutores","gluteo_maximo"]],
-    ["Extensão de quadril em quatro apoios","Quadruped hip extension","C","E",["gluteo_maximo","isquio_biceps_femoral","isquio_semitendineo","lombar_eretores"]],
-    ["Subida no banco (step-up)","Step-up","H","E",["gluteo_maximo","quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","adutores","isquio_biceps_femoral"]],
-    ["Afundo","Lunge","H","E",["gluteo_maximo","quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","adutores","isquio_biceps_femoral"]],
-    ["Cadeira abdutora","Hip abduction machine","M","B",["abdutores","gluteo_maximo"]],
-    ["Abdução de quadril na polia","Cable hip abduction","P","B",["abdutores","gluteo_maximo"]],
-    ["Caminhada lateral com elástico","Banded lateral walk","K","B",["abdutores","gluteo_maximo"]],
-    ["Ostra com elástico","Banded clamshell","K","B",["gluteo_maximo"]],
-    ["Agachamento unilateral","Single-leg squat","C","B",["gluteo_maximo","quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","adutores","isquio_biceps_femoral"]],
-    ["Stiff unilateral","Single-leg Romanian deadlift","H","B",["isquio_semitendineo","isquio_biceps_femoral","gluteo_maximo","lombar_eretores","adutores"]],
-    ["Prancha lateral com abdução de perna","Side plank hip abduction","C","B",["obliquos","abdutores","abdomen_supra","serratil"]]]},
+    ["abducao|e=co,p=er","E"],
+    ["coicegl|e=co,j=fl","E"],
+    ["stepup|e=ha","E"],
+    ["afundo|dir=fr,e=ha","E"],
+    ["lateralwalk|","B"],
+    ["ostra|","B"],
+    ["pistol|","B"],
+    ["stiff|e=ha,l=un","B"],
+    ["pranchalat|v=ab","B"]]},
   abdutores:{n:"Tensor da fáscia lata",l:"Tensor fasciae latae",c:"Quadril",s:[],x:[
-    ["Cadeira abdutora","Hip abduction machine","M","B",["gluteo_medio","gluteo_maximo"]],
-    ["Abdução de quadril na polia","Cable hip abduction","P","B",["gluteo_medio","gluteo_maximo"]],
-    ["Abdução de quadril deitado de lado","Side-lying hip abduction","C","B",["gluteo_medio","gluteo_maximo"]],
-    ["Caminhada lateral com elástico","Banded lateral walk","K","B",["gluteo_medio","gluteo_maximo"]],
-    ["Hidrante (quatro apoios)","Fire hydrant","C","B",["gluteo_medio","gluteo_maximo"]],
-    ["Elevação de joelho na polia","Cable knee raise","P","B",["quad_reto_femoral","abdomen_infra"]]]},
+    ["abducao|e=ma,p=er","B"],
+    ["lateralwalk|","B"],
+    ["hidrante|","B"],
+    ["joelhopolia|","B"]]},
   adutores:{n:"Adutores",l:"Adductor longus, brevis e magnus",c:"Coxas",s:["plotkin","kubo","serner"],x:[
-    ["Agachamento livre profundo","Deep back squat","B","H",["quad_vasto_lateral","quad_vasto_medial","quad_reto_femoral","gluteo_maximo","lombar_eretores","isquio_biceps_femoral","gluteo_medio"],"+6% de volume nos adutores"],
-    ["Elevação pélvica com barra","Barbell hip thrust","B","H",["gluteo_maximo","isquio_biceps_femoral","isquio_semitendineo","gluteo_medio","quad_vasto_lateral","quad_vasto_medial","lombar_eretores"],"menos que o agachamento"],
-    ["Prancha de Copenhagen","Copenhagen adduction","C","E",["obliquos","abdomen_supra"]],
-    ["Cadeira adutora","Hip adduction machine","M","B",[]],
-    ["Adução de quadril na polia","Cable hip adduction","P","B",[]],
-    ["Agachamento sumô","Sumo squat","H","B",["gluteo_maximo","quad_vasto_medial","quad_vasto_lateral","quad_reto_femoral"]],
-    ["Levantamento terra sumô","Sumo deadlift","B","B",["gluteo_maximo","quad_vasto_lateral","quad_vasto_medial","lombar_eretores","isquio_biceps_femoral","isquio_semitendineo","trapezio_superior"]],
-    ["Afundo lateral","Lateral lunge","H","B",["gluteo_maximo","quad_vasto_lateral","quad_vasto_medial","gluteo_medio"]],
-    ["Agachamento cossaco","Cossack squat","C","B",["gluteo_maximo","quad_vasto_lateral","quad_vasto_medial","gluteo_medio"]],
-    ["Apertar bola entre os joelhos","Adductor ball squeeze","K","B",[]]]},
+    ["agach|e=ba,am=pr,pe=md","H","+6% de volume nos adutores"],
+    ["hipthrust|ap=bc,e=ba,l=bi","H","menos que o agachamento"],
+    ["copenhagen|","E"],
+    ["aducao|e=ma","B"],
+    ["terra|st=su,e=ba","B"],
+    ["aflateral|v=la,e=ha","B"]]},
   quad_reto_femoral:{n:"Reto femoral",l:"Rectus femoris",c:"Coxas",s:["larsen"],x:[
-    ["Cadeira extensora reclinada (encosto para trás)","Leg extension, hip at ~40°","M","H",["quad_vasto_lateral","quad_vasto_medial"],"mais que sentado a 90°"],
-    ["Cadeira extensora","Leg extension","M","B",["quad_vasto_lateral","quad_vasto_medial"]],
-    ["Agachamento sissy","Sissy squat","C","B",["quad_vasto_lateral","quad_vasto_medial"]],
-    ["Agachamento frontal","Front squat","B","B",["quad_vasto_lateral","quad_vasto_medial","gluteo_maximo","adutores","lombar_eretores","abdomen_supra"]],
-    ["Agachamento livre","Back squat","B","B",["quad_vasto_lateral","quad_vasto_medial","gluteo_maximo","adutores","lombar_eretores","isquio_biceps_femoral","gluteo_medio"]],
-    ["Leg press","Leg press","M","B",["quad_vasto_lateral","quad_vasto_medial","gluteo_maximo","adutores","isquio_biceps_femoral"]],
-    ["Afundo reverso","Reverse lunge","H","B",["gluteo_maximo","quad_vasto_lateral","quad_vasto_medial","gluteo_medio","adutores","isquio_biceps_femoral"]],
-    ["Subida no banco (step-up)","Step-up","H","B",["gluteo_maximo","quad_vasto_lateral","quad_vasto_medial","gluteo_medio","adutores","isquio_biceps_femoral"]],
-    ["Elevação de joelhos na barra","Hanging knee raise","C","B",["abdomen_infra","abdomen_supra","obliquos","antebraco_flexores","dorsal_superior"]]]},
+    ["extensora|p=rc,l=bi","H","mais que sentado a 90°"],
+    ["sissy|e=co","B"],
+    ["agach|e=bf,am=pa,pe=md","B"],
+    ["legpress|e=45,pe=me,l=bi","B"],
+    ["afundo|dir=tr,e=ha","B"],
+    ["stepup|e=ha","B"],
+    ["elevpernas|e=ba,j=fl","B"]]},
   quad_vasto_lateral:{n:"Vasto lateral",l:"Vastus lateralis",c:"Coxas",s:["plotkin","delgado"],x:[
-    ["Agachamento livre","Back squat","B","H",["quad_vasto_medial","quad_reto_femoral","gluteo_maximo","adutores","lombar_eretores","isquio_biceps_femoral","gluteo_medio"],"mais que elevação pélvica"],
-    ["Agachamento hack","Hack squat","M","B",["quad_vasto_medial","quad_reto_femoral","gluteo_maximo","adutores"]],
-    ["Leg press","Leg press","M","B",["quad_vasto_medial","quad_reto_femoral","gluteo_maximo","adutores","isquio_biceps_femoral"]],
-    ["Agachamento frontal","Front squat","B","B",["quad_vasto_medial","quad_reto_femoral","gluteo_maximo","adutores","lombar_eretores","abdomen_supra"]],
-    ["Agachamento no cinto (belt squat)","Belt squat","M","B",["quad_vasto_medial","quad_reto_femoral","gluteo_maximo","adutores"]],
-    ["Cadeira extensora","Leg extension","M","B",["quad_reto_femoral","quad_vasto_medial"]],
-    ["Afundo búlgaro","Bulgarian split squat","H","B",["gluteo_maximo","quad_vasto_medial","quad_reto_femoral","gluteo_medio","adutores","isquio_biceps_femoral"]],
-    ["Afundo andando","Walking lunge","H","B",["gluteo_maximo","quad_vasto_medial","quad_reto_femoral","gluteo_medio","adutores","isquio_biceps_femoral"]]]},
+    ["agach|e=ba,am=pa,pe=md","H","mais que elevação pélvica"],
+    ["hack|e=ma,pe=me","B"],
+    ["legpress|e=45,pe=me,l=bi","B"],
+    ["extensora|p=re,l=bi","B"],
+    ["afundo|dir=bu,e=ha","B"],
+    ["afundo|dir=an,e=ha","B"]]},
   quad_vasto_medial:{n:"Vasto medial",l:"Vastus medialis",c:"Coxas",s:["kubo","plotkin"],x:[
-    ["Agachamento livre profundo","Deep back squat","B","H",["quad_vasto_lateral","quad_reto_femoral","gluteo_maximo","adutores","lombar_eretores","isquio_biceps_femoral","gluteo_medio"]],
-    ["Agachamento hack","Hack squat","M","B",["quad_vasto_lateral","quad_reto_femoral","gluteo_maximo","adutores"]],
-    ["Afundo búlgaro","Bulgarian split squat","H","B",["gluteo_maximo","quad_vasto_lateral","quad_reto_femoral","gluteo_medio","adutores","isquio_biceps_femoral"]],
-    ["Agachamento frontal","Front squat","B","B",["quad_vasto_lateral","quad_reto_femoral","gluteo_maximo","adutores","lombar_eretores","abdomen_supra"]],
-    ["Leg press com pés baixos","Low-foot leg press","M","B",["quad_vasto_lateral","quad_reto_femoral","gluteo_maximo"]],
-    ["Cadeira extensora","Leg extension","M","B",["quad_reto_femoral","quad_vasto_lateral"]],
-    ["Agachamento sissy","Sissy squat","C","B",["quad_reto_femoral","quad_vasto_lateral"]],
-    ["Subida no banco (step-up)","Step-up","H","B",["gluteo_maximo","quad_vasto_lateral","quad_reto_femoral","gluteo_medio","adutores","isquio_biceps_femoral"]],
-    ["Agachamento espanhol (com faixa)","Spanish squat","K","B",["quad_vasto_lateral","quad_reto_femoral"]]]},
+    ["agach|e=ba,am=pr,pe=md","H"],
+    ["hack|e=ma,pe=me","B"],
+    ["afundo|dir=bu,e=ha","B"],
+    ["legpress|e=45,pe=bx,l=bi","B"],
+    ["extensora|p=re,l=bi","B"],
+    ["sissy|e=co","B"],
+    ["stepup|e=ha","B"],
+    ["espanhol|","B"]]},
   isquio_biceps_femoral:{n:"Bíceps femoral",l:"Biceps femoris",c:"Coxas",s:["maeo21","mcallister","delgado"],x:[
-    ["Cadeira flexora (sentado)","Seated leg curl","M","H",["isquio_semitendineo","panturrilha_gastro"],"+14% vs +7% deitado"],
-    ["Stiff (levantamento terra romeno)","Romanian deadlift","B","E",["isquio_semitendineo","gluteo_maximo","lombar_eretores","adutores"]],
-    ["Glute-ham raise","Glute-ham raise","M","E",["isquio_semitendineo","panturrilha_gastro","gluteo_maximo","lombar_eretores"]],
-    ["Bom dia com barra","Good morning","B","E",["lombar_eretores","isquio_semitendineo","gluteo_maximo","adutores"]],
-    ["Elevação pélvica com barra","Barbell hip thrust","B","E",["gluteo_maximo","isquio_semitendineo","adutores","gluteo_medio","quad_vasto_lateral","quad_vasto_medial","lombar_eretores"]],
-    ["Mesa flexora","Lying leg curl","M","E",["isquio_semitendineo","panturrilha_gastro"]],
-    ["Flexão nórdica","Nordic curl","C","B",["isquio_semitendineo","panturrilha_gastro","gluteo_maximo"]],
-    ["Flexora em pé unilateral","Standing single-leg curl","M","B",["isquio_semitendineo","panturrilha_gastro"]],
-    ["Levantamento terra","Deadlift","B","B",["lombar_eretores","gluteo_maximo","isquio_semitendineo","adutores","quad_vasto_lateral","quad_vasto_medial","trapezio_superior","dorsal_superior"]],
-    ["Kettlebell swing","Kettlebell swing","K","B",["gluteo_maximo","isquio_semitendineo","lombar_eretores","adutores","quad_vasto_lateral","quad_vasto_medial","abdomen_supra"]],
-    ["Extensão lombar a 45°","45° back extension","C","B",["lombar_eretores","gluteo_maximo","isquio_semitendineo"]]]},
+    ["flexora|p=se,l=bi","H","+14% vs +7% deitado"],
+    ["stiff|e=ba,l=bi","E"],
+    ["ghr|","E"],
+    ["bomdia|e=ba","E"],
+    ["hipthrust|ap=bc,e=ba,l=bi","E"],
+    ["nordica|","B"],
+    ["terra|st=co,e=ba","B"],
+    ["swing|e=kb","B"],
+    ["extlombar|p=45,e=co","B"]]},
   isquio_semitendineo:{n:"Semitendíneo e semimembranáceo",l:"Semitendinosus, semimembranosus",c:"Coxas",s:["maeo21","mcallister"],x:[
-    ["Cadeira flexora (sentado)","Seated leg curl","M","H",["isquio_biceps_femoral","panturrilha_gastro"],"+24% vs +19% deitado"],
-    ["Glute-ham raise","Glute-ham raise","M","E",["isquio_biceps_femoral","panturrilha_gastro","gluteo_maximo","lombar_eretores"]],
-    ["Stiff (levantamento terra romeno)","Romanian deadlift","B","E",["isquio_biceps_femoral","gluteo_maximo","lombar_eretores","adutores"]],
-    ["Mesa flexora","Lying leg curl","M","E",["isquio_biceps_femoral","panturrilha_gastro"]],
-    ["Flexão nórdica","Nordic curl","C","B",["isquio_biceps_femoral","panturrilha_gastro","gluteo_maximo"]],
-    ["Flexão de pernas na bola suíça","Stability-ball leg curl","C","B",["isquio_biceps_femoral","panturrilha_gastro","gluteo_maximo"]],
-    ["Stiff unilateral","Single-leg Romanian deadlift","H","B",["isquio_biceps_femoral","gluteo_maximo","gluteo_medio","lombar_eretores","adutores"]],
-    ["Flexora em pé unilateral","Standing single-leg curl","M","B",["isquio_biceps_femoral","panturrilha_gastro"]],
-    ["Kettlebell swing","Kettlebell swing","K","B",["gluteo_maximo","isquio_biceps_femoral","lombar_eretores","adutores","quad_vasto_lateral","quad_vasto_medial","abdomen_supra"]]]},
+    ["flexora|p=se,l=bi","H","+24% vs +19% deitado"],
+    ["ghr|","E"],
+    ["stiff|e=ba,l=bi","E"],
+    ["nordica|","B"],
+    ["flexbola|l=bi","B"],
+    ["swing|e=kb","B"]]},
   panturrilha_gastro:{n:"Gastrocnêmio",l:"Gastrocnemius",c:"Panturrilhas",s:["kinoshita"],x:[
-    ["Panturrilha em pé na máquina","Standing calf raise","M","H",["panturrilha_soleo"],"+9 a 12% vs ~1% sentado"],
-    ["Panturrilha no leg press (joelhos estendidos)","Leg press calf raise","M","B",["panturrilha_soleo"]],
-    ["Panturrilha burrinho","Donkey calf raise","M","B",["panturrilha_soleo"]],
-    ["Panturrilha em pé no Smith","Smith machine calf raise","M","B",["panturrilha_soleo"]],
-    ["Panturrilha unilateral com halter","Single-leg dumbbell calf raise","H","B",["panturrilha_soleo"]],
-    ["Panturrilha no degrau sem carga","Bodyweight step calf raise","C","B",["panturrilha_soleo"]],
-    ["Pular corda","Jump rope","K","B",["panturrilha_soleo"]],
-    ["Panturrilha sentado na máquina","Seated calf raise","M","H",["panturrilha_soleo"],"quase não cresce o gastrocnêmio"]]},
+    ["pant|p=pe,e=ma,j=es,l=bi","H","+9 a 12% vs ~1% sentado"],
+    ["pant|p=lp,e=ma,j=es,l=bi","B"],
+    ["pant|p=bu,e=ma,j=es,l=bi","B"],
+    ["corda|","B"],
+    ["pant|p=se,e=ma,j=es,l=bi","H","quase não cresce o gastrocnêmio"]]},
   panturrilha_soleo:{n:"Sóleo",l:"Soleus",c:"Panturrilhas",s:["kinoshita"],x:[
-    ["Panturrilha sentado na máquina","Seated calf raise","M","H",["panturrilha_gastro"],"igual ao em pé"],
-    ["Panturrilha em pé na máquina","Standing calf raise","M","H",["panturrilha_gastro"],"igual ao sentado"],
-    ["Panturrilha sentado com halteres nos joelhos","Seated dumbbell calf raise","H","B",["panturrilha_gastro"]],
-    ["Panturrilha no leg press (joelhos flexionados)","Bent-knee leg press calf raise","M","B",["panturrilha_gastro"]],
-    ["Panturrilha em pé com joelhos flexionados","Bent-knee standing calf raise","C","B",["panturrilha_gastro"]],
-    ["Panturrilha sentado no Smith","Seated Smith calf raise","M","B",["panturrilha_gastro"]]]}
+    ["pant|p=se,e=ma,j=es,l=bi","H","igual ao em pé"],
+    ["pant|p=pe,e=ma,j=es,l=bi","H","igual ao sentado"],
+    ["pant|p=lp,e=ma,j=fl,l=bi","B"]]}
 };
+for(const [id,m] of Object.entries(M))m.x=m.x.map(([ref,ev,stat])=>mkEntry(id,ref,ev,stat));
 const GROUPS = ["Peito","Ombros","Braços","Antebraço","Costas","Abdômen","Quadril","Coxas","Panturrilhas"];
 
 /* ---------------------------------------------------------------- figure
@@ -1281,7 +1235,7 @@ const TOB={};for(const [g,o] of Object.entries(BASIC))o.m.forEach(m=>TOB[m]=g);
 function basicList(g){
   const lists=BASIC[g].m.map(id=>M[id].x);const out=[],seen=new Set();
   const max=Math.max(...lists.map(l=>l.length));
-  for(let r=0;r<max;r++)lists.forEach(l=>{const x=l[r];if(x&&!seen.has(x[0])){seen.add(x[0]);out.push(x)}});
+  for(let r=0;r<max;r++)lists.forEach(l=>{const x=l[r];const k=x&&splitKey(x.f,x.pre);if(x&&!seen.has(k)){seen.add(k);out.push(x)}});
   return out;
 }
 
@@ -1388,7 +1342,8 @@ function selectJoint(j,fromFig){
 function selectExercise(i){curEx=(curEx===i)?null:i;paint();render()}
 
 const baseList=()=>!cur?[]:(model==="bas"?basicList(cur):M[cur].x);
-const filtered=()=>baseList().filter(x=>eq==="all"||x[2]===eq);
+function famEqOpt(x,q){for(const [k,,,opts] of x.f.ax){const o=opts.find(o=>o.eq===q);if(o)return [k,o.k]}return null}
+const filtered=()=>baseList().filter(x=>{if(eq==="all"||x[2]===eq)return true;const m=famEqOpt(x,eq);if(!m)return false;x.sel[m[0]]=m[1];fillEntry(x);return true});
 
 function paint(){
   document.querySelectorAll("[data-m].on,[data-m].syn,.jt.on").forEach(g=>g.classList.remove("on","syn"));
@@ -1413,15 +1368,25 @@ function synNames(syn){
   if(model==="bas")return [...new Set(syn.map(s=>TOB[s]).filter(g=>g!==cur))].map(g=>BASIC[g].n);
   return syn.filter(s=>s!==cur).map(s=>M[s].n);
 }
+const mNames=ids=>model==="bas"?[...new Set(ids.map(s=>TOB[s]))].map(g=>BASIC[g].n):ids.map(s=>M[s].n);
 function exCard(x,i){
-  const [pt,en,q,ev,syn,stat]=x;const names=synNames(syn);
+  const [pt,en,q,ev,syn,stat]=x;const names=synNames(syn);const open=curEx===i;
+  const changed=x.f.ax.some(a=>x.sel[a[0]]!==x.pre[a[0]]);
+  const tgt=mNames(x.p),sy=model==="bas"?[...new Set(x.s.map(s=>TOB[s]))].filter(g=>!x.p.some(p=>TOB[p]===g)).map(g=>BASIC[g].n):x.s.map(s=>M[s].n);
+  const axes=x.f.ax.filter(a=>a[3].length>1);
+  const vari=open&&axes.length?`<div class="vars">${axes.map(([k,lab,,opts])=>`<div class="vax"><span class="vlab">${lab}</span><div class="vopts" role="group" aria-label="${lab}">${opts.map(o=>`<button data-i="${i}" data-ax="${k}" data-o="${o.k}" aria-pressed="${x.sel[k]===o.k}">${esc(o.n)}</button>`).join("")}</div></div>`).join("")}</div>`:"";
+  const notes=open?vNotes(x.f,x.sel):[];
   return `<div class="ex${curEx===i?" sel":""}" role="button" tabindex="0" data-i="${i}" aria-pressed="${curEx===i}">
     <span class="rank">${i+1}</span>
     <span class="ex-n">${esc(pt)}</span>
-    <button class="addx" data-add="${esc(pt)}" aria-label="Adicionar ${esc(pt)} a um treino">+</button>
+    <button class="addx" data-add="${esc(pt)}" data-ref="${esc(x[6])}" aria-label="Adicionar ${esc(pt)} a um treino">+</button>
     <span class="ex-en">${esc(en)}</span>
     <span class="tags"><span class="tag">${EQ[q]}</span>${ev==="H"?`<span class="tag hyp">Hipertrofia</span>`:ev==="E"?`<span class="tag emg">Estudo EMG</span>`:`<span class="tag bio">Biomecânica</span>`}${stat?`<span class="tag stat">${stat}</span>`:""}</span>
-    <span class="syns"><em>Sinergistas</em>${names.length?names.map(n=>`<span>${n}</span>`).join(""):"<span>Isolado</span>"}</span>
+    ${vari}
+    ${notes.length?`<ul class="vnotes">${notes.map(t=>`<li>${esc(t)}</li>`).join("")}</ul>`:""}
+    ${changed&&open?`<span class="vpre">Posição e selo do ranking valem para: ${esc(vName(x.f,x.pre))}</span>`:""}
+    ${open&&model!=="bas"&&![...x.p,...x.s].includes(x.host)?`<span class="vpre warn">Nesta variação, ${M[x.host].n.toLowerCase()} quase não trabalha.</span>`:""}
+    <span class="syns"><em>Alvo</em>${tgt.map(n=>`<span class="tg">${n}</span>`).join("")}<em>Sinergistas</em>${sy.length?sy.map(n=>`<span>${n}</span>`).join(""):"<span>Isolado</span>"}</span>
   </div>`;
 }
 function head(cat,title,latin,clear){$("cat").textContent=cat;$("title").textContent=title;$("latin").textContent=latin;$("clear").hidden=!clear}
@@ -1481,10 +1446,12 @@ function renderPanel(){
   const a=$("allEq");if(a)a.onclick=()=>{eq="all";chips();render()};
   const sw=$("swap");if(sw)sw.onclick=()=>{setView(sw.dataset.v);render()};
   body.querySelectorAll(".ex").forEach(c=>{
-    c.onclick=e=>{if(!e.target.closest(".addx"))selectExercise(+c.dataset.i)};
+    c.onclick=e=>{if(e.target.closest(".addx")||e.target.closest(".vars"))return;selectExercise(+c.dataset.i)};
     c.onkeydown=e=>{if((e.key==="Enter"||e.key===" ")&&e.target===c){e.preventDefault();selectExercise(+c.dataset.i)}};
   });
-  body.querySelectorAll(".addx").forEach(b=>b.onclick=e=>{e.stopPropagation();openAddSheet(b.dataset.add)});
+  body.querySelectorAll(".addx").forEach(b=>b.onclick=e=>{e.stopPropagation();openAddSheet(b.dataset.add,b.dataset.ref)});
+  body.querySelectorAll("[data-ax]").forEach(b=>b.onclick=e=>{e.stopPropagation();const x=filtered()[+b.dataset.i];if(!x)return;
+    x.sel[b.dataset.ax]=b.dataset.o;fillEntry(x);const y=body.scrollTop;paint();render();$("body").scrollTop=y});
 }
 function renderJoint(body){
   if(!curJ){
@@ -1505,6 +1472,7 @@ function about(){return `<details class="about"><summary>Como o ranking funciona
   <p><b>Estudo EMG</b>: um estudo mediu a ativação elétrica do músculo durante o exercício. Mostra quanto o músculo trabalha, mas nem sempre prevê o crescimento.</p>
   <p><b>Biomecânica</b>: não há medição comparável. A posição vem da mecânica: quanto o músculo é alongado e carregado no movimento.</p>
   <p>Quando o estudo publicou um número, ele aparece no cartão (ex.: "98% do supino", "+14% vs +7% deitado").</p>
+  <p><b>Variações</b>: cada cartão é um exercício (ex.: Puxada alta). Ao tocar nele aparecem botões de pegada, largura, equipamento, banco, posição e lado. Cada escolha muda o alvo e os sinergistas no boneco e explica a diferença. A posição na lista e o selo valem para a variação que o estudo usou (aparece no cartão quando você muda).</p>
   <p><b>Sinergistas</b> (laranja): músculos que ajudam a fazer o movimento, do mais para o menos importante. Cada exercício tem uma lista única de músculos, então ele mostra os mesmos sinergistas em qualquer músculo em que aparece. Estabilizadores só entram quando o exercício os treina de propósito (prancha, caminhada do fazendeiro, pegada pesada). Alguns músculos pequenos, como o supraespinhal e o peitoral menor, não estão no boneco. Exercícios de isolamento, como rosca de punho, aparecem como "Isolado".</p>
   <ul>${Object.values(SRC).map(s=>`<li>${s}</li>`).join("")}</ul></details>`}
 $("clear").onclick=()=>{cur=null;curEx=null;curJ=null;paint();render()};
@@ -1516,28 +1484,34 @@ const q=$("q"),res=$("results");
 q.addEventListener("input",()=>{
   const t=norm(q.value.trim());
   if(!t){res.hidden=true;return}
-  const hits=Object.entries(M).filter(([,m])=>norm(m.n+" "+m.l+" "+m.c).includes(t)||m.x.some(x=>norm(x[0]+" "+x[1]).includes(t)));
-  res.innerHTML=hits.length?hits.slice(0,12).map(([id,m])=>{
-    const ex=m.x.find(x=>norm(x[0]+" "+x[1]).includes(t));
-    return `<button data-go="${id}"><div class="r-n">${m.n}</div><div class="r-s">${ex&&!norm(m.n).includes(t)?"Exercício: "+esc(ex[0]):m.c+" · "+m.x.length+" exercícios"}</div></button>`}).join("")
-    :`<div class="empty">Nada encontrado para "${esc(q.value)}".</div>`;
+  const mus=Object.entries(M).filter(([,m])=>norm(m.n+" "+m.l+" "+m.c).includes(t)).slice(0,6);
+  const exs=famSearch(q.value).slice(0,8);
+  /* open the list of the exercise's main muscle (target of the chosen variation), preferring where it ranks highest */
+  const hostOf=(f,sel)=>{const k=splitKey(f,sel),tg=resolveV(f,sel).p;let best=null;
+    for(const [id,m] of Object.entries(M)){const i=m.x.findIndex(e=>e.f===f&&splitKey(f,e.pre)===k),j=i>=0?i:m.x.findIndex(e=>e.f===f);if(j<0)continue;
+      const sc=(tg.includes(id)?0:1000)+(tg.includes(id)?tg.indexOf(id)*100:0)+(i>=0?0:500)+j;if(!best||sc<best[1])best=[id,sc]}
+    return best&&best[0]};
+  let h=mus.map(([id,m])=>`<button data-go="${id}"><div class="r-n">${m.n}</div><div class="r-s">${m.c} · ${m.x.length} exercícios</div></button>`).join("");
+  h+=exs.map(({f,sel})=>{const id=hostOf(f,sel);if(!id)return "";const v=resolveV(f,sel);
+    return `<button data-go="${id}" data-fam="${f.id}" data-ref="${esc(mkRef(f,sel))}"><div class="r-n">${esc(vName(f,sel))}</div><div class="r-s">Exercício · ${v.p.map(m=>M[m].n).join(", ")}</div></button>`}).join("");
+  res.innerHTML=h||`<div class="empty">Nada encontrado para "${esc(q.value)}".</div>`;
   res.hidden=false;
-  res.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{setTab("atlas");selectMuscle(b.dataset.go);res.hidden=true;q.value="";q.blur()});
+  res.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{setTab("atlas");if(model==="art")setModel("det");selectMuscle(b.dataset.go);
+    if(b.dataset.fam){const r=parseRef(b.dataset.ref);eq="all";chips();const list=filtered();const i=list.findIndex(e=>e.f.id===b.dataset.fam&&splitKey(e.f,e.pre)===splitKey(r.f,r.sel));const j=i>=0?i:list.findIndex(e=>e.f.id===b.dataset.fam);
+      if(j>=0){Object.assign(list[j].sel,r.sel);fillEntry(list[j]);curEx=j;paint();render();const c=document.querySelector(`.ex[data-i="${j}"]`);if(c)c.scrollIntoView({block:"start"})}}
+    res.hidden=true;q.value="";q.blur()});
 });
 document.addEventListener("pointerdown",e=>{if(!e.target.closest(".search"))res.hidden=true});
 q.addEventListener("keydown",e=>{if(e.key==="Escape"){res.hidden=true;q.blur()}if(e.key==="Enter"){const b=res.querySelector("[data-go]");if(b)b.click()}});
 
-/* ---------------------------------------------------------- exercise catalog */
-const CAT=(()=>{const map=new Map();
-  for(const [id,m] of Object.entries(M))m.x.forEach(x=>{if(!map.has(x[0]))map.set(x[0],{n:x[0],en:x[1],eq:x[2],ms:[id]});else map.get(x[0]).ms.push(id)});
-  return [...map.values()]})();
-const CATBY=new Map(CAT.map(c=>[c.n,c]));
-function muscleLabel(name){const c=CATBY.get(name);if(!c)return "Exercício próprio";return [...new Set(c.ms.map(m=>BASIC[TOB[m]].n))].join(", ")}
+/* ---------------------------------------------------------- exercise catalog (one item per family; pick a variation inside) */
+const famGroups=f=>{const v=resolveV(f,f.d);return [...new Set(v.p.map(m=>TOB[m]))]};
+function muscleLabel(name,ref){const e=exInfo(name,ref);if(!e)return "Exercício próprio";return [...new Set(e.p.map(m=>BASIC[TOB[m]].n))].join(", ")}
 
 /* picker */
-let pickCb=null,pickG="all";
+let pickCb=null,pickG="all",pickOpen=null,pickSel=null;
 function openPicker(title,cb){
-  pickCb=cb;pickG="all";$("pTitle").textContent=title;$("pq").value="";
+  pickCb=cb;pickG="all";pickOpen=null;pickSel=null;$("pTitle").textContent=title;$("pq").value="";
   renderPChips();renderPList();$("picker").hidden=false;
   if(!matchMedia("(max-width:900px)").matches)setTimeout(()=>$("pq").focus(),30);
 }
@@ -1546,32 +1520,41 @@ function renderPChips(){
   $("pchips").innerHTML=all.map(([k,v])=>`<button data-pg="${k}" aria-pressed="${pickG===k}">${v}</button>`).join("");
 }
 function renderPList(){
-  const t=norm($("pq").value.trim());
-  const items=CAT.filter(c=>(pickG==="all"||c.ms.some(m=>TOB[m]===pickG))&&(!t||norm(c.n+" "+c.en).includes(t)));
+  const raw=$("pq").value.trim(),t=norm(raw);
+  let items=raw?famSearch(raw):FAMS.map(f=>({f,sel:{...f.d}}));
+  if(pickG!=="all")items=items.filter(({f})=>famGroups(f).includes(pickG));
   let h="";
-  const raw=$("pq").value.trim();
-  const custom=(raw&&!CAT.some(c=>norm(c.n)===t))?`<button class="custom" data-pick="${esc(raw)}"><span class="pn">Adicionar "${esc(raw)}"</span><span class="ps">Exercício próprio, fora da lista</span></button>`:"";
+  const custom=raw?`<button class="custom" data-pick="${esc(raw)}"><span class="pn">Adicionar "${esc(raw)}"</span><span class="ps">Exercício próprio, fora da lista</span></button>`:"";
   if(!items.length)h+=custom;
-  h+=items.slice(0,150).map(c=>`<button data-pick="${esc(c.n)}"><span class="pn">${esc(c.n)}</span><span class="ps">${[...new Set(c.ms.map(m=>BASIC[TOB[m]].n))].join(", ")} · ${EQ[c.eq]}</span></button>`).join("");
+  h+=items.slice(0,150).map(({f,sel})=>{const open=pickOpen===f.id,ss=open?pickSel:sel,v=resolveV(f,ss);
+    return `<div class="pfam${open?" open":""}"><button data-pf="${f.id}" data-ref="${esc(mkRef(f,sel))}"><span class="pn">${esc(open?vName(f,ss):f.n)}</span><span class="ps">${[...new Set(v.p.map(m=>BASIC[TOB[m]].n))].join(", ")}${f.ax.some(a=>a[3].length>1)?" · tem variações":""}</span></button>
+    ${open?`<div class="vars">${f.ax.filter(a=>a[3].length>1).map(([k,lab,,opts])=>`<div class="vax"><span class="vlab">${lab}</span><div class="vopts">${opts.map(o=>`<button data-pax="${k}" data-o="${o.k}" aria-pressed="${ss[k]===o.k}">${esc(o.n)}</button>`).join("")}</div></div>`).join("")}</div>
+      <div class="pfoot"><span class="muted-s" style="margin:0">Alvo: ${v.p.map(m=>M[m].n).join(", ")}${v.s.length?" · Sinergistas: "+v.s.map(m=>M[m].n).join(", "):""}</span><button class="btn primary" data-padd="1">Adicionar</button></div>`:""}</div>`}).join("");
   if(items.length)h+=custom;
   if(!h)h=`<p class="muted">Nenhum exercício encontrado.</p>`;
-  $("plist").innerHTML=h;$("plist").scrollTop=0;
+  $("plist").innerHTML=h;
 }
-$("pq").addEventListener("input",renderPList);
-$("pchips").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(!b)return;pickG=b.dataset.pg;renderPChips();renderPList()});
-$("plist").addEventListener("click",e=>{const b=e.target.closest("[data-pick]");if(!b)return;const cb=pickCb;closeModals();if(cb)cb(b.dataset.pick)});
+$("pq").addEventListener("input",()=>{pickOpen=null;renderPList();$("plist").scrollTop=0});
+$("pchips").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(!b)return;pickG=b.dataset.pg;pickOpen=null;renderPChips();renderPList();$("plist").scrollTop=0});
+$("plist").addEventListener("click",e=>{
+  const c=e.target.closest("[data-pick]");if(c){const cb=pickCb;closeModals();if(cb)cb(c.dataset.pick,null);return}
+  const pf=e.target.closest("[data-pf]");if(pf){if(pickOpen===pf.dataset.pf){pickOpen=null}else{const r=parseRef(pf.dataset.ref);pickOpen=r.f.id;pickSel={...r.sel}}const y=$("plist").scrollTop;renderPList();$("plist").scrollTop=y;return}
+  const ax=e.target.closest("[data-pax]");if(ax){pickSel[ax.dataset.pax]=ax.dataset.o;const y=$("plist").scrollTop;renderPList();$("plist").scrollTop=y;return}
+  if(e.target.closest("[data-padd]")){const f=FAMBY[pickOpen];const cb=pickCb;closeModals();if(cb)cb(vName(f,pickSel),mkRef(f,pickSel))}
+});
 function closeModals(){$("picker").hidden=true;$("addSheet").hidden=true;$("helpSheet").hidden=true;pickCb=null}
 /* page help: the small + next to each page title */
 const HELP={
   atlas:["Atlas",`<p>O boneco mostra os músculos. Toque num músculo para ele ficar vermelho e ver a lista de exercícios para ele, do que mais estimula para o que menos estimula.</p>
     <h4>O que dá para fazer</h4><ul>
     <li><b>Tocar num exercício</b>: os músculos que ajudam no movimento (sinergistas) ficam laranja.</li>
+    <li><b>Variações</b>: com o exercício aberto, escolha pegada (pronada, supinada, neutra), largura, equipamento (barra, halteres, polia, máquina, Smith…), banco, posição e lado. O boneco e a lista de alvo e sinergistas mudam na hora, e o + manda exatamente essa variação para o treino.</li>
     <li><b>Selos</b>: <i>Hipertrofia</i> vem de estudos que mediram o músculo crescer; <i>Estudo EMG</i> mediu a ativação; <i>Biomecânica</i> vem da mecânica do movimento.</li>
     <li><b>Modelos</b>: Detalhado (cada parte do músculo), Básico (grupos inteiros) e Articulações (aquecimento, mobilidade e alongamento de cada junta).</li>
     <li><b>Frente / Costas</b> e <b>♂ / ♀</b> trocam a vista e o corpo.</li>
     <li><b>Filtros</b> de equipamento (halteres, polia, barra…) logo acima da lista.</li>
     <li><b>+ no exercício</b>: manda o exercício para um dos seus treinos ou cria um novo.</li>
-    <li><b>Buscar</b>, no topo, acha músculos e exercícios pelo nome.</li></ul>
+    <li><b>Buscar</b>, no topo, acha músculos e exercícios pelo nome, inclusive nomes de academia ("puxada alta", "pulley", "voador") e variações ("puxada supinada fechada", "crucifixo inclinado máquina").</li></ul>
     <h4>Dicas</h4><ul><li>Pinça com dois dedos dá zoom; arraste para mover; ⤢ volta ao enquadramento.</li>
     <li>No celular, depois de escolher um músculo o boneco fica pequeno no canto. Toque nele para ampliar.</li>
     <li>Em "Como o ranking funciona", no fim da lista, estão as fontes.</li></ul>`],
@@ -1630,12 +1613,12 @@ document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModals()});
 
 /* add-from-atlas sheet */
-let addName=null;
+let addName=null,addRef=null;
 const DSH=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
 const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
 const daysTxt=p=>p.days.length===7?"Todos os dias":p.days.length?[...p.days].sort((a,b)=>a-b).map(i=>DSH[i]).join(" · "):"Qualquer dia";
-function openAddSheet(name){
-  addName=name;$("aTitle").textContent="Adicionar exercício";$("aName").textContent=name;
+function openAddSheet(name,ref){
+  addName=name;addRef=ref||null;$("aTitle").textContent="Adicionar exercício";$("aName").textContent=name;
   const tw=workouts.filter(w=>w.date===isoDate(new Date()));
   $("aList").innerHTML=`<h3 class="section-t" style="margin:0">Meus treinos</h3>
     ${plans.map(p=>`<button data-to="p:${p.id}"><span class="pn">${esc(p.name||"Treino sem nome")}</span><span class="ps">${daysTxt(p)} · ${plural(p.items.length,"exercício")}</span></button>`).join("")}
@@ -1644,10 +1627,10 @@ function openAddSheet(name){
   $("addSheet").hidden=false;
 }
 $("aList").addEventListener("click",e=>{
-  const b=e.target.closest("[data-to]");if(!b)return;const name=addName,to=b.dataset.to;closeModals();
-  if(to==="new"){const pl=newPlan();pl.items.push({name,sets:3,reps:"8-12"});savePlans();openPlan=pl.id;setTab("ficha");toast("Treino criado. Dê um nome e escolha os dias");return}
-  if(to.startsWith("p:")){const pl=plans.find(x=>x.id===to.slice(2));if(pl){pl.items.push({name,sets:3,reps:"8-12"});savePlans();toast(`Adicionado a ${pl.name||"treino"}`);if(tab==="ficha")renderFicha()}}
-  if(to.startsWith("w:")){const w=workouts.find(x=>x.id===to.slice(2));if(w){w.items.push(mkItem(name,3,""));saveW();toast("Adicionado ao treino de hoje");if(tab==="treino")renderTreino()}}
+  const b=e.target.closest("[data-to]");if(!b)return;const name=addName,ref=addRef,to=b.dataset.to;closeModals();
+  if(to==="new"){const pl=newPlan();pl.items.push({name,ref,sets:3,reps:"8-12"});savePlans();openPlan=pl.id;setTab("ficha");toast("Treino criado. Dê um nome e escolha os dias");return}
+  if(to.startsWith("p:")){const pl=plans.find(x=>x.id===to.slice(2));if(pl){pl.items.push({name,ref,sets:3,reps:"8-12"});savePlans();toast(`Adicionado a ${pl.name||"treino"}`);if(tab==="ficha")renderFicha()}}
+  if(to.startsWith("w:")){const w=workouts.find(x=>x.id===to.slice(2));if(w){w.items.push(mkItem(name,3,"",ref));saveW();toast("Adicionado ao treino de hoje");if(tab==="treino")renderTreino()}}
 });
 
 /* ---------------------------------------------------------- data
@@ -1668,10 +1651,10 @@ if(!Array.isArray(plans)){plans=planFromFicha(LS.get("atlas-ficha",null));LS.set
 function savePlans(){if(!LS.set("atlas-plans",plans))toast("Não foi possível salvar neste aparelho")}
 function saveW(){if(!LS.set("atlas-workouts",workouts))toast("Não foi possível salvar neste aparelho")}
 function newPlan(){const pl={id:uid(),name:"",days:[],items:[]};plans.push(pl);return pl}
-function mkItem(name,sets,reps){return {name,target:reps||"",notes:"",sets:Array.from({length:Math.max(1,Math.min(10,parseInt(sets)||3))},()=>({r:"",kg:""}))}}
+function mkItem(name,sets,reps,ref){return {name,ref:ref||null,target:reps||"",notes:"",sets:Array.from({length:Math.max(1,Math.min(10,parseInt(sets)||3))},()=>({r:"",kg:""}))}}
 function startPlan(pl,date){
   const w={id:uid(),date:date||isoDate(new Date()),title:pl?(pl.name||"Treino"):"Treino personalizado",planId:pl?pl.id:null,done:false,notes:"",
-    items:pl?pl.items.map(it=>mkItem(it.name,it.sets,it.reps)):[]};
+    items:pl?pl.items.map(it=>mkItem(it.name,it.sets,it.reps,it.ref)):[]};
   workouts.push(w);saveW();return w;
 }
 function lastFor(name,w){
@@ -1697,7 +1680,7 @@ function renderFicha(){
       ${open?`<input class="inp title-inp" data-pf="name" data-pid="${p.id}" value="${esc(p.name)}" placeholder="Nome, ex.: Peito e tríceps" aria-label="Nome do treino">
       <div><div class="fl" style="margin-bottom:6px">Dias da semana (opcional)</div><div class="dpick" role="group" aria-label="Dias da semana">${DSH.map((n,i)=>`<button data-act="day" data-pid="${p.id}" data-day="${i}" aria-pressed="${p.days.includes(i)}" aria-label="${DAYS[i]}">${n}</button>`).join("")}</div><span class="muted-s">Nos dias marcados, este treino aparece primeiro na aba Hoje.</span></div>
       ${p.items.length?p.items.map((it,j)=>`<div class="fi">
-        <div class="fi-n">${esc(it.name)}<span class="muted-s">${esc(muscleLabel(it.name))}</span></div>
+        <div class="fi-n">${esc(it.name)}<span class="muted-s">${esc(muscleLabel(it.name,it.ref))}</span></div>
         <label class="fl">Séries<input class="inp" inputmode="numeric" data-pid="${p.id}" data-j="${j}" data-f="sets" value="${esc(it.sets)}"></label>
         <label class="fl">Reps<input class="inp" data-pid="${p.id}" data-j="${j}" data-f="reps" value="${esc(it.reps)}"></label>
         <div class="fi-act"><button class="ib" data-act="up" data-pid="${p.id}" data-j="${j}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-pid="${p.id}" data-j="${j}" aria-label="Descer">↓</button><button class="ib del" data-act="rm" data-pid="${p.id}" data-j="${j}" aria-label="Remover ${esc(it.name)}">✕</button></div>
@@ -1727,7 +1710,7 @@ $("fichaBody").addEventListener("click",e=>{
   if(!pl)return;
   if(a==="toggle"){openPlan=openPlan===pl.id?null:pl.id;askDelPlan=null}
   else if(a==="day"){const d=+b.dataset.day;pl.days=pl.days.includes(d)?pl.days.filter(x=>x!==d):[...pl.days,d]}
-  else if(a==="add")return openPicker(`Adicionar a ${pl.name||"treino"}`,name=>{pl.items.push({name,sets:3,reps:"8-12"});savePlans();renderFicha()});
+  else if(a==="add")return openPicker(`Adicionar a ${pl.name||"treino"}`,(name,ref)=>{pl.items.push({name,ref,sets:3,reps:"8-12"});savePlans();renderFicha()});
   else if(a==="rm")pl.items.splice(j,1);
   else if(a==="up"&&j>0)[pl.items[j-1],pl.items[j]]=[pl.items[j],pl.items[j-1]];
   else if(a==="down"&&j<pl.items.length-1)[pl.items[j+1],pl.items[j]]=[pl.items[j],pl.items[j+1]];
@@ -1799,7 +1782,7 @@ function renderTreino(){
       <input class="inp title-inp" data-wf="title" value="${esc(w.title)}" placeholder="Nome do treino" aria-label="Nome do treino">
       ${isCustom(w)?`<div class="row">${saveBtn(w)}<span class="muted-s" style="margin:0">Vira um treino fixo na aba Treinos.</span></div>`:""}</div>`;
     h+=w.items.map((it,i)=>{const last=lastFor(it.name,w);return `<div class="card">
-      <div class="wx-h"><div><div class="wx-n">${esc(it.name)}</div><span class="muted-s">${esc(muscleLabel(it.name))}${it.target?` · meta ${esc(it.target)} reps`:""}</span></div>
+      <div class="wx-h"><div><div class="wx-n">${esc(it.name)}</div><span class="muted-s">${esc(muscleLabel(it.name,it.ref))}${it.target?` · meta ${esc(it.target)} reps`:""}</span></div>
         <div class="fi-act"><button class="ib" data-act="up" data-i="${i}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-i="${i}" aria-label="Descer">↓</button><button class="ib del" data-act="rmItem" data-i="${i}" aria-label="Remover ${esc(it.name)}">✕</button></div></div>
       ${last?`<div class="last">Última vez (${fmtDate(last.date)}): <b>${last.sets.map(setTxt).join(" · ")}</b></div>`:""}
       <div class="sets"><div class="set set-h"><span></span><span>Reps</span><span>Carga (kg)</span><span></span></div>
@@ -1858,7 +1841,7 @@ $("treinoBody").addEventListener("click",e=>{
   else if(a==="doImport"){plans=pendingImport.plans;workouts=pendingImport.workouts;pendingImport=null;openW=null;savePlans();toast("Backup importado")}
   else if(a==="noImport")pendingImport=null;
   else if(!w)return;
-  else if(a==="addEx")return openPicker("Adicionar ao treino",name=>{w.items.push(mkItem(name,3,""));saveW();renderTreino()});
+  else if(a==="addEx")return openPicker("Adicionar ao treino",(name,ref)=>{w.items.push(mkItem(name,3,"",ref));saveW();renderTreino()});
   else if(a==="addSet"){const s=w.items[i].sets,l=s[s.length-1];s.push({r:"",kg:l?l.kg:""})}
   else if(a==="rmSet"){w.items[i].sets.splice(+b.dataset.s,1);if(!w.items[i].sets.length)w.items[i].sets.push({r:"",kg:""})}
   else if(a==="rmItem")w.items.splice(i,1);
@@ -1892,9 +1875,6 @@ let tab=LS.get("atlas-tab","atlas");if(!["atlas","ficha","treino","prog"].includ
 /* ---------------------------------------------------------- progress
    Sets done in the period, per muscle: 1 for each target muscle of the
    exercise (the lists it appears in) and 1/2 for each synergist. */
-const EXMAP=(()=>{const m={};
-  for(const [id,mu] of Object.entries(M))for(const x of mu.x){const k=norm(x[0]);const e=m[k]||(m[k]={p:new Set(),s:new Set()});e.p.add(id);x[4].forEach(t=>e.s.add(t))}
-  for(const e of Object.values(m))e.p.forEach(id=>e.s.delete(id));return m})();
 let pMode=LS.get("atlas-pmode","week");if(!["week","day"].includes(pMode))pMode="week";
 let pOff=0;
 const dm=d=>d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"}).replace(".","");
@@ -1910,7 +1890,7 @@ function tally(r){
   const mus={},grp={},unk=new Map(),days=new Set();let sets=0;
   for(const w of workouts){if(w.date<r.from||w.date>r.to||w.done===false)continue;
     for(const it of w.items||[]){const n=w.done===true?(it.sets||[]).length:doneSets(it);if(!n)continue;days.add(w.date);sets+=n;
-      const e=EXMAP[norm(it.name)];if(!e){unk.set(it.name,(unk.get(it.name)||0)+n);continue}
+      const e=exInfo(it.name,it.ref);if(!e){unk.set(it.name,(unk.get(it.name)||0)+n);continue}
       e.p.forEach(id=>mus[id]=(mus[id]||0)+n);e.s.forEach(id=>mus[id]=(mus[id]||0)+n/2);
       const g={};e.s.forEach(id=>g[TOB[id]]=.5);e.p.forEach(id=>g[TOB[id]]=1);
       for(const k in g)grp[k]=(grp[k]||0)+n*g[k];}}

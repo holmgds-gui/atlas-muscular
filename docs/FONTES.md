@@ -44,6 +44,18 @@ Os links marcados com 🔎 levam a uma busca no PubMed: o estudo é conhecido, m
 | `ridao` | Rodríguez-Ridao et al. 2020, *IJERPH*: inclinação do banco no supino | [PubMed 33049982](https://pubmed.ncbi.nlm.nih.gov/33049982/) · [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC7579505/) |
 | `coratella` | Coratella et al. 2020, *IJERPH*: variações de elevação lateral | [IDEAS/RePEc](https://ideas.repec.org/a/gam/jijerp/v17y2020i17p6015-d400749.html) |
 
+### Efeito das variações (notas dos botões)
+
+| Estudo | O que mostrou | Link |
+|---|---|---|
+| Lusk, Hale, Russell 2010, *JSCR* | Puxada: pegada pronada ativa mais o grande dorsal que a supinada | [Penn State](https://pure.psu.edu/en/publications/grip-width-and-forearm-orientation-effects-on-muscle-activity-dur/) |
+| Andersen et al. 2014, *JSCR* | Puxada: largura da pegada muda pouco a ativação do dorsal | ver `andersen` acima |
+| Padovan, Coratella et al., *J Hum Kinet* | Remada baixa: pegada fechada favorece o dorsal; aberta, trapézio e deltoide | [JHK](https://johk.pl/?p=9499) |
+| Rodríguez-Ridao et al. 2020 | Supino: inclinação do banco muda a parte do peitoral | ver `ridao` acima |
+| Maeo 2021/2022, Kinoshita 2023, Larsen 2024, Kubo 2019, Kassiano 2025 | Flexora sentado × deitado, tríceps acima da cabeça, panturrilha em pé × sentado, encosto da extensora, profundidade do agachamento, rosca inclinada × Scott | ver tabela de crescimento acima |
+
+As demais notas (pegada neutra, pés altos/baixos no leg press, tronco à frente na abdutora, joelho dobrado no coice etc.) vêm da mecânica do movimento.
+
 ## 2. Volume, repetições e esforço (faixas da aba Progresso)
 
 | Estudo | O que mostrou | Link |
