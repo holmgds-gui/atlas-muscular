@@ -446,9 +446,7 @@ button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
 :root[data-theme="dark"]{--lv0:#8A919B;--lv1:#3DBE70;--lv2:#3AA6E8;--lv3:#B266F0;--lv4:#F5D040;--lv5:#FF8A2E;--lv6:#E02A40;--lv7:#FF8AD2;--lv8:#A3ABB5;--lv8a:#6E7680;--lv8b:#EEF1F4;--lv8g:linear-gradient(135deg,#6E7680 0%,#A3ABB5 38%,#F2F4F6 50%,#A3ABB5 62%,#7A828C 100%)}
 button.brand{border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:8px;color:inherit;text-align:left;align-items:center;gap:6px}
 button.brand:hover{background:var(--chip)}
-button.brand .trophy{width:17px;height:17px;flex:none;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-button.brand[aria-current="page"] .trophy{stroke:var(--target)}
-.rk-back{border:0;background:none;padding:0 0 8px;color:var(--muted);font-weight:600;font-size:14px}
+.rk-sec{margin:6px 0 -4px;display:flex;align-items:center;gap:8px}
 .rk-me{grid-template-columns:minmax(0,1fr) auto;align-items:end}
 .rk-bw,.rk-sexw{display:grid;gap:4px;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .rk-bwi{display:flex;align-items:center;gap:6px;max-width:150px}.rk-bwi small{font-size:14px;text-transform:none;letter-spacing:0;font-weight:500}
@@ -488,7 +486,7 @@ button.brand[aria-current="page"] .trophy{stroke:var(--target)}
 <body>
 <div class="app" id="app">
   <header>
-    <button class="brand" id="brandBtn" aria-label="Atlas Muscular: abrir o ranking de força" title="Ranking de força"><h1>Atlas <b>Muscular</b></h1><svg class="trophy" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4ZM8 6H4.5v1.5A3.5 3.5 0 0 0 8 11M16 6h3.5v1.5A3.5 3.5 0 0 1 16 11M12 13v4M8.5 20h7M10 17h4v3h-4z"/></svg></button>
+    <button class="brand" id="brandBtn" aria-label="Atlas Muscular: ir para o início" title="Início"><h1>Atlas <b>Muscular</b></h1></button>
     <nav class="htabs" aria-label="Seções">
       <button data-tab="atlas">Atlas</button>
       <button data-tab="ficha">Meus treinos</button>
@@ -552,7 +550,6 @@ button.brand[aria-current="page"] .trophy{stroke:var(--target)}
   <section id="tab-ficha" class="view page" hidden><div class="wrap" id="fichaBody"></div></section>
   <section id="tab-treino" class="view page" hidden><div class="wrap" id="treinoBody"></div></section>
   <section id="tab-prog" class="view page" hidden><div class="wrap" id="progBody"></div></section>
-  <section id="tab-rank" class="view page" hidden><div class="wrap" id="rankBody"></div></section>
 
   <nav class="btabs" aria-label="Seções">
     <button data-tab="atlas"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2.2"/><path d="M5 8.5l7 1.5 7-1.5M12 10v5M12 15l-3 6M12 15l3 6"/></svg>Atlas</button>
@@ -1644,7 +1641,7 @@ const HELP={
     <li><b>Toque num músculo</b> do boneco para ver quantas séries ele teve.</li>
     <li><b>Toque num grupo</b> da lista para ver as partes (ex.: peitoral superior, médio e inferior).</li>
     <li><b>Equilíbrio</b>: radar com 6 grupos (média de séries por músculo de cada um). A faixa sombreada é a faixa ideal; toque numa ponta para ver as partes e destacar os músculos no boneco.</li>
-    <li><b>Cargas</b>: cada exercício em que você anotou carga, com gráfico da maior carga do dia (linha cheia) e da força estimada (tracejada), recorde, última carga e quanto subiu. Toque no gráfico para ver cada treino.</li></ul>
+    <li><b>Força</b>: em cima, o <b>ranking de força</b> (seu nível em cada grupo muscular, de Ameba a Bizarro, comparado com quem treina; toque no + dele para entender). Embaixo, a evolução de cada exercício em que você anotou carga, com gráfico da maior carga do dia (linha cheia) e da força estimada (tracejada), recorde, última carga e quanto subiu. Toque no gráfico para ver cada treino.</li></ul>
     <h4>Como conta</h4><ul><li>Cada série vale 1 para o músculo alvo do exercício e ½ para os sinergistas.</li>
     <li><b>Semana</b>: 4–9 séries é estímulo moderado, 10–20 é a faixa ideal, mais de 20 é volume alto.</li>
     <li><b>Dia</b>: até ~11 séries por músculo no mesmo treino ainda trazem ganho; depois disso, quase nada a mais.</li></ul>
@@ -1663,7 +1660,7 @@ const HELP={
     <li>Barra fixa, mergulho, flexão e remada invertida contam o seu peso corporal. Se fizer só com o corpo, deixe a carga em branco (ou 0) e anote as repetições.</li></ul>
     <h4>Dicas</h4><ul><li>Fortinho fica em volta da média de quem treina (45–60%). Monstro já é mais forte que 3 em cada 4 pessoas.</li>
     <li>Séries de 3 a 12 repetições dão a estimativa mais confiável.</li>
-    <li>Para abrir esta tela, toque no título Atlas Muscular, lá em cima.</li></ul>`]
+    <li>O ranking fica em Progresso › Força, em cima da evolução das cargas.</li></ul>`]
 };
 function openHelp(k){const h=HELP[k];if(!h)return;$("hTitle").textContent=h[0];$("hBody").innerHTML=h[1];$("helpSheet").hidden=false;$("hBody").scrollTop=0}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-help]");if(!b)return;e.preventDefault();e.stopPropagation();openHelp(b.dataset.help)},true);
@@ -1929,7 +1926,7 @@ $("importFile").addEventListener("change",async e=>{
 });
 
 /* ---------------------------------------------------------- tabs + init */
-let tab=LS.get("atlas-tab","atlas");if(!["atlas","ficha","treino","prog","rank"].includes(tab))tab="atlas";
+let tab=LS.get("atlas-tab","atlas");if(tab==="rank"){tab="prog";LS.set("atlas-pview","kg")}if(!["atlas","ficha","treino","prog"].includes(tab))tab="atlas";
 /* ---------------------------------------------------------- progress
    Sets done in the period, per muscle: 1 for each target muscle of the
    exercise (the lists it appears in) and 1/2 for each synergist. */
@@ -1998,7 +1995,7 @@ function bandsInfo(){return `<details class="about"><summary>Como as faixas fora
 let pView=LS.get("atlas-pview","mus");if(!["mus","kg"].includes(pView))pView="mus";
 let kgRange=LS.get("atlas-kgrange","3m");if(!["1m","3m","all"].includes(kgRange))kgRange="3m";
 let kgOpen=null,kgList=[];
-const pvSeg=()=>`<div class="seg pview" role="tablist" aria-label="Tipo de progresso"><button role="tab" data-pv="mus" aria-pressed="${pView==="mus"}">Músculos</button><button role="tab" data-pv="kg" aria-pressed="${pView==="kg"}">Cargas</button></div>`;
+const pvSeg=()=>`<div class="seg pview" role="tablist" aria-label="Tipo de progresso"><button role="tab" data-pv="mus" aria-pressed="${pView==="mus"}">Músculos</button><button role="tab" data-pv="kg" aria-pressed="${pView==="kg"}">Força</button></div>`;
 const numKg=v=>{const n=parseFloat(String(v??"").replace(",","."));return isFinite(n)?n:NaN};
 const e1rm=(kg,r)=>r<=1?kg:kg*(1+r/30);
 const fkg=v=>(Math.round(v*10)/10).toLocaleString("pt-BR");
@@ -2019,9 +2016,12 @@ function loadData(){
 const setStr=x=>`${fkg(x.kg)} kg${x.r?` × ${x.r}`:""}`;
 function renderKg(){
   const body=$("progBody");kgList=loadData();
-  let h=`<div class="page-h"><h2>Progresso<button class="help" data-help="prog" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">Evolução das cargas que você anotou nos treinos marcados como feitos.</p></div>${pvSeg()}`;
+  const D=rankData();
+  let h=`<div class="page-h"><h2>Progresso<button class="help" data-help="prog" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">Seu nível de força comparado com quem treina e a evolução das cargas que você anotou nos treinos marcados como feitos.</p></div>${pvSeg()}`;
+  h+=rankHTML(D);
+  h+=`<h3 class="section-t rk-sec">Evolução por exercício</h3>`;
   if(!kgList.length){
-    body.innerHTML=h+`<div class="card"><p class="muted">Nenhuma carga anotada ainda. Na aba Hoje, toque em <b>Anotar séries</b>, preencha a carga (kg) e as repetições e marque o treino como feito.</p><button class="btn primary" data-goto="treino">Ir para Hoje</button></div>`;return}
+    body.innerHTML=h+`<div class="card"><p class="muted">Nenhuma carga anotada ainda. Na aba Hoje, toque em <b>Anotar séries</b>, preencha a carga (kg) e as repetições e marque o treino como feito.</p><button class="btn primary" data-goto="treino">Ir para Hoje</button></div>${rankAbout()}`;rankAfter(D);return}
   h+=`<div class="kglegend"><span><i class="k1"></i>Maior carga do dia</span><span><i class="k2"></i>Força estimada<button class="help sm" data-help="forca" aria-label="O que é força estimada" title="O que é força estimada">+</button></span></div>`;
   h+=kgList.map(([name,pts],i)=>{const first=pts[0],last=pts[pts.length-1],diff=last.kg-first.kg,open=kgOpen===name;
     const rec=pts.reduce((a,x)=>x.kg>a.kg||(x.kg===a.kg&&x.r>a.r)?x:a,pts[0]);
@@ -2039,8 +2039,8 @@ function renderKg(){
       </div>
       <div class="kgtab"><div class="kgrow kghead"><span>Data</span><span>Maior carga</span><span>Força est.</span></div>${[...pts].reverse().slice(0,8).map(x=>`<div class="kgrow"><span>${fmtDate(x.date)}</span><span>${setStr(x)}</span><span>${x.e?fkg(x.e)+" kg":"—"}</span></div>`).join("")}</div>`:""}
     </section>`}).join("");
-  h+=`<p class="muted">Força estimada = carga × (1 + repetições ÷ 30). É uma estimativa da carga máxima para 1 repetição, útil para comparar treinos com repetições diferentes; fica menos precisa acima de ~12 repetições.</p>`;
-  body.innerHTML=h;
+  h+=`<p class="muted">Força estimada = carga × (1 + repetições ÷ 30). É uma estimativa da carga máxima para 1 repetição, útil para comparar treinos com repetições diferentes; fica menos precisa acima de ~12 repetições.</p>${rankAbout()}`;
+  body.innerHTML=h;rankAfter(D);
   body.querySelectorAll(".kgchart").forEach(el=>drawKg(el,kgList[+el.dataset.ki][1]));
 }
 function drawKg(box,all){
@@ -2308,7 +2308,7 @@ const RPT=[5,15,30,45,60,75,88,96];
 const RB=RPT.map(p=>{for(let i=1;i<RPCT.length;i++)if(p<=RPCT[i][1]){const [s0,p0]=RPCT[i-1],[s1,p1]=RPCT[i];return s0+(p-p0)/(p1-p0)*(s1-s0)}return 6});
 let rank=LS.get("atlas-rank",null);if(!rank||typeof rank!=="object")rank={};if(!Array.isArray(rank.man))rank.man=[];
 const saveRank=()=>{if(!LS.set("atlas-rank",rank))toast("Não foi possível salvar neste aparelho")};
-let rForm=null,rOpen=null,rPrev="atlas";
+let rForm=null,rOpen=null;
 const rBW=()=>rank.bw>0?rank.bw:RSW[sex];
 function rThr(key){
   const S=RSTD[key],ref=RSW[sex],bw=rBW(),sc=Math.pow(bw/ref,2/3);
@@ -2392,8 +2392,11 @@ function rankAbout(){return `<details class="about"><summary>Como o ranking func
   <p><b>Nível do grupo.</b> É a média de <b>todos</b> os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos.</p>
   <p><b>Aproximações.</b> Halteres: o peso é de cada halter. Variações sem padrão próprio usam o mais próximo com um fator (ex.: supino inclinado com halteres ≈ 90% do reto; máquina com um braço só ≈ metade do peso dos dois). Prancha, abdominais e afundo ou ponte só com o corpo ficam fora, porque não há um padrão de carga justo para eles. Máquinas variam de marca para marca, então use o nível delas como referência, não como verdade absoluta.</p>
   <ul><li>Strength Level: padrões de força por exercício, sexo e peso corporal (strengthlevel.com)</li><li>StrengthLog: padrões de força em kg para agachamento, terra, supino e desenvolvimento (strengthlog.com)</li><li>Jaric (2002, Sports Medicine): normalizar força pelo peso corporal elevado a ⅔</li><li>Epley (1985): fórmula da força estimada</li></ul></details>`}
-function renderRank(){
-  const D=rankData(),body=$("rankBody"),has=D.list.length>0,lv=has?rLv(D.all):-1;
+/* the ranking lives at the top of Progresso › Força; renderRank re-renders that view keeping the scroll */
+function renderRank(){const sc=$("tab-prog"),y=sc.scrollTop;renderKg();sc.scrollTop=y}
+function rankAfter(D){const b=$("rkFigBox");if(b)b.appendChild(rankFig(D.gs))}
+function rankHTML(D){
+  const has=D.list.length>0,lv=has?rLv(D.all):-1;
   const hero=has?`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big" style="${lv===RLV.length-1?`background-image:${RHERO[lv]};color:transparent`:`color:${RHERO[lv]}`}">${RLV[lv][0]}</b>
       <span class="rk-sub">${RLV[lv][1]} · mais forte que ~${rPct(D.all)}% de quem treina, do mesmo sexo.</span>
       <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem" class="${i<lv?"past":i===lv?"now":""}"${i===lv?' aria-current="true"':""}><i style="background:${RHERO[i]}"></i>${x[0]}</span>`).join("")}</div>
@@ -2408,8 +2411,7 @@ function renderRank(){
       <div class="rk-inps"><label><span>${lab}</span><input class="inp" id="rkKg" inputmode="decimal" placeholder="${rBody(st)?"0":"ex.: 60"}"></label><label><span>Repetições</span><input class="inp" id="rkR" inputmode="numeric" placeholder="ex.: 8"></label></div>
       <span class="muted-s" style="margin:0">Use a série mais pesada que você faz hoje, com boa execução.${S[1]&&/cada halter/.test(S[0])?" Peso de cada halter.":""}</span>
       <div class="row"><button class="btn primary" data-ract="save">Salvar</button><button class="btn" data-ract="cancel">Cancelar</button></div></div>`})():"";
-  body.innerHTML=`<div class="page-h"><button class="rk-back" data-ract="back">‹ Voltar</button><h2>Ranking de força<button class="help" data-help="rank" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2>
-    <p class="lead">Quanto você levanta em cada grupo muscular comparado com milhões de pessoas que treinam, do seu sexo e ajustado ao seu peso.</p></div>
+  return `<h3 class="section-t rk-sec">Ranking de força<button class="help sm" data-help="rank" aria-label="Como funciona o ranking" title="Como funciona o ranking">+</button></h3>
   <div class="card rk-me"><label class="rk-bw"><span>Seu peso</span><span class="rk-bwi"><input class="inp" id="rkBw" inputmode="decimal" value="${rank.bw>0?fkg(rank.bw):""}" placeholder="${RSW[sex]}"><small>kg</small></span></label>
     <div class="rk-sexw"><span>Corpo</span><div class="seg sex" role="group" aria-label="Corpo"><button data-rsex="m" aria-pressed="${sex==="m"}" aria-label="Masculino" title="Masculino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="14.5" r="5.5"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg></button><button data-rsex="f" aria-pressed="${sex==="f"}" aria-label="Feminino" title="Feminino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5V22M8.5 18.5h7"/></svg></button></div></div>
     ${rank.bw>0?"":`<span class="muted-s rk-note">Coloque seu peso para o ranking ficar certo. Enquanto isso, o app usa ${RSW[sex]} kg.</span>`}</div>
@@ -2424,15 +2426,12 @@ function renderRank(){
         <span class="muted-s" style="margin:0">Nível do grupo = média de ${plural(x.ex.length,"exercício")}.</span></div></details>`).join(""):`<p class="muted">Nenhum exercício com carga ainda.</p>`}
     ${none.length&&has?`<p class="muted" style="font-size:13px">Sem dados: ${none.map(g=>BASIC[g].n).join(", ")}.</p>`:""}
     <button class="btn primary" data-ract="add">+ Digitar uma carga</button></div>
-  ${D.noStd.length?`<p class="muted" style="font-size:13px">Sem padrão de força (não entram): ${D.noStd.map(esc).join(", ")}.</p>`:""}
-  ${rankAbout()}`;
-  if(has)$("rkFigBox").appendChild(rankFig(D.gs));
+  ${D.noStd.length?`<p class="muted" style="font-size:13px">Sem padrão de força (não entram): ${D.noStd.map(esc).join(", ")}.</p>`:""}`;
 }
-$("rankBody").addEventListener("click",e=>{
+$("progBody").addEventListener("click",e=>{
   const sx=e.target.closest("[data-rsex]");if(sx){setSex(sx.dataset.rsex);return renderRank()}
   const a=e.target.closest("[data-ract]");
   if(a){const k=a.dataset.ract;
-    if(k==="back")return setTab(rPrev||"atlas");
     if(k==="add")return openPicker("Exercício para o ranking",(name,ref)=>{
       const r=ref&&parseRef(ref);if(!r){toast("Escolha um exercício da lista");return}
       if(!rStd(r.f,r.sel)){toast("Essa variação não tem padrão de força. Tente com barra, halteres ou máquina.");return}
@@ -2446,25 +2445,21 @@ $("rankBody").addEventListener("click",e=>{
       rOpen=TOB[resolveV(r.f,r.sel).p[0]];rForm=null;renderRank();toast("Carga salva");return}
   }
   const d=e.target.closest("[data-rdel]");if(d){rank.man=rank.man.filter(m=>m.id!==d.dataset.rdel);saveRank();return renderRank()}
-  const g=e.target.closest(".rfig [data-m]");if(g){const t=g.querySelector("title");toast(t?t.textContent:"")}
 });
-$("rankBody").addEventListener("toggle",e=>{const d=e.target.closest&&e.target.closest("[data-rg2]");if(d){if(d.open)rOpen=d.dataset.rg2;else if(rOpen===d.dataset.rg2)rOpen=null}},true);
-$("rankBody").addEventListener("change",e=>{if(e.target.id!=="rkBw")return;const v=numKg(e.target.value);
+$("progBody").addEventListener("toggle",e=>{const d=e.target.closest&&e.target.closest("[data-rg2]");if(d){if(d.open)rOpen=d.dataset.rg2;else if(rOpen===d.dataset.rg2)rOpen=null}},true);
+$("progBody").addEventListener("change",e=>{if(e.target.id!=="rkBw")return;const v=numKg(e.target.value);
   if(e.target.value.trim()===""){delete rank.bw}else if(v>=30&&v<=250){rank.bw=Math.round(v*10)/10}else{toast("Peso entre 30 e 250 kg");e.target.value=rank.bw>0?fkg(rank.bw):"";return}
   saveRank();renderRank()});
-/* title toggles: opens the ranking; tapped again (on the ranking) goes back to the home page (Atlas) */
-$("brandBtn").addEventListener("click",()=>setTab(tab==="rank"?"atlas":"rank"));
+/* the title goes back to the home page (Atlas) */
+$("brandBtn").addEventListener("click",()=>setTab("atlas"));
 
 function setTab(t){
-  if(t==="rank"&&tab!=="rank")rPrev=tab;
   tab=t;LS.set("atlas-tab",t);
-  ["atlas","ficha","treino","prog","rank"].forEach(x=>$("tab-"+x).hidden=(x!==t));
-  $("brandBtn").setAttribute("aria-current",t==="rank"?"page":"false");
+  ["atlas","ficha","treino","prog"].forEach(x=>$("tab-"+x).hidden=(x!==t));
   document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));
   if(t==="ficha")renderFicha();
   if(t==="treino"){openW=null;askDel=false;hDate=null;hWeek=0;renderTreino()}
   if(t==="prog"){pOff=0;renderProg()}
-  if(t==="rank"){rForm=null;renderRank();$("tab-rank").scrollTop=0}
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
 

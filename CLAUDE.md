@@ -11,8 +11,8 @@ App de academia em português (pt-BR), instalável no celular (PWA), publicado p
 - **Atlas**: boneco anatômico clicável (frente/costas, corpo ♂/♀). Tocar num músculo deixa ele vermelho e lista exercícios em ordem de estímulo. Tocar num exercício pinta os sinergistas de laranja e mostra botões de **variação** (pegada, largura, equipamento, banco, posição, lado) que mudam alvo e sinergistas.
 - **Meus treinos** (aba `ficha`, rótulo "Treinos" na barra de baixo): biblioteca de treinos montados (nome, exercícios, séries, reps, dias opcionais).
 - **Hoje** (aba `treino`): grade da semana com o que foi feito, todos os treinos com "Marcar como feito", "Anotar séries" opcional e treino personalizado só para hoje (que pode virar treino fixo). Tocar num dia passado da grade (ou ‹ para semanas anteriores) registra naquele dia; futuro nunca.
-- **Progresso** (aba `prog`): duas sub-abas. **Músculos**: mapa de calor dos músculos treinados na semana ou no dia, com faixas baseadas em pesquisa, e radar de **Equilíbrio** (6 grupos). **Cargas**: evolução de carga por exercício (gráfico da maior carga do dia + força estimada, recorde, última, quanto subiu, 1 mês/3 meses/Tudo).
-- **Ranking de força** (`tab-rank`, abre ao tocar no título "Atlas Muscular", `#brandBtn`; não tem botão nas barras de abas): nível por grupo em 9 faixas (Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, Bizarro), boneco colorido, peso corporal, ♂/♀ e cargas digitadas.
+- **Progresso** (aba `prog`): duas sub-abas. **Músculos**: mapa de calor dos músculos treinados na semana ou no dia, com faixas baseadas em pesquisa, e radar de **Equilíbrio** (6 grupos). **Força** (`pView` `kg`): em cima o **Ranking de força** (nível por grupo em 9 faixas: Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, Bizarro; boneco colorido, peso corporal, ♂/♀ e cargas digitadas); embaixo a evolução de carga por exercício (gráfico da maior carga do dia + força estimada, recorde, última, quanto subiu, 1 mês/3 meses/Tudo).
+- O título "Atlas Muscular" (`#brandBtn`) leva sempre para o Atlas.
 - Cada aba tem um **+** pequeno ao lado do título que abre uma ajuda da página.
 
 Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-gui`. Uma conta errada (`davigms-pve`) já apareceu conectada uma vez; ela **não** é do dono, não use.
@@ -31,7 +31,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v33` → `atlas-v34`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v34` → `atlas-v35`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 
@@ -60,7 +60,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 - **Painel**
   - `paint()`, `render()`, `exCard()`, `updateIdle()`.
   - Estados no celular: `.idle` (boneco grande), `.covered` (boneco pequeno no canto e lista cobrindo), `peek` (ampliar boneco).
-- **Ranking** (antes de `setTab`)
+- **Ranking** (antes de `setTab`; desenhado no topo de Progresso › Força por `renderKg()` → `rankHTML(D)` + `rankAfter(D)`; `renderRank()` redesenha mantendo a rolagem; eventos no `#progBody`)
   - `RSTD`: padrões do Strength Level `[nome, unidade l/k, 5 valores ♂, 5 valores ♀, k?]` (Beginner→Elite, 1RM, praticante típico de `RSW` = 77 kg ♂ / 65 kg ♀). Com `k`, os valores são peso **extra** (barra fixa, mergulho, extensão lombar) e `k` é a fração do corpo movida.
   - `rStd(f, sel)`: família/variação → `{k: padrão, x: fator, as?: assistida, bw?: fração do peso corporal}` ou `null` (sem padrão). Com `bw` (flexão ≈ 0,69 no chão / 0,74 pés elevados / 0,45 mãos elevadas, comparada ao supino; remada invertida ≈ 0,55, comparada à remada curvada) a carga é `bw × peso + peso extra`. `rBody()` = exercício que conta o corpo (barra, mergulho, extensão lombar, flexão, remada invertida): nesses a conta aceita até 30 reps (nos outros, 20), e "quanto falta" aparece em repetições só com o corpo. Fator converte a força estimada do exercício na do padrão.
   - `rThr()`: faixas ajustadas ao peso com (peso ÷ referência)^⅔. `rScore()`: nota contínua (1 = Beginner 5% · 2 = Novice 20% · 3 = Intermediate 50% · 4 = Advanced 80% · 5 = Elite 95% · 6 = um degrau além). `RPT` = percentis onde cada nível começa e `RB` = os mesmos limites na nota (convertidos por `RPCT`). `rLv()`, `rPct()`, `rVal()` (inverso, para "quanto falta"), `rPos()` (posição na barra, 9 partes iguais).
@@ -94,7 +94,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
   - Dia: 1–2 leve · 3–5 bom · 6–11 forte · 12+ pouco ganho extra, com aviso acima de ~11.
   - Valem iguais para todos. O dono **não quer total de kg levantado** (volume) em lugar nenhum; evolução de carga por exercício fica só na sub-aba Cargas.
 - **Treinos**: montar não conta. Só "Marcar como feito" na aba Hoje conta. Dá para registrar em dias passados (`hDate`/`hWeek`, `selDate()`), nunca no futuro; entrar na aba volta para hoje. Um dia pode ter vários treinos. O treino personalizado de hoje pode ir para Meus treinos com "Salvar em Meus treinos".
-- **Ranking de força**: abre pelo título, é uma tela à parte; tocar no título de novo, já no ranking, volta para a página inicial (Atlas). Nível do grupo = média de **todos** os exercícios do grupo (pedido do dono), não um exercício representante. Usa o ♂/♀ do app. Cargas vêm dos treinos feitos + digitadas. Exercícios com o peso do corpo contam o corpo (pedido do dono). 9 níveis escolhidos pelo dono: Ameba <5% · Aprendiz 5–15 · Frango 15–30 · Galo 30–45 · Fortinho 45–60 · Parrudo 60–75 · Monstro 75–88 · Lenda 88–96 · Bizarro top 4% (meio-termo: meio com 15% cada, pontas mais raras).
+- **Ranking de força**: fica em Progresso › Força, em cima da evolução das cargas (decisão do dono; antes era uma tela aberta pelo título). O título leva sempre para o Atlas. Nível do grupo = média de **todos** os exercícios do grupo (pedido do dono), não um exercício representante. Usa o ♂/♀ do app. Cargas vêm dos treinos feitos + digitadas. Exercícios com o peso do corpo contam o corpo (pedido do dono). 9 níveis escolhidos pelo dono: Ameba <5% · Aprendiz 5–15 · Frango 15–30 · Galo 30–45 · Fortinho 45–60 · Parrudo 60–75 · Monstro 75–88 · Lenda 88–96 · Bizarro top 4% (meio-termo: meio com 15% cada, pontas mais raras).
 - **Ajuda**: só o "+" cinza, sem círculo em volta. Além do + de cada aba, há um + menor (`.help.sm`, `HELP.forca`) ao lado de "Força estimada" em Cargas, explicando a conta e para que serve.
 
 ## Como trabalhar com o dono
