@@ -97,7 +97,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 
 ## 8. Ranking de força
 
-- Pedido do dono: tocar no título "Atlas Muscular" abre uma tela à parte com um ranking em 7 níveis (**Vegetal, Molenga, Frango, Decente, Fortinho, Monstro, Bizarro**). Depois o dono pediu mais 2 e escolheu dividir as faixas largas do meio: **Galo** (35–50%) e **Parrudo** (80–95%), ficando Vegetal, Molenga, Frango, Galo, Decente, Fortinho, Parrudo, Monstro, Bizarro, por grupo muscular e com base no peso corporal.
+- Pedido do dono: tocar no título "Atlas Muscular" abre uma tela à parte com um ranking em 7 níveis (**Vegetal, Molenga, Frango, Decente, Fortinho, Monstro, Bizarro**). Depois o dono pediu mais 2 e escolheu dividir as faixas largas do meio: **Galo** (35–50%) e **Parrudo** (80–95%), e depois trocou os nomes para **Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, Bizarro** (Fortinho 50–80%, Monstro 95–97%, Lenda 97–99%), por grupo muscular e com base no peso corporal.
 - Escolhas do dono:
   - Cargas vêm dos treinos feitos e também dá para digitar.
   - O nível do grupo usa **todos** os exercícios do grupo, não um só.

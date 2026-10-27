@@ -6,7 +6,7 @@ Boneco anatômico clicável, com corpo masculino ou feminino (botão ♂/♀). T
 - **Meus treinos**: monte treinos com nome e exercícios e escolha os dias da semana de cada um (um dia pode ter mais de um treino).
 - **Hoje**: treinos do dia; registre séries, repetições e carga e toque em **Marcar como feito**.
 - **Progresso**: mapa de calor dos músculos treinados na semana ou no dia, só com treinos marcados como feitos (1 série para o alvo, ½ para sinergistas), com faixas baseadas em pesquisa, radar de equilíbrio e evolução de cargas.
-- **Ranking de força** (toque no título): nível por grupo muscular em 9 faixas, de Vegetal a Bizarro, comparando suas cargas com padrões de milhões de levantamentos, ajustado ao seu peso e sexo.
+- **Ranking de força** (toque no título): nível por grupo muscular em 9 faixas, de Ameba a Bizarro, comparando suas cargas com padrões de milhões de levantamentos, ajustado ao seu peso e sexo.
 
 Abra pelo link do GitHub Pages no Safari e use Compartilhar → Adicionar à Tela de Início para instalar como app.
 

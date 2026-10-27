@@ -1647,7 +1647,7 @@ const HELP={
     <li><b>Dia</b>: até ~11 séries por músculo no mesmo treino ainda trazem ganho; depois disso, quase nada a mais.</li></ul>
     <h4>Dicas</h4><ul><li>Mire 10–20 séries por semana em cada grupo que quer crescer, divididas em 2 ou mais treinos.</li>
     <li>Grupos em "Não treinados" mostram o que ficou de fora na semana.</li></ul>`],
-  rank:["Ranking de força",`<p>Mostra quão forte você é em cada grupo muscular, em 9 níveis: <b>Vegetal, Molenga, Frango, Galo, Decente, Fortinho, Parrudo, Monstro e Bizarro</b>. A comparação é com milhões de registros de pessoas que treinam, do mesmo sexo, ajustada ao seu peso.</p>
+  rank:["Ranking de força",`<p>Mostra quão forte você é em cada grupo muscular, em 9 níveis: <b>Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda e Bizarro</b>. A comparação é com milhões de registros de pessoas que treinam, do mesmo sexo, ajustada ao seu peso.</p>
     <h4>O que dá para fazer</h4><ul>
     <li><b>Seu peso</b> e <b>corpo ♂/♀</b>: mudam as faixas. Coloque seu peso para o resultado ficar certo.</li>
     <li><b>Toque num grupo</b> para ver cada exercício que entrou na conta, o nível dele e quanto falta para o próximo nível.</li>
@@ -1657,7 +1657,7 @@ const HELP={
     <li>Cada série vira força estimada (carga × (1 + reps ÷ 30)) e é comparada com as faixas daquele exercício.</li>
     <li>O nível do grupo é a média de todos os exercícios dele; o nível geral é a média dos grupos.</li>
     <li>Halteres: use o peso de cada halter.</li></ul>
-    <h4>Dicas</h4><ul><li>Decente começa na média de quem treina (50%). Parrudo já é mais forte que 4 em cada 5 pessoas.</li>
+    <h4>Dicas</h4><ul><li>Fortinho começa na média de quem treina (50%). Parrudo já é mais forte que 4 em cada 5 pessoas.</li>
     <li>Séries de 3 a 12 repetições dão a estimativa mais confiável.</li>
     <li>Para abrir esta tela, toque no título Atlas Muscular, lá em cima.</li></ul>`]
 };
@@ -2291,10 +2291,10 @@ function rStd(f,s){
   }
   return null;
 }
-const RLV=[["Vegetal","Abaixo do iniciante"],["Molenga","Iniciante"],["Frango","Novato"],["Galo","Quase na média"],["Decente","Na média"],["Fortinho","Acima da média"],["Parrudo","Avançado"],["Monstro","Elite"],["Bizarro","Acima da elite"]];
+const RLV=[["Ameba","Abaixo do iniciante"],["Aprendiz","Iniciante"],["Frango","Novato"],["Galo","Quase na média"],["Fortinho","Acima da média"],["Parrudo","Avançado"],["Monstro","Elite"],["Lenda","Elite da elite"],["Bizarro","Acima da elite"]];
 /* level boundaries on the score scale (1 Beginner 5% · 2 Novice 20% · 3 Intermediate 50% · 4 Advanced 80% · 5 Elite 95% · 6 = one step past Elite);
-   2.5 and 3.5 split the two wide bands at ~35% and ~65% */
-const RB=[1,2,2.5,3,3.5,4,5,6];
+   2.5 splits Novice→Intermediate at ~35% (Frango/Galo); 5.5 splits Elite at ~97% (Monstro/Lenda) */
+const RB=[1,2,2.5,3,4,5,5.5,6];
 let rank=LS.get("atlas-rank",null);if(!rank||typeof rank!=="object")rank={};if(!Array.isArray(rank.man))rank.man=[];
 const saveRank=()=>{if(!LS.set("atlas-rank",rank))toast("Não foi possível salvar neste aparelho")};
 let rForm=null,rOpen=null,rPrev="atlas";
@@ -2363,7 +2363,7 @@ const rPos=s=>{const lv=rLv(s),lo=lv?RB[lv-1]:0,hi=lv<RB.length?RB[lv]:RB[RB.len
 const rBar=s=>`<span class="rk-bar"><i style="width:${Math.max(3,rPos(s)*100).toFixed(1)}%;background:var(--lv${rLv(s)})"></i>${RB.map((_,k)=>`<b style="left:${((k+1)/RLV.length*100).toFixed(2)}%"></b>`).join("")}</span>`;
 function rankAbout(){return `<details class="about"><summary>Como o ranking funciona</summary>
   <p><b>De onde vêm os números.</b> As faixas são os padrões de força do Strength Level, feitos com cerca de 11 milhões de registros de pessoas que treinam (entre 48 milhões de levantamentos enviados). As faixas do site são percentis entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%. O app usa o corpo ♂/♀ escolhido.</p>
-  <p><b>Os 9 níveis</b> (quanto % de quem treina você supera): Vegetal = menos de 5% · Molenga = 5–20% · Frango = 20–35% · Galo = 35–50% · Decente = 50–65% · Fortinho = 65–80% · Parrudo = 80–95% · Monstro = 95–99% · Bizarro = top 1% (um degrau inteiro além da elite).</p>
+  <p><b>Os 9 níveis</b> (quanto % de quem treina você supera): Ameba = menos de 5% · Aprendiz = 5–20% · Frango = 20–35% · Galo = 35–50% · Fortinho = 50–80% · Parrudo = 80–95% · Monstro = 95–97% · Lenda = 97–99% · Bizarro = top 1% (um degrau inteiro além da elite).</p>
   <p><b>Peso corporal.</b> As faixas publicadas são para o praticante típico (cerca de 77 kg no masculino e 65 kg no feminino). O app ajusta para o seu peso pela regra de ⅔: a força cresce com a área do músculo, que acompanha o peso elevado a ⅔. Quem é mais leve precisa levantar menos, mas não proporcionalmente menos.</p>
   <p><b>Sua força em cada exercício.</b> Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Séries de até ~12 repetições dão a estimativa mais confiável. Em barra fixa e mergulho conta o peso do corpo mais o peso extra; na barra assistida (graviton), a ajuda é descontada.</p>
   <p><b>Nível do grupo.</b> É a média de <b>todos</b> os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos.</p>
