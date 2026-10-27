@@ -315,6 +315,16 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .wk span.rest{color:var(--muted);border-top:0}
 .wk small{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:-2px}
 .wk.did{background:color-mix(in srgb,var(--target) 12%,var(--bg))}
+button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
+.wk.sel{box-shadow:inset 0 0 0 2px var(--ink)}
+.wk.today.sel{box-shadow:inset 0 0 0 2px var(--target)}
+.wk.fut{opacity:.4}
+.wkrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center}
+.wkrow .ib{width:28px;height:44px;font-size:18px}
+.wkrow .ib:disabled{opacity:.3}
+.pastbox{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;border:1.5px solid var(--ink);border-radius:14px;padding:12px 14px;background:var(--surface)}
+.pastbox b{display:block;font-size:15px}
+.pastbox span{display:block;font-size:13px;color:var(--muted);margin-top:2px}
 .wk.did span{border-top-color:color-mix(in srgb,var(--target) 35%,transparent)}
 .wk.today{box-shadow:inset 0 0 0 1.5px var(--target)}
 .plan-h{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:none;padding:0;color:inherit;cursor:pointer}
@@ -1528,6 +1538,7 @@ const HELP={
   treino:["Hoje",`<p>Aqui você registra o que treinou. Só o que estiver marcado como feito entra no Progresso.</p>
     <h4>O que dá para fazer</h4><ul>
     <li><b>Sua semana</b> mostra, de segunda a domingo, os treinos que você fez em cada dia.</li>
+    <li><b>Esqueceu de registrar?</b> Toque num dia que já passou na grade (ou use ‹ para semanas anteriores) e marque o treino; ele fica naquele dia. Dias futuros não podem ser escolhidos.</li>
     <li><b>Marcar como feito</b>: um toque e o treino conta, com todas as séries dele.</li>
     <li><b>Anotar séries</b>: abre o treino para anotar repetições e carga de cada série. "Última vez" mostra o que você fez antes.</li>
     <li><b>Desfazer</b> tira o treino do Progresso.</li>
@@ -1591,8 +1602,8 @@ function savePlans(){if(!LS.set("atlas-plans",plans))toast("Não foi possível s
 function saveW(){if(!LS.set("atlas-workouts",workouts))toast("Não foi possível salvar neste aparelho")}
 function newPlan(){const pl={id:uid(),name:"",days:[],items:[]};plans.push(pl);return pl}
 function mkItem(name,sets,reps){return {name,target:reps||"",notes:"",sets:Array.from({length:Math.max(1,Math.min(10,parseInt(sets)||3))},()=>({r:"",kg:""}))}}
-function startPlan(pl){
-  const w={id:uid(),date:isoDate(new Date()),title:pl?(pl.name||"Treino"):"Treino personalizado",planId:pl?pl.id:null,done:false,notes:"",
+function startPlan(pl,date){
+  const w={id:uid(),date:date||isoDate(new Date()),title:pl?(pl.name||"Treino"):"Treino personalizado",planId:pl?pl.id:null,done:false,notes:"",
     items:pl?pl.items.map(it=>mkItem(it.name,it.sets,it.reps)):[]};
   workouts.push(w);saveW();return w;
 }
@@ -1663,26 +1674,42 @@ let openW=null,askDel=false,pendingImport=null;
 function wCard(x){return `<div class="card tcard"><div class="row between"><div><div class="wx-n">${esc(x.title||"Treino")}</div><span class="muted-s">${x.items.length?x.items.map(it=>esc(it.name)).join(" · "):"Sem exercícios"}</span></div>${statusPill(x)}</div>
   <div class="row">${x.done===false?`<button class="btn primary" data-act="markDone" data-wid="${x.id}">Marcar como feito</button><button class="btn" data-open="${x.id}">Continuar</button>`:`<button class="btn" data-open="${x.id}">Ver séries</button><button class="btn" data-act="undo" data-wid="${x.id}">Desfazer</button>`}${isCustom(x)?saveBtn(x):""}</div></div>`}
 /* this week (Mon–Sun) with what was actually done each day */
+/* day being logged in Hoje: null = today. Only today or the past can be picked, never the future. */
+let hDate=null,hWeek=0;
+const selDate=()=>hDate||isoDate(new Date());
+const fromIso=iso=>new Date(iso+"T12:00:00");
+const dayIdxOf=iso=>(fromIso(iso).getDay()+6)%7;
+/* the week (Mon–Sun) with what was actually done each day; past days and today can be tapped */
 function weekDone(){
-  const t=new Date();t.setHours(12,0,0,0);const mon=new Date(t);mon.setDate(t.getDate()-todayIdx());const today=isoDate(t);
-  const cells=DAYS.map((n,i)=>{const dt=new Date(mon);dt.setDate(mon.getDate()+i);const iso=isoDate(dt);
+  const t=new Date();t.setHours(12,0,0,0);const today=isoDate(t),sel=selDate();
+  const mon=new Date(t);mon.setDate(t.getDate()-todayIdx()+7*hWeek);
+  const cells=DAYS.map((n,i)=>{const dt=new Date(mon);dt.setDate(mon.getDate()+i);const iso=isoDate(dt),fut=iso>today;
     const done=workouts.filter(x=>x.date===iso&&x.done!==false);
-    return `<div class="wk${iso===today?" today":""}${done.length?" did":""}" title="${DAYS[i]} ${dt.getDate()}: ${done.length?esc(done.map(x=>x.title||"Treino").join(", ")):iso>today?"ainda não chegou":"nada feito"}"><b>${DSH[i]}</b><small>${dt.getDate()}</small>${done.length?done.map(x=>`<span>${esc(x.title||"Treino")}</span>`).join(""):`<span class="rest" aria-label="Nada feito">—</span>`}</div>`}).join("");
-  const n=workouts.filter(x=>x.done!==false&&x.date>=isoDate(mon)&&x.date<=isoDate(new Date(mon.getTime()+6*864e5))).length;
-  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">Sua semana</h3><span class="muted-s" style="margin:0">${n?plural(n,"treino")+" feito"+(n===1?"":"s"):"Nenhum treino feito ainda"}</span></div><div class="wkgrid">${cells}</div></div>`;
+    const inner=`<b>${DSH[i]}</b><small>${dt.getDate()}</small>${done.length?done.map(x=>`<span>${esc(x.title||"Treino")}</span>`).join(""):`<span class="rest" aria-hidden="true">—</span>`}`;
+    const cls=`wk${iso===today?" today":""}${done.length?" did":""}${iso===sel?" sel":""}${fut?" fut":""}`;
+    const lab=`${DAYS[i]} ${dt.getDate()}: ${done.length?esc(done.map(x=>x.title||"Treino").join(", ")):fut?"ainda não chegou":"nada feito"}`;
+    return fut?`<div class="${cls}" title="${lab}" aria-disabled="true">${inner}</div>`
+      :`<button class="${cls}" data-day="${iso}" aria-pressed="${iso===sel}" aria-label="${lab}${iso===sel?"":". Toque para registrar neste dia"}">${inner}</button>`}).join("");
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);
+  const n=workouts.filter(x=>x.done!==false&&x.date>=isoDate(mon)&&x.date<=isoDate(sun)).length;
+  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">${hWeek===0?"Sua semana":hWeek===-1?"Semana passada":`${dm(mon)} – ${dm(sun)}`}</h3><span class="muted-s" style="margin:0">${n?plural(n,"treino")+" feito"+(n===1?"":"s"):"Nenhum treino feito"}</span></div>
+    <div class="wkrow"><button class="ib" data-act="wkPrev" aria-label="Semana anterior">‹</button><div class="wkgrid">${cells}</div><button class="ib" data-act="wkNext" aria-label="Próxima semana"${hWeek>=0?" disabled":""}>›</button></div>
+    <span class="muted-s" style="margin:0">Esqueceu de registrar? Toque num dia que já passou.</span></div>`;
 }
 function renderTreino(){
   const today=isoDate(new Date()),d=todayIdx();
   const w=openW?workouts.find(x=>x.id===openW):null;if(!w)openW=null;
   let h="";
   if(!w){
-    const tw=workouts.filter(x=>x.date===today);
-    const list=[...plans].sort((x,y)=>(y.days.includes(d)?1:0)-(x.days.includes(d)?1:0));
+    const sel=selDate(),isT=sel===today,sd=dayIdxOf(sel),dayName=isT?"hoje":`${DAYS[sd].toLowerCase()}, ${fromIso(sel).getDate()}`;
+    const tw=workouts.filter(x=>x.date===sel);
+    const list=[...plans].sort((x,y)=>(y.days.includes(sd)?1:0)-(x.days.includes(sd)?1:0));
     const nDone=tw.filter(x=>x.done!==false).length;
-    h=`<div class="page-h"><h2>Hoje<button class="help" data-help="treino" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">${cap(fmtLong(new Date()))}${nDone?` · ${plural(nDone,"treino")} feito${nDone===1?"":"s"}`:""}</p></div>
+    h=`<div class="page-h"><h2>Hoje<button class="help" data-help="treino" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">${cap(fmtLong(new Date()))}${isT&&nDone?` · ${plural(nDone,"treino")} feito${nDone===1?"":"s"}`:""}</p></div>
       ${weekDone()}
-      <h3 class="section-t">Seus treinos</h3>`;
-    h+=list.length?list.map(p=>{const ex=tw.filter(x=>x.planId===p.id).pop(),tag=p.days.includes(d)?`<span class="pill soft">Dia de hoje</span>`:"";
+      ${isT?"":`<div class="pastbox"><div><b>Registrando ${esc(fmtLong(fromIso(sel)))}</b><span>${nDone?`${plural(nDone,"treino")} feito${nDone===1?"":"s"} neste dia. `:""}O que você marcar agora fica nesse dia.</span></div><button class="btn" data-act="toToday">Voltar para hoje</button></div>`}
+      <h3 class="section-t">Seus treinos${isT?"":` · ${esc(dayName)}`}</h3>`;
+    h+=list.length?list.map(p=>{const ex=tw.filter(x=>x.planId===p.id).pop(),tag=p.days.includes(sd)?`<span class="pill soft">${isT?"Dia de hoje":"Dia deste treino"}</span>`:"";
       const sum=p.items.length?p.items.map(it=>esc(it.name)).join(" · "):"Sem exercícios. Monte na aba Treinos.";
       let btns;
       if(ex&&ex.done!==false)btns=`<button class="btn" data-open="${ex.id}">Ver séries</button><button class="btn" data-act="undo" data-wid="${ex.id}">Desfazer</button>`;
@@ -1691,9 +1718,9 @@ function renderTreino(){
       return `<div class="card tcard${ex&&ex.done!==false?" isdone":""}"><div class="row between"><div style="min-width:0"><div class="wx-n">${esc(p.name||"Treino")}</div><span class="muted-s">${sum}</span></div>${ex?statusPill(ex):tag}</div><div class="row">${btns}</div></div>`}).join("")
       :`<div class="card"><p class="muted">Você ainda não tem treinos montados.</p><div class="row"><button class="btn primary" data-act="goPlans">Montar um treino</button></div></div>`;
     const free=tw.filter(x=>!x.planId||!plans.some(p=>p.id===x.planId));
-    h+=`<h3 class="section-t">Treino personalizado de hoje</h3>`+free.map(wCard).join("")+
-      `<button class="btn wide" data-act="startFree">+ Montar um treino só para hoje</button>`;
-    const past=workouts.filter(x=>x.date!==today).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
+    h+=`<h3 class="section-t">Treino personalizado ${isT?"de hoje":"de "+esc(dayName)}</h3>`+free.map(wCard).join("")+
+      `<button class="btn wide" data-act="startFree">+ Montar um treino só para ${isT?"hoje":"este dia"}</button>`;
+    const past=workouts.filter(x=>x.date!==sel).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
     h+=`<h3 class="section-t">Histórico</h3>`+(past.length?`<div class="hist">${past.slice(0,80).map(x=>`<button data-open="${x.id}"><b>${fmtDate(x.date)}</b><span>${esc(x.title||"Treino")} · ${x.done===false?"não feito":plural(x.items.length,"exercício")}</span></button>`).join("")}</div>`:`<p class="muted">Os treinos que você fizer aparecem aqui.</p>`);
     h+=`<h3 class="section-t">Backup</h3><p class="muted">Seus treinos ficam salvos só neste aparelho. Exporte um backup de vez em quando para não perder nada.</p>
       <div class="row"><button class="btn" data-act="export">Exportar backup</button><button class="btn" data-act="import">Importar backup</button></div>
@@ -1738,11 +1765,16 @@ $("treinoBody").addEventListener("input",e=>{
 });
 $("treinoBody").addEventListener("click",e=>{
   const o=e.target.closest("[data-open]");if(o){openW=o.dataset.open;askDel=false;renderTreino();$("tab-treino").scrollTop=0;return}
+  const dy=e.target.closest("[data-day]");
+  if(dy){const iso=dy.dataset.day;if(iso>isoDate(new Date()))return;hDate=iso===isoDate(new Date())?null:iso;renderTreino();return}
   const b=e.target.closest("[data-act]");if(!b)return;
   const w=curW(),a=b.dataset.act,i=+b.dataset.i;
+  if(a==="wkPrev"){hWeek--;return renderTreino()}
+  if(a==="wkNext"){hWeek=Math.min(0,hWeek+1);return renderTreino()}
+  if(a==="toToday"&&!w){hDate=null;hWeek=0;return renderTreino()}
   const byW=()=>workouts.find(x=>x.id===b.dataset.wid),byP=()=>plans.find(x=>x.id===b.dataset.pid);
-  if(a==="log"||a==="startFree"){const nw=startPlan(a==="log"?byP():null);openW=nw.id;askDel=false;$("tab-treino").scrollTop=0}
-  else if(a==="quickDone"){const pl=byP();if(!pl)return;const nw=startPlan(pl);nw.done=true;toast(`${pl.name||"Treino"} marcado como feito`)}
+  if(a==="log"||a==="startFree"){const nw=startPlan(a==="log"?byP():null,selDate());openW=nw.id;askDel=false;$("tab-treino").scrollTop=0}
+  else if(a==="quickDone"){const pl=byP();if(!pl)return;const nw=startPlan(pl,selDate());nw.done=true;toast(`${pl.name||"Treino"} marcado como feito${hDate?" em "+fmtDate(nw.date):""}`)}
   else if(a==="markDone"){const x=byW();if(x){x.done=true;toast(`${x.title||"Treino"} marcado como feito`)}}
   else if(a==="undo"){const x=byW();if(!x)return;
     const touched=x.notes||x.items.some(it=>it.notes||it.sets.some(st=>st.r!==""||st.kg!==""));
@@ -1893,7 +1925,7 @@ function setTab(t){
   ["atlas","ficha","treino","prog"].forEach(x=>$("tab-"+x).hidden=(x!==t));
   document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));
   if(t==="ficha")renderFicha();
-  if(t==="treino"){openW=null;askDel=false;renderTreino()}
+  if(t==="treino"){openW=null;askDel=false;hDate=null;hWeek=0;renderTreino()}
   if(t==="prog"){pOff=0;renderProg()}
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));

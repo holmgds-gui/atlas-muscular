@@ -66,6 +66,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
    - A grade da semana voltou na aba Hoje, mostrando o que foi **feito** em cada dia.
    - O treino personalizado de hoje pode virar treino fixo ("Salvar em Meus treinos").
    - Meus treinos ganhou o botão "Montar um treino só para hoje".
+   - Registrar em dia passado: tocar num dia que já passou na grade da semana (ou ‹ para semanas anteriores) faz "Marcar como feito", "Anotar séries" e o treino personalizado valerem para aquele dia. Dias futuros não podem ser escolhidos.
 
 ## 6. Progresso
 
