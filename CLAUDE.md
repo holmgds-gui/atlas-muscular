@@ -12,6 +12,7 @@ App de academia em português (pt-BR), instalável no celular (PWA), publicado p
 - **Meus treinos** (aba `ficha`, rótulo "Treinos" na barra de baixo): biblioteca de treinos montados (nome, exercícios, séries, reps, dias opcionais).
 - **Hoje** (aba `treino`): grade da semana com o que foi feito, todos os treinos com "Marcar como feito", "Anotar séries" opcional e treino personalizado só para hoje (que pode virar treino fixo). Tocar num dia passado da grade (ou ‹ para semanas anteriores) registra naquele dia; futuro nunca.
 - **Progresso** (aba `prog`): duas sub-abas. **Músculos**: mapa de calor dos músculos treinados na semana ou no dia, com faixas baseadas em pesquisa, e radar de **Equilíbrio** (6 grupos). **Cargas**: evolução de carga por exercício (gráfico da maior carga do dia + força estimada, recorde, última, quanto subiu, 1 mês/3 meses/Tudo).
+- **Ranking de força** (`tab-rank`, abre ao tocar no título "Atlas Muscular", `#brandBtn`; não tem botão nas barras de abas): nível por grupo em 7 faixas (Vegetal, Molenga, Frango, Decente, Fortinho, Monstro, Bizarro), boneco colorido, peso corporal, ♂/♀ e cargas digitadas.
 - Cada aba tem um **+** pequeno ao lado do título que abre uma ajuda da página.
 
 Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-gui`. Uma conta errada (`davigms-pve`) já apareceu conectada uma vez; ela **não** é do dono, não use.
@@ -30,7 +31,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v26` → `atlas-v27`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v27` → `atlas-v28`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 
@@ -59,6 +60,13 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 - **Painel**
   - `paint()`, `render()`, `exCard()`, `updateIdle()`.
   - Estados no celular: `.idle` (boneco grande), `.covered` (boneco pequeno no canto e lista cobrindo), `peek` (ampliar boneco).
+- **Ranking** (antes de `setTab`)
+  - `RSTD`: padrões do Strength Level `[nome, unidade l/k, 5 valores ♂, 5 valores ♀, k?]` (Beginner→Elite, 1RM, praticante típico de `RSW` = 77 kg ♂ / 65 kg ♀). Com `k`, os valores são peso **extra** (barra fixa, mergulho, extensão lombar) e `k` é a fração do corpo movida.
+  - `rStd(f, sel)`: família/variação → `{k: padrão, x: fator, as?: assistida}` ou `null` (sem padrão). Fator converte a força estimada do exercício na do padrão.
+  - `rThr()`: faixas ajustadas ao peso com (peso ÷ referência)^⅔. `rScore()`: nota contínua (1 = Beginner … 5 = Elite, 6+ = Bizarro). `rLv()`, `rPct()`, `rVal()` (inverso, para "quanto falta").
+  - `rankData()`: melhor série (Epley, reps até 20) por variação nos treinos feitos dos últimos 182 dias + digitadas (`rank.man`); cada exercício conta para todos os grupos `BASIC` dos seus alvos; grupo = média; geral = média dos grupos.
+  - `rank` (`localStorage` `atlas-rank`): `{bw, man:[{id, ref, kg, r, date}]}`. Vai no backup.
+  - Cores `--lv0…--lv6` (azul, claro→escuro; no escuro invertido), validadas como escala ordinal nos dois temas.
 - **Ajuda**: `HELP` + `openHelp()` (o + das páginas).
 - **Treinos e Hoje**
   - `plans` (`localStorage` `atlas-plans`): `{id, name, days:[0..6], items:[{name, sets, reps}]}`.
@@ -86,6 +94,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
   - Dia: 1–2 leve · 3–5 bom · 6–11 forte · 12+ pouco ganho extra, com aviso acima de ~11.
   - Valem iguais para todos. O dono **não quer total de kg levantado** (volume) em lugar nenhum; evolução de carga por exercício fica só na sub-aba Cargas.
 - **Treinos**: montar não conta. Só "Marcar como feito" na aba Hoje conta. Dá para registrar em dias passados (`hDate`/`hWeek`, `selDate()`), nunca no futuro; entrar na aba volta para hoje. Um dia pode ter vários treinos. O treino personalizado de hoje pode ir para Meus treinos com "Salvar em Meus treinos".
+- **Ranking de força**: abre pelo título, é uma tela à parte. Nível do grupo = média de **todos** os exercícios do grupo (pedido do dono), não um exercício representante. Usa o ♂/♀ do app. Cargas vêm dos treinos feitos + digitadas.
 - **Ajuda**: só o "+" cinza, sem círculo em volta. Além do + de cada aba, há um + menor (`.help.sm`, `HELP.forca`) ao lado de "Força estimada" em Cargas, explicando a conta e para que serve.
 
 ## Como trabalhar com o dono

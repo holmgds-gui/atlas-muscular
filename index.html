@@ -440,12 +440,52 @@ button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
 .pg-parts div{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:var(--muted)}
 .pg-parts b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){#tab-atlas .stage{transition:none}}
+/* ---- ranking de força ---- */
+:root{--lv0:#7fb0ec;--lv1:#6a99d3;--lv2:#5683bb;--lv3:#436da4;--lv4:#30588d;--lv5:#1e4376;--lv6:#0b2f60}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--lv0:#1a5299;--lv1:#3b6baa;--lv2:#5983bb;--lv3:#779ccb;--lv4:#96b5dc;--lv5:#b6ceec;--lv6:#d6e8fc}}
+:root[data-theme="dark"]{--lv0:#1a5299;--lv1:#3b6baa;--lv2:#5983bb;--lv3:#779ccb;--lv4:#96b5dc;--lv5:#b6ceec;--lv6:#d6e8fc}
+button.brand{border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:8px;color:inherit;text-align:left;align-items:center;gap:6px}
+button.brand:hover{background:var(--chip)}
+button.brand .trophy{width:17px;height:17px;flex:none;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+button.brand[aria-current="page"] .trophy{stroke:var(--target)}
+.rk-back{border:0;background:none;padding:0 0 8px;color:var(--muted);font-weight:600;font-size:14px}
+.rk-me{grid-template-columns:minmax(0,1fr) auto;align-items:end}
+.rk-bw,.rk-sexw{display:grid;gap:4px;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+.rk-bwi{display:flex;align-items:center;gap:6px;max-width:150px}.rk-bwi small{font-size:14px;text-transform:none;letter-spacing:0;font-weight:500}
+.rk-note{grid-column:1/-1;margin:0}
+.rk-hero{border-radius:16px;padding:18px 16px 16px;display:grid;gap:6px;color:#fff;background:linear-gradient(140deg,#0b2f60 0%,#1e4376 55%,#30588d 100%);box-shadow:0 6px 20px rgba(11,47,96,.25)}
+.rk-eyebrow{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
+.rk-big{font-family:var(--f-display);font-weight:700;font-size:52px;line-height:.95;letter-spacing:.02em;text-transform:uppercase}
+.rk-sub{font-size:14px;line-height:1.4;opacity:.9}.rk-sub.sm{font-size:12px;opacity:.75}
+.rk-ladder{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 4px}
+.rk-ladder span{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.02em;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.62);white-space:nowrap}
+.rk-ladder .past{background:rgba(255,255,255,.28);color:#fff}
+.rk-ladder .now{background:#fff;color:#0b2f60;font-weight:700}
+.rk-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--muted)}
+.rk-legend span{display:flex;align-items:center;gap:5px}.rk-legend i{width:12px;height:12px;border-radius:3px;flex:none}
+.rk-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap}
+.pg-n .rk-chip{display:flex;margin-top:3px;font-weight:500;color:var(--muted)}
+.rk-chip i{width:10px;height:10px;border-radius:50%;flex:none}
+.rk-bar{position:relative;display:block;height:8px;border-radius:5px;background:var(--chip);overflow:hidden}
+.rk-bar i{display:block;height:100%;border-radius:5px}
+.rk-bar b{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:var(--surface);opacity:.9}
+.rk-g summary{grid-template-columns:minmax(0,1fr) 38% 44px}
+.rk-exs{display:grid;gap:12px;padding:4px 2px 14px}
+.rk-ex{display:grid;gap:6px;padding-bottom:12px;border-bottom:1px solid var(--line)}
+.rk-exn{font-weight:600;font-size:14px;min-width:0}.rk-exn small{display:block;font-weight:400;font-size:12px;color:var(--muted);margin-top:2px}
+.rk-next{font-size:12px;color:var(--muted)}
+.rk-man{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
+.lnk{border:0;background:none;padding:0;color:var(--target);font-size:12px;font-weight:600;text-decoration:underline}
+.rk-form{border-color:var(--ink)}
+.rk-inps{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rk-inps label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.rfig{max-height:min(56vh,480px)}
+@media (max-width:430px){.rk-big{font-size:44px}}
 </style>
 </head>
 <body>
 <div class="app" id="app">
   <header>
-    <div class="brand"><h1>Atlas <b>Muscular</b></h1></div>
+    <button class="brand" id="brandBtn" aria-label="Atlas Muscular: abrir o ranking de força" title="Ranking de força"><h1>Atlas <b>Muscular</b></h1><svg class="trophy" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4ZM8 6H4.5v1.5A3.5 3.5 0 0 0 8 11M16 6h3.5v1.5A3.5 3.5 0 0 1 16 11M12 13v4M8.5 20h7M10 17h4v3h-4z"/></svg></button>
     <nav class="htabs" aria-label="Seções">
       <button data-tab="atlas">Atlas</button>
       <button data-tab="ficha">Meus treinos</button>
@@ -509,6 +549,7 @@ button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
   <section id="tab-ficha" class="view page" hidden><div class="wrap" id="fichaBody"></div></section>
   <section id="tab-treino" class="view page" hidden><div class="wrap" id="treinoBody"></div></section>
   <section id="tab-prog" class="view page" hidden><div class="wrap" id="progBody"></div></section>
+  <section id="tab-rank" class="view page" hidden><div class="wrap" id="rankBody"></div></section>
 
   <nav class="btabs" aria-label="Seções">
     <button data-tab="atlas"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2.2"/><path d="M5 8.5l7 1.5 7-1.5M12 10v5M12 15l-3 6M12 15l3 6"/></svg>Atlas</button>
@@ -1605,7 +1646,20 @@ const HELP={
     <li><b>Semana</b>: 4–9 séries é estímulo moderado, 10–20 é a faixa ideal, mais de 20 é volume alto.</li>
     <li><b>Dia</b>: até ~11 séries por músculo no mesmo treino ainda trazem ganho; depois disso, quase nada a mais.</li></ul>
     <h4>Dicas</h4><ul><li>Mire 10–20 séries por semana em cada grupo que quer crescer, divididas em 2 ou mais treinos.</li>
-    <li>Grupos em "Não treinados" mostram o que ficou de fora na semana.</li></ul>`]
+    <li>Grupos em "Não treinados" mostram o que ficou de fora na semana.</li></ul>`],
+  rank:["Ranking de força",`<p>Mostra quão forte você é em cada grupo muscular, em 7 níveis: <b>Vegetal, Molenga, Frango, Decente, Fortinho, Monstro e Bizarro</b>. A comparação é com milhões de registros de pessoas que treinam, do mesmo sexo, ajustada ao seu peso.</p>
+    <h4>O que dá para fazer</h4><ul>
+    <li><b>Seu peso</b> e <b>corpo ♂/♀</b>: mudam as faixas. Coloque seu peso para o resultado ficar certo.</li>
+    <li><b>Toque num grupo</b> para ver cada exercício que entrou na conta, o nível dele e quanto falta para o próximo nível.</li>
+    <li><b>+ Digitar uma carga</b>: para exercícios que você faz mas ainda não anotou nos treinos. Escolha o exercício e a variação, coloque a carga e as repetições.</li>
+    <li>Toque no boneco para ver o nível de cada parte.</li></ul>
+    <h4>Como conta</h4><ul><li>As cargas vêm dos treinos marcados como feitos (com carga e repetições anotadas) nos últimos 6 meses e do que você digitar aqui. Vale a melhor série de cada exercício.</li>
+    <li>Cada série vira força estimada (carga × (1 + reps ÷ 30)) e é comparada com as faixas daquele exercício.</li>
+    <li>O nível do grupo é a média de todos os exercícios dele; o nível geral é a média dos grupos.</li>
+    <li>Halteres: use o peso de cada halter.</li></ul>
+    <h4>Dicas</h4><ul><li>Decente é a média de quem treina. Fortinho já é melhor que 4 em cada 5 pessoas.</li>
+    <li>Séries de 3 a 12 repetições dão a estimativa mais confiável.</li>
+    <li>Para abrir esta tela, toque no título Atlas Muscular, lá em cima.</li></ul>`]
 };
 function openHelp(k){const h=HELP[k];if(!h)return;$("hTitle").textContent=h[0];$("hBody").innerHTML=h[1];$("helpSheet").hidden=false;$("hBody").scrollTop=0}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-help]");if(!b)return;e.preventDefault();e.stopPropagation();openHelp(b.dataset.help)},true);
@@ -1838,7 +1892,7 @@ $("treinoBody").addEventListener("click",e=>{
   else if(a==="back"){openW=null;askDel=false}
   else if(a==="export")return exportBackup();
   else if(a==="import")return $("importFile").click();
-  else if(a==="doImport"){plans=pendingImport.plans;workouts=pendingImport.workouts;pendingImport=null;openW=null;savePlans();toast("Backup importado")}
+  else if(a==="doImport"){plans=pendingImport.plans;workouts=pendingImport.workouts;if(pendingImport.rank){rank=pendingImport.rank;saveRank()}pendingImport=null;openW=null;savePlans();toast("Backup importado")}
   else if(a==="noImport")pendingImport=null;
   else if(!w)return;
   else if(a==="addEx")return openPicker("Adicionar ao treino",(name,ref)=>{w.items.push(mkItem(name,3,"",ref));saveW();renderTreino()});
@@ -1854,7 +1908,7 @@ $("treinoBody").addEventListener("click",e=>{
   saveW();renderTreino();
 });
 function exportBackup(){
-  const data=JSON.stringify({app:"atlas-muscular",version:2,exported:new Date().toISOString(),plans,workouts});
+  const data=JSON.stringify({app:"atlas-muscular",version:2,exported:new Date().toISOString(),plans,workouts,rank});
   const name=`atlas-backup-${isoDate(new Date())}.json`;
   let file;try{file=new File([data],name,{type:"application/json"})}catch(e){file=null}
   if(file&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Backup do Atlas Muscular"}).catch(()=>{});return}
@@ -1866,12 +1920,12 @@ $("importFile").addEventListener("change",async e=>{
   try{const d=JSON.parse(await f.text());
     if(d.app!=="atlas-muscular"||!Array.isArray(d.workouts))throw 0;
     const pl=Array.isArray(d.plans)?d.plans.filter(p=>p&&Array.isArray(p.items)&&Array.isArray(p.days)):planFromFicha(d.ficha);
-    pendingImport={plans:pl,workouts:d.workouts};renderTreino();
+    pendingImport={plans:pl,workouts:d.workouts,rank:d.rank&&typeof d.rank==="object"&&Array.isArray(d.rank.man)?d.rank:null};renderTreino();
   }catch(_){toast("Esse arquivo não é um backup do Atlas Muscular")}
 });
 
 /* ---------------------------------------------------------- tabs + init */
-let tab=LS.get("atlas-tab","atlas");if(!["atlas","ficha","treino","prog"].includes(tab))tab="atlas";
+let tab=LS.get("atlas-tab","atlas");if(!["atlas","ficha","treino","prog","rank"].includes(tab))tab="atlas";
 /* ---------------------------------------------------------- progress
    Sets done in the period, per muscle: 1 for each target muscle of the
    exercise (the lists it appears in) and 1/2 for each synergist. */
@@ -2096,13 +2150,293 @@ $("progBody").addEventListener("click",e=>{
   const g=e.target.closest(".pfig [data-m]");if(g){const t=g.querySelector("title");toast(t?t.textContent:M[g.dataset.m].n)}
 });
 
+/* ---------------------------------------------------------- ranking de força (title "Atlas Muscular" opens it)
+   Standards: Strength Level (strengthlevel.com), 1-rep-max levels built from ~11 million
+   logged lifts. Each level is a percentile among lifters of the same sex: Beginner 5%,
+   Novice 20%, Intermediate 50%, Advanced 80%, Elite 95%. The numbers below are the site's
+   values for its typical lifter (~77 kg men, ~65 kg women); thresholds are rescaled to
+   the user's bodyweight with (BW/ref)^(2/3) (allometric scaling: strength grows with
+   muscle cross-section, i.e. bodyweight to the 2/3 power).
+   Entry: [name, unit l=lb k=kg, male x5, female x5, k?]. With k the values are weight
+   ADDED to the body (pull-up, dip, back extension) and k is the share of bodyweight moved. */
+const RSW={m:77,f:65},LB=.4536;
+const RSTD={
+  bench:["Supino reto (barra)","l",[107,154,212,280,353],[43,72,112,159,213]],
+  incline:["Supino inclinado (barra)","l",[96,138,190,251,317],[34,60,95,138,187]],
+  dbbench:["Supino com halteres (cada halter)","l",[37,58,85,117,153],[15,28,44,65,89]],
+  cgbench:["Supino pegada fechada","l",[108,152,206,268,336],[47,75,111,154,202]],
+  chestpress:["Supino máquina (chest press)","l",[75,124,189,267,354],[25,49,83,125,173]],
+  machfly:["Voador (máquina)","l",[81,127,188,260,339],[29,54,88,130,177]],
+  cablefly:["Crucifixo na polia","l",[15,39,76,126,186],[8,21,41,68,100]],
+  dbfly:["Crucifixo com halteres (cada halter)","l",[20,35,56,81,110],[9,17,29,43,58]],
+  dips:["Mergulho nas paralelas (peso extra)","l",[6,52,108,172,240],[-34,-2,37,82,130],1],
+  ohp:["Desenvolvimento com barra","l",[65,97,137,185,236],[29,47,72,102,135]],
+  dbohp:["Desenvolvimento com halteres (cada halter)","l",[29,45,67,93,121],[13,22,33,47,62]],
+  machohp:["Desenvolvimento na máquina","l",[54,100,162,239,326],[18,39,69,109,155]],
+  latraise:["Elevação lateral (cada halter)","l",[10,20,35,53,75],[7,12,20,29,39]],
+  cablelat:["Elevação lateral na polia","l",[6,17,34,57,85],[5,12,24,39,56]],
+  machlat:["Elevação lateral na máquina","l",[48,82,129,185,249],[19,37,62,93,128]],
+  frontraise:["Elevação frontal (cada halter)","l",[8,20,37,59,85],[6,12,21,32,44]],
+  revfly:["Crucifixo inverso (cada halter)","l",[6,18,37,62,93],[6,13,22,34,48]],
+  facepull:["Face pull","l",[30,59,100,151,209],[24,45,73,109,150]],
+  uprow:["Remada alta na polia","l",[45,84,137,203,278],[22,45,78,121,170]],
+  shrug:["Encolhimento com barra","l",[103,178,279,401,539],[40,84,149,231,326]],
+  dbshrug:["Encolhimento com halteres (cada halter)","l",[31,58,93,138,188],[15,31,55,85,120]],
+  bbcurl:["Rosca direta (barra)","l",[42,67,99,138,180],[18,33,54,80,110]],
+  ezcurl:["Rosca com barra W","k",[22,33,45,60,76],[11,18,27,37,49]],
+  dbcurl:["Rosca com halteres (cada halter)","l",[16,29,46,68,93],[9,16,27,41,56]],
+  cablecurl:["Rosca na polia","l",[38,67,108,157,214],[17,33,56,85,118]],
+  preacher:["Rosca Scott","k",[18,29,43,60,79],[9,16,25,37,50]],
+  revcurl:["Rosca inversa (barra)","l",[28,52,84,124,170],[16,29,48,70,96]],
+  pushdown:["Tríceps na polia (barra)","l",[41,74,119,174,236],[20,39,66,99,137]],
+  rope:["Tríceps na polia (corda)","l",[33,60,98,144,196],[18,34,55,82,112]],
+  cableoh:["Tríceps francês na polia","l",[26,52,90,137,191],[13,27,48,74,104]],
+  skull:["Tríceps testa (barra)","l",[37,61,92,129,171],[16,28,46,68,92]],
+  dbskull:["Tríceps testa com halteres (cada halter)","k",[6,11,20,30,42],[3,7,12,19,27]],
+  kickback:["Tríceps coice (halter)","k",[4,9,17,28,40],[4,7,10,15,20]],
+  wristcurl:["Rosca de punho (barra)","l",[12,41,90,158,239],[3,20,53,101,163]],
+  row:["Remada curvada (barra)","l",[94,137,192,255,325],[41,66,98,137,180]],
+  tbar:["Remada cavalinho (T)","l",[74,119,177,248,327],[34,61,98,143,194]],
+  cablerow:["Remada baixa na polia","l",[91,133,186,246,313],[47,73,105,143,185]],
+  cablerow1:["Remada baixa com um braço","l",[47,82,128,186,250],[25,44,71,103,140]],
+  machrow:["Remada na máquina","l",[90,147,221,311,410],[47,78,118,166,220]],
+  dbrow:["Remada serrote (halter)","l",[36,60,91,129,171],[20,32,48,67,88]],
+  pulldown:["Puxada alta","l",[93,132,180,235,295],[52,75,105,139,176]],
+  pullup:["Barra fixa pronada (peso extra)","l",[-6,29,69,114,162],[-36,-11,18,50,84],1],
+  chinup:["Barra fixa supinada (peso extra)","l",[-3,31,71,114,160],[-23,-2,21,46,72],1],
+  deadlift:["Levantamento terra","l",[176,249,340,445,558],[91,139,200,273,352]],
+  rdl:["Stiff / terra romeno (barra)","k",[58,87,122,164,210],[31,48,68,93,120]],
+  goodmorning:["Bom dia","l",[60,115,190,284,392],[36,64,102,149,202]],
+  rackpull:["Terra parcial (rack pull)","l",[211,305,422,558,705],[122,181,255,342,437]],
+  backext:["Extensão lombar (peso extra)","k",[6,36,74,118,166],[7,26,49,76,104],.5],
+  cablecrunch:["Abdominal na polia","k",[23,41,65,95,128],[16,29,48,72,98]],
+  squat:["Agachamento livre","l",[145,209,289,382,482],[71,113,167,232,303]],
+  frontsquat:["Agachamento frontal","l",[120,170,231,303,380],[69,100,138,182,230]],
+  smithsquat:["Agachamento no Smith","l",[105,167,246,341,445],[48,86,136,199,269]],
+  hacksquat:["Agachamento hack (máquina)","l",[129,217,335,478,637],[57,117,203,313,440]],
+  goblet:["Agachamento goblet","k",[14,25,40,58,79],[10,17,26,37,50]],
+  legpress:["Leg press 45°","l",[211,337,500,696,913],[115,207,333,489,665]],
+  legpressh:["Leg press horizontal","k",[66,110,168,238,316],[41,71,112,162,219]],
+  legext:["Cadeira extensora","l",[94,149,219,303,395],[50,86,135,195,262]],
+  lunge:["Afundo com halteres (cada halter)","k",[8,17,28,44,61],[6,11,19,28,39]],
+  bulgarian:["Búlgaro com halteres (cada halter)","k",[11,20,31,46,62],[7,13,20,30,41]],
+  hipthrust:["Elevação pélvica (barra)","l",[100,188,309,460,631],[78,140,225,329,448]],
+  abduction:["Abdução na máquina","l",[76,130,203,292,392],[59,101,157,224,300]],
+  adduction:["Adução na máquina","k",[38,64,99,142,190],[23,42,67,98,133]],
+  legcurl:["Cadeira flexora","k",[35,55,80,110,143],[20,32,49,69,92]],
+  standcurl:["Flexora em pé (uma perna)","l",[21,52,98,160,233],[9,31,67,118,180]],
+  calf:["Panturrilha em pé (máquina)","l",[95,181,302,453,625],[49,108,195,308,440]],
+  seatcalf:["Panturrilha sentado","k",[28,54,91,137,190],[15,35,66,106,154]]
+};
+/* Which standard each family/variation is compared with. x converts the user's estimated
+   max into the standard lift (e.g. incline dumbbell ≈ 90% of flat → x 1.1; one arm on a
+   machine whose standard is two arms → x 1.8). null = no fair standard (bodyweight-only,
+   very light or very unusual lifts). Approximations are listed in "Como o ranking funciona". */
+function rStd(f,s){
+  const e=s.e,un=s.l==="un",U=(k,x=1)=>({k,x:un?x*1.8:x}),K=(k,x=1)=>({k,x});
+  switch(f.id){
+    case "supino":if(s.w==="fe"&&e!=="ma")return e==="ha"?K("dbbench",.95):K("cgbench");
+      if(e==="ba")return s.b==="in"?K("incline"):K("bench",s.b==="de"?.95:1);
+      if(e==="sm")return s.b==="in"?K("incline",.95):K("bench",s.b==="de"?.9:.95);
+      if(e==="ha")return K("dbbench",s.b==="in"?1.1:s.b==="de"?.95:1);
+      if(e==="ma")return K("chestpress",s.b==="in"?1.1:1);return null;
+    case "crucifixo":if(e==="ha")return K("dbfly",s.b==="in"?1:.95);if(e==="po")return K("cablefly");if(e==="ma")return U("machfly");return null;
+    case "mergulho":return e==="co"?K("dips"):null;
+    case "desenv":if(e==="ha")return K("dbohp");if(e==="ba")return K("ohp");if(e==="sm")return K("ohp",.95);if(e==="ma")return U("machohp");return null;
+    case "elevfront":if(e==="ha")return K("frontraise");if(e==="po")return K("frontraise");if(e==="an"||e==="ba")return K("frontraise",.5);return null;
+    case "elevlat":if(e==="ha")return K("latraise");if(e==="po")return K("cablelat");if(e==="ma")return U("machlat");return null;
+    case "remalta":if(e==="po")return K("uprow");if(e==="ha")return K("uprow",2);if(e==="ba"||e==="bw"||e==="sm")return K("uprow");return null;
+    case "crucinv":if(e==="ha")return K("revfly");if(e==="po")return K("revfly");if(e==="ma")return U("machfly",1.3);return null;
+    case "facepull":return e==="po"?K("facepull"):null;
+    case "rosca":
+      if(s.g==="pr")return e==="ha"?K("dbcurl",1.33):e==="po"?K("revcurl"):K("revcurl");
+      if(s.g==="ne")return e==="ha"?K("dbcurl",.95):e==="po"?U("cablecurl"):K("bbcurl");
+      if(e==="ba")return K("bbcurl");if(e==="bw")return K("ezcurl");if(e==="ha")return K("dbcurl");if(e==="po")return U("cablecurl");return null;
+    case "scott":if(e==="ha")return K("dbcurl",1.18);return U("preacher");
+    case "rinclinada":return e==="ha"?K("dbcurl",1.2):null;
+    case "concentrada":return K("dbcurl",1.1);
+    case "spider":return e==="ha"?K("dbcurl",1.2):K("preacher");
+    case "drag":return K("bbcurl",1.2);
+    case "zottman":return K("dbcurl",1.05);
+    case "pushdown":return s.g==="co"?U("rope"):s.g==="su"?U("pushdown",1.3):U("pushdown");
+    case "frances":if(e==="po")return U("cableoh");if(e==="ha")return K("cableoh",un?1.8:1);if(e==="bw")return K("cableoh");return null;
+    case "testa":if(e==="ba"||e==="bw")return K("skull");if(e==="ha")return K("dbskull");if(e==="po")return K("cableoh");return null;
+    case "coice":return K("kickback");
+    case "jm":return K("cgbench",1.3);
+    case "punho":{const x=s.g==="pr"?1.6:1;return e==="ha"?K("wristcurl",2*x):K("wristcurl",x)}
+    case "encolh":return e==="ha"?K("dbshrug"):K("shrug");
+    case "terra":if(e==="ba")return K("deadlift");if(e==="hx")return K("deadlift",.93);return null;
+    case "stiff":if(un)return null;if(e==="ba"||e==="sm")return K("rdl");if(e==="ha")return K("rdl",2);return null;
+    case "bomdia":return e==="el"?null:K("goodmorning");
+    case "remcurv":if(e==="ba")return K("row");if(e==="sm")return K("row",.95);if(e==="tb")return K("tbar");if(e==="ha")return K("dbrow",1.1);return null;
+    case "rembaixa":if(e==="po")return un?K("cablerow1"):K("cablerow");if(e==="ma")return U("machrow");return null;
+    case "remapoiada":if(e==="ha")return K("dbrow",1.15);if(e==="ma")return U("machrow");if(e==="ba")return K("row",1.1);return null;
+    case "serrote":if(e==="ha")return K("dbrow");if(e==="po")return K("cablerow1");return null;
+    case "barrafixa":{const k=s.g==="su"?"chinup":"pullup";if(e==="ma")return {k,x:1,as:1};return K(k)}
+    case "puxada":return U("pulldown");
+    case "extlombar":return K("backext");
+    case "crunch":return e==="po"||e==="ma"?K("cablecrunch"):null;
+    case "hipthrust":if(e==="co")return null;return {k:"hipthrust",x:un?1.8:1};
+    case "abducao":return e==="ma"?K("abduction"):null;
+    case "aducao":return e==="ma"?K("adduction"):null;
+    case "agach":if(e==="ba")return K("squat");if(e==="bf")return K("frontsquat");if(e==="ha")return K("goblet");if(e==="sm")return K("smithsquat");if(e==="ct")return K("squat",.85);return null;
+    case "hack":return K("hacksquat");
+    case "legpress":return e==="ho"?U("legpressh"):U("legpress");
+    case "afundo":{const k=s.dir==="bu"?"bulgarian":"lunge";if(e==="ha")return K(k);if(e==="ba"||e==="sm")return K(k,.5);return null}
+    case "stepup":if(e==="ha")return K("lunge");if(e==="ba")return K("lunge",.5);return null;
+    case "extensora":return U("legext");
+    case "flexora":if(s.p==="pe")return K("standcurl");return U("legcurl",s.p==="de"?1.15:1);
+    case "rackpull":return K("rackpull",e==="hx"?.93:1);
+    case "pant":if(e==="ha"||e==="co"||s.p==="bu")return null;return s.p==="se"?U("seatcalf"):U("calf");
+  }
+  return null;
+}
+const RLV=[["Vegetal","Abaixo do iniciante"],["Molenga","Iniciante"],["Frango","Novato"],["Decente","Intermediário"],["Fortinho","Avançado"],["Monstro","Elite"],["Bizarro","Acima da elite"]];
+let rank=LS.get("atlas-rank",null);if(!rank||typeof rank!=="object")rank={};if(!Array.isArray(rank.man))rank.man=[];
+const saveRank=()=>{if(!LS.set("atlas-rank",rank))toast("Não foi possível salvar neste aparelho")};
+let rForm=null,rOpen=null,rPrev="atlas";
+const rBW=()=>rank.bw>0?rank.bw:RSW[sex];
+function rThr(key){
+  const S=RSTD[key],ref=RSW[sex],bw=rBW(),sc=Math.pow(bw/ref,2/3);
+  const a=S[sex==="f"?3:2].map(v=>S[1]==="l"?v*LB:v);
+  return S[4]!=null?a.map(v=>(S[4]*ref+v)*sc-S[4]*bw):a.map(v=>v*sc);
+}
+function rScore(v,T){
+  if(v<T[0])return Math.max(0,1+(v-T[0])/(T[1]-T[0]));
+  for(let i=0;i<4;i++)if(v<T[i+1])return 1+i+(v-T[i])/(T[i+1]-T[i]);
+  return 5+(v-T[4])/(T[4]-T[3]);
+}
+function rVal(s,T){if(s<=1)return T[0]+(s-1)*(T[1]-T[0]);if(s>=5)return T[4]+(s-5)*(T[4]-T[3]);const i=Math.floor(s)-1;return T[i]+(s-1-i)*(T[i+1]-T[i])}
+const rLv=s=>Math.max(0,Math.min(6,Math.floor(s)));
+function rPct(s){const P=[[0,1],[1,5],[2,20],[3,50],[4,80],[5,95],[6,99]];if(s>=6)return 99;
+  const i=Math.floor(s);return Math.round(P[i][1]+(s-i)*(P[i+1][1]-P[i][1]))}
+/* value of one set in "standard units": estimated 1-rep max × x, or for bodyweight lifts
+   the estimated extra weight for 1 rep. Reps above 20 count as 20 (Epley overshoots there). */
+function rSetVal(st,kg,r){
+  const S=RSTD[st.k];r=Math.min(r,20);if(!(r>0))return null;
+  if(S[4]!=null){const bw=rBW(),body=S[4]*bw;let a=isFinite(kg)?kg:0;if(st.as)a=-Math.abs(a);const eff=body+a;if(eff<=0)return null;return eff*(r<=1?1:1+r/30)-body}
+  if(!(kg>0))return null;return e1rm(kg,r)*st.x;
+}
+function rankData(){
+  const t=new Date();t.setHours(12,0,0,0);const from=isoDate(new Date(t.getTime()-182*864e5));
+  const ex=new Map(),noStd=new Map();
+  const put=(r,st,val,info)=>{const key=mkRef(r.f,r.sel);let o=ex.get(key);
+    if(!o){const v=resolveV(r.f,r.sel);o={key,f:r.f,sel:r.sel,st,name:vName(r.f,r.sel),groups:[...new Set(v.p.map(m=>TOB[m]))],best:null,man:[]};ex.set(key,o)}
+    if(val!=null&&(!o.best||val>o.best.val))o.best={val,...info};return o};
+  for(const w of workouts){if(w.done===false||w.date<from)continue;
+    for(const it of w.items||[]){const r=parseRef(it.ref)||parseRef(refByName(it.name));if(!r)continue;const st=rStd(r.f,r.sel);
+      const sets=(it.sets||[]).filter(x=>parseInt(x.r)>0||numKg(x.kg)>0);
+      if(!st){if(sets.some(x=>numKg(x.kg)>0))noStd.set(vName(r.f,r.sel),1);continue}
+      for(const x of sets){const kg=numKg(x.kg),rp=parseInt(x.r)||0,val=rSetVal(st,kg,rp);if(val!=null)put(r,st,val,{kg:isFinite(kg)?kg:0,r:rp,date:w.date,src:"t"})}}}
+  for(const m of rank.man){const r=parseRef(m.ref);if(!r)continue;const st=rStd(r.f,r.sel);if(!st)continue;
+    const o=put(r,st,rSetVal(st,m.kg,m.r),{kg:m.kg,r:m.r,date:m.date,src:"d"});o.man.push(m)}
+  const list=[...ex.values()].filter(o=>o.best);
+  list.forEach(o=>{o.T=rThr(o.st.k);o.s=rScore(o.best.val,o.T)});
+  const grp={};for(const o of list)for(const g of o.groups)(grp[g]=grp[g]||[]).push(o);
+  const gs=Object.keys(BASIC).filter(g=>grp[g]).map(g=>{const a=grp[g].sort((x,y)=>y.s-x.s);return {g,ex:a,s:a.reduce((z,o)=>z+o.s,0)/a.length}});
+  const all=gs.length?gs.reduce((z,x)=>z+x.s,0)/gs.length:null;
+  return {list,gs,all,noStd:[...noStd.keys()].filter(n=>!list.some(o=>o.name===n))};
+}
+const rKg=v=>fkg(Math.round(v*2)/2);
+function rNeed(o){const lv=rLv(o.s);if(lv>=6)return "";const v=rVal(lv+1,o.T),S=RSTD[o.st.k];
+  if(S[4]!=null){const t=o.st.as?(v<0?`com ajuda de até ${rKg(-v)} kg`:`sem ajuda (ou +${rKg(v)} kg)`):(v<=0?`1 repetição só com o corpo`:`1 repetição com +${rKg(v)} kg`);return `Para ${RLV[lv+1][0]}: ${t}`}
+  const one=v/o.st.x;return `Para ${RLV[lv+1][0]}: 1 repetição com ${rKg(one)} kg (ou ${rKg(one/(1+8/30))} kg × 8)`}
+function rSetTxt(o){const b=o.best,S=RSTD[o.st.k];
+  const load=S[4]!=null?(o.st.as?(b.kg?`ajuda de ${fkg(b.kg)} kg`:"sem ajuda"):(b.kg?`+${fkg(b.kg)} kg`:"só o corpo")):`${fkg(b.kg)} kg`;
+  return `${load} × ${b.r} · ${b.src==="d"?"digitado":"treino"} de ${fmtDate(b.date)}`}
+function rankFig(gs){
+  const f=document.createElementNS(NS,"svg");f.setAttribute("viewBox",BOX.both.join(" "));f.setAttribute("class","pfig rfig");
+  f.setAttribute("aria-label","Boneco colorido pelo nível de força de cada grupo, frente e costas");
+  for(const n of ["front","back"]){const g=VG[n].cloneNode(true);g.style.display="";f.appendChild(g)}
+  f.querySelectorAll(".on,.syn").forEach(e=>e.classList.remove("on","syn"));
+  const by={};gs.forEach(x=>by[x.g]=x);
+  f.querySelectorAll("[data-m]").forEach(g=>{const x=by[TOB[g.dataset.m]],t=g.querySelector("title"),lv=x?rLv(x.s):-1;
+    if(t)t.textContent=BASIC[TOB[g.dataset.m]]?.n+": "+(x?RLV[lv][0]:"sem dados");
+    if(x)g.querySelector(".m").style.fill=`var(--lv${lv})`});
+  return f;
+}
+const rChip=s=>{const lv=rLv(s);return `<span class="rk-chip"><i style="background:var(--lv${lv})"></i>${RLV[lv][0]}</span>`};
+const rBar=s=>`<span class="rk-bar"><i style="width:${Math.max(3,Math.min(s,7)/7*100).toFixed(1)}%;background:var(--lv${rLv(s)})"></i>${[1,2,3,4,5,6].map(k=>`<b style="left:${(k/7*100).toFixed(2)}%"></b>`).join("")}</span>`;
+function rankAbout(){return `<details class="about"><summary>Como o ranking funciona</summary>
+  <p><b>De onde vêm os números.</b> As faixas são os padrões de força do Strength Level, feitos com cerca de 11 milhões de registros de pessoas que treinam (entre 48 milhões de levantamentos enviados). Cada nível é um percentil entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%. O app usa o corpo ♂/♀ escolhido.</p>
+  <p><b>Os 7 níveis.</b> Vegetal = abaixo do iniciante · Molenga = iniciante a novato · Frango = novato a intermediário · Decente = intermediário a avançado · Fortinho = avançado a elite · Monstro = elite · Bizarro = bem acima da elite (um degrau inteiro além).</p>
+  <p><b>Peso corporal.</b> As faixas publicadas são para o praticante típico (cerca de 77 kg no masculino e 65 kg no feminino). O app ajusta para o seu peso pela regra de ⅔: a força cresce com a área do músculo, que acompanha o peso elevado a ⅔. Quem é mais leve precisa levantar menos, mas não proporcionalmente menos.</p>
+  <p><b>Sua força em cada exercício.</b> Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Séries de até ~12 repetições dão a estimativa mais confiável. Em barra fixa e mergulho conta o peso do corpo mais o peso extra; na barra assistida (graviton), a ajuda é descontada.</p>
+  <p><b>Nível do grupo.</b> É a média de <b>todos</b> os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos.</p>
+  <p><b>Aproximações.</b> Halteres: o peso é de cada halter. Variações sem padrão próprio usam o mais próximo com um fator (ex.: supino inclinado com halteres ≈ 90% do reto; máquina com um braço só ≈ metade do peso dos dois). Exercícios só com o peso do corpo (flexão, prancha) e muito leves ficam fora. Máquinas variam de marca para marca, então use o nível delas como referência, não como verdade absoluta.</p>
+  <ul><li>Strength Level: padrões de força por exercício, sexo e peso corporal (strengthlevel.com)</li><li>StrengthLog: padrões de força em kg para agachamento, terra, supino e desenvolvimento (strengthlog.com)</li><li>Jaric (2002, Sports Medicine): normalizar força pelo peso corporal elevado a ⅔</li><li>Epley (1985): fórmula da força estimada</li></ul></details>`}
+function renderRank(){
+  const D=rankData(),body=$("rankBody"),has=D.list.length>0,lv=has?rLv(D.all):-1;
+  const hero=has?`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big">${RLV[lv][0]}</b>
+      <span class="rk-sub">${RLV[lv][1]} · mais forte que ~${rPct(D.all)}% de quem treina, do mesmo sexo.</span>
+      <div class="rk-ladder" role="list" aria-label="Os 7 níveis">${RLV.map((x,i)=>`<span role="listitem" class="${i<lv?"past":i===lv?"now":""}"${i===lv?' aria-current="true"':""}>${x[0]}</span>`).join("")}</div>
+      <span class="rk-sub sm">${plural(D.gs.length,"grupo")} de ${Object.keys(BASIC).length} avaliado${D.gs.length===1?"":"s"} · ${plural(D.list.length,"exercício")} · corpo ${sex==="f"?"feminino":"masculino"}, ${fkg(rBW())} kg${rank.bw>0?"":" (padrão)"}</span></div>`
+    :`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big">Sem dados</b>
+      <span class="rk-sub">Anote carga e repetições nos treinos da aba Hoje e marque como feito, ou digite aqui embaixo uma carga que você já levanta.</span>
+      <div class="rk-ladder" role="list" aria-label="Os 7 níveis">${RLV.map(x=>`<span role="listitem">${x[0]}</span>`).join("")}</div></div>`;
+  const none=Object.keys(BASIC).filter(g=>!D.gs.some(x=>x.g===g));
+  const form=rForm?(()=>{const r=parseRef(rForm.ref),st=rStd(r.f,r.sel),S=RSTD[st.k];
+    const lab=S[4]!=null?(st.as?"Ajuda da máquina (kg)":"Peso extra (kg, 0 = só o corpo)"):"Carga (kg)";
+    return `<div class="card rk-form" id="rkForm"><h3 class="section-t" style="margin:0">Digitar carga</h3><b>${esc(rForm.name)}</b>
+      <div class="rk-inps"><label><span>${lab}</span><input class="inp" id="rkKg" inputmode="decimal" placeholder="${S[4]!=null?"0":"ex.: 60"}"></label><label><span>Repetições</span><input class="inp" id="rkR" inputmode="numeric" placeholder="ex.: 8"></label></div>
+      <span class="muted-s" style="margin:0">Use a série mais pesada que você faz hoje, com boa execução.${S[1]&&/cada halter/.test(S[0])?" Peso de cada halter.":""}</span>
+      <div class="row"><button class="btn primary" data-ract="save">Salvar</button><button class="btn" data-ract="cancel">Cancelar</button></div></div>`})():"";
+  body.innerHTML=`<div class="page-h"><button class="rk-back" data-ract="back">‹ Voltar</button><h2>Ranking de força<button class="help" data-help="rank" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2>
+    <p class="lead">Quanto você levanta em cada grupo muscular comparado com milhões de pessoas que treinam, do seu sexo e ajustado ao seu peso.</p></div>
+  <div class="card rk-me"><label class="rk-bw"><span>Seu peso</span><span class="rk-bwi"><input class="inp" id="rkBw" inputmode="decimal" value="${rank.bw>0?fkg(rank.bw):""}" placeholder="${RSW[sex]}"><small>kg</small></span></label>
+    <div class="rk-sexw"><span>Corpo</span><div class="seg sex" role="group" aria-label="Corpo"><button data-rsex="m" aria-pressed="${sex==="m"}" aria-label="Masculino" title="Masculino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="14.5" r="5.5"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg></button><button data-rsex="f" aria-pressed="${sex==="f"}" aria-label="Feminino" title="Feminino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5V22M8.5 18.5h7"/></svg></button></div></div>
+    ${rank.bw>0?"":`<span class="muted-s rk-note">Coloque seu peso para o ranking ficar certo. Enquanto isso, o app usa ${RSW[sex]} kg.</span>`}</div>
+  ${hero}
+  ${form}
+  ${has?`<div class="card"><div id="rkFigBox"></div><div class="rk-legend" role="list" aria-label="Cores dos níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:var(--lv${i})"></i>${x[0]}</span>`).join("")}<span role="listitem"><i style="background:var(--m)"></i>Sem dados</span></div></div>`:""}
+  <div class="card"><div class="row between"><h3 class="section-t" style="margin:0">Nível por grupo</h3>${has?`<span class="muted-s" style="margin:0">mais forte que</span>`:""}</div>
+    ${has?D.gs.map(x=>`<details class="pg rk-g"${rOpen===x.g?" open":""} data-rg2="${x.g}"><summary><span class="pg-n">${BASIC[x.g].n}${rChip(x.s)}</span>${rBar(x.s)}<b>${rPct(x.s)}%</b></summary>
+      <div class="rk-exs">${x.ex.map(o=>`<div class="rk-ex"><div class="row between" style="flex-wrap:nowrap;align-items:flex-start"><span class="rk-exn">${esc(o.name)}<small>${rSetTxt(o)}</small></span>${rChip(o.s)}</div>
+        ${rBar(o.s)}<small class="rk-next">${rNeed(o)}</small>
+        ${o.man.length?`<div class="rk-man">${o.man.map(m=>`<span>Digitado: ${fkg(m.kg)} kg × ${m.r} <button class="lnk" data-rdel="${esc(m.id)}">apagar</button></span>`).join("")}</div>`:""}</div>`).join("")}
+        <span class="muted-s" style="margin:0">Nível do grupo = média de ${plural(x.ex.length,"exercício")}.</span></div></details>`).join(""):`<p class="muted">Nenhum exercício com carga ainda.</p>`}
+    ${none.length&&has?`<p class="muted" style="font-size:13px">Sem dados: ${none.map(g=>BASIC[g].n).join(", ")}.</p>`:""}
+    <button class="btn primary" data-ract="add">+ Digitar uma carga</button></div>
+  ${D.noStd.length?`<p class="muted" style="font-size:13px">Sem padrão de força (não entram): ${D.noStd.map(esc).join(", ")}.</p>`:""}
+  ${rankAbout()}`;
+  if(has)$("rkFigBox").appendChild(rankFig(D.gs));
+}
+$("rankBody").addEventListener("click",e=>{
+  const sx=e.target.closest("[data-rsex]");if(sx){setSex(sx.dataset.rsex);return renderRank()}
+  const a=e.target.closest("[data-ract]");
+  if(a){const k=a.dataset.ract;
+    if(k==="back")return setTab(rPrev||"atlas");
+    if(k==="add")return openPicker("Exercício para o ranking",(name,ref)=>{
+      const r=ref&&parseRef(ref);if(!r){toast("Escolha um exercício da lista");return}
+      if(!rStd(r.f,r.sel)){toast("Essa variação não tem padrão de força. Tente com barra, halteres ou máquina.");return}
+      rForm={name,ref};renderRank();const fm=$("rkForm");if(fm){fm.scrollIntoView({block:"center"});setTimeout(()=>$("rkKg").focus(),60)}});
+    if(k==="cancel"){rForm=null;return renderRank()}
+    if(k==="save"){const r=parseRef(rForm.ref),st=rStd(r.f,r.sel),S=RSTD[st.k];
+      let kg=numKg($("rkKg").value);const rp=parseInt($("rkR").value);
+      if(S[4]!=null&&!isFinite(kg))kg=0;
+      if(!(rp>0)||!(isFinite(kg))||(S[4]==null&&!(kg>0))){toast("Preencha a carga e as repetições");return}
+      rank.man.push({id:Date.now().toString(36),ref:rForm.ref,kg:Math.abs(kg),r:rp,date:isoDate(new Date())});saveRank();
+      rOpen=TOB[resolveV(r.f,r.sel).p[0]];rForm=null;renderRank();toast("Carga salva");return}
+  }
+  const d=e.target.closest("[data-rdel]");if(d){rank.man=rank.man.filter(m=>m.id!==d.dataset.rdel);saveRank();return renderRank()}
+  const g=e.target.closest(".rfig [data-m]");if(g){const t=g.querySelector("title");toast(t?t.textContent:"")}
+});
+$("rankBody").addEventListener("toggle",e=>{const d=e.target.closest&&e.target.closest("[data-rg2]");if(d){if(d.open)rOpen=d.dataset.rg2;else if(rOpen===d.dataset.rg2)rOpen=null}},true);
+$("rankBody").addEventListener("change",e=>{if(e.target.id!=="rkBw")return;const v=numKg(e.target.value);
+  if(e.target.value.trim()===""){delete rank.bw}else if(v>=30&&v<=250){rank.bw=Math.round(v*10)/10}else{toast("Peso entre 30 e 250 kg");e.target.value=rank.bw>0?fkg(rank.bw):"";return}
+  saveRank();renderRank()});
+$("brandBtn").addEventListener("click",()=>{if(tab!=="rank")setTab("rank")});
+
 function setTab(t){
+  if(t==="rank"&&tab!=="rank")rPrev=tab;
   tab=t;LS.set("atlas-tab",t);
-  ["atlas","ficha","treino","prog"].forEach(x=>$("tab-"+x).hidden=(x!==t));
+  ["atlas","ficha","treino","prog","rank"].forEach(x=>$("tab-"+x).hidden=(x!==t));
+  $("brandBtn").setAttribute("aria-current",t==="rank"?"page":"false");
   document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));
   if(t==="ficha")renderFicha();
   if(t==="treino"){openW=null;askDel=false;hDate=null;hWeek=0;renderTreino()}
   if(t==="prog"){pOff=0;renderProg()}
+  if(t==="rank"){rForm=null;renderRank();$("tab-rank").scrollTop=0}
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
 

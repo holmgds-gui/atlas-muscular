@@ -81,7 +81,61 @@ Textos de divulgação consultados:
 - [Fisiología del Ejercicio: dose-resposta](https://www.fisiologiadelejercicio.com/dosis-respuesta-en-volumen-y-frecuencia-en-la-mejora-de-hipertrofia-y-fuerza-muscular/)
 - [Train.fitness: nem toda série é igual](https://train.fitness/personal-trainer-blogs/not-all-sets-are-created-equal)
 
-## 3. Extras para consulta futura
+## 3. Ranking de força (toque no título "Atlas Muscular")
+
+Os 7 níveis (Vegetal, Molenga, Frango, Decente, Fortinho, Monstro, Bizarro) vêm dos padrões de força do **Strength Level**: cerca de 11 milhões de resultados válidos, de 48 milhões de levantamentos enviados por quem treina. Cada nível é um percentil entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%.
+
+| Nível do app | Faixa do Strength Level | Mais forte que |
+|---|---|---|
+| Vegetal | abaixo de Beginner | menos de 5% |
+| Molenga | Beginner → Novice | 5–20% |
+| Frango | Novice → Intermediate | 20–50% |
+| Decente | Intermediate → Advanced | 50–80% |
+| Fortinho | Advanced → Elite | 80–95% |
+| Monstro | Elite → Elite + 1 degrau | 95–99% |
+| Bizarro | mais de 1 degrau acima da Elite | top ~1% |
+
+- **Valores de referência**: as páginas de comparação do Strength Level mostram os números do praticante típico (calculado em ~77 kg no masculino e ~65 kg no feminino, comparando com as tabelas por peso de supino e puxada). O app ajusta para o peso da pessoa com peso^⅔.
+- **Ajuste por peso (⅔)**: Jaric 2002, *Sports Medicine*, "Muscle strength testing: use of normalisation for body size" ([🔎 PubMed](https://pubmed.ncbi.nlm.nih.gov/?term=Jaric+2002+muscle+strength+testing+normalisation+body+size)).
+- **Força estimada**: fórmula de Epley (1985), carga × (1 + reps ÷ 30), a mesma da sub-aba Cargas.
+- **Conferência com outra base**: StrengthLog (razões por peso corporal, mesma ordem de grandeza): [agachamento](https://www.strengthlog.com/squat-strength-standards-kg/) · [terra](https://www.strengthlog.com/deadlift-strength-standards-kg/) · [supino](https://www.strengthlog.com/bench-press-strength-standards/) · [desenvolvimento](https://www.strengthlog.com/overhead-press-strength-standards-kg/).
+- **Halteres**: os números são de cada halter (o supino com halteres no intermediário fica em ~80% do supino com barra somado, o que bate com a proporção conhecida).
+- **Aproximações do app** (sem padrão próprio): supino inclinado com halteres ≈ 90% do reto; máquina ou polia com um braço/perna ≈ metade dos dois (fator 1,8); rosca martelo ≈ rosca com halteres; flexora deitada ≈ 87% da sentada; JM press ≈ 75% do supino fechado; barra hexagonal ≈ 107% do terra; voador inverso ≈ 77% do voador. Flexão, prancha e exercícios muito leves ficam fora.
+
+Páginas do Strength Level consultadas:
+
+- [bench-press/lb](https://strengthlevel.com/strength-standards/bench-press/lb)
+- [lat-pulldown/lb](https://strengthlevel.com/strength-standards/lat-pulldown/lb)
+- [incline-bench-press-vs-dumbbell-bench-press](https://strengthlevel.com/strength-standards/incline-bench-press-vs-dumbbell-bench-press)
+- [machine-chest-fly-vs-chest-press](https://strengthlevel.com/strength-standards/machine-chest-fly-vs-chest-press)
+- [dips-vs-pull-ups](https://strengthlevel.com/strength-standards/dips-vs-pull-ups)
+- [lat-pulldown-vs-chin-ups](https://strengthlevel.com/strength-standards/lat-pulldown-vs-chin-ups)
+- [barbell-hack-squat-vs-romanian-deadlift/kg](https://strengthlevel.com/strength-standards/barbell-hack-squat-vs-romanian-deadlift/kg)
+- [hip-abduction-vs-leg-extension](https://strengthlevel.com/strength-standards/hip-abduction-vs-leg-extension)
+- [machine-calf-raise-vs-sled-leg-press](https://strengthlevel.com/strength-standards/machine-calf-raise-vs-sled-leg-press)
+- [hip-adduction-vs-seated-calf-raise/kg](https://strengthlevel.com/strength-standards/hip-adduction-vs-seated-calf-raise/kg)
+- [ez-bar-curl-vs-preacher-curl/kg](https://strengthlevel.com/strength-standards/ez-bar-curl-vs-preacher-curl/kg)
+- [ez-bar-curl-vs-barbell-shrug](https://strengthlevel.com/strength-standards/ez-bar-curl-vs-barbell-shrug)
+- [dumbbell-shrug-vs-dumbbell-curl](https://strengthlevel.com/strength-standards/dumbbell-shrug-vs-dumbbell-curl)
+- [dumbbell-tricep-kickback-vs-lying-dumbbell-tricep-extension/kg](https://strengthlevel.com/strength-standards/dumbbell-tricep-kickback-vs-lying-dumbbell-tricep-extension/kg)
+- [lying-tricep-extension-vs-close-grip-bench-press](https://strengthlevel.com/strength-standards/lying-tricep-extension-vs-close-grip-bench-press)
+- [tricep-rope-pushdown-vs-cable-overhead-tricep-extension](https://strengthlevel.com/strength-standards/tricep-rope-pushdown-vs-cable-overhead-tricep-extension)
+- [dumbbell-reverse-fly-vs-incline-dumbbell-fly](https://strengthlevel.com/strength-standards/dumbbell-reverse-fly-vs-incline-dumbbell-fly)
+- [dumbbell-front-raise-vs-dumbbell-reverse-fly](https://strengthlevel.com/strength-standards/dumbbell-front-raise-vs-dumbbell-reverse-fly)
+- [machine-lateral-raise-vs-dumbbell-lateral-raise](https://strengthlevel.com/strength-standards/machine-lateral-raise-vs-dumbbell-lateral-raise)
+- [one-arm-seated-cable-row-vs-cable-lateral-raise](https://strengthlevel.com/strength-standards/one-arm-seated-cable-row-vs-cable-lateral-raise)
+- [cable-upright-row-vs-face-pull](https://strengthlevel.com/strength-standards/cable-upright-row-vs-face-pull)
+- [machine-row-vs-machine-back-extension](https://strengthlevel.com/strength-standards/machine-row-vs-machine-back-extension)
+- [t-bar-row-vs-rack-pull](https://strengthlevel.com/strength-standards/t-bar-row-vs-rack-pull)
+- [good-morning-vs-squat](https://strengthlevel.com/strength-standards/good-morning-vs-squat)
+- [dumbbell-squat-vs-goblet-squat/kg](https://strengthlevel.com/strength-standards/dumbbell-squat-vs-goblet-squat/kg)
+- [hack-squat-vs-smith-machine-squat](https://strengthlevel.com/strength-standards/hack-squat-vs-smith-machine-squat)
+- [dumbbell-lunge-vs-dumbbell-bulgarian-split-squat/kg](https://strengthlevel.com/strength-standards/dumbbell-lunge-vs-dumbbell-bulgarian-split-squat/kg)
+- [pull-ups-vs-back-extension/kg](https://strengthlevel.com/strength-standards/pull-ups-vs-back-extension/kg)
+- [cable-crunch-vs-standing-cable-crunch/kg](https://strengthlevel.com/strength-standards/cable-crunch-vs-standing-cable-crunch/kg)
+- [reverse-barbell-curl-vs-wrist-curl](https://strengthlevel.com/strength-standards/reverse-barbell-curl-vs-wrist-curl)
+
+## 4. Extras para consulta futura
 
 | Estudo | Tema | Link |
 |---|---|---|
@@ -91,12 +145,12 @@ Textos de divulgação consultados:
 | Morton et al. 2018, *Br J Sports Med* | Proteína: benefício até ~1,6 g/kg/dia | [PubMed 28698222](https://pubmed.ncbi.nlm.nih.gov/28698222/) |
 | Grgic & Schoenfeld 2018, *Front Physiol* | Carga leve vs pesada e tipo de fibra | [Frontiers](https://www.frontiersin.org/journals/physiology/articles/10.3389/fphys.2018.00402/pdf) |
 
-## 4. Desenho do boneco
+## 5. Desenho do boneco
 
 - Imagem de referência para a silhueta (só formato e detalhes, sem cores ou textos): [Toda Matéria](https://static.todamateria.com.br/upload/55/77/55771934478af-musculos-do-corpo-humano.jpg)
 - Ideia original do app, conversa no Gemini: [link compartilhado](https://share.gemini.google/a7ybw8rbXXQ6)
 
-## 5. Publicação e ferramentas
+## 6. Publicação e ferramentas
 
 - App publicado: https://holmgds-gui.github.io/atlas-muscular/
 - Lojas de apps:

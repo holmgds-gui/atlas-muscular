@@ -95,7 +95,24 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 - Um "+" pequeno ao lado do título de cada aba abre uma explicação: o que a página faz, o que dá para fazer e dicas.
 - Só o "+", sem círculo em volta.
 
-## 8. Perguntas que o dono fez (respostas resumidas)
+## 8. Ranking de força
+
+- Pedido do dono: tocar no título "Atlas Muscular" abre uma tela à parte com um ranking em 7 níveis (**Vegetal, Molenga, Frango, Decente, Fortinho, Monstro, Bizarro**), por grupo muscular e com base no peso corporal.
+- Escolhas do dono:
+  - Cargas vêm dos treinos feitos e também dá para digitar.
+  - O nível do grupo usa **todos** os exercícios do grupo, não um só.
+  - Usa o ♂/♀ do app.
+  - A tela mostra o nível por grupo e o boneco colorido.
+- Como funciona:
+  - Padrões do Strength Level (percentis entre quem treina), ajustados ao peso pela regra de ⅔.
+  - Cada série vira força estimada (Epley); vale a melhor dos últimos 6 meses ou a digitada.
+  - Cada exercício conta para todos os grupos-alvo dele. Grupo = média dos exercícios; geral = média dos grupos.
+  - 66 exercícios-padrão cobrem 46 famílias e 1.046 das 1.325 variações.
+  - Cada exercício mostra quanto falta para o próximo nível.
+  - Cores: uma escala de azul em 7 tons, validada para daltonismo nos dois temas.
+- Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
+
+## 9. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.
 - **Ranking**: no começo, parte das listas só dizia se o exercício "pega ou não pega" o músculo. Depois tudo virou ordem por estímulo com selos.
