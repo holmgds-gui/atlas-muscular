@@ -1659,7 +1659,8 @@ const HELP={
     <h4>Como conta</h4><ul><li>As cargas vêm dos treinos marcados como feitos (com carga e repetições anotadas) nos últimos 6 meses e do que você digitar aqui. Vale a melhor série de cada exercício.</li>
     <li>Cada série vira força estimada (carga × (1 + reps ÷ 30)) e é comparada com as faixas daquele exercício.</li>
     <li>O nível do grupo é a média de todos os exercícios dele; o nível geral é a média dos grupos.</li>
-    <li>Halteres: use o peso de cada halter.</li></ul>
+    <li>Halteres: use o peso de cada halter.</li>
+    <li>Barra fixa, mergulho, flexão e remada invertida contam o seu peso corporal. Se fizer só com o corpo, deixe a carga em branco (ou 0) e anote as repetições.</li></ul>
     <h4>Dicas</h4><ul><li>Fortinho fica em volta da média de quem treina (45–60%). Monstro já é mais forte que 3 em cada 4 pessoas.</li>
     <li>Séries de 3 a 12 repetições dão a estimativa mais confiável.</li>
     <li>Para abrir esta tela, toque no título Atlas Muscular, lá em cima.</li></ul>`]
@@ -2276,6 +2277,11 @@ function rStd(f,s){
     case "remapoiada":if(e==="ha")return K("dbrow",1.15);if(e==="ma")return U("machrow");if(e==="ba")return K("row",1.1);return null;
     case "serrote":if(e==="ha")return K("dbrow");if(e==="po")return K("cablerow1");return null;
     case "barrafixa":{const k=s.g==="su"?"chinup":"pullup";if(e==="ma")return {k,x:1,as:1};return K(k)}
+    /* bodyweight lifts compared with a loaded lift: bw = share of bodyweight the arms move
+       (push-up ≈ 69% on the floor, 74% feet elevated, ~45% hands elevated: Ebben 2011, Suprak 2011;
+       inverted row ≈ 55%). Extra weight (vest, plate) adds on top. */
+    case "flexao":{const bw=s.b==="pe"?.74:s.b==="ma"?.45:e==="tr"?.6:.69;return {k:s.w==="fe"?"cgbench":"bench",x:1,bw}}
+    case "reminv":return {k:"row",x:1,bw:e==="tr"?.5:.55};
     case "puxada":return U("pulldown");
     case "extlombar":return K("backext");
     case "crunch":return e==="po"||e==="ma"?K("cablecrunch"):null;
@@ -2320,8 +2326,11 @@ function rPct(s){const P=RPCT;if(s>=6)return 99;
   const i=Math.floor(s);return Math.round(P[i][1]+(s-i)*(P[i+1][1]-P[i][1]))}
 /* value of one set in "standard units": estimated 1-rep max × x, or for bodyweight lifts
    the estimated extra weight for 1 rep. Reps above 20 count as 20 (Epley overshoots there). */
+const rBody=st=>RSTD[st.k][4]!=null||!!st.bw;
 function rSetVal(st,kg,r){
-  const S=RSTD[st.k];r=Math.min(r,20);if(!(r>0))return null;
+  /* bodyweight lifts are often done for many reps: count up to 30 there, 20 elsewhere */
+  const S=RSTD[st.k];r=Math.min(r,rBody(st)?30:20);if(!(r>0))return null;
+  if(st.bw){const eff=st.bw*rBW()+(isFinite(kg)&&kg>0?kg:0);return e1rm(eff,r)*st.x}
   if(S[4]!=null){const bw=rBW(),body=S[4]*bw;let a=isFinite(kg)?kg:0;if(st.as)a=-Math.abs(a);const eff=body+a;if(eff<=0)return null;return eff*(r<=1?1:1+r/30)-body}
   if(!(kg>0))return null;return e1rm(kg,r)*st.x;
 }
@@ -2347,10 +2356,13 @@ function rankData(){
 }
 const rKg=v=>fkg(Math.round(v*2)/2);
 function rNeed(o){const lv=rLv(o.s);if(lv>=RB.length)return "";const v=rVal(RB[lv],o.T),S=RSTD[o.st.k];
-  if(S[4]!=null){const t=o.st.as?(v<0?`com ajuda de até ${rKg(-v)} kg`:`sem ajuda (ou +${rKg(v)} kg)`):(v<=0?`1 repetição só com o corpo`:`1 repetição com +${rKg(v)} kg`);return `Para ${RLV[lv+1][0]}: ${t}`}
+  /* bodyweight lifts: say how many reps with just the body, or how much extra weight if that is over 30 */
+  const reps=(body,need)=>{const r=Math.ceil(30*(need/body-1));return r<=1?"1 repetição só com o corpo":r<=30?`${r} repetições seguidas só com o corpo`:`10 repetições com +${rKg(need/(1+10/30)-body)} kg de peso extra`};
+  if(o.st.bw)return `Para ${RLV[lv+1][0]}: ${reps(o.st.bw*rBW(),v/o.st.x)}`;
+  if(S[4]!=null){const body=S[4]*rBW();const t=o.st.as?(v<0?`com ajuda de até ${rKg(-v)} kg`:reps(body,body+v)):(v<=0?`1 repetição só com o corpo`:reps(body,body+v));return `Para ${RLV[lv+1][0]}: ${t}`}
   const one=v/o.st.x;return `Para ${RLV[lv+1][0]}: 1 repetição com ${rKg(one)} kg (ou ${rKg(one/(1+8/30))} kg × 8)`}
 function rSetTxt(o){const b=o.best,S=RSTD[o.st.k];
-  const load=S[4]!=null?(o.st.as?(b.kg?`ajuda de ${fkg(b.kg)} kg`:"sem ajuda"):(b.kg?`+${fkg(b.kg)} kg`:"só o corpo")):`${fkg(b.kg)} kg`;
+  const load=o.st.bw?(b.kg?`+${fkg(b.kg)} kg`:"só o corpo"):S[4]!=null?(o.st.as?(b.kg?`ajuda de ${fkg(b.kg)} kg`:"sem ajuda"):(b.kg?`+${fkg(b.kg)} kg`:"só o corpo")):`${fkg(b.kg)} kg`;
   return `${load} × ${b.r} · ${b.src==="d"?"digitado":"treino"} de ${fmtDate(b.date)}`}
 function rankFig(gs){
   const f=document.createElementNS(NS,"svg");f.setAttribute("viewBox",BOX.both.join(" "));f.setAttribute("class","pfig rfig");
@@ -2376,9 +2388,9 @@ function rankAbout(){return `<details class="about"><summary>Como o ranking func
   <p><b>De onde vêm os números.</b> As faixas são os padrões de força do Strength Level, feitos com cerca de 11 milhões de registros de pessoas que treinam (entre 48 milhões de levantamentos enviados). As faixas do site são percentis entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%. O app usa o corpo ♂/♀ escolhido.</p>
   <p><b>Os 9 níveis</b> (quanto % de quem treina você supera): Ameba = menos de 5% · Aprendiz = 5–15% · Frango = 15–30% · Galo = 30–45% · Fortinho = 45–60% · Parrudo = 60–75% · Monstro = 75–88% · Lenda = 88–96% · Bizarro = top 4%. Os níveis do meio têm a mesma largura; as pontas são mais difíceis. Entre as faixas do site, o app interpola.</p>
   <p><b>Peso corporal.</b> As faixas publicadas são para o praticante típico (cerca de 77 kg no masculino e 65 kg no feminino). O app ajusta para o seu peso pela regra de ⅔: a força cresce com a área do músculo, que acompanha o peso elevado a ⅔. Quem é mais leve precisa levantar menos, mas não proporcionalmente menos.</p>
-  <p><b>Sua força em cada exercício.</b> Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Séries de até ~12 repetições dão a estimativa mais confiável. Em barra fixa e mergulho conta o peso do corpo mais o peso extra; na barra assistida (graviton), a ajuda é descontada.</p>
+  <p><b>Sua força em cada exercício.</b> Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Séries de até ~12 repetições dão a estimativa mais confiável. Exercícios com o peso do corpo contam o corpo: barra fixa e mergulho (o corpo todo), flexão (cerca de 69% do peso no chão, 74% com os pés elevados, 45% com as mãos elevadas, comparada com o supino) e remada invertida (cerca de 55%, comparada com a remada curvada). Peso extra (colete, anilha) soma; na barra assistida (graviton), a ajuda é descontada. Nesses exercícios valem até 30 repetições na conta.</p>
   <p><b>Nível do grupo.</b> É a média de <b>todos</b> os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos.</p>
-  <p><b>Aproximações.</b> Halteres: o peso é de cada halter. Variações sem padrão próprio usam o mais próximo com um fator (ex.: supino inclinado com halteres ≈ 90% do reto; máquina com um braço só ≈ metade do peso dos dois). Exercícios só com o peso do corpo (flexão, prancha) e muito leves ficam fora. Máquinas variam de marca para marca, então use o nível delas como referência, não como verdade absoluta.</p>
+  <p><b>Aproximações.</b> Halteres: o peso é de cada halter. Variações sem padrão próprio usam o mais próximo com um fator (ex.: supino inclinado com halteres ≈ 90% do reto; máquina com um braço só ≈ metade do peso dos dois). Prancha, abdominais e afundo ou ponte só com o corpo ficam fora, porque não há um padrão de carga justo para eles. Máquinas variam de marca para marca, então use o nível delas como referência, não como verdade absoluta.</p>
   <ul><li>Strength Level: padrões de força por exercício, sexo e peso corporal (strengthlevel.com)</li><li>StrengthLog: padrões de força em kg para agachamento, terra, supino e desenvolvimento (strengthlog.com)</li><li>Jaric (2002, Sports Medicine): normalizar força pelo peso corporal elevado a ⅔</li><li>Epley (1985): fórmula da força estimada</li></ul></details>`}
 function renderRank(){
   const D=rankData(),body=$("rankBody"),has=D.list.length>0,lv=has?rLv(D.all):-1;
@@ -2391,9 +2403,9 @@ function renderRank(){
       <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:${RHERO[i]}"></i>${x[0]}</span>`).join("")}</div></div>`;
   const none=Object.keys(BASIC).filter(g=>!D.gs.some(x=>x.g===g));
   const form=rForm?(()=>{const r=parseRef(rForm.ref),st=rStd(r.f,r.sel),S=RSTD[st.k];
-    const lab=S[4]!=null?(st.as?"Ajuda da máquina (kg)":"Peso extra (kg, 0 = só o corpo)"):"Carga (kg)";
+    const lab=rBody(st)?(st.as?"Ajuda da máquina (kg)":"Peso extra (kg, 0 = só o corpo)"):"Carga (kg)";
     return `<div class="card rk-form" id="rkForm"><h3 class="section-t" style="margin:0">Digitar carga</h3><b>${esc(rForm.name)}</b>
-      <div class="rk-inps"><label><span>${lab}</span><input class="inp" id="rkKg" inputmode="decimal" placeholder="${S[4]!=null?"0":"ex.: 60"}"></label><label><span>Repetições</span><input class="inp" id="rkR" inputmode="numeric" placeholder="ex.: 8"></label></div>
+      <div class="rk-inps"><label><span>${lab}</span><input class="inp" id="rkKg" inputmode="decimal" placeholder="${rBody(st)?"0":"ex.: 60"}"></label><label><span>Repetições</span><input class="inp" id="rkR" inputmode="numeric" placeholder="ex.: 8"></label></div>
       <span class="muted-s" style="margin:0">Use a série mais pesada que você faz hoje, com boa execução.${S[1]&&/cada halter/.test(S[0])?" Peso de cada halter.":""}</span>
       <div class="row"><button class="btn primary" data-ract="save">Salvar</button><button class="btn" data-ract="cancel">Cancelar</button></div></div>`})():"";
   body.innerHTML=`<div class="page-h"><button class="rk-back" data-ract="back">‹ Voltar</button><h2>Ranking de força<button class="help" data-help="rank" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2>
@@ -2428,8 +2440,8 @@ $("rankBody").addEventListener("click",e=>{
     if(k==="cancel"){rForm=null;return renderRank()}
     if(k==="save"){const r=parseRef(rForm.ref),st=rStd(r.f,r.sel),S=RSTD[st.k];
       let kg=numKg($("rkKg").value);const rp=parseInt($("rkR").value);
-      if(S[4]!=null&&!isFinite(kg))kg=0;
-      if(!(rp>0)||!(isFinite(kg))||(S[4]==null&&!(kg>0))){toast("Preencha a carga e as repetições");return}
+      if(rBody(st)&&!isFinite(kg))kg=0;
+      if(!(rp>0)||!(isFinite(kg))||(!rBody(st)&&!(kg>0))){toast("Preencha a carga e as repetições");return}
       rank.man.push({id:Date.now().toString(36),ref:rForm.ref,kg:Math.abs(kg),r:rp,date:isoDate(new Date())});saveRank();
       rOpen=TOB[resolveV(r.f,r.sel).p[0]];rForm=null;renderRank();toast("Carga salva");return}
   }

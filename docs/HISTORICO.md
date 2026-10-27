@@ -109,6 +109,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - Cada exercício conta para todos os grupos-alvo dele. Grupo = média dos exercícios; geral = média dos grupos.
   - 66 exercícios-padrão cobrem 46 famílias e 1.046 das 1.325 variações.
   - Cada exercício mostra quanto falta para o próximo nível.
+  - Pedido do dono: exercícios com o peso do corpo contam o corpo. Barra fixa e mergulho já contavam; flexão (vs supino) e remada invertida (vs remada curvada) entraram com a fração do peso que o braço movimenta; nesses, até 30 repetições entram na conta e "quanto falta" aparece em repetições.
   - Cores: primeiro uma escala de azul; depois o dono escolheu o estilo videogame: Ameba cinza, Aprendiz verde, Frango azul, Galo roxo, Fortinho amarelo, Parrudo laranja, Monstro vermelho, Lenda rosa e Bizarro cinza metálico brilhante. Antes: uma escala de azul em 9 tons, validada para daltonismo nos dois temas.
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
