@@ -315,7 +315,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .pill.soft{background:var(--chip);color:var(--muted)}
 .more summary{cursor:pointer;font-weight:600;font-size:15px}
 .donebtn{padding:14px;font-size:16px}
-.donebox.isdone{border-color:var(--target)}
+.donebox.isdone,.tcard.isdone{border-color:var(--target)}
 .btn:disabled{opacity:.45}
 .alist .custom{border-style:dashed}
 .page .link{padding:4px 0;font-size:15px;cursor:pointer;text-decoration:none}
@@ -1491,7 +1491,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModals()});
 let addName=null;
 const DSH=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
 const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
-const daysTxt=p=>p.days.length===7?"Todos os dias":p.days.length?[...p.days].sort((a,b)=>a-b).map(i=>DSH[i]).join(" · "):"Sem dia definido";
+const daysTxt=p=>p.days.length===7?"Todos os dias":p.days.length?[...p.days].sort((a,b)=>a-b).map(i=>DSH[i]).join(" · "):"Qualquer dia";
 function openAddSheet(name){
   addName=name;$("aTitle").textContent="Adicionar exercício";$("aName").textContent=name;
   const tw=workouts.filter(w=>w.date===isoDate(new Date()));
@@ -1528,7 +1528,7 @@ function saveW(){if(!LS.set("atlas-workouts",workouts))toast("Não foi possível
 function newPlan(){const pl={id:uid(),name:"",days:[],items:[]};plans.push(pl);return pl}
 function mkItem(name,sets,reps){return {name,target:reps||"",notes:"",sets:Array.from({length:Math.max(1,Math.min(10,parseInt(sets)||3))},()=>({r:"",kg:""}))}}
 function startPlan(pl){
-  const w={id:uid(),date:isoDate(new Date()),title:pl?(pl.name||"Treino"):"Treino livre",planId:pl?pl.id:null,done:false,notes:"",
+  const w={id:uid(),date:isoDate(new Date()),title:pl?(pl.name||"Treino"):"Treino personalizado",planId:pl?pl.id:null,done:false,notes:"",
     items:pl?pl.items.map(it=>mkItem(it.name,it.sets,it.reps)):[]};
   workouts.push(w);saveW();return w;
 }
@@ -1546,15 +1546,12 @@ const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
 let openPlan=null,askDelPlan=null;
 function renderFicha(){
   const d=todayIdx();
-  const week=DAYS.map((n,i)=>{const ps=plans.filter(p=>p.days.includes(i));
-    return `<div class="wk${i===d?" today":""}" title="${DAYS[i]}: ${ps.length?esc(ps.map(p=>p.name||"Treino").join(", ")):"descanso"}"><b>${DSH[i]}</b>${ps.length?ps.map(p=>`<span>${esc(p.name||"Treino")}</span>`).join(""):`<span class="rest" aria-label="Descanso">—</span>`}</div>`}).join("");
-  let h=`<div class="page-h"><h2>Meus treinos</h2><p class="lead">Monte seus treinos e escolha os dias da semana de cada um. Montar ou mudar um treino não altera o Progresso: só conta quando você marca o treino como feito na aba Hoje.</p></div>
-    <div class="card"><h3 class="section-t" style="margin:0">Sua semana</h3><div class="wkgrid">${week}</div></div>`;
+  let h=`<div class="page-h"><h2>Meus treinos</h2><p class="lead">Monte seus treinos aqui. Para registrar um treino, vá na aba Hoje e toque em Marcar como feito.</p></div>`;
   h+=plans.map(p=>{const open=openPlan===p.id;
     return `<section class="card plan" data-pid="${p.id}">
       <button class="plan-h" data-act="toggle" data-pid="${p.id}" aria-expanded="${open}"><span><span class="wx-n">${esc(p.name||"Treino sem nome")}</span><span class="muted-s">${daysTxt(p)} · ${plural(p.items.length,"exercício")}</span></span><span class="chev" aria-hidden="true">${open?"Fechar":"Editar"}</span></button>
       ${open?`<input class="inp title-inp" data-pf="name" data-pid="${p.id}" value="${esc(p.name)}" placeholder="Nome, ex.: Peito e tríceps" aria-label="Nome do treino">
-      <div><div class="fl" style="margin-bottom:6px">Dias da semana</div><div class="dpick" role="group" aria-label="Dias da semana">${DSH.map((n,i)=>`<button data-act="day" data-pid="${p.id}" data-day="${i}" aria-pressed="${p.days.includes(i)}" aria-label="${DAYS[i]}">${n}</button>`).join("")}</div></div>
+      <div><div class="fl" style="margin-bottom:6px">Dias da semana (opcional)</div><div class="dpick" role="group" aria-label="Dias da semana">${DSH.map((n,i)=>`<button data-act="day" data-pid="${p.id}" data-day="${i}" aria-pressed="${p.days.includes(i)}" aria-label="${DAYS[i]}">${n}</button>`).join("")}</div><span class="muted-s">Nos dias marcados, este treino aparece primeiro na aba Hoje.</span></div>
       ${p.items.length?p.items.map((it,j)=>`<div class="fi">
         <div class="fi-n">${esc(it.name)}<span class="muted-s">${esc(muscleLabel(it.name))}</span></div>
         <label class="fl">Séries<input class="inp" inputmode="numeric" data-pid="${p.id}" data-j="${j}" data-f="sets" value="${esc(it.sets)}"></label>
@@ -1596,23 +1593,28 @@ $("fichaBody").addEventListener("click",e=>{
 /* ---------------------------------------------------------- hoje tab */
 let openW=null,askDel=false,pendingImport=null;
 function wCard(x){return `<div class="card tcard"><div class="row between"><div><div class="wx-n">${esc(x.title||"Treino")}</div><span class="muted-s">${x.items.length?x.items.map(it=>esc(it.name)).join(" · "):"Sem exercícios"}</span></div>${statusPill(x)}</div>
-  <div class="row"><button class="btn${x.done===false?" primary":""}" data-open="${x.id}">${x.done===false?"Continuar":"Ver treino"}</button></div></div>`}
+  <div class="row">${x.done===false?`<button class="btn primary" data-act="markDone" data-wid="${x.id}">Marcar como feito</button><button class="btn" data-open="${x.id}">Continuar</button>`:`<button class="btn" data-open="${x.id}">Ver séries</button><button class="btn" data-act="undo" data-wid="${x.id}">Desfazer</button>`}</div></div>`}
 function renderTreino(){
   const today=isoDate(new Date()),d=todayIdx();
   const w=openW?workouts.find(x=>x.id===openW):null;if(!w)openW=null;
   let h="";
   if(!w){
-    const tw=workouts.filter(x=>x.date===today),sched=plans.filter(p=>p.days.includes(d));
-    h=`<div class="page-h"><h2>Hoje</h2><p class="lead">${cap(fmtLong(new Date()))}</p></div>
-      <h3 class="section-t">Treinos de ${DAYS[d].toLowerCase()}</h3>`;
-    h+=sched.length?sched.map(p=>{const ex=tw.find(x=>x.planId===p.id);if(ex)return wCard(ex);
-      return `<div class="card tcard"><div><div class="wx-n">${esc(p.name||"Treino")}</div><span class="muted-s">${p.items.length?p.items.map(it=>esc(it.name)).join(" · "):"Sem exercícios. Monte em Meus treinos."}</span></div>
-        <div class="row"><button class="btn primary" data-act="start" data-pid="${p.id}"${p.items.length?"":" disabled"}>Começar</button></div></div>`}).join("")
-      :`<div class="card"><p class="muted">Nenhum treino marcado para ${DAYS[d].toLowerCase()}. Descanse, ou faça outro treino abaixo.</p></div>`;
-    const extra=tw.filter(x=>!sched.some(p=>p.id===x.planId));
-    if(extra.length)h+=`<h3 class="section-t">Também hoje</h3>`+extra.map(wCard).join("");
-    const others=plans.filter(p=>!p.days.includes(d));
-    h+=`<details class="card more"><summary>Fazer outro treino hoje</summary><div class="hist">${others.map(p=>`<button data-act="start" data-pid="${p.id}"><b>${esc(p.name||"Treino")}</b><span>${daysTxt(p)}</span></button>`).join("")}<button data-act="startFree"><b>Treino livre</b><span>Começa vazio</span></button></div></details>`;
+    const tw=workouts.filter(x=>x.date===today);
+    const list=[...plans].sort((x,y)=>(y.days.includes(d)?1:0)-(x.days.includes(d)?1:0));
+    const nDone=tw.filter(x=>x.done!==false).length;
+    h=`<div class="page-h"><h2>Hoje</h2><p class="lead">${cap(fmtLong(new Date()))}${nDone?` · ${plural(nDone,"treino")} feito${nDone===1?"":"s"}`:""}</p></div>
+      <h3 class="section-t">Seus treinos</h3>`;
+    h+=list.length?list.map(p=>{const ex=tw.filter(x=>x.planId===p.id).pop(),tag=p.days.includes(d)?`<span class="pill soft">Dia de hoje</span>`:"";
+      const sum=p.items.length?p.items.map(it=>esc(it.name)).join(" · "):"Sem exercícios. Monte na aba Treinos.";
+      let btns;
+      if(ex&&ex.done!==false)btns=`<button class="btn" data-open="${ex.id}">Ver séries</button><button class="btn" data-act="undo" data-wid="${ex.id}">Desfazer</button>`;
+      else if(ex)btns=`<button class="btn primary" data-act="markDone" data-wid="${ex.id}">Marcar como feito</button><button class="btn" data-open="${ex.id}">Continuar anotando</button>`;
+      else btns=`<button class="btn primary" data-act="quickDone" data-pid="${p.id}"${p.items.length?"":" disabled"}>Marcar como feito</button><button class="btn" data-act="log" data-pid="${p.id}"${p.items.length?"":" disabled"}>Anotar séries</button>`;
+      return `<div class="card tcard${ex&&ex.done!==false?" isdone":""}"><div class="row between"><div style="min-width:0"><div class="wx-n">${esc(p.name||"Treino")}</div><span class="muted-s">${sum}</span></div>${ex?statusPill(ex):tag}</div><div class="row">${btns}</div></div>`}).join("")
+      :`<div class="card"><p class="muted">Você ainda não tem treinos montados.</p><div class="row"><button class="btn primary" data-act="goPlans">Montar um treino</button></div></div>`;
+    const free=tw.filter(x=>!x.planId||!plans.some(p=>p.id===x.planId));
+    h+=`<h3 class="section-t">Treino personalizado de hoje</h3>`+free.map(wCard).join("")+
+      `<button class="btn wide" data-act="startFree">+ Montar um treino só para hoje</button>`;
     const past=workouts.filter(x=>x.date!==today).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
     h+=`<h3 class="section-t">Histórico</h3>`+(past.length?`<div class="hist">${past.slice(0,80).map(x=>`<button data-open="${x.id}"><b>${fmtDate(x.date)}</b><span>${esc(x.title||"Treino")} · ${x.done===false?"não feito":plural(x.items.length,"exercício")}</span></button>`).join("")}</div>`:`<p class="muted">Os treinos que você fizer aparecem aqui.</p>`);
     h+=`<h3 class="section-t">Backup</h3><p class="muted">Seus treinos ficam salvos só neste aparelho. Exporte um backup de vez em quando para não perder nada.</p>
@@ -1659,7 +1661,14 @@ $("treinoBody").addEventListener("click",e=>{
   const o=e.target.closest("[data-open]");if(o){openW=o.dataset.open;askDel=false;renderTreino();$("tab-treino").scrollTop=0;return}
   const b=e.target.closest("[data-act]");if(!b)return;
   const w=curW(),a=b.dataset.act,i=+b.dataset.i;
-  if(a==="start"||a==="startFree"){const nw=startPlan(a==="start"?plans.find(x=>x.id===b.dataset.pid):null);openW=nw.id;askDel=false;$("tab-treino").scrollTop=0}
+  const byW=()=>workouts.find(x=>x.id===b.dataset.wid),byP=()=>plans.find(x=>x.id===b.dataset.pid);
+  if(a==="log"||a==="startFree"){const nw=startPlan(a==="log"?byP():null);openW=nw.id;askDel=false;$("tab-treino").scrollTop=0}
+  else if(a==="quickDone"){const pl=byP();if(!pl)return;const nw=startPlan(pl);nw.done=true;toast(`${pl.name||"Treino"} marcado como feito`)}
+  else if(a==="markDone"){const x=byW();if(x){x.done=true;toast(`${x.title||"Treino"} marcado como feito`)}}
+  else if(a==="undo"){const x=byW();if(!x)return;
+    const touched=x.notes||x.items.some(it=>it.notes||it.sets.some(st=>st.r!==""||st.kg!==""));
+    if(touched||!x.planId)x.done=false;else workouts=workouts.filter(y=>y.id!==x.id);toast("Desfeito: saiu do Progresso")}
+  else if(a==="goPlans"){setTab("ficha");return}
   else if(a==="back"){openW=null;askDel=false}
   else if(a==="export")return exportBackup();
   else if(a==="import")return $("importFile").click();
