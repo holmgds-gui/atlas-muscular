@@ -8,3 +8,9 @@ Boneco anatômico clicável, com corpo masculino ou feminino (botão ♂/♀). T
 - **Progresso**: mapa de calor dos músculos treinados na semana ou no dia, só com treinos marcados como feitos (1 série para o alvo, ½ para sinergistas), com faixas baseadas em pesquisa.
 
 Abra pelo link do GitHub Pages no Safari e use Compartilhar → Adicionar à Tela de Início para instalar como app.
+
+## Documentação
+
+- [CLAUDE.md](CLAUDE.md): como o app funciona por dentro e as decisões já tomadas (o Claude Code lê este arquivo sozinho).
+- [docs/HISTORICO.md](docs/HISTORICO.md): o que foi construído, em ordem.
+- [docs/FONTES.md](docs/FONTES.md): todos os estudos e links usados.
