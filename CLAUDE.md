@@ -13,6 +13,7 @@ App de academia em português (pt-BR), instalável no celular (PWA), publicado p
 - **Hoje** (aba `treino`): grade da semana com o que foi feito, todos os treinos com "Marcar como feito", "Anotar séries" opcional e treino personalizado só para hoje (que pode virar treino fixo). Tocar num dia passado da grade (ou ‹ para semanas anteriores) registra naquele dia; futuro nunca.
 - **Progresso** (aba `prog`): duas sub-abas. **Músculos**: mapa de calor dos músculos treinados na semana ou no dia, com faixas baseadas em pesquisa, e radar de **Equilíbrio** (6 grupos). **Força** (`pView` `kg`): em cima o **Ranking de força** (nível por grupo em 9 faixas: Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, Bizarro; boneco colorido, peso corporal, ♂/♀ e cargas digitadas); embaixo a evolução de carga por exercício (gráfico da maior carga do dia + força estimada, recorde, última, quanto subiu, 1 mês/3 meses/Tudo).
 - O título "Atlas Muscular" (`#brandBtn`) leva sempre para o Atlas.
+- **Configurações** (aba `conf`, `#tab-conf`, `renderConf()`): abre pela engrenagem no canto superior direito, ao lado da busca (`#gearBtn`). Ainda em montagem com o dono.
 - Cada aba tem um **+** pequeno ao lado do título que abre uma ajuda da página.
 
 Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-gui`. Uma conta errada (`davigms-pve`) já apareceu conectada uma vez; ela **não** é do dono, não use.
@@ -31,7 +32,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v34` → `atlas-v35`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v35` → `atlas-v36`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 

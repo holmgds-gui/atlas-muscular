@@ -112,6 +112,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - Pedido do dono: exercícios com o peso do corpo contam o corpo. Barra fixa e mergulho já contavam; flexão (vs supino) e remada invertida (vs remada curvada) entraram com a fração do peso que o braço movimenta; nesses, até 30 repetições entram na conta e "quanto falta" aparece em repetições.
   - Cores: primeiro uma escala de azul; depois o dono escolheu o estilo videogame: Ameba cinza, Aprendiz verde, Frango azul, Galo roxo, Fortinho amarelo, Parrudo laranja, Monstro vermelho, Lenda rosa e Bizarro cinza metálico brilhante. Antes: uma escala de azul em 9 tons, validada para daltonismo nos dois temas.
 - O dono pediu para juntar o ranking com o progresso de cargas: a sub-aba Cargas virou **Força**, com o ranking em cima e a evolução por exercício embaixo. O título "Atlas Muscular" passou a levar sempre para o Atlas.
+- Engrenagem no canto superior direito, ao lado da busca, abre a página **Configurações** (conteúdo a definir com o dono).
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)
