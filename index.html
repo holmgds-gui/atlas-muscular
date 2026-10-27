@@ -29,7 +29,7 @@ img{max-width:100%}
   --skin:#D6DADF; --m:#AEB6C0; --m-hi:#C3CAD2; --m-lo:#97A0AB; --m-edge:#E9ECEF; --fiber:rgba(26,31,38,.13);
   --target:#D3222A; --target-hi:#F04A50; --target-lo:#A0141B;
   --syn:#F08A24; --syn-soft:rgba(240,138,36,.55);
-  --chip:#E1E5E9; --focus:#1A1F26; --tend:#E4E7EB; --hair:#6B737E; --hair-l:rgba(255,255,255,.22); --breast:rgba(255,255,255,.2); --fold:rgba(26,31,38,.16);
+  --chip:#E1E5E9; --focus:#1A1F26; --tend:#E4E7EB; --k1:#D3222A; --k2:#2F6DB5; --hair:#6B737E; --hair-l:rgba(255,255,255,.22); --breast:rgba(255,255,255,.2); --fold:rgba(26,31,38,.16);
   --f-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
   --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -38,13 +38,13 @@ img{max-width:100%}
   --skin:#1E242C; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
-  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}}
+  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --k1:#F0474D; --k2:#5B8FDB; --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
   --skin:#1E242C; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
-  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}
+  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --k1:#F0474D; --k2:#5B8FDB; --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}
 
 html{height:100%}body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;overflow:hidden;-webkit-tap-highlight-color:transparent}
@@ -341,6 +341,35 @@ button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
 .alist .custom{border-style:dashed}
 .page .link{padding:4px 0;font-size:15px;cursor:pointer;text-decoration:none}
 /* ---- progress tab ---- */
+.seg.pview{display:flex}.seg.pview button{flex:1}
+.kglegend{display:flex;gap:16px;font-size:13px;color:var(--muted);flex-wrap:wrap}
+.kglegend span,.kgtip span{display:inline-flex;align-items:center;gap:6px}
+.kglegend i,.kgtip i{display:inline-block;width:16px;height:0;border-top:2.5px solid var(--k1)}
+.kglegend i.k2,.kgtip i.k2{border-top:2.5px dashed var(--k2)}
+.kg-h{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:none;padding:0;color:inherit;cursor:pointer}
+.kgdelta{flex:none;font-weight:700;font-size:14px;font-variant-numeric:tabular-nums;color:var(--ink);background:var(--chip);border-radius:8px;padding:5px 9px}
+.seg.kgr{align-self:start}
+.kgchart{position:relative;min-width:0}
+.kgsvg{display:block;width:100%;height:auto;touch-action:pan-y}
+.kg-grid{stroke:var(--line);stroke-width:1}
+.kg-ax{fill:var(--muted);font-size:11px;font-family:var(--f-body);font-variant-numeric:tabular-nums}
+.kg-l1{fill:none;stroke:var(--k1);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.kg-l2{fill:none;stroke:var(--k2);stroke-width:2;stroke-dasharray:5 4;stroke-linejoin:round;stroke-linecap:round}
+.kg-d1{fill:var(--k1);stroke:var(--surface);stroke-width:2}
+.kg-d2{fill:var(--k2);stroke:var(--surface);stroke-width:2}
+.kg-cross{stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3}
+.kg-hit{fill:transparent;cursor:crosshair}
+.kgtip{position:absolute;top:0;width:176px;box-sizing:border-box;background:var(--ink);color:var(--surface);border-radius:8px;padding:7px 9px;font-size:12px;line-height:1.35;display:grid;gap:2px;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.2)}
+.kgtip[hidden]{display:none}
+.kgstats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.kgstats div{background:var(--bg);border-radius:10px;padding:9px 11px;display:grid;gap:1px;min-width:0}
+.kgstats span{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;color:var(--muted)}
+.kgstats b{font-family:var(--f-display);font-size:21px;line-height:1.1;font-variant-numeric:tabular-nums}
+.kgstats small{font-size:12px;color:var(--muted)}
+.kgtab{display:grid;gap:0;font-size:14px}
+.kgrow{display:grid;grid-template-columns:70px minmax(0,1fr) 90px;gap:8px;padding:7px 2px;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.kgrow span:last-child{text-align:right}
+.kghead{font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:600;color:var(--muted);border-top:0}
 .pnav{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .pnav .plabel{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.03em;text-align:center;flex:1;min-width:0}
 .pnav .ib:disabled{opacity:.35}
@@ -1550,7 +1579,8 @@ const HELP={
     <h4>O que dá para fazer</h4><ul>
     <li><b>Semana / Dia</b> trocam o período; as setas voltam para semanas ou dias anteriores.</li>
     <li><b>Toque num músculo</b> do boneco para ver quantas séries ele teve.</li>
-    <li><b>Toque num grupo</b> da lista para ver as partes (ex.: peitoral superior, médio e inferior).</li></ul>
+    <li><b>Toque num grupo</b> da lista para ver as partes (ex.: peitoral superior, médio e inferior).</li>
+    <li><b>Cargas</b>: cada exercício em que você anotou carga, com gráfico da maior carga do dia (linha cheia) e da força estimada (tracejada), recorde, última carga e quanto subiu. Toque no gráfico para ver cada treino.</li></ul>
     <h4>Como conta</h4><ul><li>Cada série vale 1 para o músculo alvo do exercício e ½ para os sinergistas.</li>
     <li><b>Semana</b>: 4–9 séries é estímulo moderado, 10–20 é a faixa ideal, mais de 20 é volume alto.</li>
     <li><b>Dia</b>: até ~11 séries por músculo no mesmo treino ainda trazem ganho; depois disso, quase nada a mais.</li></ul>
@@ -1887,12 +1917,96 @@ function bandsInfo(){return `<details class="about"><summary>Como as faixas fora
   <p><b>Treino do dia.</b> Até cerca de 11 séries por músculo no mesmo treino ainda trazem ganho mensurável. Depois disso, os estudos não mostram ganho extra.</p>
   <p><b>Repetições e esforço.</b> De cerca de 6 a 30 repetições o crescimento é parecido, se a série terminar perto da falha (sobrando 0 a 2 repetições). Séries muito leves ou longe da falha estimulam menos, mas o app conta todas as séries marcadas.</p>
   <ul><li>Pelland et al. (2024/2026, Sports Medicine): volume semanal e frequência, 67 estudos</li><li>Remmert et al. (2025, pré-publicação): volume por treino, 35 estudos</li><li>Schoenfeld, Ogborn e Krieger (2017): 10+ séries por semana</li><li>Baz-Valle et al. (2022, J. Human Kinetics): 12–20 séries por semana em treinados</li><li>Schoenfeld et al. (2017, JSCR): carga leve vs pesada até a falha</li><li>Robinson et al. (2024, Sports Medicine) e Refalo et al. (2024, J. Sports Sciences): proximidade da falha</li><li>Spiering et al. (2021, JSCR): dose mínima para manter</li></ul></details>`}
+/* ---------------------------------------------------------- cargas (load progress)
+   Per exercise and per day: the heaviest set (kg × reps) and the estimated
+   1-rep max, Epley: kg × (1 + reps/30). Only workouts marked as done count. */
+let pView=LS.get("atlas-pview","mus");if(!["mus","kg"].includes(pView))pView="mus";
+let kgRange=LS.get("atlas-kgrange","3m");if(!["1m","3m","all"].includes(kgRange))kgRange="3m";
+let kgOpen=null,kgList=[];
+const pvSeg=()=>`<div class="seg pview" role="tablist" aria-label="Tipo de progresso"><button role="tab" data-pv="mus" aria-pressed="${pView==="mus"}">Músculos</button><button role="tab" data-pv="kg" aria-pressed="${pView==="kg"}">Cargas</button></div>`;
+const numKg=v=>{const n=parseFloat(String(v??"").replace(",","."));return isFinite(n)?n:NaN};
+const e1rm=(kg,r)=>r<=1?kg:kg*(1+r/30);
+const fkg=v=>(Math.round(v*10)/10).toLocaleString("pt-BR");
+function loadData(){
+  const m=new Map();
+  for(const w of workouts){if(w.done===false)continue;
+    for(const it of w.items||[]){let top=null,best=0;
+      for(const st of it.sets||[]){const kg=numKg(st.kg),r=parseInt(st.r)||0;if(!(kg>0))continue;
+        if(!top||kg>top.kg||(kg===top.kg&&r>top.r))top={kg,r};if(r>0)best=Math.max(best,e1rm(kg,r))}
+      if(!top)continue;
+      const arr=m.get(it.name)||[];const ex=arr.find(x=>x.date===w.date);
+      if(ex){if(top.kg>ex.kg||(top.kg===ex.kg&&top.r>ex.r)){ex.kg=top.kg;ex.r=top.r}if(best&&(!ex.e||best>ex.e))ex.e=best}
+      else arr.push({date:w.date,kg:top.kg,r:top.r,e:best||null});
+      m.set(it.name,arr)}}
+  for(const a of m.values())a.sort((x,y)=>x.date<y.date?-1:1);
+  return [...m].sort((a,b)=>a[1][a[1].length-1].date<b[1][b[1].length-1].date?1:-1);
+}
+const setStr=x=>`${fkg(x.kg)} kg${x.r?` × ${x.r}`:""}`;
+function renderKg(){
+  const body=$("progBody");kgList=loadData();
+  let h=`<div class="page-h"><h2>Progresso<button class="help" data-help="prog" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">Evolução das cargas que você anotou nos treinos marcados como feitos.</p></div>${pvSeg()}`;
+  if(!kgList.length){
+    body.innerHTML=h+`<div class="card"><p class="muted">Nenhuma carga anotada ainda. Na aba Hoje, toque em <b>Anotar séries</b>, preencha a carga (kg) e as repetições e marque o treino como feito.</p><button class="btn primary" data-goto="treino">Ir para Hoje</button></div>`;return}
+  h+=`<div class="kglegend"><span><i class="k1"></i>Maior carga do dia</span><span><i class="k2"></i>Força estimada</span></div>`;
+  h+=kgList.map(([name,pts],i)=>{const first=pts[0],last=pts[pts.length-1],diff=last.kg-first.kg,open=kgOpen===name;
+    const rec=pts.reduce((a,x)=>x.kg>a.kg||(x.kg===a.kg&&x.r>a.r)?x:a,pts[0]);
+    const eAll=pts.filter(x=>x.e),eLast=eAll.length?eAll[eAll.length-1].e:null,eRec=eAll.length?Math.max(...eAll.map(x=>x.e)):null;
+    return `<section class="card kgx${open?" open":""}">
+      <button class="kg-h" data-kx="${i}" aria-expanded="${open}"><span style="min-width:0"><span class="wx-n">${esc(name)}</span><span class="muted-s">Última: ${setStr(last)} · ${fmtDate(last.date)} · ${plural(pts.length,"treino")}</span></span>
+        <span class="kgdelta">${pts.length>1?`${diff>0?"▲ +":diff<0?"▼ ":""}${fkg(diff)} kg`:"novo"}</span></button>
+      ${open?`<div class="seg kgr" role="group" aria-label="Período">${[["1m","1 mês"],["3m","3 meses"],["all","Tudo"]].map(([k,t])=>`<button data-kr="${k}" aria-pressed="${kgRange===k}">${t}</button>`).join("")}</div>
+      <div class="kgchart" data-ki="${i}"></div>
+      <div class="kgstats">
+        <div><span>Recorde</span><b>${setStr(rec)}</b><small>${fmtDate(rec.date)}</small></div>
+        <div><span>Última</span><b>${setStr(last)}</b><small>${fmtDate(last.date)}</small></div>
+        <div><span>Desde o início</span><b>${diff>0?"+":""}${fkg(diff)} kg</b><small>${pts.length>1?`desde ${fmtDate(first.date)}`:"1 treino só"}</small></div>
+        <div><span>Força estimada</span><b>${eLast?fkg(eLast)+" kg":"—"}</b><small>${eRec?`recorde ${fkg(eRec)} kg`:"anote as reps"}</small></div>
+      </div>
+      <div class="kgtab"><div class="kgrow kghead"><span>Data</span><span>Maior carga</span><span>Força est.</span></div>${[...pts].reverse().slice(0,8).map(x=>`<div class="kgrow"><span>${fmtDate(x.date)}</span><span>${setStr(x)}</span><span>${x.e?fkg(x.e)+" kg":"—"}</span></div>`).join("")}</div>`:""}
+    </section>`}).join("");
+  h+=`<p class="muted">Força estimada = carga × (1 + repetições ÷ 30). É uma estimativa da carga máxima para 1 repetição, útil para comparar treinos com repetições diferentes; fica menos precisa acima de ~12 repetições.</p>`;
+  body.innerHTML=h;
+  body.querySelectorAll(".kgchart").forEach(el=>drawKg(el,kgList[+el.dataset.ki][1]));
+}
+function drawKg(box,all){
+  const today=new Date();today.setHours(12,0,0,0);
+  const from=kgRange==="all"?"":isoDate(new Date(today.getTime()-(kgRange==="1m"?30:91)*864e5));
+  const pts=all.filter(x=>x.date>=from);
+  if(!pts.length){box.innerHTML=`<p class="muted">Nenhum registro neste período. Escolha "Tudo".</p>`;return}
+  const W=Math.max(260,box.clientWidth||320),H=190,L=40,R=14,T=12,Bm=26;
+  const t=x=>fromIso(x.date).getTime(),t0=t(pts[0]),t1=t(pts[pts.length-1]);
+  const vals=pts.flatMap(x=>[x.kg,x.e].filter(Boolean));let lo=Math.min(...vals),hi=Math.max(...vals);
+  if(hi-lo<5){const m=(hi+lo)/2;lo=m-2.5;hi=m+2.5}
+  const span=hi-lo,raw=span/3,mag=Math.pow(10,Math.floor(Math.log10(raw))),step=[1,2,2.5,5,10].map(k=>k*mag).find(k=>k>=raw);
+  lo=Math.floor(lo/step)*step;hi=Math.ceil(hi/step)*step;
+  const X=x=>pts.length===1?L+(W-L-R)/2:L+(t(x)-t0)/(t1-t0)*(W-L-R),Y=v=>T+(hi-v)/(hi-lo)*(H-T-Bm);
+  let g="";for(let v=lo;v<=hi+1e-9;v+=step)g+=`<line class="kg-grid" x1="${L}" x2="${W-R}" y1="${Y(v)}" y2="${Y(v)}"/><text class="kg-ax" x="${L-6}" y="${Y(v)+4}" text-anchor="end">${fkg(v)}</text>`;
+  const line=(key,cls)=>{const q=pts.filter(x=>x[key]);if(q.length<2)return "";return `<path class="${cls}" d="${q.map((x,i)=>`${i?"L":"M"}${X(x).toFixed(1)},${Y(x[key]).toFixed(1)}`).join(" ")}"/>`};
+  const dots=(key,cls)=>pts.filter(x=>x[key]).map(x=>`<circle class="${cls}" cx="${X(x).toFixed(1)}" cy="${Y(x[key]).toFixed(1)}" r="4"/>`).join("");
+  const xl=[pts[0],pts.length>2?pts[Math.floor((pts.length-1)/2)]:null,pts.length>1?pts[pts.length-1]:null].filter(Boolean);
+  const xt=xl.map((x,i)=>`<text class="kg-ax" x="${X(x)}" y="${H-8}" text-anchor="${pts.length===1?"middle":i===0?"start":i===xl.length-1?"end":"middle"}">${fmtDate(x.date)}</text>`).join("");
+  box.innerHTML=`<svg class="kgsvg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Gráfico de cargas: ${pts.map(x=>`${fmtDate(x.date)} ${setStr(x)}`).join(", ")}">${g}${xt}
+    ${line("e","kg-l2")}${line("kg","kg-l1")}${dots("e","kg-d2")}${dots("kg","kg-d1")}
+    <line class="kg-cross" x1="0" x2="0" y1="${T}" y2="${H-Bm}" style="display:none"/><rect class="kg-hit" x="${L}" y="0" width="${W-L-R}" height="${H}"/></svg>
+    <div class="kgtip" hidden></div>${pts.length===1?`<p class="muted" style="margin-top:4px">Registre mais treinos com carga para ver a linha.</p>`:""}`;
+  const svgEl=box.querySelector("svg"),cross=box.querySelector(".kg-cross"),tip=box.querySelector(".kgtip");
+  const show=ev=>{const r=svgEl.getBoundingClientRect(),mx=(ev.clientX-r.left)*W/r.width;
+    let best=pts[0];for(const x of pts)if(Math.abs(X(x)-mx)<Math.abs(X(best)-mx))best=x;
+    const cx=X(best);cross.setAttribute("x1",cx);cross.setAttribute("x2",cx);cross.style.display="";
+    tip.innerHTML=`<b>${fmtDate(best.date)}</b><span><i class="k1"></i>Maior carga: ${setStr(best)}</span><span><i class="k2"></i>Força est.: ${best.e?fkg(best.e)+" kg":"—"}</span>`;
+    tip.hidden=false;const px=cx*r.width/W;tip.style.left=Math.min(Math.max(px-88,0),r.width-176)+"px"};
+  const hide=()=>{cross.style.display="none";tip.hidden=true};
+  const hit=box.querySelector(".kg-hit");hit.addEventListener("pointermove",show);hit.addEventListener("pointerdown",show);hit.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")hide()});
+}
+addEventListener("resize",()=>{if(tab==="prog"&&pView==="kg")document.querySelectorAll(".kgchart").forEach(el=>drawKg(el,kgList[+el.dataset.ki][1]))});
 function renderProg(){
+  if(pView==="kg")return renderKg();
   const r=pRange(),T=tally(r),body=$("progBody"),B=BANDS[pMode];
   const gs=Object.keys(BASIC).map(g=>[g,T.grp[g]||0]);const done=gs.filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]),none=gs.filter(x=>!x[1]);
   const top=Math.max(B.bar,...done.map(x=>x[1]));
   const over=pMode==="day"?done.filter(([,v])=>v>B.t[2]):[];
   body.innerHTML=`<div class="page-h"><h2>Progresso<button class="help" data-help="prog" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">Músculos que você treinou, pelos treinos marcados como feitos na aba Hoje. Cada série conta 1 para o músculo alvo e ½ para os sinergistas.</p></div>
+  ${pvSeg()}
   <div class="card">
     <div class="row between"><div class="seg" role="group" aria-label="Período"><button data-pm="week" aria-pressed="${pMode==="week"}">Semana</button><button data-pm="day" aria-pressed="${pMode==="day"}">Dia</button></div></div>
     <div class="pnav"><button class="ib" data-pnav="-1" aria-label="${pMode==="week"?"Semana anterior":"Dia anterior"}">‹</button>
@@ -1914,6 +2028,10 @@ function renderProg(){
   $("pfigBox").appendChild(progFig(T.mus,B));
 }
 $("progBody").addEventListener("click",e=>{
+  const pv=e.target.closest("[data-pv]");if(pv){pView=pv.dataset.pv;LS.set("atlas-pview",pView);return renderProg()}
+  const kx=e.target.closest("[data-kx]");if(kx){const nm=kgList[+kx.dataset.kx][0];kgOpen=kgOpen===nm?null:nm;renderKg();
+    const c=document.querySelector(`[data-kx="${kx.dataset.kx}"]`);if(c&&kgOpen)c.scrollIntoView({block:"nearest"});return}
+  const kr=e.target.closest("[data-kr]");if(kr){kgRange=kr.dataset.kr;LS.set("atlas-kgrange",kgRange);return renderKg()}
   const m=e.target.closest("[data-pm]");if(m){pMode=m.dataset.pm;LS.set("atlas-pmode",pMode);pOff=0;return renderProg()}
   const n=e.target.closest("[data-pnav]");if(n){pOff=Math.min(0,pOff+ +n.dataset.pnav);return renderProg()}
   if(e.target.closest("[data-goto]"))return setTab("treino");
