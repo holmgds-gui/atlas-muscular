@@ -264,7 +264,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 
 @media (max-width:900px){
   .htabs{display:none}
-  .btabs{display:grid;grid-row:3;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line);background:var(--surface);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .btabs{display:grid;grid-row:3;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--surface);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
   .btabs button{display:grid;justify-items:center;gap:2px;padding:7px 0 6px;font-size:13px}
   .btabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .btabs button[aria-current="page"]{color:var(--target)}
@@ -298,6 +298,33 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   .p-top .clear{flex:none}
 }
 @media (min-width:901px){.listbtn{display:none!important}}
+/* ---- progress tab ---- */
+.pnav{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pnav .plabel{font-family:var(--f-display);font-weight:700;font-size:20px;letter-spacing:.03em;text-align:center;flex:1;min-width:0}
+.pnav .ib:disabled{opacity:.35}
+.pfig{display:block;width:100%;height:auto;max-height:min(60vh,520px);touch-action:manipulation}
+.pfig .m{fill:var(--m);transition:none}
+.pfig .dm{fill:var(--m-hi)}
+.pfig .skin{fill:var(--m-lo)}
+.pfig .fib{display:none}
+.pfig [data-m]{cursor:pointer}
+.heatbar{display:grid;gap:4px}
+.heatbar > span{height:10px;border-radius:6px;background:linear-gradient(90deg,var(--m) 0 9%,#F7E38C 14%,#F5B041 45%,#EF7A24 72%,#D3222A)}
+.heatbar small{font-size:12px;color:var(--muted)}
+.pstat{display:flex;gap:10px}
+.pstat > div{flex:1;background:var(--bg);border-radius:10px;padding:10px 12px}
+.pstat b{display:block;font-family:var(--f-display);font-size:26px;line-height:1.05}
+.pstat span{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
+.pg{border-top:1px solid var(--line)}
+.pg summary{display:grid;grid-template-columns:minmax(0,1fr) 38% 40px;gap:10px;align-items:center;padding:11px 2px;cursor:pointer;list-style:none}
+.pg summary::-webkit-details-marker{display:none}
+.pg-n{font-weight:600;font-size:15px}
+.pg-bar{height:8px;border-radius:5px;background:var(--chip);overflow:hidden}
+.pg-bar i{display:block;height:100%;border-radius:5px}
+.pg summary b{text-align:right;font-variant-numeric:tabular-nums;font-size:15px}
+.pg-parts{display:grid;gap:6px;padding:0 2px 12px 12px}
+.pg-parts div{display:flex;justify-content:space-between;gap:10px;font-size:14px;color:var(--muted)}
+.pg-parts b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){#tab-atlas .stage{transition:none}}
 </style>
 </head>
@@ -309,6 +336,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
       <button data-tab="atlas">Atlas</button>
       <button data-tab="ficha">Ficha</button>
       <button data-tab="treino">Treino</button>
+      <button data-tab="prog">Progresso</button>
     </nav>
     <div class="search">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
@@ -366,11 +394,13 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 
   <section id="tab-ficha" class="view page" hidden><div class="wrap" id="fichaBody"></div></section>
   <section id="tab-treino" class="view page" hidden><div class="wrap" id="treinoBody"></div></section>
+  <section id="tab-prog" class="view page" hidden><div class="wrap" id="progBody"></div></section>
 
   <nav class="btabs" aria-label="Seções">
     <button data-tab="atlas"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2.2"/><path d="M5 8.5l7 1.5 7-1.5M12 10v5M12 15l-3 6M12 15l3 6"/></svg>Atlas</button>
     <button data-tab="ficha"><svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M8 3v4M16 3v4M7.5 13h3M13.5 13h3M7.5 16.5h3"/></svg>Ficha</button>
     <button data-tab="treino"><svg viewBox="0 0 24 24"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></svg>Treino</button>
+    <button data-tab="prog"><svg viewBox="0 0 24 24"><path d="M3 20h18M6 20v-6M10.5 20V9M15 20v-8M19.5 20V5"/></svg>Progresso</button>
   </nav>
 </div>
 
@@ -1589,13 +1619,85 @@ $("importFile").addEventListener("change",async e=>{
 });
 
 /* ---------------------------------------------------------- tabs + init */
-let tab=LS.get("atlas-tab","atlas");if(!["atlas","ficha","treino"].includes(tab))tab="atlas";
+let tab=LS.get("atlas-tab","atlas");if(!["atlas","ficha","treino","prog"].includes(tab))tab="atlas";
+/* ---------------------------------------------------------- progress
+   Sets done in the period, per muscle: 1 for each target muscle of the
+   exercise (the lists it appears in) and 1/2 for each synergist. */
+const EXMAP=(()=>{const m={};
+  for(const [id,mu] of Object.entries(M))for(const x of mu.x){const k=norm(x[0]);const e=m[k]||(m[k]={p:new Set(),s:new Set()});e.p.add(id);x[4].forEach(t=>e.s.add(t))}
+  for(const e of Object.values(m))e.p.forEach(id=>e.s.delete(id));return m})();
+let pMode=LS.get("atlas-pmode","week");if(!["week","day"].includes(pMode))pMode="week";
+let pOff=0;
+const dm=d=>d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"}).replace(".","");
+function pRange(){
+  const t=new Date();t.setHours(12,0,0,0);
+  if(pMode==="day"){t.setDate(t.getDate()+pOff);const s=isoDate(t);
+    return {from:s,to:s,label:pOff===0?"Hoje":pOff===-1?"Ontem":fmtLong(t),H:6}}
+  const mon=new Date(t);mon.setDate(mon.getDate()-todayIdx()+7*pOff);const sun=new Date(mon);sun.setDate(sun.getDate()+6);
+  return {from:isoDate(mon),to:isoDate(sun),label:`${dm(mon)} – ${dm(sun)}`,sub:pOff===0?"Esta semana":pOff===-1?"Semana passada":"",H:12};
+}
+const doneSets=it=>(it.sets||[]).filter(x=>String(x.r??"").trim()!==""||String(x.kg??"").trim()!=="").length;
+function tally(r){
+  const mus={},grp={},unk=new Map(),days=new Set();let sets=0;
+  for(const w of workouts){if(w.date<r.from||w.date>r.to)continue;
+    for(const it of w.items||[]){const n=doneSets(it);if(!n)continue;days.add(w.date);sets+=n;
+      const e=EXMAP[norm(it.name)];if(!e){unk.set(it.name,(unk.get(it.name)||0)+n);continue}
+      e.p.forEach(id=>mus[id]=(mus[id]||0)+n);e.s.forEach(id=>mus[id]=(mus[id]||0)+n/2);
+      const g={};e.s.forEach(id=>g[TOB[id]]=.5);e.p.forEach(id=>g[TOB[id]]=1);
+      for(const k in g)grp[k]=(grp[k]||0)+n*g[k];}}
+  return {mus,grp,unk,sets,days:days.size};
+}
+const HEAT=[[247,227,140],[245,176,65],[239,122,36],[211,34,42]];
+function heat(v,H){const t=Math.min(1,v/H)*3,i=Math.min(2,Math.floor(t)),f=t-i;const a=HEAT[i],b=HEAT[i+1];
+  return `rgb(${a.map((c,k)=>Math.round(c+(b[k]-c)*f)).join(",")})`}
+const nf=v=>(Math.round(v*2)/2).toLocaleString("pt-BR");
+function progFig(mus,H){
+  const f=document.createElementNS(NS,"svg");f.setAttribute("viewBox",BOX.both.join(" "));f.setAttribute("class","pfig");
+  f.setAttribute("aria-label","Músculos treinados no período, frente e costas");
+  for(const n of ["front","back"]){const g=VG[n].cloneNode(true);g.style.display="";f.appendChild(g)}
+  f.querySelectorAll(".on,.syn").forEach(e=>e.classList.remove("on","syn"));
+  f.querySelectorAll("[data-m]").forEach(g=>{const v=mus[g.dataset.m];const t=g.querySelector("title");
+    if(t)t.textContent=M[g.dataset.m].n+(v?`: ${nf(v)} séries`:": não treinado");
+    if(v)g.querySelector(".m").style.fill=heat(v,H)});
+  return f;
+}
+function renderProg(){
+  const r=pRange(),T=tally(r),body=$("progBody");
+  const gs=Object.keys(BASIC).map(g=>[g,T.grp[g]||0]);const done=gs.filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]),none=gs.filter(x=>!x[1]);
+  const top=Math.max(r.H,...done.map(x=>x[1]));
+  body.innerHTML=`<div class="page-h"><h2>Progresso</h2><p class="lead">Músculos que você treinou, pelas séries marcadas na aba Treino. Cada série conta 1 para o músculo alvo e ½ para os sinergistas.</p></div>
+  <div class="card">
+    <div class="row between"><div class="seg" role="group" aria-label="Período"><button data-pm="week" aria-pressed="${pMode==="week"}">Semana</button><button data-pm="day" aria-pressed="${pMode==="day"}">Dia</button></div></div>
+    <div class="pnav"><button class="ib" data-pnav="-1" aria-label="${pMode==="week"?"Semana anterior":"Dia anterior"}">‹</button>
+      <div class="plabel">${esc(r.label)}${r.sub?`<span class="muted-s">${r.sub}</span>`:""}</div>
+      <button class="ib" data-pnav="1" aria-label="${pMode==="week"?"Próxima semana":"Próximo dia"}" ${pOff>=0?"disabled":""}>›</button></div>
+    <div id="pfigBox"></div>
+    <div class="heatbar"><span></span><div class="row between"><small>Não treinado</small><small>Pouco</small><small>Muito</small></div></div>
+    <div class="pstat"><div><b>${T.days}</b><span>${T.days===1?"Treino":"Treinos"}</span></div><div><b>${T.sets}</b><span>Séries feitas</span></div><div><b>${done.length}</b><span>Grupos treinados</span></div></div>
+  </div>
+  ${T.sets?`<div class="card"><h3 class="section-t" style="margin:0">Séries por músculo</h3><div>${done.map(([g,v])=>{
+      const parts=BASIC[g].m.map(id=>[id,T.mus[id]||0]).sort((a,b)=>b[1]-a[1]);
+      return `<details class="pg"><summary><span class="pg-n">${BASIC[g].n}</span><span class="pg-bar"><i style="width:${Math.max(4,Math.round(v/top*100))}%;background:${heat(v,r.H)}"></i></span><b>${nf(v)}</b></summary>
+        <div class="pg-parts">${parts.map(([id,x])=>`<div><span>${M[id].n}</span><b>${x?nf(x):"—"}</b></div>`).join("")}</div></details>`}).join("")}</div>
+      ${none.length?`<p class="muted">Não treinados: ${none.map(([g])=>BASIC[g].n).join(", ")}.</p>`:""}</div>`
+    :`<div class="card"><p class="muted">Nenhuma série marcada ${pMode==="week"?"nesta semana":"neste dia"}. Na aba Treino, preencha repetições ou carga das séries que fez e elas aparecem aqui.</p><button class="btn primary" data-goto="treino">Ir para o Treino</button></div>`}
+  ${T.unk.size?`<p class="muted">Não entram no boneco porque o app não conhece o exercício: ${[...T.unk].map(([n,c])=>`${esc(n)} (${c})`).join(", ")}.</p>`:""}`;
+  $("pfigBox").appendChild(progFig(T.mus,r.H));
+}
+$("progBody").addEventListener("click",e=>{
+  const m=e.target.closest("[data-pm]");if(m){pMode=m.dataset.pm;LS.set("atlas-pmode",pMode);pOff=0;return renderProg()}
+  const n=e.target.closest("[data-pnav]");if(n){pOff=Math.min(0,pOff+ +n.dataset.pnav);return renderProg()}
+  if(e.target.closest("[data-goto]"))return setTab("treino");
+  const g=e.target.closest(".pfig [data-m]");if(g){const t=g.querySelector("title");toast(t?t.textContent:M[g.dataset.m].n)}
+});
+
 function setTab(t){
   tab=t;LS.set("atlas-tab",t);
-  ["atlas","ficha","treino"].forEach(x=>$("tab-"+x).hidden=(x!==t));
+  ["atlas","ficha","treino","prog"].forEach(x=>$("tab-"+x).hidden=(x!==t));
   document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));
   if(t==="ficha")renderFicha();
   if(t==="treino"){openW=null;askDel=false;renderTreino()}
+  if(t==="prog"){pOff=0;renderProg()}
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
 
