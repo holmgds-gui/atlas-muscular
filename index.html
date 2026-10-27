@@ -2440,7 +2440,8 @@ $("rankBody").addEventListener("toggle",e=>{const d=e.target.closest&&e.target.c
 $("rankBody").addEventListener("change",e=>{if(e.target.id!=="rkBw")return;const v=numKg(e.target.value);
   if(e.target.value.trim()===""){delete rank.bw}else if(v>=30&&v<=250){rank.bw=Math.round(v*10)/10}else{toast("Peso entre 30 e 250 kg");e.target.value=rank.bw>0?fkg(rank.bw):"";return}
   saveRank();renderRank()});
-$("brandBtn").addEventListener("click",()=>{if(tab!=="rank")setTab("rank")});
+/* title toggles: opens the ranking; tapped again (on the ranking) goes back to the home page (Atlas) */
+$("brandBtn").addEventListener("click",()=>setTab(tab==="rank"?"atlas":"rank"));
 
 function setTab(t){
   if(t==="rank"&&tab!=="rank")rPrev=tab;
