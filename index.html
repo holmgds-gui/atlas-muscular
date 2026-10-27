@@ -113,6 +113,14 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .p-top{display:flex;align-items:flex-start;gap:10px}
 .p-top > div{min-width:0;flex:1}
 .eyebrow{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--target)}
+.eyebrow-row{display:flex;align-items:center;gap:8px}
+.help{display:inline-grid;place-items:center;flex:none;width:22px;height:22px;padding:0;border-radius:50%;border:1.5px solid var(--line);background:var(--surface);color:var(--muted);font-family:var(--f-body);font-size:16px;font-weight:600;line-height:1;letter-spacing:0;vertical-align:middle;cursor:pointer;position:relative}
+.help::after{content:"";position:absolute;inset:-10px}
+.page-h h2 .help{margin-left:10px;transform:translateY(-3px)}
+.helpb{overflow:auto;padding:0 16px 22px;font-size:15px;line-height:1.5}
+.helpb p{margin:0 0 6px}
+.helpb h4{margin:14px 0 6px;font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.helpb ul{margin:0;padding-left:18px;display:grid;gap:6px}
 .p-title{margin:2px 0 0;font-family:var(--f-display);font-weight:700;font-size:28px;line-height:1.02;text-wrap:balance}
 .p-latin{margin:4px 0 0;font-size:13px;color:var(--muted);font-style:italic}
 .clear{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:6px 10px;font-size:13px}
@@ -409,7 +417,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
       <div class="p-head">
         <div class="p-top">
           <div>
-            <div class="eyebrow" id="cat">Escolha um músculo</div>
+            <div class="eyebrow-row"><div class="eyebrow" id="cat">Escolha um músculo</div><button class="help" data-help="atlas" aria-label="Sobre esta página" title="Sobre esta página">+</button></div>
             <h2 class="p-title" id="title">Toque no boneco</h2>
             <p class="p-latin" id="latin">O músculo fica vermelho e a lista mostra os exercícios em ordem.</p>
           </div>
@@ -449,6 +457,13 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
     <div class="sheet-h"><h3 id="aTitle">Adicionar</h3><button class="btn" data-close>Fechar</button></div>
     <div class="sheet-s"><p class="muted" id="aName"></p></div>
     <div class="alist" id="aList"></div>
+  </div>
+</div>
+
+<div class="modal" id="helpSheet" hidden>
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="hTitle">
+    <div class="sheet-h"><h3 id="hTitle">Ajuda</h3><button class="btn" data-close>Fechar</button></div>
+    <div class="helpb" id="hBody"></div>
   </div>
 </div>
 
@@ -1486,7 +1501,52 @@ function renderPList(){
 $("pq").addEventListener("input",renderPList);
 $("pchips").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(!b)return;pickG=b.dataset.pg;renderPChips();renderPList()});
 $("plist").addEventListener("click",e=>{const b=e.target.closest("[data-pick]");if(!b)return;const cb=pickCb;closeModals();if(cb)cb(b.dataset.pick)});
-function closeModals(){$("picker").hidden=true;$("addSheet").hidden=true;pickCb=null}
+function closeModals(){$("picker").hidden=true;$("addSheet").hidden=true;$("helpSheet").hidden=true;pickCb=null}
+/* page help: the small + next to each page title */
+const HELP={
+  atlas:["Atlas",`<p>O boneco mostra os músculos. Toque num músculo para ele ficar vermelho e ver a lista de exercícios para ele, do que mais estimula para o que menos estimula.</p>
+    <h4>O que dá para fazer</h4><ul>
+    <li><b>Tocar num exercício</b>: os músculos que ajudam no movimento (sinergistas) ficam laranja.</li>
+    <li><b>Selos</b>: <i>Hipertrofia</i> vem de estudos que mediram o músculo crescer; <i>Estudo EMG</i> mediu a ativação; <i>Biomecânica</i> vem da mecânica do movimento.</li>
+    <li><b>Modelos</b>: Detalhado (cada parte do músculo), Básico (grupos inteiros) e Articulações (aquecimento, mobilidade e alongamento de cada junta).</li>
+    <li><b>Frente / Costas</b> e <b>♂ / ♀</b> trocam a vista e o corpo.</li>
+    <li><b>Filtros</b> de equipamento (halteres, polia, barra…) logo acima da lista.</li>
+    <li><b>+ no exercício</b>: manda o exercício para um dos seus treinos ou cria um novo.</li>
+    <li><b>Buscar</b>, no topo, acha músculos e exercícios pelo nome.</li></ul>
+    <h4>Dicas</h4><ul><li>Pinça com dois dedos dá zoom; arraste para mover; ⤢ volta ao enquadramento.</li>
+    <li>No celular, depois de escolher um músculo o boneco fica pequeno no canto. Toque nele para ampliar.</li>
+    <li>Em "Como o ranking funciona", no fim da lista, estão as fontes.</li></ul>`],
+  ficha:["Meus treinos",`<p>Aqui você monta seus treinos: nome, exercícios, séries e repetições. Montar ou mudar um treino não conta no Progresso.</p>
+    <h4>O que dá para fazer</h4><ul>
+    <li><b>+ Novo treino</b> cria um treino. Dê um nome, como "Peito e tríceps".</li>
+    <li><b>Editar</b> abre o treino: adicione exercícios, mude séries e reps, reordene com ↑ ↓ e remova com ✕.</li>
+    <li><b>Dias da semana</b> são opcionais: nesses dias o treino aparece primeiro na aba Hoje.</li>
+    <li><b>Excluir treino</b> apaga o modelo; o que você já fez continua no histórico.</li></ul>
+    <h4>Dicas</h4><ul><li>No Atlas, o + de cada exercício manda ele direto para um treino daqui.</li>
+    <li>Para o treino contar, vá na aba Hoje e toque em Marcar como feito.</li></ul>`],
+  treino:["Hoje",`<p>Aqui você registra o que treinou. Só o que estiver marcado como feito entra no Progresso.</p>
+    <h4>O que dá para fazer</h4><ul>
+    <li><b>Sua semana</b> mostra, de segunda a domingo, os treinos que você fez em cada dia.</li>
+    <li><b>Marcar como feito</b>: um toque e o treino conta, com todas as séries dele.</li>
+    <li><b>Anotar séries</b>: abre o treino para anotar repetições e carga de cada série. "Última vez" mostra o que você fez antes.</li>
+    <li><b>Desfazer</b> tira o treino do Progresso.</li>
+    <li><b>Treino personalizado</b>: monte um treino só para hoje, sem salvar em Meus treinos.</li>
+    <li><b>Histórico</b> guarda os treinos de outros dias. <b>Backup</b> salva tudo num arquivo.</li></ul>
+    <h4>Dicas</h4><ul><li>Os dados ficam só neste aparelho. Exporte um backup de vez em quando.</li>
+    <li>Anotar a carga ajuda a ver se você está progredindo.</li></ul>`],
+  prog:["Progresso",`<p>O boneco fica colorido conforme quantas séries cada músculo recebeu nos treinos marcados como feitos.</p>
+    <h4>O que dá para fazer</h4><ul>
+    <li><b>Semana / Dia</b> trocam o período; as setas voltam para semanas ou dias anteriores.</li>
+    <li><b>Toque num músculo</b> do boneco para ver quantas séries ele teve.</li>
+    <li><b>Toque num grupo</b> da lista para ver as partes (ex.: peitoral superior, médio e inferior).</li></ul>
+    <h4>Como conta</h4><ul><li>Cada série vale 1 para o músculo alvo do exercício e ½ para os sinergistas.</li>
+    <li><b>Semana</b>: 4–9 séries é estímulo moderado, 10–20 é a faixa ideal, mais de 20 é volume alto.</li>
+    <li><b>Dia</b>: até ~11 séries por músculo no mesmo treino ainda trazem ganho; depois disso, quase nada a mais.</li></ul>
+    <h4>Dicas</h4><ul><li>Mire 10–20 séries por semana em cada grupo que quer crescer, divididas em 2 ou mais treinos.</li>
+    <li>Grupos em "Não treinados" mostram o que ficou de fora na semana.</li></ul>`]
+};
+function openHelp(k){const h=HELP[k];if(!h)return;$("hTitle").textContent=h[0];$("hBody").innerHTML=h[1];$("helpSheet").hidden=false;$("hBody").scrollTop=0}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-help]");if(!b)return;e.preventDefault();e.stopPropagation();openHelp(b.dataset.help)},true);
 document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m||e.target.closest("[data-close]"))closeModals()}));
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModals()});
 
@@ -1549,7 +1609,7 @@ const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
 let openPlan=null,askDelPlan=null;
 function renderFicha(){
   const d=todayIdx();
-  let h=`<div class="page-h"><h2>Meus treinos</h2><p class="lead">Monte seus treinos aqui. Para registrar um treino, vá na aba Hoje e toque em Marcar como feito.</p></div>`;
+  let h=`<div class="page-h"><h2>Meus treinos<button class="help" data-help="ficha" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">Monte seus treinos aqui. Para registrar um treino, vá na aba Hoje e toque em Marcar como feito.</p></div>`;
   h+=plans.map(p=>{const open=openPlan===p.id;
     return `<section class="card plan" data-pid="${p.id}">
       <button class="plan-h" data-act="toggle" data-pid="${p.id}" aria-expanded="${open}"><span><span class="wx-n">${esc(p.name||"Treino sem nome")}</span><span class="muted-s">${daysTxt(p)} · ${plural(p.items.length,"exercício")}</span></span><span class="chev" aria-hidden="true">${open?"Fechar":"Editar"}</span></button>
@@ -1614,7 +1674,7 @@ function renderTreino(){
     const tw=workouts.filter(x=>x.date===today);
     const list=[...plans].sort((x,y)=>(y.days.includes(d)?1:0)-(x.days.includes(d)?1:0));
     const nDone=tw.filter(x=>x.done!==false).length;
-    h=`<div class="page-h"><h2>Hoje</h2><p class="lead">${cap(fmtLong(new Date()))}${nDone?` · ${plural(nDone,"treino")} feito${nDone===1?"":"s"}`:""}</p></div>
+    h=`<div class="page-h"><h2>Hoje<button class="help" data-help="treino" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">${cap(fmtLong(new Date()))}${nDone?` · ${plural(nDone,"treino")} feito${nDone===1?"":"s"}`:""}</p></div>
       ${weekDone()}
       <h3 class="section-t">Seus treinos</h3>`;
     h+=list.length?list.map(p=>{const ex=tw.filter(x=>x.planId===p.id).pop(),tag=p.days.includes(d)?`<span class="pill soft">Dia de hoje</span>`:"";
@@ -1789,7 +1849,7 @@ function renderProg(){
   const gs=Object.keys(BASIC).map(g=>[g,T.grp[g]||0]);const done=gs.filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]),none=gs.filter(x=>!x[1]);
   const top=Math.max(B.bar,...done.map(x=>x[1]));
   const over=pMode==="day"?done.filter(([,v])=>v>B.t[2]):[];
-  body.innerHTML=`<div class="page-h"><h2>Progresso</h2><p class="lead">Músculos que você treinou, pelos treinos marcados como feitos na aba Hoje. Cada série conta 1 para o músculo alvo e ½ para os sinergistas.</p></div>
+  body.innerHTML=`<div class="page-h"><h2>Progresso<button class="help" data-help="prog" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">Músculos que você treinou, pelos treinos marcados como feitos na aba Hoje. Cada série conta 1 para o músculo alvo e ½ para os sinergistas.</p></div>
   <div class="card">
     <div class="row between"><div class="seg" role="group" aria-label="Período"><button data-pm="week" aria-pressed="${pMode==="week"}">Semana</button><button data-pm="day" aria-pressed="${pMode==="day"}">Dia</button></div></div>
     <div class="pnav"><button class="ib" data-pnav="-1" aria-label="${pMode==="week"?"Semana anterior":"Dia anterior"}">‹</button>
