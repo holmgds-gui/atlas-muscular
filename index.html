@@ -308,9 +308,16 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .pfig .skin{fill:var(--m-lo)}
 .pfig .fib{display:none}
 .pfig [data-m]{cursor:pointer}
-.heatbar{display:grid;gap:4px}
-.heatbar > span{height:10px;border-radius:6px;background:linear-gradient(90deg,var(--m) 0 9%,#F7E38C 14%,#F5B041 45%,#EF7A24 72%,#D3222A)}
-.heatbar small{font-size:12px;color:var(--muted)}
+.bands{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.bands div{display:grid;gap:2px;align-content:start;min-width:0}
+.bands i{display:block;height:10px;border-radius:3px}
+.bands div:first-child i{border-radius:6px 3px 3px 6px}.bands div:last-child i{border-radius:3px 6px 6px 3px}
+.bands b{font-size:13px;font-variant-numeric:tabular-nums;margin-top:2px}
+.bands small{font-size:11px;line-height:1.2;color:var(--muted)}
+.pg-b{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:500;color:var(--muted);margin-top:2px}
+.pg-b i{width:8px;height:8px;border-radius:50%;flex:none}
+.warnbox{border:1px solid var(--target);background:color-mix(in srgb,var(--target) 8%,var(--surface));border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.45}
+.warnbox b{display:block;color:var(--target);margin-bottom:2px}
 .pstat{display:flex;gap:10px}
 .pstat > div{flex:1;background:var(--bg);border-radius:10px;padding:10px 12px}
 .pstat b{display:block;font-family:var(--f-display);font-size:26px;line-height:1.05}
@@ -1632,9 +1639,9 @@ const dm=d=>d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"}).replace(
 function pRange(){
   const t=new Date();t.setHours(12,0,0,0);
   if(pMode==="day"){t.setDate(t.getDate()+pOff);const s=isoDate(t);
-    return {from:s,to:s,label:pOff===0?"Hoje":pOff===-1?"Ontem":fmtLong(t),H:6}}
+    return {from:s,to:s,label:pOff===0?"Hoje":pOff===-1?"Ontem":fmtLong(t)}}
   const mon=new Date(t);mon.setDate(mon.getDate()-todayIdx()+7*pOff);const sun=new Date(mon);sun.setDate(sun.getDate()+6);
-  return {from:isoDate(mon),to:isoDate(sun),label:`${dm(mon)} – ${dm(sun)}`,sub:pOff===0?"Esta semana":pOff===-1?"Semana passada":"",H:12};
+  return {from:isoDate(mon),to:isoDate(sun),label:`${dm(mon)} – ${dm(sun)}`,sub:pOff===0?"Esta semana":pOff===-1?"Semana passada":""};
 }
 const doneSets=it=>(it.sets||[]).filter(x=>String(x.r??"").trim()!==""||String(x.kg??"").trim()!=="").length;
 function tally(r){
@@ -1647,24 +1654,49 @@ function tally(r){
       for(const k in g)grp[k]=(grp[k]||0)+n*g[k];}}
   return {mus,grp,unk,sets,days:days.size};
 }
-const HEAT=[[247,227,140],[245,176,65],[239,122,36],[211,34,42]];
-function heat(v,H){const t=Math.min(1,v/H)*3,i=Math.min(2,Math.floor(t)),f=t-i;const a=HEAT[i],b=HEAT[i+1];
-  return `rgb(${a.map((c,k)=>Math.round(c+(b[k]-c)*f)).join(",")})`}
+/* Bands from the research summary in "Como as faixas foram definidas".
+   Week: 4 sets = minimum effective dose, 10+ to maximise, 12–20 likely optimum, >20 diminishing returns.
+   Day: ~11 fractional sets per muscle per session is where extra sets stop adding detectable growth. */
+const BANDS={
+  week:{t:[4,10,20],max:30,bar:25,names:["Não treinado","Abaixo do mínimo","Estímulo moderado","Faixa ideal","Volume alto"],ranges:["0","1–3","4–9","10–20","20+"],
+    stops:[[.5,"#F7E38C"],[4,"#F5B041"],[10,"#EF7A24"],[20,"#D3222A"],[30,"#8E1018"]]},
+  day:{t:[3,6,11],max:16,bar:14,names:["Não treinado","Leve","Bom","Forte","Pouco ganho extra"],ranges:["0","1–2","3–5","6–11","12+"],
+    stops:[[.5,"#F7E38C"],[3,"#F5B041"],[6,"#EF7A24"],[11,"#D3222A"],[16,"#8E1018"]]}
+};
+const bandOf=(v,B)=>v<=0?0:v>B.t[2]?4:v>=B.t[1]?3:v>=B.t[0]?2:1;
+const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+function heat(v,B){const st=B.stops;if(v<=st[0][0])return st[0][1];
+  for(let i=1;i<st.length;i++)if(v<=st[i][0]){const [v0,c0]=st[i-1],[v1,c1]=st[i];const f=(v-v0)/(v1-v0);const a=rgb(c0),b=rgb(c1);
+    return `rgb(${a.map((c,k)=>Math.round(c+(b[k]-c)*f)).join(",")})`}
+  return st[st.length-1][1]}
 const nf=v=>(Math.round(v*2)/2).toLocaleString("pt-BR");
-function progFig(mus,H){
+function bandLegend(B){
+  const edges=[0,.5,...B.t,B.max];
+  return `<div class="bands" role="list" aria-label="Faixas de séries">${B.names.map((n,i)=>{
+    const bg=i===0?"var(--m)":`linear-gradient(90deg,${heat(edges[i],B)},${heat(edges[i+1],B)})`;
+    return `<div role="listitem"><i style="background:${bg}"></i><b>${B.ranges[i]}</b><small>${n}</small></div>`}).join("")}</div>`;
+}
+function progFig(mus,B){
   const f=document.createElementNS(NS,"svg");f.setAttribute("viewBox",BOX.both.join(" "));f.setAttribute("class","pfig");
   f.setAttribute("aria-label","Músculos treinados no período, frente e costas");
   for(const n of ["front","back"]){const g=VG[n].cloneNode(true);g.style.display="";f.appendChild(g)}
   f.querySelectorAll(".on,.syn").forEach(e=>e.classList.remove("on","syn"));
   f.querySelectorAll("[data-m]").forEach(g=>{const v=mus[g.dataset.m];const t=g.querySelector("title");
     if(t)t.textContent=M[g.dataset.m].n+(v?`: ${nf(v)} séries`:": não treinado");
-    if(v)g.querySelector(".m").style.fill=heat(v,H)});
+    if(v)g.querySelector(".m").style.fill=heat(v,B)});
   return f;
 }
+function bandsInfo(){return `<details class="about"><summary>Como as faixas foram definidas</summary>
+  <p>As séries contam como nos estudos: série do músculo alvo vale 1, de sinergista vale ½. As faixas valem para o músculo inteiro (o número de cada grupo na lista). No boneco, cada parte é pintada pelo próprio número.</p>
+  <p><b>Semana.</b> Cerca de 4 séries já dão crescimento mensurável. 10 ou mais são necessárias para maximizar. Entre 12 e 20 é a provável faixa ideal para quem já treina. Acima de 20 ainda pode ajudar, mas cada série a mais rende menos e quase não há estudos acima de 25–30.</p>
+  <p><b>Treino do dia.</b> Até cerca de 11 séries por músculo no mesmo treino ainda trazem ganho mensurável. Depois disso, os estudos não mostram ganho extra.</p>
+  <p><b>Repetições e esforço.</b> De cerca de 6 a 30 repetições o crescimento é parecido, se a série terminar perto da falha (sobrando 0 a 2 repetições). Séries muito leves ou longe da falha estimulam menos, mas o app conta todas as séries marcadas.</p>
+  <ul><li>Pelland et al. (2024/2026, Sports Medicine): volume semanal e frequência, 67 estudos</li><li>Remmert et al. (2025, pré-publicação): volume por treino, 35 estudos</li><li>Schoenfeld, Ogborn e Krieger (2017): 10+ séries por semana</li><li>Baz-Valle et al. (2022, J. Human Kinetics): 12–20 séries por semana em treinados</li><li>Schoenfeld et al. (2017, JSCR): carga leve vs pesada até a falha</li><li>Robinson et al. (2024, Sports Medicine) e Refalo et al. (2024, J. Sports Sciences): proximidade da falha</li><li>Spiering et al. (2021, JSCR): dose mínima para manter</li></ul></details>`}
 function renderProg(){
-  const r=pRange(),T=tally(r),body=$("progBody");
+  const r=pRange(),T=tally(r),body=$("progBody"),B=BANDS[pMode];
   const gs=Object.keys(BASIC).map(g=>[g,T.grp[g]||0]);const done=gs.filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]),none=gs.filter(x=>!x[1]);
-  const top=Math.max(r.H,...done.map(x=>x[1]));
+  const top=Math.max(B.bar,...done.map(x=>x[1]));
+  const over=pMode==="day"?done.filter(([,v])=>v>B.t[2]):[];
   body.innerHTML=`<div class="page-h"><h2>Progresso</h2><p class="lead">Músculos que você treinou, pelas séries marcadas na aba Treino. Cada série conta 1 para o músculo alvo e ½ para os sinergistas.</p></div>
   <div class="card">
     <div class="row between"><div class="seg" role="group" aria-label="Período"><button data-pm="week" aria-pressed="${pMode==="week"}">Semana</button><button data-pm="day" aria-pressed="${pMode==="day"}">Dia</button></div></div>
@@ -1672,17 +1704,19 @@ function renderProg(){
       <div class="plabel">${esc(r.label)}${r.sub?`<span class="muted-s">${r.sub}</span>`:""}</div>
       <button class="ib" data-pnav="1" aria-label="${pMode==="week"?"Próxima semana":"Próximo dia"}" ${pOff>=0?"disabled":""}>›</button></div>
     <div id="pfigBox"></div>
-    <div class="heatbar"><span></span><div class="row between"><small>Não treinado</small><small>Pouco</small><small>Muito</small></div></div>
+    ${bandLegend(B)}
     <div class="pstat"><div><b>${T.days}</b><span>${T.days===1?"Treino":"Treinos"}</span></div><div><b>${T.sets}</b><span>Séries feitas</span></div><div><b>${done.length}</b><span>Grupos treinados</span></div></div>
   </div>
-  ${T.sets?`<div class="card"><h3 class="section-t" style="margin:0">Séries por músculo</h3><div>${done.map(([g,v])=>{
-      const parts=BASIC[g].m.map(id=>[id,T.mus[id]||0]).sort((a,b)=>b[1]-a[1]);
-      return `<details class="pg"><summary><span class="pg-n">${BASIC[g].n}</span><span class="pg-bar"><i style="width:${Math.max(4,Math.round(v/top*100))}%;background:${heat(v,r.H)}"></i></span><b>${nf(v)}</b></summary>
+  ${over.length?`<div class="warnbox"><b>Muitas séries no mesmo treino</b>${over.map(([g,v])=>`${BASIC[g].n} (${nf(v)})`).join(", ")} ${over.length>1?"passaram":"passou"} de ~11 séries ${pOff===0?"hoje":"neste dia"}. Os estudos não mostram ganho extra a partir daí; vale dividir em outro dia da semana.</div>`:""}
+  ${T.sets?`<div class="card"><h3 class="section-t" style="margin:0">Séries por músculo ${pMode==="week"?"na semana":"no treino"}</h3><div>${done.map(([g,v])=>{
+      const parts=BASIC[g].m.map(id=>[id,T.mus[id]||0]).sort((a,b)=>b[1]-a[1]);const bi=bandOf(v,B),c=heat(v,B);
+      return `<details class="pg"><summary><span class="pg-n">${BASIC[g].n}<small class="pg-b"><i style="background:${c}"></i>${B.names[bi]}</small></span><span class="pg-bar"><i style="width:${Math.max(4,Math.round(Math.min(v,top)/top*100))}%;background:${c}"></i></span><b>${nf(v)}</b></summary>
         <div class="pg-parts">${parts.map(([id,x])=>`<div><span>${M[id].n}</span><b>${x?nf(x):"—"}</b></div>`).join("")}</div></details>`}).join("")}</div>
       ${none.length?`<p class="muted">Não treinados: ${none.map(([g])=>BASIC[g].n).join(", ")}.</p>`:""}</div>`
     :`<div class="card"><p class="muted">Nenhuma série marcada ${pMode==="week"?"nesta semana":"neste dia"}. Na aba Treino, preencha repetições ou carga das séries que fez e elas aparecem aqui.</p><button class="btn primary" data-goto="treino">Ir para o Treino</button></div>`}
-  ${T.unk.size?`<p class="muted">Não entram no boneco porque o app não conhece o exercício: ${[...T.unk].map(([n,c])=>`${esc(n)} (${c})`).join(", ")}.</p>`:""}`;
-  $("pfigBox").appendChild(progFig(T.mus,r.H));
+  ${T.unk.size?`<p class="muted">Não entram no boneco porque o app não conhece o exercício: ${[...T.unk].map(([n,c])=>`${esc(n)} (${c})`).join(", ")}.</p>`:""}
+  ${bandsInfo()}`;
+  $("pfigBox").appendChild(progFig(T.mus,B));
 }
 $("progBody").addEventListener("click",e=>{
   const m=e.target.closest("[data-pm]");if(m){pMode=m.dataset.pm;LS.set("atlas-pmode",pMode);pOff=0;return renderProg()}
