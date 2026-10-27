@@ -305,6 +305,9 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .wk b{font-family:var(--f-display);font-size:14px;letter-spacing:.04em}
 .wk span{font-size:11px;line-height:1.2;color:var(--ink);overflow-wrap:break-word;hyphens:auto;padding-top:3px;border-top:1px solid var(--line)}
 .wk span.rest{color:var(--muted);border-top:0}
+.wk small{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;margin-top:-2px}
+.wk.did{background:color-mix(in srgb,var(--target) 12%,var(--bg))}
+.wk.did span{border-top-color:color-mix(in srgb,var(--target) 35%,transparent)}
 .wk.today{box-shadow:inset 0 0 0 1.5px var(--target)}
 .plan-h{display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;text-align:left;border:0;background:none;padding:0;color:inherit;cursor:pointer}
 .plan-h > span:first-child{min-width:0}
@@ -1594,6 +1597,15 @@ $("fichaBody").addEventListener("click",e=>{
 let openW=null,askDel=false,pendingImport=null;
 function wCard(x){return `<div class="card tcard"><div class="row between"><div><div class="wx-n">${esc(x.title||"Treino")}</div><span class="muted-s">${x.items.length?x.items.map(it=>esc(it.name)).join(" · "):"Sem exercícios"}</span></div>${statusPill(x)}</div>
   <div class="row">${x.done===false?`<button class="btn primary" data-act="markDone" data-wid="${x.id}">Marcar como feito</button><button class="btn" data-open="${x.id}">Continuar</button>`:`<button class="btn" data-open="${x.id}">Ver séries</button><button class="btn" data-act="undo" data-wid="${x.id}">Desfazer</button>`}</div></div>`}
+/* this week (Mon–Sun) with what was actually done each day */
+function weekDone(){
+  const t=new Date();t.setHours(12,0,0,0);const mon=new Date(t);mon.setDate(t.getDate()-todayIdx());const today=isoDate(t);
+  const cells=DAYS.map((n,i)=>{const dt=new Date(mon);dt.setDate(mon.getDate()+i);const iso=isoDate(dt);
+    const done=workouts.filter(x=>x.date===iso&&x.done!==false);
+    return `<div class="wk${iso===today?" today":""}${done.length?" did":""}" title="${DAYS[i]} ${dt.getDate()}: ${done.length?esc(done.map(x=>x.title||"Treino").join(", ")):iso>today?"ainda não chegou":"nada feito"}"><b>${DSH[i]}</b><small>${dt.getDate()}</small>${done.length?done.map(x=>`<span>${esc(x.title||"Treino")}</span>`).join(""):`<span class="rest" aria-label="Nada feito">—</span>`}</div>`}).join("");
+  const n=workouts.filter(x=>x.done!==false&&x.date>=isoDate(mon)&&x.date<=isoDate(new Date(mon.getTime()+6*864e5))).length;
+  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">Sua semana</h3><span class="muted-s" style="margin:0">${n?plural(n,"treino")+" feito"+(n===1?"":"s"):"Nenhum treino feito ainda"}</span></div><div class="wkgrid">${cells}</div></div>`;
+}
 function renderTreino(){
   const today=isoDate(new Date()),d=todayIdx();
   const w=openW?workouts.find(x=>x.id===openW):null;if(!w)openW=null;
@@ -1603,6 +1615,7 @@ function renderTreino(){
     const list=[...plans].sort((x,y)=>(y.days.includes(d)?1:0)-(x.days.includes(d)?1:0));
     const nDone=tw.filter(x=>x.done!==false).length;
     h=`<div class="page-h"><h2>Hoje</h2><p class="lead">${cap(fmtLong(new Date()))}${nDone?` · ${plural(nDone,"treino")} feito${nDone===1?"":"s"}`:""}</p></div>
+      ${weekDone()}
       <h3 class="section-t">Seus treinos</h3>`;
     h+=list.length?list.map(p=>{const ex=tw.filter(x=>x.planId===p.id).pop(),tag=p.days.includes(d)?`<span class="pill soft">Dia de hoje</span>`:"";
       const sum=p.items.length?p.items.map(it=>esc(it.name)).join(" · "):"Sem exercícios. Monte na aba Treinos.";
