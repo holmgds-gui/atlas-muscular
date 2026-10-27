@@ -29,7 +29,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v23` → `atlas-v24`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v24` → `atlas-v25`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 
@@ -79,7 +79,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
   - Dia: 1–2 leve · 3–5 bom · 6–11 forte · 12+ pouco ganho extra, com aviso acima de ~11.
   - Valem iguais para todos. O dono **não quer total de kg levantado** (volume) em lugar nenhum; evolução de carga por exercício fica só na sub-aba Cargas.
 - **Treinos**: montar não conta. Só "Marcar como feito" na aba Hoje conta. Dá para registrar em dias passados (`hDate`/`hWeek`, `selDate()`), nunca no futuro; entrar na aba volta para hoje. Um dia pode ter vários treinos. O treino personalizado de hoje pode ir para Meus treinos com "Salvar em Meus treinos".
-- **Ajuda**: só o "+" cinza, sem círculo em volta.
+- **Ajuda**: só o "+" cinza, sem círculo em volta. Além do + de cada aba, há um + menor (`.help.sm`, `HELP.forca`) ao lado de "Força estimada" em Cargas, explicando a conta e para que serve.
 
 ## Como trabalhar com o dono
 

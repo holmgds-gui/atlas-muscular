@@ -117,6 +117,8 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .help{display:inline-grid;place-items:center;flex:none;width:22px;height:22px;padding:0;border:0;background:none;color:var(--muted);font-family:var(--f-body);font-size:22px;font-weight:500;line-height:1;letter-spacing:0;vertical-align:middle;cursor:pointer;position:relative}
 .help::after{content:"";position:absolute;inset:-10px}
 .page-h h2 .help{margin-left:10px;transform:translateY(-3px)}
+.help.sm{width:18px;height:18px;font-size:18px;margin-left:4px}
+.kgsl{display:inline-flex;align-items:center}
 .helpb{overflow:auto;padding:0 16px 22px;font-size:15px;line-height:1.5}
 .helpb p{margin:0 0 6px}
 .helpb h4{margin:14px 0 6px;font-family:var(--f-display);font-weight:600;font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
@@ -1575,6 +1577,22 @@ const HELP={
     <li><b>Histórico</b> guarda os treinos de outros dias. <b>Backup</b> salva tudo num arquivo.</li></ul>
     <h4>Dicas</h4><ul><li>Os dados ficam só neste aparelho. Exporte um backup de vez em quando.</li>
     <li>Anotar a carga ajuda a ver se você está progredindo.</li></ul>`],
+  forca:["Força estimada",`<p>É uma estimativa de <b>quanto você conseguiria levantar numa única repetição</b>, no máximo, calculada a partir de uma série que você fez.</p>
+    <h4>Como é calculada</h4><ul>
+    <li><b>Carga × (1 + repetições ÷ 30)</b>. É a fórmula de Epley, muito usada em academias e estudos.</li>
+    <li>Exemplo: 72 kg × 8 repetições → 72 × (1 + 8 ÷ 30) = 72 × 1,27 ≈ <b>91 kg</b>.</li>
+    <li>Em cada treino, o app usa a série que dá o maior número.</li></ul>
+    <h4>Por que fica acima da linha vermelha</h4><ul>
+    <li>A vermelha é o peso que você <b>levantou</b> (ex.: 72 kg, 8 vezes).</li>
+    <li>A azul é o máximo que você <b>aguentaria uma vez só</b> com essa força (≈ 91 kg). Só são iguais quando a série tem 1 repetição.</li>
+    <li>Com o mesmo peso, mais repetições = estimativa maior: 72 × 6 ≈ 86 kg · 72 × 8 ≈ 91 kg · 72 × 10 ≈ 96 kg.</li></ul>
+    <h4>Para que serve</h4><ul>
+    <li>Comparar treinos em que você mudou o peso <i>e</i> as repetições. Ex.: 65 kg × 6 ≈ 78 kg e depois 62,5 kg × 9 ≈ 81 kg: o peso caiu, mas você ficou mais forte.</li>
+    <li>Se a linha azul sobe com o tempo, sua força está subindo.</li></ul>
+    <h4>Cuidados</h4><ul>
+    <li>É uma conta, não um teste: não precisa (nem deve) tentar levantar esse peso.</li>
+    <li>Fica menos precisa acima de ~12 repetições.</li>
+    <li>Só aparece quando você anota carga <i>e</i> repetições.</li></ul>`],
   prog:["Progresso",`<p>O boneco fica colorido conforme quantas séries cada músculo recebeu nos treinos marcados como feitos.</p>
     <h4>O que dá para fazer</h4><ul>
     <li><b>Semana / Dia</b> trocam o período; as setas voltam para semanas ou dias anteriores.</li>
@@ -1947,7 +1965,7 @@ function renderKg(){
   let h=`<div class="page-h"><h2>Progresso<button class="help" data-help="prog" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">Evolução das cargas que você anotou nos treinos marcados como feitos.</p></div>${pvSeg()}`;
   if(!kgList.length){
     body.innerHTML=h+`<div class="card"><p class="muted">Nenhuma carga anotada ainda. Na aba Hoje, toque em <b>Anotar séries</b>, preencha a carga (kg) e as repetições e marque o treino como feito.</p><button class="btn primary" data-goto="treino">Ir para Hoje</button></div>`;return}
-  h+=`<div class="kglegend"><span><i class="k1"></i>Maior carga do dia</span><span><i class="k2"></i>Força estimada</span></div>`;
+  h+=`<div class="kglegend"><span><i class="k1"></i>Maior carga do dia</span><span><i class="k2"></i>Força estimada<button class="help sm" data-help="forca" aria-label="O que é força estimada" title="O que é força estimada">+</button></span></div>`;
   h+=kgList.map(([name,pts],i)=>{const first=pts[0],last=pts[pts.length-1],diff=last.kg-first.kg,open=kgOpen===name;
     const rec=pts.reduce((a,x)=>x.kg>a.kg||(x.kg===a.kg&&x.r>a.r)?x:a,pts[0]);
     const eAll=pts.filter(x=>x.e),eLast=eAll.length?eAll[eAll.length-1].e:null,eRec=eAll.length?Math.max(...eAll.map(x=>x.e)):null;
@@ -1960,7 +1978,7 @@ function renderKg(){
         <div><span>Recorde</span><b>${setStr(rec)}</b><small>${fmtDate(rec.date)}</small></div>
         <div><span>Última</span><b>${setStr(last)}</b><small>${fmtDate(last.date)}</small></div>
         <div><span>Desde o início</span><b>${diff>0?"+":""}${fkg(diff)} kg</b><small>${pts.length>1?`desde ${fmtDate(first.date)}`:"1 treino só"}</small></div>
-        <div><span>Força estimada</span><b>${eLast?fkg(eLast)+" kg":"—"}</b><small>${eRec?`recorde ${fkg(eRec)} kg`:"anote as reps"}</small></div>
+        <div><span class="kgsl">Força estimada<button class="help sm" data-help="forca" aria-label="O que é força estimada" title="O que é força estimada">+</button></span><b>${eLast?fkg(eLast)+" kg":"—"}</b><small>${eRec?`recorde ${fkg(eRec)} kg`:"anote as reps"}</small></div>
       </div>
       <div class="kgtab"><div class="kgrow kghead"><span>Data</span><span>Maior carga</span><span>Força est.</span></div>${[...pts].reverse().slice(0,8).map(x=>`<div class="kgrow"><span>${fmtDate(x.date)}</span><span>${setStr(x)}</span><span>${x.e?fkg(x.e)+" kg":"—"}</span></div>`).join("")}</div>`:""}
     </section>`}).join("");
