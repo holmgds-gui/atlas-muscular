@@ -83,15 +83,17 @@ Textos de divulgação consultados:
 
 ## 3. Ranking de força (toque no título "Atlas Muscular")
 
-Os 7 níveis (Vegetal, Molenga, Frango, Decente, Fortinho, Monstro, Bizarro) vêm dos padrões de força do **Strength Level**: cerca de 11 milhões de resultados válidos, de 48 milhões de levantamentos enviados por quem treina. Cada nível é um percentil entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%.
+Os 9 níveis (Vegetal, Molenga, Frango, Galo, Decente, Fortinho, Parrudo, Monstro, Bizarro) vêm dos padrões de força do **Strength Level**: cerca de 11 milhões de resultados válidos, de 48 milhões de levantamentos enviados por quem treina. Cada nível é um percentil entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%.
 
 | Nível do app | Faixa do Strength Level | Mais forte que |
 |---|---|---|
 | Vegetal | abaixo de Beginner | menos de 5% |
 | Molenga | Beginner → Novice | 5–20% |
-| Frango | Novice → Intermediate | 20–50% |
-| Decente | Intermediate → Advanced | 50–80% |
-| Fortinho | Advanced → Elite | 80–95% |
+| Frango | Novice → metade do caminho até Intermediate | 20–35% |
+| Galo | metade → Intermediate | 35–50% |
+| Decente | Intermediate → metade do caminho até Advanced | 50–65% |
+| Fortinho | metade → Advanced | 65–80% |
+| Parrudo | Advanced → Elite | 80–95% |
 | Monstro | Elite → Elite + 1 degrau | 95–99% |
 | Bizarro | mais de 1 degrau acima da Elite | top ~1% |
 

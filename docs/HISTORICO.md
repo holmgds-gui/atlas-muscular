@@ -97,7 +97,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 
 ## 8. Ranking de força
 
-- Pedido do dono: tocar no título "Atlas Muscular" abre uma tela à parte com um ranking em 7 níveis (**Vegetal, Molenga, Frango, Decente, Fortinho, Monstro, Bizarro**), por grupo muscular e com base no peso corporal.
+- Pedido do dono: tocar no título "Atlas Muscular" abre uma tela à parte com um ranking em 7 níveis (**Vegetal, Molenga, Frango, Decente, Fortinho, Monstro, Bizarro**). Depois o dono pediu mais 2 e escolheu dividir as faixas largas do meio: **Galo** (35–50%) e **Parrudo** (80–95%), ficando Vegetal, Molenga, Frango, Galo, Decente, Fortinho, Parrudo, Monstro, Bizarro, por grupo muscular e com base no peso corporal.
 - Escolhas do dono:
   - Cargas vêm dos treinos feitos e também dá para digitar.
   - O nível do grupo usa **todos** os exercícios do grupo, não um só.
@@ -109,7 +109,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - Cada exercício conta para todos os grupos-alvo dele. Grupo = média dos exercícios; geral = média dos grupos.
   - 66 exercícios-padrão cobrem 46 famílias e 1.046 das 1.325 variações.
   - Cada exercício mostra quanto falta para o próximo nível.
-  - Cores: uma escala de azul em 7 tons, validada para daltonismo nos dois temas.
+  - Cores: uma escala de azul em 9 tons, validada para daltonismo nos dois temas.
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)

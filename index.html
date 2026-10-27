@@ -441,9 +441,9 @@ button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
 .pg-parts b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){#tab-atlas .stage{transition:none}}
 /* ---- ranking de força ---- */
-:root{--lv0:#7fb0ec;--lv1:#6a99d3;--lv2:#5683bb;--lv3:#436da4;--lv4:#30588d;--lv5:#1e4376;--lv6:#0b2f60}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--lv0:#1a5299;--lv1:#3b6baa;--lv2:#5983bb;--lv3:#779ccb;--lv4:#96b5dc;--lv5:#b6ceec;--lv6:#d6e8fc}}
-:root[data-theme="dark"]{--lv0:#1a5299;--lv1:#3b6baa;--lv2:#5983bb;--lv3:#779ccb;--lv4:#96b5dc;--lv5:#b6ceec;--lv6:#d6e8fc}
+:root{--lv0:#7fb0ec;--lv1:#6e9cd5;--lv2:#5e89bf;--lv3:#4e76aa;--lv4:#3f6394;--lv5:#305180;--lv6:#21406c;--lv7:#132f58;--lv8:#061f45}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--lv0:#1a5299;--lv1:#3465a6;--lv2:#4d78b3;--lv3:#658bc0;--lv4:#7d9fcc;--lv5:#95b2d8;--lv6:#aec6e5;--lv7:#c7daf1;--lv8:#e1eefd}}
+:root[data-theme="dark"]{--lv0:#1a5299;--lv1:#3465a6;--lv2:#4d78b3;--lv3:#658bc0;--lv4:#7d9fcc;--lv5:#95b2d8;--lv6:#aec6e5;--lv7:#c7daf1;--lv8:#e1eefd}
 button.brand{border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:8px;color:inherit;text-align:left;align-items:center;gap:6px}
 button.brand:hover{background:var(--chip)}
 button.brand .trophy{width:17px;height:17px;flex:none;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -1647,7 +1647,7 @@ const HELP={
     <li><b>Dia</b>: até ~11 séries por músculo no mesmo treino ainda trazem ganho; depois disso, quase nada a mais.</li></ul>
     <h4>Dicas</h4><ul><li>Mire 10–20 séries por semana em cada grupo que quer crescer, divididas em 2 ou mais treinos.</li>
     <li>Grupos em "Não treinados" mostram o que ficou de fora na semana.</li></ul>`],
-  rank:["Ranking de força",`<p>Mostra quão forte você é em cada grupo muscular, em 7 níveis: <b>Vegetal, Molenga, Frango, Decente, Fortinho, Monstro e Bizarro</b>. A comparação é com milhões de registros de pessoas que treinam, do mesmo sexo, ajustada ao seu peso.</p>
+  rank:["Ranking de força",`<p>Mostra quão forte você é em cada grupo muscular, em 9 níveis: <b>Vegetal, Molenga, Frango, Galo, Decente, Fortinho, Parrudo, Monstro e Bizarro</b>. A comparação é com milhões de registros de pessoas que treinam, do mesmo sexo, ajustada ao seu peso.</p>
     <h4>O que dá para fazer</h4><ul>
     <li><b>Seu peso</b> e <b>corpo ♂/♀</b>: mudam as faixas. Coloque seu peso para o resultado ficar certo.</li>
     <li><b>Toque num grupo</b> para ver cada exercício que entrou na conta, o nível dele e quanto falta para o próximo nível.</li>
@@ -1657,7 +1657,7 @@ const HELP={
     <li>Cada série vira força estimada (carga × (1 + reps ÷ 30)) e é comparada com as faixas daquele exercício.</li>
     <li>O nível do grupo é a média de todos os exercícios dele; o nível geral é a média dos grupos.</li>
     <li>Halteres: use o peso de cada halter.</li></ul>
-    <h4>Dicas</h4><ul><li>Decente é a média de quem treina. Fortinho já é melhor que 4 em cada 5 pessoas.</li>
+    <h4>Dicas</h4><ul><li>Decente começa na média de quem treina (50%). Parrudo já é mais forte que 4 em cada 5 pessoas.</li>
     <li>Séries de 3 a 12 repetições dão a estimativa mais confiável.</li>
     <li>Para abrir esta tela, toque no título Atlas Muscular, lá em cima.</li></ul>`]
 };
@@ -2291,7 +2291,10 @@ function rStd(f,s){
   }
   return null;
 }
-const RLV=[["Vegetal","Abaixo do iniciante"],["Molenga","Iniciante"],["Frango","Novato"],["Decente","Intermediário"],["Fortinho","Avançado"],["Monstro","Elite"],["Bizarro","Acima da elite"]];
+const RLV=[["Vegetal","Abaixo do iniciante"],["Molenga","Iniciante"],["Frango","Novato"],["Galo","Quase na média"],["Decente","Na média"],["Fortinho","Acima da média"],["Parrudo","Avançado"],["Monstro","Elite"],["Bizarro","Acima da elite"]];
+/* level boundaries on the score scale (1 Beginner 5% · 2 Novice 20% · 3 Intermediate 50% · 4 Advanced 80% · 5 Elite 95% · 6 = one step past Elite);
+   2.5 and 3.5 split the two wide bands at ~35% and ~65% */
+const RB=[1,2,2.5,3,3.5,4,5,6];
 let rank=LS.get("atlas-rank",null);if(!rank||typeof rank!=="object")rank={};if(!Array.isArray(rank.man))rank.man=[];
 const saveRank=()=>{if(!LS.set("atlas-rank",rank))toast("Não foi possível salvar neste aparelho")};
 let rForm=null,rOpen=null,rPrev="atlas";
@@ -2307,7 +2310,7 @@ function rScore(v,T){
   return 5+(v-T[4])/(T[4]-T[3]);
 }
 function rVal(s,T){if(s<=1)return T[0]+(s-1)*(T[1]-T[0]);if(s>=5)return T[4]+(s-5)*(T[4]-T[3]);const i=Math.floor(s)-1;return T[i]+(s-1-i)*(T[i+1]-T[i])}
-const rLv=s=>Math.max(0,Math.min(6,Math.floor(s)));
+const rLv=s=>RB.filter(b=>s>=b).length;
 function rPct(s){const P=[[0,1],[1,5],[2,20],[3,50],[4,80],[5,95],[6,99]];if(s>=6)return 99;
   const i=Math.floor(s);return Math.round(P[i][1]+(s-i)*(P[i+1][1]-P[i][1]))}
 /* value of one set in "standard units": estimated 1-rep max × x, or for bodyweight lifts
@@ -2338,7 +2341,7 @@ function rankData(){
   return {list,gs,all,noStd:[...noStd.keys()].filter(n=>!list.some(o=>o.name===n))};
 }
 const rKg=v=>fkg(Math.round(v*2)/2);
-function rNeed(o){const lv=rLv(o.s);if(lv>=6)return "";const v=rVal(lv+1,o.T),S=RSTD[o.st.k];
+function rNeed(o){const lv=rLv(o.s);if(lv>=RB.length)return "";const v=rVal(RB[lv],o.T),S=RSTD[o.st.k];
   if(S[4]!=null){const t=o.st.as?(v<0?`com ajuda de até ${rKg(-v)} kg`:`sem ajuda (ou +${rKg(v)} kg)`):(v<=0?`1 repetição só com o corpo`:`1 repetição com +${rKg(v)} kg`);return `Para ${RLV[lv+1][0]}: ${t}`}
   const one=v/o.st.x;return `Para ${RLV[lv+1][0]}: 1 repetição com ${rKg(one)} kg (ou ${rKg(one/(1+8/30))} kg × 8)`}
 function rSetTxt(o){const b=o.best,S=RSTD[o.st.k];
@@ -2356,10 +2359,11 @@ function rankFig(gs){
   return f;
 }
 const rChip=s=>{const lv=rLv(s);return `<span class="rk-chip"><i style="background:var(--lv${lv})"></i>${RLV[lv][0]}</span>`};
-const rBar=s=>`<span class="rk-bar"><i style="width:${Math.max(3,Math.min(s,7)/7*100).toFixed(1)}%;background:var(--lv${rLv(s)})"></i>${[1,2,3,4,5,6].map(k=>`<b style="left:${(k/7*100).toFixed(2)}%"></b>`).join("")}</span>`;
+const rPos=s=>{const lv=rLv(s),lo=lv?RB[lv-1]:0,hi=lv<RB.length?RB[lv]:RB[RB.length-1]+1;return (lv+Math.min(1,Math.max(0,(s-lo)/(hi-lo))))/RLV.length};
+const rBar=s=>`<span class="rk-bar"><i style="width:${Math.max(3,rPos(s)*100).toFixed(1)}%;background:var(--lv${rLv(s)})"></i>${RB.map((_,k)=>`<b style="left:${((k+1)/RLV.length*100).toFixed(2)}%"></b>`).join("")}</span>`;
 function rankAbout(){return `<details class="about"><summary>Como o ranking funciona</summary>
-  <p><b>De onde vêm os números.</b> As faixas são os padrões de força do Strength Level, feitos com cerca de 11 milhões de registros de pessoas que treinam (entre 48 milhões de levantamentos enviados). Cada nível é um percentil entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%. O app usa o corpo ♂/♀ escolhido.</p>
-  <p><b>Os 7 níveis.</b> Vegetal = abaixo do iniciante · Molenga = iniciante a novato · Frango = novato a intermediário · Decente = intermediário a avançado · Fortinho = avançado a elite · Monstro = elite · Bizarro = bem acima da elite (um degrau inteiro além).</p>
+  <p><b>De onde vêm os números.</b> As faixas são os padrões de força do Strength Level, feitos com cerca de 11 milhões de registros de pessoas que treinam (entre 48 milhões de levantamentos enviados). As faixas do site são percentis entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%. O app usa o corpo ♂/♀ escolhido.</p>
+  <p><b>Os 9 níveis</b> (quanto % de quem treina você supera): Vegetal = menos de 5% · Molenga = 5–20% · Frango = 20–35% · Galo = 35–50% · Decente = 50–65% · Fortinho = 65–80% · Parrudo = 80–95% · Monstro = 95–99% · Bizarro = top 1% (um degrau inteiro além da elite).</p>
   <p><b>Peso corporal.</b> As faixas publicadas são para o praticante típico (cerca de 77 kg no masculino e 65 kg no feminino). O app ajusta para o seu peso pela regra de ⅔: a força cresce com a área do músculo, que acompanha o peso elevado a ⅔. Quem é mais leve precisa levantar menos, mas não proporcionalmente menos.</p>
   <p><b>Sua força em cada exercício.</b> Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Séries de até ~12 repetições dão a estimativa mais confiável. Em barra fixa e mergulho conta o peso do corpo mais o peso extra; na barra assistida (graviton), a ajuda é descontada.</p>
   <p><b>Nível do grupo.</b> É a média de <b>todos</b> os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos.</p>
@@ -2369,11 +2373,11 @@ function renderRank(){
   const D=rankData(),body=$("rankBody"),has=D.list.length>0,lv=has?rLv(D.all):-1;
   const hero=has?`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big">${RLV[lv][0]}</b>
       <span class="rk-sub">${RLV[lv][1]} · mais forte que ~${rPct(D.all)}% de quem treina, do mesmo sexo.</span>
-      <div class="rk-ladder" role="list" aria-label="Os 7 níveis">${RLV.map((x,i)=>`<span role="listitem" class="${i<lv?"past":i===lv?"now":""}"${i===lv?' aria-current="true"':""}>${x[0]}</span>`).join("")}</div>
+      <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem" class="${i<lv?"past":i===lv?"now":""}"${i===lv?' aria-current="true"':""}>${x[0]}</span>`).join("")}</div>
       <span class="rk-sub sm">${plural(D.gs.length,"grupo")} de ${Object.keys(BASIC).length} avaliado${D.gs.length===1?"":"s"} · ${plural(D.list.length,"exercício")} · corpo ${sex==="f"?"feminino":"masculino"}, ${fkg(rBW())} kg${rank.bw>0?"":" (padrão)"}</span></div>`
     :`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big">Sem dados</b>
       <span class="rk-sub">Anote carga e repetições nos treinos da aba Hoje e marque como feito, ou digite aqui embaixo uma carga que você já levanta.</span>
-      <div class="rk-ladder" role="list" aria-label="Os 7 níveis">${RLV.map(x=>`<span role="listitem">${x[0]}</span>`).join("")}</div></div>`;
+      <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map(x=>`<span role="listitem">${x[0]}</span>`).join("")}</div></div>`;
   const none=Object.keys(BASIC).filter(g=>!D.gs.some(x=>x.g===g));
   const form=rForm?(()=>{const r=parseRef(rForm.ref),st=rStd(r.f,r.sel),S=RSTD[st.k];
     const lab=S[4]!=null?(st.as?"Ajuda da máquina (kg)":"Peso extra (kg, 0 = só o corpo)"):"Carga (kg)";
