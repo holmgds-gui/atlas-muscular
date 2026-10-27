@@ -1521,7 +1521,8 @@ const HELP={
     <li><b>+ Novo treino</b> cria um treino. Dê um nome, como "Peito e tríceps".</li>
     <li><b>Editar</b> abre o treino: adicione exercícios, mude séries e reps, reordene com ↑ ↓ e remova com ✕.</li>
     <li><b>Dias da semana</b> são opcionais: nesses dias o treino aparece primeiro na aba Hoje.</li>
-    <li><b>Excluir treino</b> apaga o modelo; o que você já fez continua no histórico.</li></ul>
+    <li><b>Excluir treino</b> apaga o modelo; o que você já fez continua no histórico.</li>
+    <li><b>Montar um treino só para hoje</b> abre um treino avulso na aba Hoje; depois dá para salvá-lo aqui.</li></ul>
     <h4>Dicas</h4><ul><li>No Atlas, o + de cada exercício manda ele direto para um treino daqui.</li>
     <li>Para o treino contar, vá na aba Hoje e toque em Marcar como feito.</li></ul>`],
   treino:["Hoje",`<p>Aqui você registra o que treinou. Só o que estiver marcado como feito entra no Progresso.</p>
@@ -1530,7 +1531,7 @@ const HELP={
     <li><b>Marcar como feito</b>: um toque e o treino conta, com todas as séries dele.</li>
     <li><b>Anotar séries</b>: abre o treino para anotar repetições e carga de cada série. "Última vez" mostra o que você fez antes.</li>
     <li><b>Desfazer</b> tira o treino do Progresso.</li>
-    <li><b>Treino personalizado</b>: monte um treino só para hoje, sem salvar em Meus treinos.</li>
+    <li><b>Treino personalizado</b>: monte um treino só para hoje. Se gostar, toque em <b>Salvar em Meus treinos</b> e ele vira um treino fixo.</li>
     <li><b>Histórico</b> guarda os treinos de outros dias. <b>Backup</b> salva tudo num arquivo.</li></ul>
     <h4>Dicas</h4><ul><li>Os dados ficam só neste aparelho. Exporte um backup de vez em quando.</li>
     <li>Anotar a carga ajuda a ver se você está progredindo.</li></ul>`],
@@ -1602,6 +1603,8 @@ function lastFor(name,w){
   return null;
 }
 const setTxt=s=>`${s.r||"–"}${s.kg!==""?` × ${s.kg} kg`:""}`;
+const isCustom=w=>!w.planId||!plans.some(p=>p.id===w.planId);
+const saveBtn=w=>`<button class="btn" data-act="savePlan" data-wid="${w.id}"${w.items.length?"":" disabled"}>Salvar em Meus treinos</button>`;
 const statusPill=w=>w.done===false?`<span class="pill soft">Não feito</span>`:`<span class="pill">Feito ✓</span>`;
 const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
 
@@ -1625,7 +1628,8 @@ function renderFicha(){
       <div class="confirm">${askDelPlan===p.id?`<span>Excluir este treino? O que você já fez continua no histórico.</span><button class="btn danger" data-act="delPlan" data-pid="${p.id}">Excluir</button><button class="btn" data-act="noDelPlan">Cancelar</button>`:`<button class="btn danger" data-act="askDelPlan" data-pid="${p.id}">Excluir treino</button>`}</div>`:""}
     </section>`}).join("");
   if(!plans.length)h+=`<div class="card"><p class="muted">Você ainda não tem treinos. Crie o primeiro, por exemplo "Peito e tríceps", e escolha os dias.</p></div>`;
-  h+=`<button class="btn primary wide" data-act="newPlan">+ Novo treino</button>`;
+  h+=`<button class="btn primary wide" data-act="newPlan">+ Novo treino</button>
+    <button class="btn wide" data-act="todayOnly">Montar um treino só para hoje</button>`;
   $("fichaBody").innerHTML=h;
 }
 const planOf=el=>plans.find(x=>x.id===el.dataset.pid);
@@ -1641,6 +1645,7 @@ $("fichaBody").addEventListener("click",e=>{
   if(a==="newPlan"){const n=newPlan();openPlan=n.id;askDelPlan=null;savePlans();renderFicha();
     const c=document.querySelector(`.plan[data-pid="${n.id}"]`);if(c){c.scrollIntoView({block:"start",behavior:"smooth"});const i=c.querySelector("[data-pf]");if(i)i.focus({preventScroll:true})}return}
   if(a==="noDelPlan"){askDelPlan=null;return renderFicha()}
+  if(a==="todayOnly"){const nw=startPlan(null);setTab("treino");openW=nw.id;renderTreino();$("tab-treino").scrollTop=0;return}
   if(!pl)return;
   if(a==="toggle"){openPlan=openPlan===pl.id?null:pl.id;askDelPlan=null}
   else if(a==="day"){const d=+b.dataset.day;pl.days=pl.days.includes(d)?pl.days.filter(x=>x!==d):[...pl.days,d]}
@@ -1656,7 +1661,7 @@ $("fichaBody").addEventListener("click",e=>{
 /* ---------------------------------------------------------- hoje tab */
 let openW=null,askDel=false,pendingImport=null;
 function wCard(x){return `<div class="card tcard"><div class="row between"><div><div class="wx-n">${esc(x.title||"Treino")}</div><span class="muted-s">${x.items.length?x.items.map(it=>esc(it.name)).join(" · "):"Sem exercícios"}</span></div>${statusPill(x)}</div>
-  <div class="row">${x.done===false?`<button class="btn primary" data-act="markDone" data-wid="${x.id}">Marcar como feito</button><button class="btn" data-open="${x.id}">Continuar</button>`:`<button class="btn" data-open="${x.id}">Ver séries</button><button class="btn" data-act="undo" data-wid="${x.id}">Desfazer</button>`}</div></div>`}
+  <div class="row">${x.done===false?`<button class="btn primary" data-act="markDone" data-wid="${x.id}">Marcar como feito</button><button class="btn" data-open="${x.id}">Continuar</button>`:`<button class="btn" data-open="${x.id}">Ver séries</button><button class="btn" data-act="undo" data-wid="${x.id}">Desfazer</button>`}${isCustom(x)?saveBtn(x):""}</div></div>`}
 /* this week (Mon–Sun) with what was actually done each day */
 function weekDone(){
   const t=new Date();t.setHours(12,0,0,0);const mon=new Date(t);mon.setDate(t.getDate()-todayIdx());const today=isoDate(t);
@@ -1697,7 +1702,8 @@ function renderTreino(){
     const isToday=w.date===today;
     h=`<div class="row"><button class="link" data-act="back">‹ ${isToday?"Hoje":"Voltar"}</button></div>
       <div class="card"><div class="row between"><div class="eyebrow">${isToday?"Treino de hoje":"Treino de "+fmtDate(w.date)}</div>${statusPill(w)}</div>
-      <input class="inp title-inp" data-wf="title" value="${esc(w.title)}" placeholder="Nome do treino" aria-label="Nome do treino"></div>`;
+      <input class="inp title-inp" data-wf="title" value="${esc(w.title)}" placeholder="Nome do treino" aria-label="Nome do treino">
+      ${isCustom(w)?`<div class="row">${saveBtn(w)}<span class="muted-s" style="margin:0">Vira um treino fixo na aba Treinos.</span></div>`:""}</div>`;
     h+=w.items.map((it,i)=>{const last=lastFor(it.name,w);return `<div class="card">
       <div class="wx-h"><div><div class="wx-n">${esc(it.name)}</div><span class="muted-s">${esc(muscleLabel(it.name))}${it.target?` · meta ${esc(it.target)} reps`:""}</span></div>
         <div class="fi-act"><button class="ib" data-act="up" data-i="${i}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-i="${i}" aria-label="Descer">↓</button><button class="ib del" data-act="rmItem" data-i="${i}" aria-label="Remover ${esc(it.name)}">✕</button></div></div>
@@ -1742,6 +1748,11 @@ $("treinoBody").addEventListener("click",e=>{
     const touched=x.notes||x.items.some(it=>it.notes||it.sets.some(st=>st.r!==""||st.kg!==""));
     if(touched||!x.planId)x.done=false;else workouts=workouts.filter(y=>y.id!==x.id);toast("Desfeito: saiu do Progresso")}
   else if(a==="goPlans"){setTab("ficha");return}
+  else if(a==="savePlan"){const x=byW();if(!x||!x.items.length)return;
+    const pl={id:uid(),name:x.title&&x.title!=="Treino personalizado"?x.title:"",days:[],
+      items:x.items.map(it=>({name:it.name,sets:it.sets.length,reps:it.target||(it.sets.find(st=>st.r!=="")||{}).r||"8-12"}))};
+    plans.push(pl);x.planId=pl.id;savePlans();saveW();openPlan=pl.id;openW=null;toast(pl.name?`${pl.name} salvo em Meus treinos`:"Salvo em Meus treinos. Dê um nome a ele");setTab("ficha");
+    const c=document.querySelector(`.plan[data-pid="${pl.id}"]`);if(c){c.scrollIntoView({block:"start"});if(!pl.name){const i=c.querySelector("[data-pf]");if(i)i.focus({preventScroll:true})}}return}
   else if(a==="back"){openW=null;askDel=false}
   else if(a==="export")return exportBackup();
   else if(a==="import")return $("importFile").click();
