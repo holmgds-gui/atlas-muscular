@@ -79,6 +79,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - Semana: 0 não treinado · 1–3 abaixo do mínimo · 4–9 estímulo moderado · 10–20 faixa ideal · 20+ volume alto.
   - Dia: 1–2 leve · 3–5 bom · 6–11 forte · 12+ pouco ganho extra, com aviso.
 - Seção "Como as faixas foram definidas" dentro da aba.
+- **Radar de Equilíbrio** (o dono mandou um print de outro app com radar): 6 grupos, cada ponta com a média de séries por músculo do grupo, anel sombreado da faixa ideal e toque numa ponta para ver as partes e destacar os músculos no boneco. Outras ideias oferecidas e não escolhidas por enquanto: últimas 8 semanas, calendário de treinos, comparações empurrar × puxar / cima × baixo / frente × costas.
 - **Sub-aba Cargas**: para cada exercício com carga anotada (só treinos feitos), gráfico com a maior carga do dia (linha cheia) e a força estimada (tracejada, kg × (1 + reps ÷ 30)), botões 1 mês / 3 meses / Tudo, recorde, última carga, quanto subiu desde o primeiro registro e tabela dos últimos treinos. O dono escolheu as duas linhas depois de ver um exemplo em que a maior carga parece cair (65 kg × 6 → 62,5 kg × 9) mas a força estimada sobe.
 
 ## 7. Ajuda

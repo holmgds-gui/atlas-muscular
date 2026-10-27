@@ -11,7 +11,7 @@ App de academia em português (pt-BR), instalável no celular (PWA), publicado p
 - **Atlas**: boneco anatômico clicável (frente/costas, corpo ♂/♀). Tocar num músculo deixa ele vermelho e lista exercícios em ordem de estímulo. Tocar num exercício pinta os sinergistas de laranja.
 - **Meus treinos** (aba `ficha`, rótulo "Treinos" na barra de baixo): biblioteca de treinos montados (nome, exercícios, séries, reps, dias opcionais).
 - **Hoje** (aba `treino`): grade da semana com o que foi feito, todos os treinos com "Marcar como feito", "Anotar séries" opcional e treino personalizado só para hoje (que pode virar treino fixo). Tocar num dia passado da grade (ou ‹ para semanas anteriores) registra naquele dia; futuro nunca.
-- **Progresso** (aba `prog`): duas sub-abas. **Músculos**: mapa de calor dos músculos treinados na semana ou no dia, com faixas baseadas em pesquisa. **Cargas**: evolução de carga por exercício (gráfico da maior carga do dia + força estimada, recorde, última, quanto subiu, 1 mês/3 meses/Tudo).
+- **Progresso** (aba `prog`): duas sub-abas. **Músculos**: mapa de calor dos músculos treinados na semana ou no dia, com faixas baseadas em pesquisa, e radar de **Equilíbrio** (6 grupos). **Cargas**: evolução de carga por exercício (gráfico da maior carga do dia + força estimada, recorde, última, quanto subiu, 1 mês/3 meses/Tudo).
 - Cada aba tem um **+** pequeno ao lado do título que abre uma ajuda da página.
 
 Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-gui`. Uma conta errada (`davigms-pve`) já apareceu conectada uma vez; ela **não** é do dono, não use.
@@ -29,7 +29,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v24` → `atlas-v25`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v25` → `atlas-v26`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 
@@ -65,6 +65,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
   - `EXMAP`: para cada nome de exercício, `p` = músculos-alvo (as listas em que ele aparece) e `s` = sinergistas.
   - `tally()`: 1 série por alvo, ½ por sinergista (contagem fracionada).
   - `BANDS`: faixas da semana e do dia. `progFig()` clona o boneco atual e pinta.
+  - Radar: `RAD` (Peito, Ombros, Braços, Core = abdômen + lombar, Pernas, Costas = costas + trapézio). Cada ponta = **média** das séries dos grupos do `BASIC` dentro dela, para que o anel da faixa ideal (semana 10–20, dia 3–11) valha igual em todas. `radarCard()`, `radSel`, `applyRadSel()` (toque destaca os músculos no boneco do Progresso).
   - Cargas: `pView` (`mus`/`kg`), `loadData()` agrupa por exercício e dia (série mais pesada e força estimada de Epley, kg × (1 + reps/30)), `renderKg()` e `drawKg()` (SVG à mão com tooltip ao tocar). Só treinos feitos contam. Cores `--k1` (vermelho, linha cheia) e `--k2` (azul, tracejada), validadas para daltonismo nos dois temas.
 
 ## Decisões já tomadas (não desfazer sem perguntar)

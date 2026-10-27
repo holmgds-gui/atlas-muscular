@@ -29,7 +29,7 @@ img{max-width:100%}
   --skin:#D6DADF; --m:#AEB6C0; --m-hi:#C3CAD2; --m-lo:#97A0AB; --m-edge:#E9ECEF; --fiber:rgba(26,31,38,.13);
   --target:#D3222A; --target-hi:#F04A50; --target-lo:#A0141B;
   --syn:#F08A24; --syn-soft:rgba(240,138,36,.55);
-  --chip:#E1E5E9; --focus:#1A1F26; --tend:#E4E7EB; --k1:#D3222A; --k2:#2F6DB5; --hair:#6B737E; --hair-l:rgba(255,255,255,.22); --breast:rgba(255,255,255,.2); --fold:rgba(26,31,38,.16);
+  --chip:#E1E5E9; --focus:#1A1F26; --tend:#E4E7EB; --k1:#D3222A; --k2:#2F6DB5; --band:rgba(26,31,38,.08); --hair:#6B737E; --hair-l:rgba(255,255,255,.22); --breast:rgba(255,255,255,.2); --fold:rgba(26,31,38,.16);
   --f-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
   --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -38,13 +38,13 @@ img{max-width:100%}
   --skin:#1E242C; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
-  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --k1:#F0474D; --k2:#5B8FDB; --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}}
+  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --k1:#F0474D; --k2:#5B8FDB; --band:rgba(255,255,255,.09); --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
   --skin:#1E242C; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
-  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --k1:#F0474D; --k2:#5B8FDB; --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}
+  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --k1:#F0474D; --k2:#5B8FDB; --band:rgba(255,255,255,.09); --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}
 
 html{height:100%}body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;overflow:hidden;-webkit-tap-highlight-color:transparent}
@@ -343,6 +343,24 @@ button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
 .alist .custom{border-style:dashed}
 .page .link{padding:4px 0;font-size:15px;cursor:pointer;text-decoration:none}
 /* ---- progress tab ---- */
+.radar{display:block;width:100%;max-width:420px;height:auto;margin:0 auto;overflow:visible;touch-action:manipulation}
+.rd-grid{fill:none;stroke:var(--line);stroke-width:1}
+.rd-band{fill:var(--band)}
+.rd-ring{fill:none;stroke:var(--muted);stroke-width:1;stroke-dasharray:3 3;opacity:.7}
+.rd-area{fill:color-mix(in srgb,var(--target) 22%,transparent);stroke:var(--target);stroke-width:2;stroke-linejoin:round}
+.rd-pt{fill:var(--target);stroke:var(--surface);stroke-width:2}
+.rd-n{fill:var(--muted);font-size:13px;font-weight:600;font-family:var(--f-body)}
+.rd-v{fill:var(--ink);font-size:15px;font-weight:700;font-family:var(--f-body);font-variant-numeric:tabular-nums}
+.rd-dot{font-size:11px}
+.rd-lab.on .rd-n{fill:var(--ink)}
+.rd-hit{fill:transparent;cursor:pointer}
+.rd-key{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.rd-key i{width:14px;height:10px;border-radius:3px;background:var(--band);border:1px dashed var(--muted)}
+.rd-sel{display:grid;gap:7px;background:var(--bg);border-radius:12px;padding:11px 12px}
+.rd-part{display:grid;grid-template-columns:minmax(0,1fr) 40% 34px;gap:10px;align-items:center;font-size:14px}
+.rd-part b{text-align:right;font-variant-numeric:tabular-nums}
+.pfig.focus [data-m] .m{opacity:.35}
+.pfig.focus [data-m].hl .m{opacity:1;stroke:var(--ink);stroke-width:2.5}
 .seg.pview{display:flex}.seg.pview button{flex:1}
 .kglegend{display:flex;gap:16px;font-size:13px;color:var(--muted);flex-wrap:wrap}
 .kglegend span,.kgtip span{display:inline-flex;align-items:center;gap:6px}
@@ -1598,6 +1616,7 @@ const HELP={
     <li><b>Semana / Dia</b> trocam o período; as setas voltam para semanas ou dias anteriores.</li>
     <li><b>Toque num músculo</b> do boneco para ver quantas séries ele teve.</li>
     <li><b>Toque num grupo</b> da lista para ver as partes (ex.: peitoral superior, médio e inferior).</li>
+    <li><b>Equilíbrio</b>: radar com 6 grupos (média de séries por músculo de cada um). A faixa sombreada é a faixa ideal; toque numa ponta para ver as partes e destacar os músculos no boneco.</li>
     <li><b>Cargas</b>: cada exercício em que você anotou carga, com gráfico da maior carga do dia (linha cheia) e da força estimada (tracejada), recorde, última carga e quanto subiu. Toque no gráfico para ver cada treino.</li></ul>
     <h4>Como conta</h4><ul><li>Cada série vale 1 para o músculo alvo do exercício e ½ para os sinergistas.</li>
     <li><b>Semana</b>: 4–9 séries é estímulo moderado, 10–20 é a faixa ideal, mais de 20 é volume alto.</li>
@@ -2017,6 +2036,45 @@ function drawKg(box,all){
   const hit=box.querySelector(".kg-hit");hit.addEventListener("pointermove",show);hit.addEventListener("pointerdown",show);hit.addEventListener("pointerleave",e=>{if(e.pointerType==="mouse")hide()});
 }
 addEventListener("resize",()=>{if(tab==="prog"&&pView==="kg")document.querySelectorAll(".kgchart").forEach(el=>drawKg(el,kgList[+el.dataset.ki][1]))});
+/* ---------------------------------------------------------- radar de equilíbrio
+   6 big groups; each point is the AVERAGE weekly (or daily) sets per muscle group
+   inside it, so the same ideal band (week 10–20, day 3–11) applies to every axis. */
+const RAD=[{k:"peito",n:"Peito",g:["peito"]},{k:"ombros",n:"Ombros",g:["ombro"]},{k:"bracos",n:"Braços",g:["biceps","triceps","antebraco"]},
+  {k:"core",n:"Core",g:["abdomen","lombar"]},{k:"pernas",n:"Pernas",g:["quadriceps","posterior","gluteo","adutores","panturrilha"]},{k:"costas",n:"Costas",g:["costas","trapezio"]}];
+let radSel=null;
+function radarCard(T,B){
+  const ring=pMode==="week"?[B.t[1],B.t[2]]:[B.t[0],B.t[2]],ringTxt=pMode==="week"?"faixa ideal (10–20)":"bom a forte (3–11)";
+  const vals=RAD.map(r=>{const parts=r.g.map(g=>[g,T.grp[g]||0]);return {...r,parts,v:parts.reduce((a,x)=>a+x[1],0)/parts.length}});
+  const top=Math.max(pMode==="week"?25:14,...vals.map(x=>x.v))*1.05;
+  const W=340,H=300,cx=170,cy=150,Rr=104,n=vals.length;
+  const ang=i=>-Math.PI/2+i*2*Math.PI/n,P=(i,v)=>[cx+Math.cos(ang(i))*Rr*v/top,cy+Math.sin(ang(i))*Rr*v/top];
+  const poly=v=>vals.map((_,i)=>P(i,v).map(z=>z.toFixed(1)).join(",")).join(" ");
+  const step=pMode==="week"?5:3;let grid="";
+  for(let v=step;v<=top;v+=step)grid+=`<polygon class="rd-grid" points="${poly(v)}"/>`;
+  vals.forEach((_,i)=>{const [x,y]=P(i,top);grid+=`<line class="rd-grid" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`});
+  const band=`<path class="rd-band" fill-rule="evenodd" d="M${poly(Math.min(ring[1],top)).split(" ").join(" L")} Z M${poly(ring[0]).split(" ").join(" L")} Z"/>
+    <polygon class="rd-ring" points="${poly(ring[0])}"/><polygon class="rd-ring" points="${poly(Math.min(ring[1],top))}"/>`;
+  const dpts=vals.map((x,i)=>P(i,x.v).map(z=>z.toFixed(1)).join(",")).join(" ");
+  const labels=vals.map((x,i)=>{const [lx,ly]=P(i,top*1.2),a=Math.cos(ang(i)),anchor=Math.abs(a)<.2?"middle":a>0?"start":"end";
+    const bi=bandOf(x.v,B);return `<g class="rd-lab${radSel===x.k?" on":""}" data-rg="${x.k}"><text x="${lx.toFixed(1)}" y="${(ly-2).toFixed(1)}" text-anchor="${anchor}" class="rd-n">${x.n}</text><text x="${lx.toFixed(1)}" y="${(ly+15).toFixed(1)}" text-anchor="${anchor}" class="rd-v">${nf(x.v)}<tspan class="rd-dot" fill="${bi?heat(x.v,B):"var(--muted)"}"> ●</tspan></text></g>`}).join("");
+  const hits=vals.map((x,i)=>{const a0=ang(i)-Math.PI/n,a1=ang(i)+Math.PI/n,rr=Rr*1.45;
+    return `<path class="rd-hit" data-rg="${x.k}" d="M${cx},${cy} L${(cx+Math.cos(a0)*rr).toFixed(1)},${(cy+Math.sin(a0)*rr).toFixed(1)} L${(cx+Math.cos(a1)*rr).toFixed(1)},${(cy+Math.sin(a1)*rr).toFixed(1)} Z"><title>${x.n}: ${nf(x.v)} séries por músculo</title></path>`}).join("");
+  const sel=vals.find(x=>x.k===radSel);
+  const selBox=sel?`<div class="rd-sel"><div class="row between"><b>${sel.n}</b><span class="muted-s" style="margin:0">média ${nf(sel.v)} · ${B.names[bandOf(sel.v,B)]}</span></div>
+    ${sel.parts.map(([g,v])=>`<div class="rd-part"><span>${BASIC[g].n}</span><span class="pg-bar"><i style="width:${Math.max(v?4:0,Math.round(Math.min(v,top)/top*100))}%;background:${v?heat(v,B):"transparent"}"></i></span><b>${v?nf(v):"—"}</b></div>`).join("")}
+    <span class="muted-s" style="margin:0">Os músculos de ${sel.n.toLowerCase()} estão destacados no boneco acima.</span></div>`
+    :`<p class="muted" style="font-size:13px">Toque num grupo para ver as partes e destacar os músculos no boneco.</p>`;
+  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">Equilíbrio</h3><span class="rd-key"><i></i>${ringTxt}</span></div>
+    <svg class="radar" viewBox="0 0 ${W} ${H}" role="img" aria-label="Equilíbrio, média de séries por músculo: ${vals.map(x=>`${x.n} ${nf(x.v)}`).join(", ")}">
+      ${grid}${band}<polygon class="rd-area" points="${dpts}"/>${vals.map((x,i)=>{const [px,py]=P(i,x.v);return `<circle class="rd-pt${radSel===x.k?" on":""}" cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${radSel===x.k?6:4}"/>`}).join("")}
+      ${labels}${hits}</svg>
+    ${selBox}
+    <p class="muted" style="font-size:12px;margin:0">Cada ponta mostra a média de séries por músculo do grupo (ex.: Pernas = média de quadríceps, posterior, glúteos, adutores e panturrilha).</p></div>`;
+}
+function applyRadSel(){
+  const f=document.querySelector(".pfig");if(!f)return;const r=RAD.find(x=>x.k===radSel);
+  f.classList.toggle("focus",!!r);f.querySelectorAll("[data-m]").forEach(g=>g.classList.toggle("hl",!!r&&r.g.includes(TOB[g.dataset.m])));
+}
 function renderProg(){
   if(pView==="kg")return renderKg();
   const r=pRange(),T=tally(r),body=$("progBody"),B=BANDS[pMode];
@@ -2035,6 +2093,7 @@ function renderProg(){
     <div class="pstat"><div><b>${T.days}</b><span>${T.days===1?"Treino":"Treinos"}</span></div><div><b>${T.sets}</b><span>Séries feitas</span></div><div><b>${done.length}</b><span>Grupos treinados</span></div></div>
   </div>
   ${over.length?`<div class="warnbox"><b>Muitas séries no mesmo treino</b>${over.map(([g,v])=>`${BASIC[g].n} (${nf(v)})`).join(", ")} ${over.length>1?"passaram":"passou"} de ~11 séries ${pOff===0?"hoje":"neste dia"}. Os estudos não mostram ganho extra a partir daí; vale dividir em outro dia da semana.</div>`:""}
+  ${T.sets?radarCard(T,B):""}
   ${T.sets?`<div class="card"><h3 class="section-t" style="margin:0">Séries por músculo ${pMode==="week"?"na semana":"no treino"}</h3><div>${done.map(([g,v])=>{
       const parts=BASIC[g].m.map(id=>[id,T.mus[id]||0]).sort((a,b)=>b[1]-a[1]);const bi=bandOf(v,B),c=heat(v,B);
       return `<details class="pg"><summary><span class="pg-n">${BASIC[g].n}<small class="pg-b"><i style="background:${c}"></i>${B.names[bi]}</small></span><span class="pg-bar"><i style="width:${Math.max(4,Math.round(Math.min(v,top)/top*100))}%;background:${c}"></i></span><b>${nf(v)}</b></summary>
@@ -2043,7 +2102,7 @@ function renderProg(){
     :`<div class="card"><p class="muted">Nenhum treino feito ${pMode==="week"?"nesta semana":"neste dia"}. Na aba Hoje, abra o treino e toque em Marcar como feito.</p><button class="btn primary" data-goto="treino">Ir para Hoje</button></div>`}
   ${T.unk.size?`<p class="muted">Não entram no boneco porque o app não conhece o exercício: ${[...T.unk].map(([n,c])=>`${esc(n)} (${c})`).join(", ")}.</p>`:""}
   ${bandsInfo()}`;
-  $("pfigBox").appendChild(progFig(T.mus,B));
+  $("pfigBox").appendChild(progFig(T.mus,B));applyRadSel();
 }
 $("progBody").addEventListener("click",e=>{
   const pv=e.target.closest("[data-pv]");if(pv){pView=pv.dataset.pv;LS.set("atlas-pview",pView);return renderProg()}
@@ -2053,6 +2112,7 @@ $("progBody").addEventListener("click",e=>{
   const m=e.target.closest("[data-pm]");if(m){pMode=m.dataset.pm;LS.set("atlas-pmode",pMode);pOff=0;return renderProg()}
   const n=e.target.closest("[data-pnav]");if(n){pOff=Math.min(0,pOff+ +n.dataset.pnav);return renderProg()}
   if(e.target.closest("[data-goto]"))return setTab("treino");
+  const rg=e.target.closest("[data-rg]");if(rg){radSel=radSel===rg.dataset.rg?null:rg.dataset.rg;const y=$("tab-prog").scrollTop;renderProg();$("tab-prog").scrollTop=y;return}
   const g=e.target.closest(".pfig [data-m]");if(g){const t=g.querySelector("title");toast(t?t.textContent:M[g.dataset.m].n)}
 });
 
