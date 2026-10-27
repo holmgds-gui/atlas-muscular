@@ -56,7 +56,7 @@ button{cursor:pointer}
 header{display:flex;align-items:center;gap:12px;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line);background:var(--surface)}
 .brand{display:flex;align-items:baseline;gap:8px;min-width:0}
 .brand h1{margin:0;font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
-.brand h1 b{color:var(--target);font-weight:700}
+.brand h1 b{color:var(--accent,var(--target));font-weight:700}
 .brand small{color:var(--muted);font-size:12px;white-space:nowrap}
 .search{position:relative;margin-left:auto;flex:1;max-width:380px;min-width:0}
 .search input{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px 9px 34px;font-size:15px}
@@ -64,6 +64,36 @@ header{display:flex;align-items:center;gap:12px;padding-block:10px;padding-left:
 .gear{flex:none;display:grid;place-items:center;width:40px;height:40px;margin-right:-6px;border:0;border-radius:10px;background:none;color:var(--muted);padding:0}
 .gear svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .gear:hover,.gear[aria-current="page"]{background:var(--chip);color:var(--ink)}
+/* configurações */
+.cf{gap:0;padding-block:4px}
+.cf-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
+.cf>.cf-row:first-child{border-top:0}
+.cf-l{min-width:0;display:grid;gap:2px}.cf-l b{font-weight:600;font-size:15px}.cf-l small{color:var(--muted);font-size:12px;line-height:1.35}
+.cf-l .pill{vertical-align:2px;margin-left:4px}
+.cf-c{flex:none;max-width:62%;display:flex;justify-content:flex-end}
+.cf-in{width:auto;max-width:180px}.cf-in.sm{width:74px;text-align:center}.cf-in.xs{width:48px;text-align:center}
+.cf-unit{display:flex;align-items:center;gap:6px}.cf-unit small{color:var(--muted);font-size:13px}
+.cf-seg{flex-wrap:wrap;justify-content:flex-end}.cf-seg button{padding:6px 10px;font-size:13px}
+.cf-seg button:disabled{opacity:.4;cursor:default}
+.cf-dots{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.cf-dots button{width:28px;height:28px;border-radius:50%;border:2px solid var(--surface);box-shadow:0 0 0 1px var(--line);padding:0}
+.cf-dots button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--ink)}
+.cf-sub{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:0 0 12px}
+.cf-days{display:flex;gap:4px}.cf-days button{width:32px;height:32px;border-radius:50%;border:1px solid var(--line);background:var(--bg);font-size:13px;font-weight:600;color:var(--muted);padding:0}
+.cf-days button[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.cf .confirm{padding:0 0 12px}
+.cf-row.st{flex-direction:column;align-items:stretch;gap:8px}.cf-row.st .cf-c{max-width:none;justify-content:flex-start}
+.cf-row.st .cf-seg{display:flex;width:100%;flex-wrap:nowrap}.cf-row.st .cf-seg button{flex:1;padding:7px 4px}
+.seg.cf-seg button{text-transform:none;letter-spacing:0;font-family:var(--f-body);font-weight:600}
+.cf-row.st .cf-dots{justify-content:flex-start}
+a.btn{display:inline-flex;align-items:center;text-decoration:none;color:inherit}
+.sw{position:relative;display:inline-block;width:46px;height:28px;flex:none}
+.sw input{position:absolute;opacity:0;width:100%;height:100%;margin:0;cursor:pointer}
+.sw i{position:absolute;inset:0;border-radius:999px;background:var(--line);transition:background .15s}
+.sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
+.sw input:checked+i{background:var(--accent,var(--target))}.sw input:checked+i::after{transform:translateX(18px)}
+.sw input:disabled+i{opacity:.45}.sw input:focus-visible+i{outline:2px solid var(--focus);outline-offset:2px}
+html.noanim *,html.noanim *::before,html.noanim *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 @media (max-width:400px){header{gap:8px}.gear{width:34px;margin-right:-4px}.search input{padding-right:6px}}
 .results{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);max-height:60vh;overflow:auto;z-index:20}
 .results button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 14px;border-bottom:1px solid var(--line)}
@@ -282,7 +312,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   .btabs{display:grid;grid-row:3;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--surface);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
   .btabs button{display:grid;justify-items:center;gap:2px;padding:7px 0 6px;font-size:13px}
   .btabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
-  .btabs button[aria-current="page"]{color:var(--target)}
+  .btabs button[aria-current="page"]{color:var(--accent,var(--target))}
   .seg.model{width:100%}
   .seg.model button{flex:1;padding:6px 4px;font-size:14px;letter-spacing:.03em}
   .fi{grid-template-columns:minmax(0,1fr) 58px 70px}
@@ -1252,6 +1282,29 @@ const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
           set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+/* app settings (Configurações). Some are saved but not active yet; see renderConf. */
+const CONF_DEF={name:"",age:null,height:null,exp:"",theme:"auto",accent:"",fs:"m",noanim:false,lang:"pt",unit:"kg",sets:3,reps:"8-12",rest:90,goal:0,remind:false,rdays:[0,2,4],rtime:"18:00",sound:true,vibe:true};
+let CONF=(()=>{const c=LS.get("atlas-conf",null);return {...CONF_DEF,...(c&&typeof c==="object"?c:{})}})();
+const saveConf=()=>{if(!LS.set("atlas-conf",CONF))toast("Não foi possível salvar neste aparelho")};
+function applyConf(){
+  const r=document.documentElement,c=CONF;
+  if(c.theme==="light"||c.theme==="dark")r.setAttribute("data-theme",c.theme);else r.removeAttribute("data-theme");
+  const dark=c.theme==="dark"||(c.theme!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.setAttribute("content",dark?"#0E1115":"#F7F8F9");
+  if(c.accent)r.style.setProperty("--accent",c.accent);else r.style.removeProperty("--accent");
+  r.classList.toggle("fs-s",c.fs==="s");r.classList.toggle("fs-l",c.fs==="l");r.classList.toggle("noanim",!!c.noanim);
+}
+/* text size: copy every font-size in px from the app's stylesheets into html.fs-s / html.fs-l
+   versions scaled by 0.9 / 1.15 (zoom was unreliable between browsers). Built once at start. */
+(function buildFsCSS(){let out="";
+  const walk=(rules,media)=>{for(const r of rules){
+    if(r.media&&r.cssRules){walk(r.cssRules,r.media.mediaText);continue}
+    if(!r.style||!r.selectorText||/brand|btabs|htabs|search|header|gear|\.wk/.test(r.selectorText))continue;const f=r.style.fontSize;if(!/^[\d.]+px$/.test(f))continue;const px=parseFloat(f);
+    for(const [c,k] of [["fs-s",.9],["fs-l",1.15]]){const sel=r.selectorText.split(",").map(x=>`html.${c} ${x.trim()}`).join(",");
+      const rule=`${sel}{font-size:${(px*k).toFixed(1)}px}`;out+=media?`@media ${media}{${rule}}`:rule}}};
+  for(const sh of document.styleSheets){try{walk(sh.cssRules)}catch(_){}}
+  const st=document.createElement("style");st.textContent=out;document.head.appendChild(st)})();
+applyConf();matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyConf);
 const DAYS=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
 const todayIdx=()=>(new Date().getDay()+6)%7;
 const isoDate=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
@@ -1653,6 +1706,14 @@ const HELP={
     <li><b>Dia</b>: até ~11 séries por músculo no mesmo treino ainda trazem ganho; depois disso, quase nada a mais.</li></ul>
     <h4>Dicas</h4><ul><li>Mire 10–20 séries por semana em cada grupo que quer crescer, divididas em 2 ou mais treinos.</li>
     <li>Grupos em "Não treinados" mostram o que ficou de fora na semana.</li></ul>`],
+  conf:["Configurações",`<p>Ajustes do app. Tudo fica salvo só neste aparelho e vai junto no backup.</p>
+    <h4>O que já funciona</h4><ul><li><b>Perfil</b>: nome (aparece na aba Hoje), peso e corpo ♂/♀ (usados no ranking de força).</li>
+    <li><b>Aparência</b>: tema claro/escuro/automático, cor de destaque, tamanho da letra e reduzir animações.</li>
+    <li><b>Treino</b>: séries e repetições que já vêm ao adicionar um exercício.</li>
+    <li><b>Meta semanal</b>: aparece na grade da aba Hoje ("2 de 4 treinos").</li>
+    <li><b>Seus dados</b>: exportar e importar backup, apagar histórico, cargas digitadas ou tudo.</li>
+    <li><b>Sobre</b>: compartilhar o app, mandar sugestões e ver as fontes.</li></ul>
+    <h4>Em breve</h4><ul><li>Idioma, libras, timer de descanso, lembretes, sons e vibração, e conta com sincronização. As escolhas já ficam guardadas.</li></ul>`],
   rank:["Ranking de força",`<p>Mostra quão forte você é em cada grupo muscular, em 9 níveis: <b>Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda e Bizarro</b>. A comparação é com milhões de registros de pessoas que treinam, do mesmo sexo, ajustada ao seu peso.</p>
     <h4>O que dá para fazer</h4><ul>
     <li><b>Seu peso</b> e <b>corpo ♂/♀</b>: mudam as faixas. Coloque seu peso para o resultado ficar certo.</li>
@@ -1689,9 +1750,9 @@ function openAddSheet(name,ref){
 }
 $("aList").addEventListener("click",e=>{
   const b=e.target.closest("[data-to]");if(!b)return;const name=addName,ref=addRef,to=b.dataset.to;closeModals();
-  if(to==="new"){const pl=newPlan();pl.items.push({name,ref,sets:3,reps:"8-12"});savePlans();openPlan=pl.id;setTab("ficha");toast("Treino criado. Dê um nome e escolha os dias");return}
-  if(to.startsWith("p:")){const pl=plans.find(x=>x.id===to.slice(2));if(pl){pl.items.push({name,ref,sets:3,reps:"8-12"});savePlans();toast(`Adicionado a ${pl.name||"treino"}`);if(tab==="ficha")renderFicha()}}
-  if(to.startsWith("w:")){const w=workouts.find(x=>x.id===to.slice(2));if(w){w.items.push(mkItem(name,3,"",ref));saveW();toast("Adicionado ao treino de hoje");if(tab==="treino")renderTreino()}}
+  if(to==="new"){const pl=newPlan();pl.items.push({name,ref,sets:CONF.sets,reps:CONF.reps});savePlans();openPlan=pl.id;setTab("ficha");toast("Treino criado. Dê um nome e escolha os dias");return}
+  if(to.startsWith("p:")){const pl=plans.find(x=>x.id===to.slice(2));if(pl){pl.items.push({name,ref,sets:CONF.sets,reps:CONF.reps});savePlans();toast(`Adicionado a ${pl.name||"treino"}`);if(tab==="ficha")renderFicha()}}
+  if(to.startsWith("w:")){const w=workouts.find(x=>x.id===to.slice(2));if(w){w.items.push(mkItem(name,CONF.sets,CONF.reps,ref));saveW();toast("Adicionado ao treino de hoje");if(tab==="treino")renderTreino()}}
 });
 
 /* ---------------------------------------------------------- data
@@ -1771,7 +1832,7 @@ $("fichaBody").addEventListener("click",e=>{
   if(!pl)return;
   if(a==="toggle"){openPlan=openPlan===pl.id?null:pl.id;askDelPlan=null}
   else if(a==="day"){const d=+b.dataset.day;pl.days=pl.days.includes(d)?pl.days.filter(x=>x!==d):[...pl.days,d]}
-  else if(a==="add")return openPicker(`Adicionar a ${pl.name||"treino"}`,(name,ref)=>{pl.items.push({name,ref,sets:3,reps:"8-12"});savePlans();renderFicha()});
+  else if(a==="add")return openPicker(`Adicionar a ${pl.name||"treino"}`,(name,ref)=>{pl.items.push({name,ref,sets:CONF.sets,reps:CONF.reps});savePlans();renderFicha()});
   else if(a==="rm")pl.items.splice(j,1);
   else if(a==="up"&&j>0)[pl.items[j-1],pl.items[j]]=[pl.items[j],pl.items[j-1]];
   else if(a==="down"&&j<pl.items.length-1)[pl.items[j+1],pl.items[j]]=[pl.items[j],pl.items[j+1]];
@@ -1803,7 +1864,7 @@ function weekDone(){
       :`<button class="${cls}" data-day="${iso}" aria-pressed="${iso===sel}" aria-label="${lab}${iso===sel?"":". Toque para registrar neste dia"}">${inner}</button>`}).join("");
   const sun=new Date(mon);sun.setDate(mon.getDate()+6);
   const n=workouts.filter(x=>x.done!==false&&x.date>=isoDate(mon)&&x.date<=isoDate(sun)).length;
-  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">${hWeek===0?"Sua semana":hWeek===-1?"Semana passada":`${dm(mon)} – ${dm(sun)}`}</h3><span class="muted-s" style="margin:0">${n?plural(n,"treino")+" feito"+(n===1?"":"s"):"Nenhum treino feito"}</span></div>
+  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">${hWeek===0?"Sua semana":hWeek===-1?"Semana passada":`${dm(mon)} – ${dm(sun)}`}</h3><span class="muted-s" style="margin:0">${CONF.goal?`${n} de ${CONF.goal} treinos${n>=CONF.goal?" · meta batida!":""}`:n?plural(n,"treino")+" feito"+(n===1?"":"s"):"Nenhum treino feito"}</span></div>
     <div class="wkrow"><button class="ib" data-act="wkPrev" aria-label="Semana anterior">‹</button><div class="wkgrid">${cells}</div><button class="ib" data-act="wkNext" aria-label="Próxima semana"${hWeek>=0?" disabled":""}>›</button></div>
     <span class="muted-s" style="margin:0">Esqueceu de registrar? Toque num dia que já passou.</span></div>`;
 }
@@ -1816,7 +1877,7 @@ function renderTreino(){
     const tw=workouts.filter(x=>x.date===sel);
     const list=[...plans].sort((x,y)=>(y.days.includes(sd)?1:0)-(x.days.includes(sd)?1:0));
     const nDone=tw.filter(x=>x.done!==false).length;
-    h=`<div class="page-h"><h2>Hoje<button class="help" data-help="treino" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">${cap(fmtLong(new Date()))}${isT&&nDone?` · ${plural(nDone,"treino")} feito${nDone===1?"":"s"}`:""}</p></div>
+    h=`<div class="page-h"><h2>Hoje<button class="help" data-help="treino" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">${CONF.name?`Olá, ${esc(CONF.name)}! `:""}${cap(fmtLong(new Date()))}${isT&&nDone?` · ${plural(nDone,"treino")} feito${nDone===1?"":"s"}`:""}</p></div>
       ${weekDone()}
       ${isT?"":`<div class="pastbox"><div><b>Registrando ${esc(fmtLong(fromIso(sel)))}</b><span>${nDone?`${plural(nDone,"treino")} feito${nDone===1?"":"s"} neste dia. `:""}O que você marcar agora fica nesse dia.</span></div><button class="btn" data-act="toToday">Voltar para hoje</button></div>`}
       <h3 class="section-t">Seus treinos${isT?"":` · ${esc(dayName)}`}</h3>`;
@@ -1833,9 +1894,7 @@ function renderTreino(){
       `<button class="btn wide" data-act="startFree">+ Montar um treino só para ${isT?"hoje":"este dia"}</button>`;
     const past=workouts.filter(x=>x.date!==sel).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
     h+=`<h3 class="section-t">Histórico</h3>`+(past.length?`<div class="hist">${past.slice(0,80).map(x=>`<button data-open="${x.id}"><b>${fmtDate(x.date)}</b><span>${esc(x.title||"Treino")} · ${x.done===false?"não feito":plural(x.items.length,"exercício")}</span></button>`).join("")}</div>`:`<p class="muted">Os treinos que você fizer aparecem aqui.</p>`);
-    h+=`<h3 class="section-t">Backup</h3><p class="muted">Seus treinos ficam salvos só neste aparelho. Exporte um backup de vez em quando para não perder nada.</p>
-      <div class="row"><button class="btn" data-act="export">Exportar backup</button><button class="btn" data-act="import">Importar backup</button></div>
-      ${pendingImport?`<div class="confirm"><span>Substituir seus dados atuais pelo backup (${plural(pendingImport.plans.length,"treino")} montado${pendingImport.plans.length===1?"":"s"}, ${pendingImport.workouts.length} no histórico)?</span><button class="btn danger" data-act="doImport">Substituir</button><button class="btn" data-act="noImport">Cancelar</button></div>`:""}`;
+    h+=`<p class="muted" style="font-size:13px">Backup, apagar dados e outros ajustes ficam em Configurações (engrenagem lá em cima).</p>`;
   }else{
     const isToday=w.date===today;
     h=`<div class="row"><button class="link" data-act="back">‹ ${isToday?"Hoje":"Voltar"}</button></div>
@@ -1899,10 +1958,10 @@ $("treinoBody").addEventListener("click",e=>{
   else if(a==="back"){openW=null;askDel=false}
   else if(a==="export")return exportBackup();
   else if(a==="import")return $("importFile").click();
-  else if(a==="doImport"){plans=pendingImport.plans;workouts=pendingImport.workouts;if(pendingImport.rank){rank=pendingImport.rank;saveRank()}pendingImport=null;openW=null;savePlans();toast("Backup importado")}
+  else if(a==="doImport"){plans=pendingImport.plans;workouts=pendingImport.workouts;if(pendingImport.rank){rank=pendingImport.rank;saveRank()}pendingImport=null;openW=null;savePlans();saveW();toast("Backup importado")}
   else if(a==="noImport")pendingImport=null;
   else if(!w)return;
-  else if(a==="addEx")return openPicker("Adicionar ao treino",(name,ref)=>{w.items.push(mkItem(name,3,"",ref));saveW();renderTreino()});
+  else if(a==="addEx")return openPicker("Adicionar ao treino",(name,ref)=>{w.items.push(mkItem(name,CONF.sets,CONF.reps,ref));saveW();renderTreino()});
   else if(a==="addSet"){const s=w.items[i].sets,l=s[s.length-1];s.push({r:"",kg:l?l.kg:""})}
   else if(a==="rmSet"){w.items[i].sets.splice(+b.dataset.s,1);if(!w.items[i].sets.length)w.items[i].sets.push({r:"",kg:""})}
   else if(a==="rmItem")w.items.splice(i,1);
@@ -1915,7 +1974,7 @@ $("treinoBody").addEventListener("click",e=>{
   saveW();renderTreino();
 });
 function exportBackup(){
-  const data=JSON.stringify({app:"atlas-muscular",version:2,exported:new Date().toISOString(),plans,workouts,rank});
+  const data=JSON.stringify({app:"atlas-muscular",version:2,exported:new Date().toISOString(),plans,workouts,rank,conf:CONF});
   const name=`atlas-backup-${isoDate(new Date())}.json`;
   let file;try{file=new File([data],name,{type:"application/json"})}catch(e){file=null}
   if(file&&navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:"Backup do Atlas Muscular"}).catch(()=>{});return}
@@ -1927,7 +1986,7 @@ $("importFile").addEventListener("change",async e=>{
   try{const d=JSON.parse(await f.text());
     if(d.app!=="atlas-muscular"||!Array.isArray(d.workouts))throw 0;
     const pl=Array.isArray(d.plans)?d.plans.filter(p=>p&&Array.isArray(p.items)&&Array.isArray(p.days)):planFromFicha(d.ficha);
-    pendingImport={plans:pl,workouts:d.workouts,rank:d.rank&&typeof d.rank==="object"&&Array.isArray(d.rank.man)?d.rank:null};renderTreino();
+    pendingImport={plans:pl,workouts:d.workouts,rank:d.rank&&typeof d.rank==="object"&&Array.isArray(d.rank.man)?d.rank:null,conf:d.conf&&typeof d.conf==="object"?d.conf:null};if(tab==="conf")renderConf();else renderTreino();
   }catch(_){toast("Esse arquivo não é um backup do Atlas Muscular")}
 });
 
@@ -2456,11 +2515,120 @@ $("progBody").addEventListener("toggle",e=>{const d=e.target.closest&&e.target.c
 $("progBody").addEventListener("change",e=>{if(e.target.id!=="rkBw")return;const v=numKg(e.target.value);
   if(e.target.value.trim()===""){delete rank.bw}else if(v>=30&&v<=250){rank.bw=Math.round(v*10)/10}else{toast("Peso entre 30 e 250 kg");e.target.value=rank.bw>0?fkg(rank.bw):"";return}
   saveRank();renderRank()});
-/* ---------------------------------------------------------- configurações (gear at the top right) */
+/* ---------------------------------------------------------- configurações (gear at the top right)
+   CONF (localStorage atlas-conf). Working now: name, body weight/sex (shared with the ranking),
+   theme, accent, text size, reduce motion, default sets/reps, weekly goal, backup, delete data,
+   share, suggestions, about. Saved but not active yet ("em breve"): language, unit, rest timer,
+   reminders, sounds/vibration, account/sync, age/height/experience (profile only). */
+let cfConfirm=null;
+const ACCENTS=[["","Vermelho","var(--target)"],["#3A7BD5","Azul"],["#2FA866","Verde"],["#8B5CF6","Roxo"],["#F07818","Laranja"],["#E0559A","Rosa"]];
+const cfSeg=(key,opts,cur,label)=>`<div class="seg cf-seg" role="group" aria-label="${label}">${opts.map(([v,t,dis])=>`<button data-cf="${key}" data-v="${v}" aria-pressed="${String(cur)===String(v)}"${dis?" disabled":""}>${t}</button>`).join("")}</div>`;
+const cfSw=(key,on,dis)=>`<label class="sw"><input type="checkbox" data-cfsw="${key}"${on?" checked":""}${dis?" disabled":""}><i></i></label>`;
+const cfRow=(t,sub,ctl,soon,stack)=>`<div class="cf-row${stack?" st":""}"><div class="cf-l"><b>${t}${soon?` <span class="pill soft">em breve</span>`:""}</b>${sub?`<small>${sub}</small>`:""}</div><div class="cf-c">${ctl}</div></div>`;
 function renderConf(){
-  $("confBody").innerHTML=`<div class="page-h"><h2>Configurações</h2><p class="lead">Ajustes do app.</p></div>
-  <div class="card"><p class="muted">Esta página ainda está sendo montada.</p></div>`;
+  const c=CONF,days=["S","T","Q","Q","S","S","D"];
+  const conf=(k,txt,btn)=>cfConfirm===k?`<div class="confirm"><span>${txt}</span><button class="btn danger" data-cact="${k}!">${btn}</button><button class="btn" data-cact="cancel">Cancelar</button></div>`:"";
+  $("confBody").innerHTML=`<div class="page-h"><h2>Configurações<button class="help" data-help="conf" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">${c.name?`Olá, ${esc(c.name)}! `:""}Ajustes do app. Tudo fica salvo só neste aparelho.</p></div>
+
+  <h3 class="section-t">Perfil</h3>
+  <div class="card cf">
+    ${cfRow("Nome ou apelido","Aparece na aba Hoje.",`<input class="inp cf-in" data-cfin="name" maxlength="30" value="${esc(c.name)}" placeholder="Seu nome">`)}
+    ${cfRow("Peso corporal","Usado no ranking de força.",`<span class="cf-unit"><input class="inp cf-in sm" data-cfin="bw" inputmode="decimal" value="${rank.bw>0?fkg(rank.bw):""}" placeholder="${RSW[sex]}"><small>kg</small></span>`)}
+    ${cfRow("Corpo","Boneco e faixas do ranking.",`<div class="seg sex" role="group" aria-label="Corpo"><button data-cf="sex" data-v="m" aria-pressed="${sex==="m"}" aria-label="Masculino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="14.5" r="5.5"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg></button><button data-cf="sex" data-v="f" aria-pressed="${sex==="f"}" aria-label="Feminino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5V22M8.5 18.5h7"/></svg></button></div>`)}
+    ${cfRow("Idade","",`<span class="cf-unit"><input class="inp cf-in sm" data-cfin="age" inputmode="numeric" value="${c.age||""}" placeholder="—"><small>anos</small></span>`)}
+    ${cfRow("Altura","",`<span class="cf-unit"><input class="inp cf-in sm" data-cfin="height" inputmode="numeric" value="${c.height||""}" placeholder="—"><small>cm</small></span>`)}
+    ${cfRow("Experiência","Há quanto tempo você treina.",cfSeg("exp",[["ini","Iniciante"],["int","Intermediário"],["ava","Avançado"]],c.exp,"Experiência"),false,1)}
+  </div>
+
+  <h3 class="section-t">Aparência</h3>
+  <div class="card cf">
+    ${cfRow("Tema","",cfSeg("theme",[["auto","Automático"],["light","Claro"],["dark","Escuro"]],c.theme,"Tema"),false,1)}
+    ${cfRow("Cor de destaque","Título, aba atual e botões de destaque. O músculo-alvo continua vermelho.",`<div class="cf-dots" role="group" aria-label="Cor de destaque">${ACCENTS.map(([v,t,css])=>`<button data-cf="accent" data-v="${v}" aria-pressed="${c.accent===v}" aria-label="${t}" title="${t}" style="background:${css||v}"></button>`).join("")}</div>`,false,1)}
+    ${cfRow("Tamanho da letra","",cfSeg("fs",[["s","Pequena"],["m","Normal"],["l","Grande"]],c.fs,"Tamanho da letra"),false,1)}
+    ${cfRow("Reduzir animações","Desliga as transições.",cfSw("noanim",c.noanim))}
+    ${cfRow("Idioma","",`<select class="inp cf-in" data-cfsel="lang"><option value="pt" selected>Português</option><option disabled>English (em breve)</option><option disabled>Español (em breve)</option></select>`)}
+  </div>
+
+  <h3 class="section-t">Treino</h3>
+  <div class="card cf">
+    ${cfRow("Unidade de peso","",cfSeg("unit",[["kg","kg"],["lb","lb",1]],"kg","Unidade"),true)}
+    ${cfRow("Séries e repetições padrão","O que já vem preenchido ao adicionar um exercício.",`<span class="cf-unit"><input class="inp cf-in xs" data-cfin="sets" inputmode="numeric" value="${c.sets}"><small>×</small><input class="inp cf-in sm" data-cfin="reps" value="${esc(c.reps)}" placeholder="8-12"></span>`)}
+    ${cfRow("Timer de descanso","Tempo padrão entre séries.",cfSeg("rest",[["60","1 min"],["90","1:30"],["120","2 min"],["180","3 min"]],c.rest,"Descanso"),true,1)}
+  </div>
+
+  <h3 class="section-t">Lembretes e metas</h3>
+  <div class="card cf">
+    ${cfRow("Meta semanal","Treinos por semana. Aparece na grade da aba Hoje.",cfSeg("goal",[["0","Sem meta"],["2","2"],["3","3"],["4","4"],["5","5"],["6","6"]],c.goal,"Meta semanal"),false,1)}
+    ${cfRow("Lembrete de treino","Notificação nos dias e horário escolhidos.",cfSw("remind",c.remind),true)}
+    ${c.remind?`<div class="cf-sub"><div class="cf-days" role="group" aria-label="Dias do lembrete">${days.map((d,i)=>`<button data-cfday="${i}" aria-pressed="${c.rdays.includes(i)}" aria-label="${DAYS[i]}">${d}</button>`).join("")}</div><input class="inp cf-in sm" type="time" data-cfin="rtime" value="${c.rtime}"></div>`:""}
+    ${cfRow("Sons","Ao acabar o descanso e ao marcar treino como feito.",cfSw("sound",c.sound),true)}
+    ${cfRow("Vibração","",cfSw("vibe",c.vibe),true)}
+  </div>
+
+  <h3 class="section-t">Conta</h3>
+  <div class="card cf">
+    ${cfRow("Conta e sincronização","Entrar com uma conta e salvar na nuvem, para usar em outro celular.",`<button class="btn" disabled>Entrar</button>`,true)}
+  </div>
+
+  <h3 class="section-t">Seus dados</h3>
+  <div class="card cf">
+    ${cfRow("Backup","Seus treinos, cargas e ajustes num arquivo. Faça de vez em quando.",`<div class="row"><button class="btn" data-cact="export">Exportar</button><button class="btn" data-cact="import">Importar</button></div>`,false,1)}
+    ${pendingImport?`<div class="confirm"><span>Substituir seus dados atuais pelo backup (${plural(pendingImport.plans.length,"treino")} montado${pendingImport.plans.length===1?"":"s"}, ${pendingImport.workouts.length} no histórico)?</span><button class="btn danger" data-cact="doImport">Substituir</button><button class="btn" data-cact="noImport">Cancelar</button></div>`:""}
+    ${cfRow("Apagar histórico de treinos",`${plural(workouts.length,"registro")}. Os treinos montados continuam.`,`<button class="btn danger" data-cact="delHist"${workouts.length?"":" disabled"}>Apagar</button>`)}
+    ${conf("delHist","Apagar todo o histórico de treinos? Não dá para desfazer.","Apagar histórico")}
+    ${cfRow("Apagar cargas digitadas",`${plural(rank.man.length,"carga")} digitada${rank.man.length===1?"":"s"} no ranking.`,`<button class="btn danger" data-cact="delMan"${rank.man.length?"":" disabled"}>Apagar</button>`)}
+    ${conf("delMan","Apagar as cargas digitadas no ranking? Não dá para desfazer.","Apagar cargas")}
+    ${cfRow("Apagar tudo","Treinos, histórico, cargas e ajustes. O app volta ao começo.",`<button class="btn danger" data-cact="delAll">Apagar tudo</button>`)}
+    ${conf("delAll","Apagar TODOS os dados deste aparelho? Exporte um backup antes se quiser guardar.","Apagar tudo")}
+  </div>
+
+  <h3 class="section-t">Sobre</h3>
+  <div class="card cf">
+    ${cfRow("Compartilhar o app","Mande o link para os amigos.",`<button class="btn" data-cact="share">Compartilhar</button>`)}
+    ${cfRow("Sugestões e avaliação","Abre uma página no GitHub para mandar ideias ou problemas.",`<a class="btn" href="https://github.com/holmgds-gui/atlas-muscular/issues/new" target="_blank" rel="noopener">Enviar</a>`)}
+    ${cfRow("Fontes dos estudos","Todos os artigos e links usados no app.",`<a class="btn" href="https://github.com/holmgds-gui/atlas-muscular/blob/main/docs/FONTES.md" target="_blank" rel="noopener">Ver</a>`)}
+    ${cfRow("Versão",`<span id="cfVer">—</span>`,"")}
+  </div>`;
+  if("caches" in window)caches.keys().then(k=>{const v=k.filter(x=>/^atlas-v\d+/.test(x)).sort().pop();const el=$("cfVer");if(el&&v)el.textContent=v.replace("atlas-","")}).catch(()=>{});
 }
+function cfSet(k,v){CONF[k]=v;saveConf();applyConf()}
+$("confBody").addEventListener("click",e=>{
+  const b=e.target.closest("[data-cf]");
+  if(b){const k=b.dataset.cf,v=b.dataset.v;
+    if(k==="sex"){setSex(v)}
+    else if(k==="goal"||k==="rest")cfSet(k,+v);
+    else cfSet(k,k==="exp"&&CONF.exp===v?"":v);
+    return renderConf()}
+  const d=e.target.closest("[data-cfday]");if(d){const i=+d.dataset.cfday,a=CONF.rdays;CONF.rdays=a.includes(i)?a.filter(x=>x!==i):[...a,i].sort();saveConf();return renderConf()}
+  const a=e.target.closest("[data-cact]");if(!a)return;const k=a.dataset.cact;
+  if(k==="export")return exportBackup();
+  if(k==="import")return $("importFile").click();
+  if(k==="doImport"){plans=pendingImport.plans;workouts=pendingImport.workouts;if(pendingImport.rank){rank=pendingImport.rank;saveRank()}
+    if(pendingImport.conf){CONF={...CONF_DEF,...pendingImport.conf};saveConf();applyConf()}
+    pendingImport=null;openW=null;savePlans();saveW();toast("Backup importado");return renderConf()}
+  if(k==="noImport"){pendingImport=null;return renderConf()}
+  if(k==="cancel"){cfConfirm=null;return renderConf()}
+  if(["delHist","delMan","delAll"].includes(k)){cfConfirm=k;return renderConf()}
+  if(k==="delHist!"){workouts=[];saveW();openW=null}
+  if(k==="delMan!"){rank.man=[];saveRank()}
+  if(k==="delAll!"){try{Object.keys(localStorage).filter(x=>x.startsWith("atlas-")).forEach(x=>localStorage.removeItem(x))}catch(_){}location.reload();return}
+  if(k.endsWith("!")){cfConfirm=null;toast("Apagado");return renderConf()}
+  if(k==="share"){const url="https://holmgds-gui.github.io/atlas-muscular/";
+    if(navigator.share)navigator.share({title:"Atlas Muscular",text:"App de academia: músculos, treinos e ranking de força",url}).catch(()=>{});
+    else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast("Link copiado")).catch(()=>toast(url));
+    else toast(url)}
+});
+$("confBody").addEventListener("change",e=>{
+  const t=e.target;
+  if(t.dataset.cfsw){CONF[t.dataset.cfsw]=t.checked;saveConf();applyConf();return renderConf()}
+  const k=t.dataset.cfin;if(!k)return;const v=t.value.trim();
+  if(k==="name"){CONF.name=v.slice(0,30);saveConf();return renderConf()}
+  if(k==="bw"){const n=numKg(v);if(v===""){delete rank.bw}else if(n>=30&&n<=250){rank.bw=Math.round(n*10)/10}else{toast("Peso entre 30 e 250 kg");return renderConf()}saveRank();return}
+  if(k==="age"||k==="height"){const n=parseInt(v);CONF[k]=v===""?null:(n>0&&n<(k==="age"?120:260)?n:CONF[k]);saveConf();return renderConf()}
+  if(k==="sets"){const n=parseInt(v);CONF.sets=n>=1&&n<=10?n:CONF.sets;saveConf();return renderConf()}
+  if(k==="reps"){CONF.reps=v.slice(0,10);saveConf();return}
+  if(k==="rtime"){CONF.rtime=v||"18:00";saveConf();return}
+});
 $("gearBtn").addEventListener("click",()=>setTab("conf"));
 /* the title goes back to the home page (Atlas) */
 $("brandBtn").addEventListener("click",()=>setTab("atlas"));
