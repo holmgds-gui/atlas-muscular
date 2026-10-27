@@ -441,9 +441,9 @@ button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
 .pg-parts b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
 @media (prefers-reduced-motion:reduce){#tab-atlas .stage{transition:none}}
 /* ---- ranking de força ---- */
-:root{--lv0:#7fb0ec;--lv1:#6e9cd5;--lv2:#5e89bf;--lv3:#4e76aa;--lv4:#3f6394;--lv5:#305180;--lv6:#21406c;--lv7:#132f58;--lv8:#061f45}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--lv0:#1a5299;--lv1:#3465a6;--lv2:#4d78b3;--lv3:#658bc0;--lv4:#7d9fcc;--lv5:#95b2d8;--lv6:#aec6e5;--lv7:#c7daf1;--lv8:#e1eefd}}
-:root[data-theme="dark"]{--lv0:#1a5299;--lv1:#3465a6;--lv2:#4d78b3;--lv3:#658bc0;--lv4:#7d9fcc;--lv5:#95b2d8;--lv6:#aec6e5;--lv7:#c7daf1;--lv8:#e1eefd}
+:root{--lv0:#8E959E;--lv1:#2E9E5B;--lv2:#1688C9;--lv3:#9640CF;--lv4:#E0B800;--lv5:#EC6F12;--lv6:#B8182A;--lv7:#EE62BE;--lv8:#4B5058;--lv8a:#2E3238;--lv8b:#B9C0C8;--lv8g:linear-gradient(135deg,#2E3238 0%,#5A616B 38%,#C3CAD2 50%,#5A616B 62%,#3A3F46 100%)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--lv0:#8A919B;--lv1:#3DBE70;--lv2:#3AA6E8;--lv3:#B266F0;--lv4:#F5D040;--lv5:#FF8A2E;--lv6:#E02A40;--lv7:#FF8AD2;--lv8:#A3ABB5;--lv8a:#6E7680;--lv8b:#EEF1F4;--lv8g:linear-gradient(135deg,#6E7680 0%,#A3ABB5 38%,#F2F4F6 50%,#A3ABB5 62%,#7A828C 100%)}}
+:root[data-theme="dark"]{--lv0:#8A919B;--lv1:#3DBE70;--lv2:#3AA6E8;--lv3:#B266F0;--lv4:#F5D040;--lv5:#FF8A2E;--lv6:#E02A40;--lv7:#FF8AD2;--lv8:#A3ABB5;--lv8a:#6E7680;--lv8b:#EEF1F4;--lv8g:linear-gradient(135deg,#6E7680 0%,#A3ABB5 38%,#F2F4F6 50%,#A3ABB5 62%,#7A828C 100%)}
 button.brand{border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:8px;color:inherit;text-align:left;align-items:center;gap:6px}
 button.brand:hover{background:var(--chip)}
 button.brand .trophy{width:17px;height:17px;flex:none;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
@@ -453,14 +453,17 @@ button.brand[aria-current="page"] .trophy{stroke:var(--target)}
 .rk-bw,.rk-sexw{display:grid;gap:4px;font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em;text-transform:uppercase}
 .rk-bwi{display:flex;align-items:center;gap:6px;max-width:150px}.rk-bwi small{font-size:14px;text-transform:none;letter-spacing:0;font-weight:500}
 .rk-note{grid-column:1/-1;margin:0}
-.rk-hero{border-radius:16px;padding:18px 16px 16px;display:grid;gap:6px;color:#fff;background:linear-gradient(140deg,#0b2f60 0%,#1e4376 55%,#30588d 100%);box-shadow:0 6px 20px rgba(11,47,96,.25)}
+.rk-hero{border-radius:16px;padding:18px 16px 16px;display:grid;gap:6px;color:#fff;background:linear-gradient(140deg,#14181E 0%,#222831 60%,#2C333D 100%);box-shadow:0 6px 20px rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.06)}
 .rk-eyebrow{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.16em;text-transform:uppercase;opacity:.75}
 .rk-big{font-family:var(--f-display);font-weight:700;font-size:52px;line-height:.95;letter-spacing:.02em;text-transform:uppercase}
 .rk-sub{font-size:14px;line-height:1.4;opacity:.9}.rk-sub.sm{font-size:12px;opacity:.75}
 .rk-ladder{display:flex;flex-wrap:wrap;gap:4px;margin:8px 0 4px}
 .rk-ladder span{font-family:var(--f-display);font-weight:600;font-size:13px;letter-spacing:.02em;padding:5px 9px;border-radius:999px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.62);white-space:nowrap}
 .rk-ladder .past{background:rgba(255,255,255,.28);color:#fff}
-.rk-ladder .now{background:#fff;color:#0b2f60;font-weight:700}
+.rk-ladder .now{background:#fff;color:#14181E;font-weight:700}
+.rk-ladder span{display:inline-flex;align-items:center;gap:5px}.rk-ladder i{width:8px;height:8px;border-radius:50%;flex:none}
+.rk-big{background-clip:text;-webkit-background-clip:text}
+.rfig [data-m]:not(.rk-has) .m{fill:var(--m-hi);opacity:.45}
 .rk-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--muted)}
 .rk-legend span{display:flex;align-items:center;gap:5px}.rk-legend i{width:12px;height:12px;border-radius:3px;flex:none}
 .rk-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap}
@@ -2357,12 +2360,18 @@ function rankFig(gs){
   const by={};gs.forEach(x=>by[x.g]=x);
   f.querySelectorAll("[data-m]").forEach(g=>{const x=by[TOB[g.dataset.m]],t=g.querySelector("title"),lv=x?rLv(x.s):-1;
     if(t)t.textContent=BASIC[TOB[g.dataset.m]]?.n+": "+(x?RLV[lv][0]:"sem dados");
-    if(x)g.querySelector(".m").style.fill=`var(--lv${lv})`});
+    if(x){g.classList.add("rk-has");g.querySelector(".m").style.fill=lv===RLV.length-1?"url(#rkMetal)":`var(--lv${lv})`}});
+  const d=document.createElementNS(NS,"defs");d.innerHTML='<linearGradient id="rkMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--lv8a)"/><stop offset=".48" style="stop-color:var(--lv8)"/><stop offset=".55" style="stop-color:var(--lv8b)"/><stop offset=".65" style="stop-color:var(--lv8)"/><stop offset="1" style="stop-color:var(--lv8a)"/></linearGradient>';
+  f.insertBefore(d,f.firstChild);
   return f;
 }
-const rChip=s=>{const lv=rLv(s);return `<span class="rk-chip"><i style="background:var(--lv${lv})"></i>${RLV[lv][0]}</span>`};
+/* game-style colours (owner's choice): grey, green, blue, purple, yellow, orange, red, pink, shiny dark grey.
+   Not an ordered ramp, so the level name is always written next to the colour. */
+const RHERO=["#A3AAB3","#3DBE70","#3AA6E8","#B97AF2","#F5D040","#FF8A2E","#FF4A5C","#FF8AD2","linear-gradient(135deg,#7A828C,#C9CFD6 45%,#F4F6F8 52%,#9AA2AC 60%,#6E7680)"];
+const rBg=lv=>lv===RLV.length-1?"var(--lv8g)":`var(--lv${lv})`;
+const rChip=s=>{const lv=rLv(s);return `<span class="rk-chip"><i style="background:${rBg(lv)}"></i>${RLV[lv][0]}</span>`};
 const rPos=s=>{const lv=rLv(s),lo=lv?RB[lv-1]:0,hi=lv<RB.length?RB[lv]:RB[RB.length-1]+1;return (lv+Math.min(1,Math.max(0,(s-lo)/(hi-lo))))/RLV.length};
-const rBar=s=>`<span class="rk-bar"><i style="width:${Math.max(3,rPos(s)*100).toFixed(1)}%;background:var(--lv${rLv(s)})"></i>${RB.map((_,k)=>`<b style="left:${((k+1)/RLV.length*100).toFixed(2)}%"></b>`).join("")}</span>`;
+const rBar=s=>`<span class="rk-bar"><i style="width:${Math.max(3,rPos(s)*100).toFixed(1)}%;background:${rBg(rLv(s))}"></i>${RB.map((_,k)=>`<b style="left:${((k+1)/RLV.length*100).toFixed(2)}%"></b>`).join("")}</span>`;
 function rankAbout(){return `<details class="about"><summary>Como o ranking funciona</summary>
   <p><b>De onde vêm os números.</b> As faixas são os padrões de força do Strength Level, feitos com cerca de 11 milhões de registros de pessoas que treinam (entre 48 milhões de levantamentos enviados). As faixas do site são percentis entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%. O app usa o corpo ♂/♀ escolhido.</p>
   <p><b>Os 9 níveis</b> (quanto % de quem treina você supera): Ameba = menos de 5% · Aprendiz = 5–15% · Frango = 15–30% · Galo = 30–45% · Fortinho = 45–60% · Parrudo = 60–75% · Monstro = 75–88% · Lenda = 88–96% · Bizarro = top 4%. Os níveis do meio têm a mesma largura; as pontas são mais difíceis. Entre as faixas do site, o app interpola.</p>
@@ -2373,13 +2382,13 @@ function rankAbout(){return `<details class="about"><summary>Como o ranking func
   <ul><li>Strength Level: padrões de força por exercício, sexo e peso corporal (strengthlevel.com)</li><li>StrengthLog: padrões de força em kg para agachamento, terra, supino e desenvolvimento (strengthlog.com)</li><li>Jaric (2002, Sports Medicine): normalizar força pelo peso corporal elevado a ⅔</li><li>Epley (1985): fórmula da força estimada</li></ul></details>`}
 function renderRank(){
   const D=rankData(),body=$("rankBody"),has=D.list.length>0,lv=has?rLv(D.all):-1;
-  const hero=has?`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big">${RLV[lv][0]}</b>
+  const hero=has?`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big" style="${lv===RLV.length-1?`background-image:${RHERO[lv]};color:transparent`:`color:${RHERO[lv]}`}">${RLV[lv][0]}</b>
       <span class="rk-sub">${RLV[lv][1]} · mais forte que ~${rPct(D.all)}% de quem treina, do mesmo sexo.</span>
-      <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem" class="${i<lv?"past":i===lv?"now":""}"${i===lv?' aria-current="true"':""}>${x[0]}</span>`).join("")}</div>
+      <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem" class="${i<lv?"past":i===lv?"now":""}"${i===lv?' aria-current="true"':""}><i style="background:${RHERO[i]}"></i>${x[0]}</span>`).join("")}</div>
       <span class="rk-sub sm">${plural(D.gs.length,"grupo")} de ${Object.keys(BASIC).length} avaliado${D.gs.length===1?"":"s"} · ${plural(D.list.length,"exercício")} · corpo ${sex==="f"?"feminino":"masculino"}, ${fkg(rBW())} kg${rank.bw>0?"":" (padrão)"}</span></div>`
     :`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big">Sem dados</b>
       <span class="rk-sub">Anote carga e repetições nos treinos da aba Hoje e marque como feito, ou digite aqui embaixo uma carga que você já levanta.</span>
-      <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map(x=>`<span role="listitem">${x[0]}</span>`).join("")}</div></div>`;
+      <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:${RHERO[i]}"></i>${x[0]}</span>`).join("")}</div></div>`;
   const none=Object.keys(BASIC).filter(g=>!D.gs.some(x=>x.g===g));
   const form=rForm?(()=>{const r=parseRef(rForm.ref),st=rStd(r.f,r.sel),S=RSTD[st.k];
     const lab=S[4]!=null?(st.as?"Ajuda da máquina (kg)":"Peso extra (kg, 0 = só o corpo)"):"Carga (kg)";
@@ -2394,7 +2403,7 @@ function renderRank(){
     ${rank.bw>0?"":`<span class="muted-s rk-note">Coloque seu peso para o ranking ficar certo. Enquanto isso, o app usa ${RSW[sex]} kg.</span>`}</div>
   ${hero}
   ${form}
-  ${has?`<div class="card"><div id="rkFigBox"></div><div class="rk-legend" role="list" aria-label="Cores dos níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:var(--lv${i})"></i>${x[0]}</span>`).join("")}<span role="listitem"><i style="background:var(--m)"></i>Sem dados</span></div></div>`:""}
+  ${has?`<div class="card"><div id="rkFigBox"></div><div class="rk-legend" role="list" aria-label="Cores dos níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:${rBg(i)}"></i>${x[0]}</span>`).join("")}<span role="listitem"><i style="background:var(--m-hi);opacity:.55"></i>Sem dados</span></div></div>`:""}
   <div class="card"><div class="row between"><h3 class="section-t" style="margin:0">Nível por grupo</h3>${has?`<span class="muted-s" style="margin:0">mais forte que</span>`:""}</div>
     ${has?D.gs.map(x=>`<details class="pg rk-g"${rOpen===x.g?" open":""} data-rg2="${x.g}"><summary><span class="pg-n">${BASIC[x.g].n}${rChip(x.s)}</span>${rBar(x.s)}<b>${rPct(x.s)}%</b></summary>
       <div class="rk-exs">${x.ex.map(o=>`<div class="rk-ex"><div class="row between" style="flex-wrap:nowrap;align-items:flex-start"><span class="rk-exn">${esc(o.name)}<small>${rSetTxt(o)}</small></span>${rChip(o.s)}</div>

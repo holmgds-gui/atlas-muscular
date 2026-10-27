@@ -31,7 +31,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v30` → `atlas-v31`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v31` → `atlas-v32`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 
@@ -66,7 +66,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
   - `rThr()`: faixas ajustadas ao peso com (peso ÷ referência)^⅔. `rScore()`: nota contínua (1 = Beginner 5% · 2 = Novice 20% · 3 = Intermediate 50% · 4 = Advanced 80% · 5 = Elite 95% · 6 = um degrau além). `RPT` = percentis onde cada nível começa e `RB` = os mesmos limites na nota (convertidos por `RPCT`). `rLv()`, `rPct()`, `rVal()` (inverso, para "quanto falta"), `rPos()` (posição na barra, 9 partes iguais).
   - `rankData()`: melhor série (Epley, reps até 20) por variação nos treinos feitos dos últimos 182 dias + digitadas (`rank.man`); cada exercício conta para todos os grupos `BASIC` dos seus alvos; grupo = média; geral = média dos grupos.
   - `rank` (`localStorage` `atlas-rank`): `{bw, man:[{id, ref, kg, r, date}]}`. Vai no backup.
-  - Cores `--lv0…--lv8` (azul, claro→escuro; no escuro invertido), validadas como escala ordinal nos dois temas.
+  - Cores estilo videogame, escolhidas pelo dono: `--lv0…--lv8` = cinza, verde, azul, roxo, amarelo, laranja, vermelho, rosa e cinza metálico brilhante (Bizarro usa degradê `--lv8g` e, no boneco, o `linearGradient` `#rkMetal`). Não é escala em ordem, então o nome do nível sempre aparece junto da cor. `RHERO` = mesmas cores mais claras para o quadro escuro do nível geral. No boneco do ranking, músculos sem dados ficam apagados (`.rk-has`).
 - **Ajuda**: `HELP` + `openHelp()` (o + das páginas).
 - **Treinos e Hoje**
   - `plans` (`localStorage` `atlas-plans`): `{id, name, days:[0..6], items:[{name, sets, reps}]}`.
