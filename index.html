@@ -29,7 +29,7 @@ img{max-width:100%}
   --skin:#D6DADF; --m:#AEB6C0; --m-hi:#C3CAD2; --m-lo:#97A0AB; --m-edge:#E9ECEF; --fiber:rgba(26,31,38,.13);
   --target:#D3222A; --target-hi:#F04A50; --target-lo:#A0141B;
   --syn:#F08A24; --syn-soft:rgba(240,138,36,.55);
-  --chip:#E1E5E9; --focus:#1A1F26; --tend:#E4E7EB;
+  --chip:#E1E5E9; --focus:#1A1F26; --tend:#E4E7EB; --hair:#6B737E; --hair-l:rgba(255,255,255,.22); --breast:rgba(255,255,255,.2); --fold:rgba(26,31,38,.16);
   --f-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
   --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -38,13 +38,13 @@ img{max-width:100%}
   --skin:#1E242C; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
-  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; color-scheme:dark}}
+  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
   --skin:#1E242C; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
-  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; color-scheme:dark}
+  --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}
 
 html{height:100%}body{height:100%}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;overflow:hidden;-webkit-tap-highlight-color:transparent}
@@ -90,8 +90,14 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .deco{pointer-events:none}
 .dm{fill:url(#gM);stroke:var(--m-edge);stroke-width:1.4;stroke-linejoin:round}
 .tend{fill:var(--tend);stroke:var(--m-edge);stroke-width:1;pointer-events:none}
+.hair{fill:var(--hair);stroke:var(--m-edge);stroke-width:1.2;pointer-events:none}
+.hair-l{fill:none;stroke:var(--hair-l);stroke-width:1.3;stroke-linecap:round;pointer-events:none}
+.breast{fill:var(--breast);stroke:var(--m-edge);stroke-width:1.8;stroke-linecap:round;pointer-events:none}
+.bfold{fill:none;stroke:var(--fold);stroke-width:3;stroke-linecap:round;pointer-events:none}
+.seg.sex button{font-family:system-ui,sans-serif;font-size:20px;font-weight:700;padding:3px 13px;letter-spacing:0;line-height:1.25}
+@media (max-width:900px){#zIn,#zOut{display:none}}
 .mode-art .skin,.mode-art .dm{opacity:.5}
-.mode-art .tend{opacity:.6}
+.mode-art .tend,.mode-art .hair,.mode-art .breast,.mode-art .bfold{opacity:.6}
 .m{fill:url(#gM);stroke:var(--m-edge);stroke-width:1.6;stroke-linejoin:round;transition:fill .18s}
 .fib{pointer-events:none}
 @media (hover:hover){[data-m]:hover .m{fill:var(--m-hi)}}
@@ -323,6 +329,10 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
           <button id="vFront" data-v="front" aria-pressed="true">Frente</button>
           <button id="vBack" data-v="back" aria-pressed="false">Costas</button>
           <button id="vBoth" class="both" data-v="both" aria-pressed="false">Ambos</button>
+        </div>
+        <div class="seg sex" role="group" aria-label="Corpo">
+          <button data-sex="m" aria-pressed="true" aria-label="Corpo masculino" title="Masculino">♂</button>
+          <button data-sex="f" aria-pressed="false" aria-label="Corpo feminino" title="Feminino">♀</button>
         </div>
         <div class="zoom">
           <button id="zIn" aria-label="Aproximar">+</button>
@@ -951,37 +961,85 @@ function fibPattern(defs,a){
   }
   return `url(#${key})`;
 }
+/* ---------------------------------------------------------- body shape
+   Two athletic builds from one drawing. The torso is scaled sideways around
+   the midline, by height; each limb frame is rebuilt from the shoulder or hip
+   so the joints stay connected. w = [y, sideways scale]. */
+const BODY={
+  m:{w:[[0,1],[96,1.04],[120,1.06],[245,1.06],[295,1.02],[345,.96],[400,.99],[470,1],[540,1]],delt:.1,
+     head:[29,37,60],S:[250-78*1.06,168],arm:[[27.9,149.4,1.12],[24,121.7,1.08],[20,0,1.04]],
+     H:[214,468],leg:[[4.96,196.7,1.07],[1,182,1.07]]},
+  f:{w:[[0,.9],[96,.87],[120,.9],[245,.9],[295,.89],[345,.85],[398,.96],[448,1.09],[492,1.09],[540,1.06]],delt:.07,
+     head:[27,35,61],S:[250-78*.9,170],arm:[[27,150.5,.97],[23,117,.95],[20,0,.9]],
+     H:[250-36*1.09,472],leg:[[3,196.7,1.08],[1,180,.98]]}
+};
+let sex=(()=>{try{return localStorage.getItem("atlas-sex")==="f"?"f":"m"}catch(e){return "m"}})();
+let BD,FRX,JPT;
+function shapeBody(){
+  BD=BODY[sex];FRX={t:""};const pts={},rad=a=>a*Math.PI/180,f=n=>n.toFixed(1);
+  const chain=(start,keys,segs)=>{let [x,y]=start;keys.forEach((k,i)=>{const [a,L,w]=segs[i];
+    FRX[k]=`translate(${f(x)},${f(y)}) rotate(${a}) scale(${w},1)`;pts[k]=[x,y];x-=L*Math.sin(rad(a));y+=L*Math.cos(rad(a))});return [x,y]};
+  chain(BD.S,["ua","fa","hd"],BD.arm);const ank=chain(BD.H,["th","sh"],BD.leg);
+  JPT={ombro:[pts.ua[0],pts.ua[1]-2],cotovelo:pts.fa,punho:pts.hd,quadril:[pts.th[0]-4,pts.th[1]-4],joelho:[pts.sh[0],pts.sh[1]-1],tornozelo:ank};
+}
+function wscale(y){const w=BD.w;if(y<=w[0][0])return w[0][1];
+  for(let i=1;i<w.length;i++)if(y<=w[i][0]){const [y0,s0]=w[i-1],[y1,s1]=w[i];const t=(y-y0)/(y1-y0);return s0+(s1-s0)*t*t*(3-2*t)}
+  return w[w.length-1][1]}
+/* trained shoulders: the outer part of the torso between y 140 and 250 (deltoid cap) is pushed out a little more */
+const bump=y=>y<=135||y>=255?0:Math.sin(Math.PI*(y-135)/120);
+const warp=d=>d.replace(/(-?\d*\.?\d+),(-?\d*\.?\d+)/g,(_,x,y)=>{x=+x;y=+y;let nx=250-(250-x)*wscale(y);
+  if(x<196)nx-=BD.delt*(196-x)*bump(y);return nx.toFixed(1)+","+y});
+const PD=(f,d)=>f==="t"?warp(d):d;
 function drawView(defs,name,list,dx){
   const root=el("g",{transform:`translate(${dx},0)`},svg);VG[name]=root;
   el("text",{x:250,y:-12,"text-anchor":"middle",class:"vlabel"},root).textContent=name==="front"?"FRENTE":"COSTAS";
-  el("path",{d:"M234,86 L266,86 L270,126 L230,126 Z",class:"skin"},root);
-  el("ellipse",{cx:250,cy:60,rx:29,ry:37,class:"dm deco"},root);
+  const [hrx,hry,hcy]=BD.head;
+  if(sex==="f")el("circle",{cx:250,cy:hcy-hry+(name==="front"?2:6),r:13,class:"hair"},root);
+  el("path",{d:warp("M234,86 L266,86 L270,126 L230,126 Z"),class:"skin"},root);
+  el("ellipse",{cx:250,cy:hcy,rx:hrx,ry:hry,class:"dm deco"},root);
   const halves=[el("g",{},root),el("g",{transform:"matrix(-1,0,0,1,500,0)"},root)];
-  halves.forEach(h=>SKIN.forEach(([f,d])=>el("path",{d,class:"skin",transform:FR[f]},h)));
-  halves.forEach(h=>EXTR.forEach(([f,d])=>el("path",{d,class:"dm deco",transform:FR[f]},h)));
+  halves.forEach(h=>SKIN.forEach(([f,d])=>el("path",{d:PD(f,d),class:"skin",transform:FRX[f]},h)));
+  halves.forEach(h=>EXTR.forEach(([f,d])=>el("path",{d:PD(f,d),class:"dm deco",transform:FRX[f]},h)));
   halves.forEach(h=>list.forEach(([f,id,d,a])=>{
-    const g=el("g",{"data-m":id,transform:FR[f]},h);
+    const g=el("g",{"data-m":id,transform:FRX[f]},h);d=PD(f,d);
     el("path",{d,class:"m"},g);
     if(a!==undefined)el("path",{d,class:"fib",fill:fibPattern(defs,a)},g);
     (inViews[id]=inViews[id]||new Set()).add(name);
   }));
   halves.forEach(h=>DECO[name].forEach(([f,d,a])=>{
-    const g=el("g",{class:"deco",transform:FR[f]},h);
+    const g=el("g",{class:"deco",transform:FRX[f]},h);d=PD(f,d);
     el("path",{d,class:"dm"},g);
     if(a!==undefined)el("path",{d,class:"fib",fill:fibPattern(defs,a)},g);
   }));
-  halves.forEach(h=>TEND[name].forEach(([f,d])=>el("path",{d,class:"tend",transform:FR[f]},h)));
+  halves.forEach(h=>TEND[name].forEach(([f,d])=>el("path",{d:PD(f,d),class:"tend",transform:FRX[f]},h)));
+  if(name==="front"&&sex==="f")halves.forEach(h=>{el("path",{d:BREAST,class:"breast"},h);el("path",{d:BFOLD,class:"bfold"},h)});
+  if(sex==="f"){
+    const top=hcy-hry,l=250-hrx,r=250+hrx;
+    if(name==="front"){
+      el("path",{d:`M${l-1},${hcy+2} C${l-4},${top-15} ${r+4},${top-15} ${r+1},${hcy+2} C${r-2},${hcy-14} ${r-9},${top+12} 250,${top+12} C${l+9},${top+12} ${l+2},${hcy-14} ${l-1},${hcy+2} Z`,class:"hair"},root);
+      el("path",{d:`M250,${top+12} C247,${top+4} 243,${top-1} 238,${top} M250,${top+12} C253,${top+4} 257,${top-1} 262,${top} M${l+6},${hcy-8} C${l+8},${top+12} 240,${top+3} 246,${top+2} M${r-6},${hcy-8} C${r-8},${top+12} 260,${top+3} 254,${top+2}`,class:"hair-l"},root);
+    }else{
+      el("path",{d:`M${l-1},${hcy+4} C${l-4},${top-15} ${r+4},${top-15} ${r+1},${hcy+4} C${r},${hcy+22} ${r-6},${hcy+30} 250,${hcy+31} C${l+6},${hcy+30} ${l},${hcy+22} ${l-1},${hcy+4} Z`,class:"hair"},root);
+      el("path",{d:`M250,${top+8} C243,${hcy-6} 240,${hcy+14} 242,${hcy+28} M250,${top+8} C257,${hcy-6} 260,${hcy+14} 258,${hcy+28} M250,${top+8} L250,${hcy+30}`,class:"hair-l"},root);
+    }
+  }
   if(name==="front"){
-    el("ellipse",{cx:250,cy:84,rx:10,ry:4.5,class:"dm deco"},root);
-    el("path",{d:"M229,60 C233,55 241,55 245,60 C241,64 233,64 229,60 Z M255,60 C259,55 267,55 271,60 C267,64 259,64 255,60 Z",class:"skin deco"},root);
+    el("ellipse",{cx:250,cy:hcy+24,rx:10*hrx/29,ry:4.5,class:"dm deco"},root);
+    const ey=hcy;el("path",{d:`M229,${ey} C233,${ey-5} 241,${ey-5} 245,${ey} C241,${ey+4} 233,${ey+4} 229,${ey} Z M255,${ey} C259,${ey-5} 267,${ey-5} 271,${ey} C267,${ey+4} 259,${ey+4} 255,${ey} Z`,class:"skin deco",transform:`translate(250,0) scale(${hrx/29},1) translate(-250,0)`},root);
   }
 }
+/* soft breast contour over the chest (left half; mirrored). Clicks pass through to the pectorals. */
+const BREAST="M241,210 C228,199 206,198 195,212 C185,228 188,256 204,268 C218,278 236,277 244,265 C248,256 247,240 243,226 Z",BFOLD="M190,240 C190,256 198,268 212,273 C226,277 238,273 244,264";
 const defs=buildDefs();
-drawView(defs,"front",FRONT,0);
-drawView(defs,"back",BACK,540);
-document.querySelectorAll("[data-m]").forEach(g=>{
-  const t=el("title",{},g);t.textContent=M[g.dataset.m].n;g.insertBefore(t,g.firstChild);
-});
+function buildFigure(){
+  ["front","back"].forEach(n=>{if(VG[n])VG[n].remove()});
+  for(const k in inViews)delete inViews[k];
+  shapeBody();
+  drawView(defs,"front",FRONT,0);
+  drawView(defs,"back",BACK,540);
+  svg.querySelectorAll("[data-m]").forEach(g=>{const t=el("title",{},g);t.textContent=M[g.dataset.m].n;g.insertBefore(t,g.firstChild)});
+  if(typeof drawJoints==="function"&&typeof JOINTS!=="undefined")drawJoints();
+}
 
 /* ------------------------------------------------------- view, zoom, pan */
 let view=(()=>{try{const v=localStorage.getItem("atlas-view");return ["front","back","both"].includes(v)?v:"front"}catch(e){return "front"}})();
@@ -1136,7 +1194,7 @@ function drawJoints(){
     const g=el("g",{class:"joints"},VG[name]);
     for(const [id,j] of Object.entries(JOINTS)){
       if(!j.v.includes(name))continue;
-      const pts=[...j.p];if(j.bi)j.p.forEach(([x,y])=>pts.push([500-x,y]));
+      const p0=JPT[id]?[JPT[id]]:j.p;const pts=[...p0];if(j.bi)p0.forEach(([x,y])=>pts.push([500-x,y]));
       pts.forEach(([x,y])=>{
         const jg=el("g",{class:"jt","data-j":id},g);
         el("title",{},jg).textContent=j.n;
@@ -1146,7 +1204,7 @@ function drawJoints(){
     }
   }
 }
-drawJoints();
+buildFigure();
 
 /* ---------------------------------------------------------- atlas state */
 let model=LS.get("atlas-model","det");if(!["det","bas","art"].includes(model))model="det";
@@ -1159,6 +1217,13 @@ function setModel(m){
   paint();render();
 }
 document.querySelectorAll("[data-model]").forEach(b=>b.onclick=()=>setModel(b.dataset.model));
+function setSex(x){
+  sex=x;try{localStorage.setItem("atlas-sex",x)}catch(e){}
+  document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===x));
+  buildFigure();setView(view,true);paint();
+}
+document.querySelectorAll("[data-sex]").forEach(b=>b.onclick=()=>setSex(b.dataset.sex));
+document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===sex));
 
 function viewsOf(ids){const s=new Set();ids.forEach(i=>(inViews[i]||[]).forEach(v=>s.add(v)));return s}
 function ensureVisible(vs){if(view!=="both"&&vs.size&&!vs.has(view))setView(vs.has("front")?"front":"back")}
