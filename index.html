@@ -1657,7 +1657,7 @@ const HELP={
     <li>Cada série vira força estimada (carga × (1 + reps ÷ 30)) e é comparada com as faixas daquele exercício.</li>
     <li>O nível do grupo é a média de todos os exercícios dele; o nível geral é a média dos grupos.</li>
     <li>Halteres: use o peso de cada halter.</li></ul>
-    <h4>Dicas</h4><ul><li>Fortinho começa na média de quem treina (50%). Parrudo já é mais forte que 4 em cada 5 pessoas.</li>
+    <h4>Dicas</h4><ul><li>Fortinho fica em volta da média de quem treina (45–60%). Monstro já é mais forte que 3 em cada 4 pessoas.</li>
     <li>Séries de 3 a 12 repetições dão a estimativa mais confiável.</li>
     <li>Para abrir esta tela, toque no título Atlas Muscular, lá em cima.</li></ul>`]
 };
@@ -2291,10 +2291,12 @@ function rStd(f,s){
   }
   return null;
 }
-const RLV=[["Ameba","Abaixo do iniciante"],["Aprendiz","Iniciante"],["Frango","Novato"],["Galo","Quase na média"],["Fortinho","Acima da média"],["Parrudo","Avançado"],["Monstro","Elite"],["Lenda","Elite da elite"],["Bizarro","Acima da elite"]];
+const RLV=[["Ameba","Abaixo do iniciante"],["Aprendiz","Iniciante"],["Frango","Novato"],["Galo","Quase na média"],["Fortinho","Na média"],["Parrudo","Acima da média"],["Monstro","Avançado"],["Lenda","Elite"],["Bizarro","Elite da elite"]];
 /* level boundaries on the score scale (1 Beginner 5% · 2 Novice 20% · 3 Intermediate 50% · 4 Advanced 80% · 5 Elite 95% · 6 = one step past Elite);
-   2.5 splits Novice→Intermediate at ~35% (Frango/Galo); 5.5 splits Elite at ~97% (Monstro/Lenda) */
-const RB=[1,2,2.5,3,4,5,5.5,6];
+   the 9 levels start at these percentiles (owner's choice: middle levels 15% wide each, the ends rarer) */
+const RPCT=[[0,1],[1,5],[2,20],[3,50],[4,80],[5,95],[6,99]];
+const RPT=[5,15,30,45,60,75,88,96];
+const RB=RPT.map(p=>{for(let i=1;i<RPCT.length;i++)if(p<=RPCT[i][1]){const [s0,p0]=RPCT[i-1],[s1,p1]=RPCT[i];return s0+(p-p0)/(p1-p0)*(s1-s0)}return 6});
 let rank=LS.get("atlas-rank",null);if(!rank||typeof rank!=="object")rank={};if(!Array.isArray(rank.man))rank.man=[];
 const saveRank=()=>{if(!LS.set("atlas-rank",rank))toast("Não foi possível salvar neste aparelho")};
 let rForm=null,rOpen=null,rPrev="atlas";
@@ -2311,7 +2313,7 @@ function rScore(v,T){
 }
 function rVal(s,T){if(s<=1)return T[0]+(s-1)*(T[1]-T[0]);if(s>=5)return T[4]+(s-5)*(T[4]-T[3]);const i=Math.floor(s)-1;return T[i]+(s-1-i)*(T[i+1]-T[i])}
 const rLv=s=>RB.filter(b=>s>=b).length;
-function rPct(s){const P=[[0,1],[1,5],[2,20],[3,50],[4,80],[5,95],[6,99]];if(s>=6)return 99;
+function rPct(s){const P=RPCT;if(s>=6)return 99;
   const i=Math.floor(s);return Math.round(P[i][1]+(s-i)*(P[i+1][1]-P[i][1]))}
 /* value of one set in "standard units": estimated 1-rep max × x, or for bodyweight lifts
    the estimated extra weight for 1 rep. Reps above 20 count as 20 (Epley overshoots there). */
@@ -2363,7 +2365,7 @@ const rPos=s=>{const lv=rLv(s),lo=lv?RB[lv-1]:0,hi=lv<RB.length?RB[lv]:RB[RB.len
 const rBar=s=>`<span class="rk-bar"><i style="width:${Math.max(3,rPos(s)*100).toFixed(1)}%;background:var(--lv${rLv(s)})"></i>${RB.map((_,k)=>`<b style="left:${((k+1)/RLV.length*100).toFixed(2)}%"></b>`).join("")}</span>`;
 function rankAbout(){return `<details class="about"><summary>Como o ranking funciona</summary>
   <p><b>De onde vêm os números.</b> As faixas são os padrões de força do Strength Level, feitos com cerca de 11 milhões de registros de pessoas que treinam (entre 48 milhões de levantamentos enviados). As faixas do site são percentis entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%. O app usa o corpo ♂/♀ escolhido.</p>
-  <p><b>Os 9 níveis</b> (quanto % de quem treina você supera): Ameba = menos de 5% · Aprendiz = 5–20% · Frango = 20–35% · Galo = 35–50% · Fortinho = 50–80% · Parrudo = 80–95% · Monstro = 95–97% · Lenda = 97–99% · Bizarro = top 1% (um degrau inteiro além da elite).</p>
+  <p><b>Os 9 níveis</b> (quanto % de quem treina você supera): Ameba = menos de 5% · Aprendiz = 5–15% · Frango = 15–30% · Galo = 30–45% · Fortinho = 45–60% · Parrudo = 60–75% · Monstro = 75–88% · Lenda = 88–96% · Bizarro = top 4%. Os níveis do meio têm a mesma largura; as pontas são mais difíceis. Entre as faixas do site, o app interpola.</p>
   <p><b>Peso corporal.</b> As faixas publicadas são para o praticante típico (cerca de 77 kg no masculino e 65 kg no feminino). O app ajusta para o seu peso pela regra de ⅔: a força cresce com a área do músculo, que acompanha o peso elevado a ⅔. Quem é mais leve precisa levantar menos, mas não proporcionalmente menos.</p>
   <p><b>Sua força em cada exercício.</b> Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Séries de até ~12 repetições dão a estimativa mais confiável. Em barra fixa e mergulho conta o peso do corpo mais o peso extra; na barra assistida (graviton), a ajuda é descontada.</p>
   <p><b>Nível do grupo.</b> É a média de <b>todos</b> os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos.</p>

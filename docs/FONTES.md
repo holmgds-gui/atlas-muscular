@@ -85,17 +85,19 @@ Textos de divulgação consultados:
 
 Os 9 níveis (Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, Bizarro) vêm dos padrões de força do **Strength Level**: cerca de 11 milhões de resultados válidos, de 48 milhões de levantamentos enviados por quem treina. Cada nível é um percentil entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%.
 
-| Nível do app | Faixa do Strength Level | Mais forte que |
+| Nível do app | Mais forte que | Nota no app (1 = Beginner, 2 = Novice, 3 = Intermediate, 4 = Advanced, 5 = Elite) |
 |---|---|---|
-| Ameba | abaixo de Beginner | menos de 5% |
-| Aprendiz | Beginner → Novice | 5–20% |
-| Frango | Novice → metade do caminho até Intermediate | 20–35% |
-| Galo | metade → Intermediate | 35–50% |
-| Fortinho | Intermediate → Advanced | 50–80% |
-| Parrudo | Advanced → Elite | 80–95% |
-| Monstro | Elite → metade do degrau seguinte | 95–97% |
-| Lenda | metade → Elite + 1 degrau | 97–99% |
-| Bizarro | mais de 1 degrau acima da Elite | top ~1% |
+| Ameba | menos de 5% | abaixo de 1 |
+| Aprendiz | 5–15% | 1 → 1,67 |
+| Frango | 15–30% | 1,67 → 2,33 |
+| Galo | 30–45% | 2,33 → 2,83 |
+| Fortinho | 45–60% | 2,83 → 3,33 |
+| Parrudo | 60–75% | 3,33 → 3,83 |
+| Monstro | 75–88% | 3,83 → 4,53 |
+| Lenda | 88–96% | 4,53 → 5,25 |
+| Bizarro | top 4% | acima de 5,25 |
+
+Escolha do dono ("meio-termo"): os níveis do meio têm 15% das pessoas cada; as pontas são mais raras. Entre as faixas do Strength Level (5%, 20%, 50%, 80%, 95%) o app interpola em linha reta; acima de 95%, assume 99% um degrau além da elite.
 
 - **Valores de referência**: as páginas de comparação do Strength Level mostram os números do praticante típico (calculado em ~77 kg no masculino e ~65 kg no feminino, comparando com as tabelas por peso de supino e puxada). O app ajusta para o peso da pessoa com peso^⅔.
 - **Ajuste por peso (⅔)**: Jaric 2002, *Sports Medicine*, "Muscle strength testing: use of normalisation for body size" ([🔎 PubMed](https://pubmed.ncbi.nlm.nih.gov/?term=Jaric+2002+muscle+strength+testing+normalisation+body+size)).
