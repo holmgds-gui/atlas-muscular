@@ -105,7 +105,8 @@ header{position:relative}
 .lv-sum{text-align:center}.lv-sum h3{margin:6px 0 10px;font-family:var(--f-display);font-size:28px;letter-spacing:.03em;text-transform:uppercase}
 .lv-trophy{font-size:44px}
 .lv-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.lv-stats b{display:block;font-family:var(--f-display);font-size:28px}.lv-stats span{font-size:12px;color:var(--muted)}
-.lv-prs{text-align:left;padding-left:0;list-style:none;display:grid;gap:4px;margin:0 0 8px}
+.lv-prs{text-align:left;padding-left:0;list-style:none;display:grid;gap:6px;margin:0 0 8px}
+.pr-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--target);margin-right:8px;vertical-align:middle}
 .restpill{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(140px + env(safe-area-inset-bottom,0px));z-index:55;display:flex;align-items:center;gap:6px;background:var(--target);color:#fff;border-radius:999px;padding:6px 6px 6px 14px;font-weight:600;font-variant-numeric:tabular-nums;box-shadow:0 8px 24px rgba(0,0,0,.25);cursor:pointer;white-space:nowrap}
 .restpill[hidden]{display:none}
 .restpill button{border:0;background:rgba(255,255,255,.2);color:#fff;border-radius:999px;padding:5px 10px;font-weight:600}
@@ -2842,7 +2843,7 @@ function liveHTML(){
   if(liveSum){const S=liveSum;return `<div class="card lv-sum"><div class="lv-trophy" aria-hidden="true">${S.prs.length?"🏆":"✓"}</div>
     <h3>${tx("Treino concluído!","Workout done!","¡Entreno terminado!")}</h3>
     <div class="lv-stats"><div><b>${mmss(S.dur)}</b><span>${tx("duração","duration","duración")}</span></div><div><b>${S.sets}</b><span>${tx("séries","sets","series")}</span></div><div><b>${S.prs.length}</b><span>${tx("recordes","records","récords")}</span></div></div>
-    ${S.prs.length?`<ul class="lv-prs">${S.prs.map(p=>`<li>🏆 ${esc(p.name)}: <b>${fkg(p.kg)} kg × ${p.r}</b></li>`).join("")}</ul>`:""}
+    ${S.prs.length?`<ul class="lv-prs">${S.prs.map(p=>`<li><i class="pr-dot" aria-hidden="true"></i>${esc(p.name)}: <b>${fkg(p.kg)} kg × ${p.r}</b></li>`).join("")}</ul>`:""}
     <p class="muted">${tx("Já conta no Progresso e no ranking de força.","It already counts in Progress and in the strength ranking.","Ya cuenta en el Progreso y en la clasificación de fuerza.")}</p>
     <div class="row" style="justify-content:center"><button class="btn" data-share="workout">📤 ${tx("Cartão para Stories","Story card","Tarjeta para Stories")}</button></div>
     <button class="btn primary wide" data-lv="sumOk">OK</button></div>`}
@@ -3095,7 +3096,7 @@ async function makeCard(kind){
   else if(kind==="workout"){const w=workouts.find(x=>x.id===liveSumW)||workouts.filter(x=>x.done!==false&&x.items&&x.items.length).sort((a,b)=>a.date<b.date?1:-1)[0];if(!w)return null;const m=musOf(w),prs=workoutPRs(w);
     title=w.title||tx("Treino","Workout","Entreno");sub=fmtLong(fromIso(w.date));fig=progFig(m.mus,BANDS.day).querySelector("svg");
     stats=[[w.dur?mmss(w.dur):"—",tx("duração","duration","duración")],[m.sets,tx("séries","sets","series")],[prs.length,tx("recordes","records","récords")]];
-    lines=prs.slice(0,3).map(p=>[`🏆 ${p.name}: ${fkg(p.kg)} kg × ${p.r}`,"#F5D040",FB(600,40)])}
+    lines=prs.slice(0,3).map(p=>[`• ${p.name}: ${fkg(p.kg)} kg × ${p.r}`,"#E7EAEE",FB(600,40)])}
   else if(kind==="ach"){const S=achStats();title=tx("Minhas conquistas","My achievements","Mis logros");sub=tx(`${S.streak} semanas seguidas 🔥`,`${S.streak} weeks in a row 🔥`,`${S.streak} semanas seguidas 🔥`);
     const got=ACH.filter(a=>a[5](S)>=a[6]);stats=[[S.n,tx("treinos","workouts","entrenos")],[S.prs,tx("recordes","records","récords")],[got.length,tx("conquistas","achievements","logros")]];
     lines=got.slice(-6).reverse().map(a=>[`${a[1]} ${achName(a)}`,"#E7EAEE",FB(600,46)])}
