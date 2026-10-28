@@ -140,6 +140,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 - **Silhuetas mais características** (pedido do dono): homem com ombros mais largos e cintura menos fina; mulher com quadril mais largo, ombros um pouco mais estreitos e coxas acompanhando o quadril.
 - **Homem fisiculturista** (pedido do dono, com imagem de referência; escolheu "igual à referência" e mulher mais forte também): trapézio alto, pescoço grosso, ombros e braços grandes, V marcado, coxas com o quadríceps abrindo para fora e panturrilhas grandes. Novo `lwarp()` deixa os membros mais grossos no meio do músculo. O dono perguntou se um criador de imagens ajudaria: não, porque o boneco precisa de cada músculo como peça separada para tocar e pintar.
 - Ajuste do dono: cintura do homem menos fina, pernas dele bem mais finas e coxas/pernas da mulher um pouco mais finas.
+- Ajuste do dono: superiores do homem um pouco menores (ombros, trapézio, pescoço e braços).
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)
