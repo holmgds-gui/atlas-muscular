@@ -130,6 +130,7 @@ details.how b{font-size:13px;color:var(--muted)}
 /* conquistas, Stories */
 .card.ach-top{display:flex;flex-direction:row;align-items:center;gap:14px}.ach-fire{font-size:46px}
 .ach-n{font-family:var(--f-display);font-size:44px;line-height:1;margin-right:6px}.ach-top span{font-weight:600}.ach-top small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.ach-sec{font-size:15px;margin:18px 0 8px;display:flex;align-items:center;gap:6px}.ach-sec span{margin-left:auto;font-size:12px;color:var(--muted);font-weight:600}.ach-sd{margin:-4px 0 10px;font-size:12px;color:var(--muted)}
 .ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
 .ach{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:3px;opacity:.55;filter:grayscale(1)}
 .ach.ok{opacity:1;filter:none;border-color:var(--target)}.ach-i{font-size:26px}.ach b{font-size:14px}.ach small{font-size:11px;color:var(--muted);line-height:1.3}
@@ -2653,7 +2654,7 @@ function weekDone(){
       :`<button class="${cls}" data-day="${iso}" aria-pressed="${iso===sel}" aria-label="${lab}${iso===sel?"":". Toque para registrar neste dia"}">${inner}</button>`}).join("");
   const sun=new Date(mon);sun.setDate(mon.getDate()+6);
   const n=workouts.filter(x=>x.done!==false&&x.date>=isoDate(mon)&&x.date<=isoDate(sun)).length;
-  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">${hWeek===0?"Sua semana":hWeek===-1?"Semana passada":`${dm(mon)} – ${dm(sun)}`}</h3><span class="muted-s" style="margin:0">${(()=>{const k=streakNow();return k?`<b class="streak" title="${tx("Semanas seguidas batendo a meta","Weeks in a row hitting your goal","Semanas seguidas cumpliendo la meta")}">🔥 ${k}</b> `:""})()}${CONF.goal?`${n} de ${CONF.goal} treinos${n>=CONF.goal?" · meta batida!":""}`:n?plural(n,"treino")+" feito"+(n===1?"":"s"):"Nenhum treino feito"}</span></div>
+  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">${hWeek===0?"Sua semana":hWeek===-1?"Semana passada":`${dm(mon)} – ${dm(sun)}`}</h3><span class="muted-s" style="margin:0">${(()=>{const k=streakNow();return k?`<b class="streak" title="${tx("Semanas seguidas com 3 treinos","Weeks in a row with 3 workouts","Semanas seguidas con 3 entrenos")}">🔥 ${k}</b> `:""})()}${CONF.goal?`${n} de ${CONF.goal} treinos${n>=CONF.goal?" · meta batida!":""}`:n?plural(n,"treino")+" feito"+(n===1?"":"s"):"Nenhum treino feito"}</span></div>
     <div class="wkrow"><button class="ib" data-act="wkPrev" aria-label="Semana anterior">‹</button><div class="wkgrid">${cells}</div><button class="ib" data-act="wkNext" aria-label="Próxima semana"${hWeek>=0?" disabled":""}>›</button></div>
     <span class="muted-s" style="margin:0">Esqueceu de registrar? Toque num dia que já passou.</span></div>`;
 }
@@ -3033,55 +3034,167 @@ function openPrograms(){
 let ach=LS.get("atlas-ach",null);if(!ach||typeof ach!=="object")ach={};if(!Array.isArray(ach.seen))ach.seen=[];if(!(ach.lvMax>=0))ach.lvMax=-1;
 const saveAch=()=>LS.set("atlas-ach",ach);
 const monOf=iso=>{const d=fromIso(iso);d.setDate(d.getDate()-dayIdxOf(iso));return isoDate(d)};
+/* Owner's rules (Oct 2026): a week counts when it has 3 workouts done in the calendar week (Monday–Sunday); the
+   streak badges are 1, 2, 3, 4, 5, 10, 15 … 52 weeks in a row. Monthly badges, bodyweight-multiple badges (a set really
+   lifted with that load, ≥1 rep; ♀ targets about ⅔ of ♂) and extras. */
+const ACH_GOAL=3,ACH_WEEKS=[1,2,3,4,5,10,15,20,25,30,40,52];
+/* [key, which family/variation counts, name pt/en/es, multiples ♂, multiples ♀] — barbell versions only */
+const BWL=[
+  ["sup",(f,s)=>f.id==="supino"&&s.e==="ba",["Supino","Bench press","Press de banca"],[1,1.25,1.5],[.5,.75,1]],
+  ["agc",(f,s)=>f.id==="agach"&&(s.e==="ba"||s.e==="bf"),["Agachamento","Squat","Sentadilla"],[1,1.5,2],[.75,1,1.25]],
+  ["ter",(f,s)=>f.id==="terra"&&(s.e==="ba"||s.e==="hx"),["Levantamento terra","Deadlift","Peso muerto"],[1,1.5,2,2.5],[.75,1,1.25,1.75]],
+  ["dev",(f,s)=>f.id==="desenv"&&s.e==="ba",["Desenvolvimento","Overhead press","Press militar"],[.5,.75,1],[.35,.5,.65]],
+  ["rem",(f,s)=>f.id==="remcurv"&&s.e==="ba",["Remada curvada","Barbell row","Remo con barra"],[1],[.75]]];
+/* pull-ups and push-ups: [♂, ♀] */
+const BWP={pu2:[10,6],pux:[[5,.25],[3,.15]],fl1:[20,15],fl2:[40,25]};
+const LEGS=["quadriceps","posterior","gluteo","adutores","panturrilha"],UPPER=["peito","ombro","biceps","triceps","antebraco","trapezio","costas"];
+const sx=v=>sex==="f"?v[1]:v[0];
+const achBW=()=>rank.bw>0?rank.bw:0;
+const ym=iso=>iso.slice(0,7);
+const nextYm=k=>{let [y,m]=k.split("-").map(Number);m++;if(m>12){m=1;y++}return `${y}-${String(m).padStart(2,"0")}`};
+function runBest(keys,step){let best=0,run=0,prev=null;for(const k of keys.slice().sort()){run=prev&&step(prev)===k?run+1:1;best=Math.max(best,run);prev=k}return best}
+const plus7=k=>{const d=fromIso(k);d.setDate(d.getDate()+7);return isoDate(d)};
 function achStats(){
   const done=workouts.filter(w=>w.done!==false&&w.items&&w.items.length).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
-  const weeks={};done.forEach(w=>{const k=monOf(w.date);weeks[k]=(weeks[k]||0)+1});
-  const goal=CONF.goal||1,thisMon=monOf(isoDate(new Date()));
-  /* weekly streak: weeks in a row that reached the weekly goal (1 workout when there is no goal); the current week
-     counts once it is reached, and does not break the streak while it is still going */
-  let streak=0;{let m=fromIso(thisMon);if((weeks[thisMon]||0)<goal)m.setDate(m.getDate()-7);
-    while((weeks[isoDate(m)]||0)>=goal){streak++;m.setDate(m.getDate()-7)}}
-  let best=0;{const ks=Object.keys(weeks).filter(k=>weeks[k]>=goal).sort();let run=0,prev=null;
-    for(const k of ks){run=prev&&(fromIso(k)-fromIso(prev))/864e5===7?run+1:1;best=Math.max(best,run);prev=k}}
-  /* records over the whole history: a set that beats every earlier session of that exercise */
-  let prs=0;const bestE={};for(const w of done)for(const it of w.items){const key=exKey(it);let top=0;
-    for(const s of it.sets||[]){const kg=numKg(s.kg),r=parseInt(s.r)||0;if(kg>0&&r>0)top=Math.max(top,e1rm(kg,r))}
+  const weeks={},days=new Set(),months={};
+  done.forEach(w=>{const k=monOf(w.date);weeks[k]=(weeks[k]||0)+1;days.add(w.date);months[ym(w.date)]=(months[ym(w.date)]||0)+1});
+  const today=isoDate(new Date()),thisMon=monOf(today);
+  /* streak of weeks with 3 workouts; the current week does not break it while it is still going */
+  let streak=0;{let m=fromIso(thisMon);if((weeks[thisMon]||0)<ACH_GOAL)m.setDate(m.getDate()-7);
+    while((weeks[isoDate(m)]||0)>=ACH_GOAL){streak++;m.setDate(m.getDate()-7)}}
+  const best=Math.max(streak,runBest(Object.keys(weeks).filter(k=>weeks[k]>=ACH_GOAL),plus7));
+  /* months: most workouts in one calendar month, months in a row with 12+, and a "perfect" month
+     (every week that starts in the month reached 3) */
+  const mBest=Math.max(0,...Object.values(months));
+  const mRun=runBest(Object.keys(months).filter(k=>months[k]>=12),nextYm);
+  let perfect=false;for(const k of Object.keys(months)){const [y,mo]=k.split("-").map(Number),mons=[];
+    for(let d=new Date(y,mo-1,1);d.getMonth()===mo-1;d.setDate(d.getDate()+1))if(d.getDay()===1)mons.push(isoDate(d));
+    if(mons.length&&mons.every(m=>(weeks[m]||0)>=ACH_GOAL)){perfect=true;break}}
+  /* records, sets, exercises tried, bodyweight lifts */
+  let prs=0,sets=0;const bestE={},fams=new Set(),bw={},bwT=achBW();let pull=0,pullX=0,push=0;const pxR=sx(BWP.pux)[0];
+  for(const w of done)for(const it of w.items){const key=exKey(it);let top=0;const R=parseRef(it.ref||refByName(it.name));
+    fams.add(R?R.f.id:it.name);
+    for(const s of it.sets||[]){const kg=numKg(s.kg),r=parseInt(s.r)||0;if(w.done===true||r>0)sets++;
+      if(kg>0&&r>0)top=Math.max(top,e1rm(kg,r));
+      if(R&&r>0){for(const L of BWL)if(L[1](R.f,R.sel)&&kg>0)bw[L[0]]=Math.max(bw[L[0]]||0,kg);
+        if(R.f.id==="barrafixa"&&R.sel.e!=="ma"){pull=Math.max(pull,r);if(R.sel.e==="lt"&&r>=pxR&&kg>0)pullX=Math.max(pullX,kg)}
+        if(R.f.id==="flexao")push=Math.max(push,r)}}
     if(top>0){if(bestE[key]!==undefined&&top>bestE[key]+.05)prs++;bestE[key]=Math.max(bestE[key]||0,top)}}
-  /* weeks where every muscle group was trained / where many groups were in the ideal range */
-  let full=false,ideal=false;for(const k of Object.keys(weeks)){const e=fromIso(k);e.setDate(e.getDate()+6);const T=tally({from:k,to:isoDate(e)});
+  /* weekly volume: whole body, ideal week, legs in the ideal range (weeks in a row), every radar point ideal */
+  let full=false,ideal=false,bal=false,noLeg=false,noUp=false;const legW=[];
+  for(const k of Object.keys(weeks)){const e=fromIso(k);e.setDate(e.getDate()+6);const T=tally({from:k,to:isoDate(e)});
     const g=Object.keys(BASIC).filter(x=>(T.grp[x]||0)>0).length;if(g===Object.keys(BASIC).length)full=true;
-    if(Object.keys(BASIC).filter(x=>(T.grp[x]||0)>=10&&(T.grp[x]||0)<=20).length>=8)ideal=true}
+    if(Object.keys(BASIC).filter(x=>(T.grp[x]||0)>=10&&(T.grp[x]||0)<=20).length>=8)ideal=true;
+    const rv=RAD.map(r=>r.g.reduce((a,x)=>a+(T.grp[x]||0),0)/r.g.length);
+    if(rv[RAD.findIndex(r=>r.k==="pernas")]>=10)legW.push(k);if(rv.every(v=>v>=10&&v<=20))bal=true;
+    /* funny: a finished week with workouts but nothing for the legs / nothing for the upper body */
+    if(k<thisMon){const sum=gs=>gs.reduce((a,x)=>a+(T.grp[x]||0),0);if(T.sets>0&&!sum(LEGS))noLeg=true;if(T.sets>0&&!sum(UPPER))noUp=true}}
+  /* extras */
+  const live=done.filter(w=>w.start);
+  const early=live.some(w=>new Date(w.start).getHours()<7),late=live.some(w=>new Date(w.start).getHours()>=22);
+  const weekend=Object.keys(weeks).some(k=>{const d=fromIso(k);d.setDate(d.getDate()+5);const sa=isoDate(d);d.setDate(d.getDate()+1);return days.has(sa)&&days.has(isoDate(d))});
+  const dl=[...days].sort();let back=false;for(let i=1;i<dl.length;i++)if((fromIso(dl[i])-fromIso(dl[i-1]))/864e5>14.5){back=true;break}
+  /* funny: days off (between workouts or since the last one), Monday chest, two workouts in one day, holidays,
+     very short live workout, "beach workout" (only chest and arms) */
+  let maxOff=0;for(let i=1;i<dl.length;i++)maxOff=Math.max(maxOff,Math.round((fromIso(dl[i])-fromIso(dl[i-1]))/864e5)-1);
+  if(dl.length)maxOff=Math.max(maxOff,Math.round((fromIso(today)-fromIso(dl[dl.length-1]))/864e5)-1);
+  const tg=it=>{const e=exInfo(it.name,it.ref);return e?new Set(e.p.map(id=>TOB[id])):new Set()};
+  const monChest=done.some(w=>dayIdxOf(w.date)===0&&w.items.some(it=>tg(it).has("peito")));
+  const perDay={};done.forEach(w=>perDay[w.date]=(perDay[w.date]||0)+1);const rat=Object.values(perDay).some(v=>v>=2);
+  const holiday=done.some(w=>/-(12-25|01-01)$/.test(w.date));
+  const flash=live.some(w=>w.dur>0&&w.dur<900);
+  const beach=done.some(w=>{if(w.items.length<2)return false;const all=new Set();
+    for(const it of w.items){const g=tg(it);if(!g.size)return false;for(const x of g){if(!["peito","biceps","triceps"].includes(x))return false;all.add(x)}}
+    return all.has("peito")&&all.has("biceps")});
   let lv=-1;try{const D=rankData();if(D.all!=null)lv=rLv(D.all)}catch(e){}
   if(lv>ach.lvMax){ach.lvMax=lv;saveAch()}
-  return {n:done.length,live:done.filter(w=>w.start).length,streak,best:Math.max(best,streak),prs,full,ideal,lv:ach.lvMax,weeks}}
-/* [id, icon, pt, en, es, value from the stats, target] */
-const ACH=[
-  ["t1","🏁","Primeiro treino","First workout","Primer entreno",S=>S.n,1],["t10","💪","10 treinos","10 workouts","10 entrenos",S=>S.n,10],
-  ["t25","💪","25 treinos","25 workouts","25 entrenos",S=>S.n,25],["t50","🏋️","50 treinos","50 workouts","50 entrenos",S=>S.n,50],
-  ["t100","🏋️","100 treinos","100 workouts","100 entrenos",S=>S.n,100],["t250","👑","250 treinos","250 workouts","250 entrenos",S=>S.n,250],
-  ["s2","🔥","2 semanas seguidas","2 weeks in a row","2 semanas seguidas",S=>S.best,2],["s4","🔥","1 mês sem falhar","1 month without missing","1 mes sin fallar",S=>S.best,4],
-  ["s8","🔥","8 semanas seguidas","8 weeks in a row","8 semanas seguidas",S=>S.best,8],["s12","🔥","3 meses seguidos","3 months in a row","3 meses seguidos",S=>S.best,12],
-  ["s26","☄️","6 meses seguidos","6 months in a row","6 meses seguidos",S=>S.best,26],["s52","☄️","1 ano sem falhar","1 year without missing","1 año sin fallar",S=>S.best,52],
-  ["p1","🏆","Primeiro recorde","First record","Primer récord",S=>S.prs,1],["p10","🏆","10 recordes","10 records","10 récords",S=>S.prs,10],["p50","🏆","50 recordes","50 records","50 récords",S=>S.prs,50],
-  ["l1","⏱️","Primeiro treino ao vivo","First live workout","Primer entreno en vivo",S=>S.live,1],["l10","⏱️","10 treinos ao vivo","10 live workouts","10 entrenos en vivo",S=>S.live,10],
-  ["full","🧍","Corpo inteiro na semana","Whole body in a week","Cuerpo completo en la semana",S=>S.full?1:0,1],["ideal","🎯","Semana na faixa ideal","Week in the ideal range","Semana en el rango ideal",S=>S.ideal?1:0,1],
-  ...[3,4,5,6,7,8].map(i=>["r"+i,"🎖️",null,null,null,S=>S.lv>=i?1:0,1,i])];
-const achName=a=>a[2]?p3([a[2],a[3],a[4]]):tx(`Chegar a ${RLV[a[7]][0]}`,`Reach ${RLV[a[7]][0]}`,`Llegar a ${RLV[a[7]][0]}`);
-const achDesc=a=>a[0][0]==="t"?tx("Treinos marcados como feitos.","Workouts marked as done.","Entrenos marcados como hechos."):a[0][0]==="s"?tx(`Semanas seguidas batendo a meta (${CONF.goal||1} por semana).`,`Weeks in a row hitting your goal (${CONF.goal||1} a week).`,`Semanas seguidas cumpliendo la meta (${CONF.goal||1} por semana).`)
-  :a[0][0]==="p"?tx("Séries que superam todas as vezes anteriores do exercício.","Sets that beat every earlier session of that exercise.","Series que superan todas las veces anteriores del ejercicio."):a[0][0]==="l"?tx("Treinos feitos na aba Ao vivo.","Workouts done in the Live tab.","Entrenos hechos en la pestaña En vivo.")
-  :a[0]==="full"?tx("Todos os 14 grupos musculares na mesma semana.","All 14 muscle groups in the same week.","Los 14 grupos musculares en la misma semana."):a[0]==="ideal"?tx("8 grupos ou mais com 10–20 séries na mesma semana.","8 or more groups with 10–20 sets in the same week.","8 grupos o más con 10–20 series en la misma semana.")
-  :tx("Nível geral do ranking de força.","Overall strength ranking level.","Nivel general de la clasificación de fuerza.");
-/* announce badges unlocked since last time (after a workout is marked done) */
-function checkAch(quiet){const S=achStats(),got=ACH.filter(a=>a[5](S)>=a[6]).map(a=>a[0]),nw=got.filter(id=>!ach.seen.includes(id));
-  if(nw.length){ach.seen=[...ach.seen,...nw];saveAch();if(!quiet){const a=ACH.find(x=>x[0]===nw[nw.length-1]);
-    setTimeout(()=>{toast(tx(`🏅 Conquista: ${achName(a)}`,`🏅 Achievement: ${achName(a)}`,`🏅 Logro: ${achName(a)}`));beep(2)},2400)}}
+  return {n:done.length,live:live.length,streak,best,thisWeek:weeks[thisMon]||0,mBest,mRun,perfect,prs,sets,fams:fams.size,bw,bwT,pull,pullX,push,
+    full,ideal,bal,leg:runBest(legW,plus7),early,late,weekend,back,marathon:done.some(w=>w.dur>=3600),shared:!!ach.shared,lv:ach.lvMax,weeks,
+    noLeg,noUp,maxOff,monChest,rat,holiday,flash,beach}}
+/* badge = {c: section, id, i: icon, n: name ([pt,en,es] or function), d: description (same), v: S → value,
+   t: target (number or S → number; Infinity = not possible yet), u: "kg" for loads} */
+const B1=S=>1;
+const ACH=[];{const A=(c,id,i,n,d,v,t=1,u)=>ACH.push({c,id,i,n,d,v,t,u});
+  const seqD=()=>tx("Semanas seguidas com 3 treinos ou mais (segunda a domingo).","Weeks in a row with 3 or more workouts (Monday to Sunday).","Semanas seguidas con 3 entrenos o más (lunes a domingo).");
+  ACH_WEEKS.forEach(k=>A("seq","w"+k,k>=52?"👑":k>=10?"☄️":"🔥",
+    ()=>k===52?tx("1 ano sem falhar","1 year without missing","1 año sin fallar"):k===1?tx("1 semana de 3 treinos","1 week of 3 workouts","1 semana de 3 entrenos"):tx(`${k} semanas seguidas`,`${k} weeks in a row`,`${k} semanas seguidas`),seqD,S=>S.best,k));
+  [12,16,20].forEach(k=>A("mes","m"+k,"📅",()=>tx(`Mês com ${k} treinos`,`${k}-workout month`,`Mes con ${k} entrenos`),
+    ()=>tx(`${k} treinos feitos no mesmo mês.`,`${k} workouts done in the same calendar month.`,`${k} entrenos hechos en el mismo mes.`),S=>S.mBest,k));
+  A("mes","mperf","🗓️",["Mês perfeito","Perfect month","Mes perfecto"],["Todas as semanas do mês com 3 treinos.","Every week of the month with 3 workouts.","Todas las semanas del mes con 3 entrenos."],S=>S.perfect?1:0);
+  [3,6,12].forEach(k=>A("mes","mr"+k,"📆",()=>k===12?tx("12 meses seguidos","12 months in a row","12 meses seguidos"):tx(`${k} meses seguidos`,`${k} months in a row`,`${k} meses seguidos`),
+    ()=>tx("Meses seguidos com 12 treinos ou mais.","Months in a row with 12 or more workouts.","Meses seguidos con 12 entrenos o más."),S=>S.mRun,k));
+  [[1,"🏁"],[10,"💪"],[25,"💪"],[50,"🏋️"],[100,"🏋️"],[250,"👑"],[500,"👑"]].forEach(([k,i])=>A("tre","t"+k,i,
+    ()=>k===1?tx("Primeiro treino","First workout","Primer entreno"):tx(`${k} treinos`,`${k} workouts`,`${k} entrenos`),
+    ["Treinos marcados como feitos.","Workouts marked as done.","Entrenos marcados como hechos."],S=>S.n,k));
+  A("tre","sets1000","📈",()=>tx("1.000 séries","1,000 sets","1.000 series"),["Séries feitas em treinos marcados como feitos.","Sets in workouts marked as done.","Series en entrenos marcados como hechos."],S=>S.sets,1000);
+  [1,10,50,100].forEach(k=>A("tre","l"+k,"⏱️",()=>k===1?tx("Primeiro treino ao vivo","First live workout","Primer entreno en vivo"):tx(`${k} treinos ao vivo`,`${k} live workouts`,`${k} entrenos en vivo`),
+    ["Treinos feitos na aba Ao vivo.","Workouts done in the Live tab.","Entrenos hechos en la pestaña En vivo."],S=>S.live,k));
+  const bwD=need=>S=>S.bwT>0?tx(`Uma série com ${fkg(need(S))} kg ou mais, com barra.`,`One set with ${fkg(need(S))} kg or more, barbell.`,`Una serie con ${fkg(need(S))} kg o más, con barra.`)
+    :tx("Coloque o seu peso em Configurações para liberar.","Enter your body weight in Settings to unlock.","Pon tu peso en Ajustes para desbloquear.");
+  BWL.forEach(L=>L[3].forEach((_,j)=>{const m=()=>sx([L[3][j],L[4][j]]),need=S=>S.bwT*m();
+    A("pc",`bw_${L[0]}${j+1}`,"⚖️",()=>tx(`${L[2][0]}: ${m().toLocaleString(LOC)}× o seu peso`,`${L[2][1]}: ${m().toLocaleString(LOC)}× bodyweight`,`${L[2][2]}: ${m().toLocaleString(LOC)}× tu peso`),
+      bwD(need),S=>S.bw[L[0]]||0,S=>S.bwT>0?need(S)-.01:Infinity,"kg")}));
+  A("pc","bw_pu1","🧗",["Barra fixa: 1 repetição","Pull-up: 1 rep","Dominada: 1 repetición"],["Uma barra fixa sem ajuda.","One pull-up without assistance.","Una dominada sin ayuda."],S=>S.pull,1);
+  A("pc","bw_pu2","🧗",()=>tx(`Barra fixa: ${sx(BWP.pu2)} seguidas`,`Pull-ups: ${sx(BWP.pu2)} in a row`,`Dominadas: ${sx(BWP.pu2)} seguidas`),
+    ()=>tx("Na mesma série, sem ajuda.","In one set, without assistance.","En la misma serie, sin ayuda."),S=>S.pull,S=>sx(BWP.pu2));
+  A("pc","bw_pu3","🧗",()=>{const [r,p]=sx(BWP.pux);return tx(`Barra fixa: ${r} com +${p*100}% do peso`,`Pull-ups: ${r} with +${p*100}% bodyweight`,`Dominadas: ${r} con +${p*100}% del peso`)},
+    S=>{const [r,p]=sx(BWP.pux);return S.bwT>0?tx(`${r} repetições com ${fkg(S.bwT*p)} kg amarrados (barra fixa com peso extra).`,`${r} reps with ${fkg(S.bwT*p)} kg attached (weighted pull-up).`,`${r} repeticiones con ${fkg(S.bwT*p)} kg colgados (dominada lastrada).`)
+      :tx("Coloque o seu peso em Configurações para liberar.","Enter your body weight in Settings to unlock.","Pon tu peso en Ajustes para desbloquear.")},
+    S=>S.pullX,S=>S.bwT>0?S.bwT*sx(BWP.pux)[1]-.01:Infinity,"kg");
+  ["fl1","fl2"].forEach(k=>A("pc","bw_"+k,"🤸",()=>tx(`Flexão: ${sx(BWP[k])} seguidas`,`Push-ups: ${sx(BWP[k])} in a row`,`Flexiones: ${sx(BWP[k])} seguidas`),
+    ["Na mesma série.","In one set.","En la misma serie."],S=>S.push,S=>sx(BWP[k])));
+  [1,10,25,50,100].forEach(k=>A("rec","p"+k,"🏆",()=>k===1?tx("Primeiro recorde","First record","Primer récord"):tx(`${k} recordes`,`${k} records`,`${k} récords`),
+    ["Séries que superam todas as vezes anteriores do exercício.","Sets that beat every earlier session of that exercise.","Series que superan todas las veces anteriores del ejercicio."],S=>S.prs,k));
+  A("vol","full","🧍",["Corpo inteiro na semana","Whole body in a week","Cuerpo completo en la semana"],["Todos os 14 grupos musculares na mesma semana.","All 14 muscle groups in the same week.","Los 14 grupos musculares en la misma semana."],S=>S.full?1:0);
+  A("vol","ideal","🎯",["Semana na faixa ideal","Week in the ideal range","Semana en el rango ideal"],["8 grupos ou mais com 10–20 séries na mesma semana.","8 or more groups with 10–20 sets in the same week.","8 grupos o más con 10–20 series en la misma semana."],S=>S.ideal?1:0);
+  A("vol","leg4","🦵",["Não pulou perna","Never skipped leg day","No se saltó pierna"],["4 semanas seguidas com pernas na faixa ideal (10 séries ou mais).","4 weeks in a row with legs in the ideal range (10+ sets).","4 semanas seguidas con piernas en el rango ideal (10+ series)."],S=>S.leg,4);
+  A("vol","bal","⚖️",["Equilíbrio perfeito","Perfect balance","Equilibrio perfecto"],["As 6 pontas do radar na faixa ideal (10–20) na mesma semana.","All 6 radar points in the ideal range (10–20) in the same week.","Las 6 puntas del radar en el rango ideal (10–20) en la misma semana."],S=>S.bal?1:0);
+  [10,25,50].forEach(k=>A("ext","ex"+k,"🧭",()=>tx(`Explorador: ${k} exercícios`,`Explorer: ${k} exercises`,`Explorador: ${k} ejercicios`),
+    ["Exercícios diferentes já feitos.","Different exercises done.","Ejercicios distintos hechos."],S=>S.fams,k));
+  A("ext","early","🌅",["Madrugador","Early bird","Madrugador"],["Treino ao vivo começado antes das 7h.","Live workout started before 7 am.","Entreno en vivo empezado antes de las 7."],S=>S.early?1:0);
+  A("ext","late","🦉",["Coruja","Night owl","Búho"],["Treino ao vivo começado depois das 22h.","Live workout started after 10 pm.","Entreno en vivo empezado después de las 22."],S=>S.late?1:0);
+  A("ext","wknd","⚔️",["Guerreiro de fim de semana","Weekend warrior","Guerrero de fin de semana"],["Treinou no sábado e no domingo da mesma semana.","Trained on Saturday and Sunday of the same week.","Entrenó el sábado y el domingo de la misma semana."],S=>S.weekend?1:0);
+  A("ext","back","🔁",["Voltei!","I'm back!","¡Volví!"],["Treinou de novo depois de 14 dias parado.","Trained again after 14 days off.","Volvió a entrenar después de 14 días parado."],S=>S.back?1:0);
+  A("ext","mara","⏳",["Maratona","Marathon","Maratón"],["Treino ao vivo de 1 hora ou mais.","Live workout of 1 hour or more.","Entreno en vivo de 1 hora o más."],S=>S.marathon?1:0);
+  A("ext","share","📸",["Influencer","Influencer","Influencer"],["Compartilhou ou salvou um cartão para Stories.","Shared or saved a Story card.","Compartió o guardó una tarjeta para Stories."],S=>S.shared?1:0);
+  /* funny ones (owner's idea) */
+  A("fun","noleg","🐦",["Perna de saracura","Chicken legs","Piernas de alambre"],["Treinou a semana inteira sem fazer perna.","Trained all week without a single leg exercise.","Entrenó toda la semana sin hacer pierna."],S=>S.noLeg?1:0);
+  A("fun","noup","🦖",["Braço de T-rex","T-rex arms","Brazos de T-rex"],["Treinou a semana inteira sem fazer nada de superior.","Trained all week without any upper body.","Entrenó toda la semana sin nada de tren superior."],S=>S.noUp?1:0);
+  A("fun","sofa","🛋️",["Sofá master","Couch master","Maestro del sofá"],["Ficou 3 dias seguidos sem treinar.","Went 3 days in a row without training.","Pasó 3 días seguidos sin entrenar."],S=>S.maxOff,3);
+  A("fun","hib","🐻",["Hibernação","Hibernation","Hibernación"],["Ficou 30 dias sem treinar.","Went 30 days without training.","Pasó 30 días sin entrenar."],S=>S.maxOff,30);
+  A("fun","monchest","📅",["Segunda é dia de peito","Monday is chest day","El lunes es día de pecho"],["Treinou peito numa segunda-feira, como manda a tradição.","Trained chest on a Monday, as tradition demands.","Entrenó pecho un lunes, como manda la tradición."],S=>S.monChest?1:0);
+  A("fun","rat","🐀",["Rato de academia","Gym rat","Rata de gimnasio"],["Fez dois treinos no mesmo dia.","Did two workouts on the same day.","Hizo dos entrenos el mismo día."],S=>S.rat?1:0);
+  A("fun","holiday","🎄",["Sem feriado","No days off","Sin feriados"],["Treinou no Natal ou no Ano-Novo.","Trained on Christmas or New Year's Day.","Entrenó en Navidad o Año Nuevo."],S=>S.holiday?1:0);
+  A("fun","flash","⚡",["Treino relâmpago","Speedrun","Entreno relámpago"],["Treino ao vivo com menos de 15 minutos.","Live workout under 15 minutes.","Entreno en vivo de menos de 15 minutos."],S=>S.flash?1:0);
+  A("fun","beach","🏖️",["Treino de praia","Beach workout","Entreno de playa"],["Um treino só de peito e braço.","A workout of only chest and arms.","Un entreno solo de pecho y brazos."],S=>S.beach?1:0);
+  [0,1,2,3,4,5,6,7,8].forEach(i=>A("rk","r"+i,i>=7?"👑":i>=5?"🏅":"🎖️",()=>tx(`Chegar a ${RLV[i][0]}`,`Reach ${RLV[i][0]}`,`Llegar a ${RLV[i][0]}`),
+    ["Nível geral do ranking de força.","Overall strength ranking level.","Nivel general de la clasificación de fuerza."],S=>S.lv>=i?1:0))}
+const ACH_SEC=[["seq","🔥",["Semanas de 3 treinos","Weeks of 3 workouts","Semanas de 3 entrenos"]],["mes","📅",["Do mês","Monthly","Del mes"]],
+  ["tre","💪",["Treinos","Workouts","Entrenos"]],["pc","⚖️",["Peso do corpo","Bodyweight","Peso corporal"]],["rec","🏆",["Recordes","Records","Récords"]],
+  ["vol","🎯",["Volume e equilíbrio","Volume and balance","Volumen y equilibrio"]],["ext","✨",["Extras","Extras","Extras"]],["fun","😂",["Engraçadas","Just for fun","Divertidos"]],["rk","🎖️",["Ranking de força","Strength ranking","Clasificación de fuerza"]]];
+const achTxt=(x,S)=>typeof x==="function"?x(S):p3(x);
+const achName=a=>achTxt(a.n);
+const achDesc=(a,S)=>achTxt(a.d,S);
+const achT=(a,S)=>typeof a.t==="function"?a.t(S):a.t;
+const achOk=(a,S)=>a.v(S)>=achT(a,S);
+/* announce badges unlocked since last time (after a workout is marked done, or a card is shared) */
+function checkAch(quiet){const S=achStats(),got=ACH.filter(a=>achOk(a,S)).map(a=>a.id),nw=got.filter(id=>!ach.seen.includes(id));
+  if(nw.length){ach.seen=[...ach.seen,...nw];saveAch();if(!quiet){const a=ACH.find(x=>x.id===nw[nw.length-1]),more=nw.length>1?` (+${nw.length-1})`:"";
+    setTimeout(()=>{toast(tx(`🏅 Conquista: ${achName(a)}${more}`,`🏅 Achievement: ${achName(a)}${more}`,`🏅 Logro: ${achName(a)}${more}`));beep(2)},2400)}}
   return S}
-function achHTML(){const S=checkAch(true),got=ACH.filter(a=>a[5](S)>=a[6]).length;
+function achHTML(){const S=checkAch(true),got=ACH.filter(a=>achOk(a,S)).length;
+  const cell=(a,hideD)=>{const v=a.v(S),t=achT(a,S),ok=v>=t;let pr="";
+    if(ok)pr=`<em>✓</em>`;
+    else if(a.u==="kg"&&isFinite(t))pr=`<span class="ach-bar"><i style="width:${Math.min(100,v/t*100).toFixed(0)}%"></i></span><em>${fkg(v)}/${fkg(Math.ceil(t*2)/2)} kg</em>`;
+    else if(isFinite(t)&&t>1)pr=`<span class="ach-bar"><i style="width:${Math.min(100,v/t*100).toFixed(0)}%"></i></span><em>${Math.min(v,t).toLocaleString(LOC)}/${t.toLocaleString(LOC)}</em>`;
+    return `<div class="ach${ok?" ok":""}"><span class="ach-i">${a.i}</span><b>${esc(achName(a))}</b>${hideD?"":`<small>${esc(achDesc(a,S))}</small>`}${pr}</div>`};
   return `<div class="card ach-top"><div class="ach-fire">🔥</div><div><b class="ach-n">${S.streak}</b><span>${tx(S.streak===1?"semana seguida":"semanas seguidas",S.streak===1?"week in a row":"weeks in a row",S.streak===1?"semana seguida":"semanas seguidas")}</span>
-      <small>${tx(`Meta: ${CONF.goal||1} treino(s) por semana · melhor sequência: ${S.best}`,`Goal: ${CONF.goal||1} workout(s) a week · best streak: ${S.best}`,`Meta: ${CONF.goal||1} entreno(s) por semana · mejor racha: ${S.best}`)}</small></div></div>
+      <small>${tx(`3 treinos por semana · esta semana: ${Math.min(S.thisWeek,3)} de 3 · melhor sequência: ${S.best}`,`3 workouts a week · this week: ${Math.min(S.thisWeek,3)} of 3 · best streak: ${S.best}`,`3 entrenos por semana · esta semana: ${Math.min(S.thisWeek,3)} de 3 · mejor racha: ${S.best}`)}</small></div></div>
     <div class="pstat"><div><b>${S.n}</b><span>${tx("Treinos","Workouts","Entrenos")}</span></div><div><b>${S.prs}</b><span>${tx("Recordes","Records","Récords")}</span></div><div><b>${got}/${ACH.length}</b><span>${tx("Conquistas","Achievements","Logros")}</span></div></div>
     <div class="row" style="margin:4px 0 12px"><button class="btn" data-share="ach">📤 ${tx("Compartilhar","Share","Compartir")}</button></div>
-    <div class="ach-grid">${ACH.map(a=>{const v=a[5](S),ok=v>=a[6];return `<div class="ach${ok?" ok":""}"><span class="ach-i">${a[1]}</span><b>${esc(achName(a))}</b><small>${esc(achDesc(a))}</small>${ok?`<em>✓</em>`:a[6]>1?`<span class="ach-bar"><i style="width:${Math.min(100,v/a[6]*100).toFixed(0)}%"></i></span><em>${Math.min(v,a[6])}/${a[6]}</em>`:""}</div>`}).join("")}</div>`}
+    ${ACH_SEC.map(([c,i,n])=>{const L=ACH.filter(a=>a.c===c),k=L.filter(a=>achOk(a,S)).length,D=L.map(a=>achDesc(a,S)),same=D.every(d=>d===D[0]);
+      /* when every badge of a section has the same explanation, it is shown once under the title */
+      return `<h3 class="ach-sec">${i} ${esc(p3(n))} <span>${k}/${L.length}</span></h3>${same?`<p class="ach-sd">${esc(D[0])}</p>`:""}<div class="ach-grid">${L.map(a=>cell(a,same)).join("")}</div>`}).join("")}`}
 
 /* ---- Stories card (1080 × 1920 PNG): the painted figure, a title and a few numbers. Built on a canvas, shown
    in a sheet with Share / Save (iPhone: a share sheet needs a fresh tap, so the image is prepared first). */
@@ -3115,8 +3228,8 @@ async function makeCard(kind){
     stats=[[w.dur?mmss(w.dur):"—",tx("duração","duration","duración")],[m.sets,tx("séries","sets","series")],[prs.length,tx("recordes","records","récords")]];
     lines=prs.slice(0,3).map(p=>[`• ${p.name}: ${fkg(p.kg)} kg × ${p.r}`,"#E7EAEE",FB(600,40)])}
   else if(kind==="ach"){const S=achStats();title=tx("Minhas conquistas","My achievements","Mis logros");sub=tx(`${S.streak} semanas seguidas 🔥`,`${S.streak} weeks in a row 🔥`,`${S.streak} semanas seguidas 🔥`);
-    const got=ACH.filter(a=>a[5](S)>=a[6]);stats=[[S.n,tx("treinos","workouts","entrenos")],[S.prs,tx("recordes","records","récords")],[got.length,tx("conquistas","achievements","logros")]];
-    lines=got.slice(-6).reverse().map(a=>[`${a[1]} ${achName(a)}`,"#E7EAEE",FB(600,46)])}
+    const got=ACH.filter(a=>achOk(a,S));stats=[[S.n,tx("treinos","workouts","entrenos")],[S.prs,tx("recordes","records","récords")],[got.length,tx("conquistas","achievements","logros")]];
+    lines=got.slice(-6).reverse().map(a=>[`${a.i} ${achName(a)}`,"#E7EAEE",FB(600,46)])}
   text(title.toUpperCase(),W/2,330,F(700,96),"#FFFFFF","center");if(sub)text(sub,W/2,400,FB(500,44),"#AEB6C0","center");
   let y=460;
   if(fig){const {img,ar}=await figImg(fig);const fw=kind==="rank"?860:980,fh=fw*ar;g.drawImage(img,(W-fw)/2,y,fw,fh);y+=fh+40}
@@ -3131,15 +3244,16 @@ async function shareCard(kind){toast(tx("Preparando a imagem…","Preparing the 
   let blob;try{blob=await makeCard(kind)}catch(e){blob=null}
   if(!blob){toast(tx("Não foi possível criar a imagem","Couldn't create the image","No se pudo crear la imagen"));return}
   const url=URL.createObjectURL(blob),file=new File([blob],`muscle-atlas-${kind}.png`,{type:"image/png"});
-  gAct=b=>{if(b.dataset.g==="share"){if(navigator.canShare&&navigator.canShare({files:[file]}))navigator.share({files:[file],title:"Muscle Atlas"}).catch(()=>{});
+  gAct=b=>{if((b.dataset.g==="share"||b.dataset.g==="save")&&!ach.shared){ach.shared=1;saveAch();checkAch()}
+    if(b.dataset.g==="share"){if(navigator.canShare&&navigator.canShare({files:[file]}))navigator.share({files:[file],title:"Muscle Atlas"}).catch(()=>{});
       else toast(tx("Este navegador não compartilha imagens: use Salvar.","This browser can't share images: use Save.","Este navegador no comparte imágenes: usa Guardar."))}
     if(b.dataset.g==="save"){const a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove()}};
   openG(tx("Cartão para Stories","Story card","Tarjeta para Stories"),`<img class="card-prev" src="${url}" alt="">
     <p class="muted" style="font-size:13px">${tx("No iPhone, também dá para tocar e segurar a imagem para salvar nas Fotos.","On iPhone you can also tap and hold the image to save it to Photos.","En iPhone también puedes mantener pulsada la imagen para guardarla en Fotos.")}</p>
     <div class="row"><button class="btn primary" data-g="share">📤 ${tx("Compartilhar","Share","Compartir")}</button><button class="btn" data-g="save">⬇ ${tx("Salvar imagem","Save image","Guardar imagen")}</button></div>`)}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-share]");if(!b)return;e.preventDefault();e.stopPropagation();shareCard(b.dataset.share)},true);
-/* weekly streak for the Hoje week card (cheap version of achStats) */
-function streakNow(){const goal=CONF.goal||1,wk={};workouts.forEach(w=>{if(w.done!==false&&w.items&&w.items.length){const k=monOf(w.date);wk[k]=(wk[k]||0)+1}});
+/* weekly streak for the Hoje week card (cheap version of achStats; 3 workouts a week) */
+function streakNow(){const goal=ACH_GOAL,wk={};workouts.forEach(w=>{if(w.done!==false&&w.items&&w.items.length){const k=monOf(w.date);wk[k]=(wk[k]||0)+1}});
   let n=0,m=fromIso(monOf(isoDate(new Date())));if((wk[isoDate(m)]||0)<goal)m.setDate(m.getDate()-7);while((wk[isoDate(m)]||0)>=goal){n++;m.setDate(m.getDate()-7)}return n}
 function exportBackup(){
   const data=JSON.stringify({app:"atlas-muscular",version:2,exported:new Date().toISOString(),plans,workouts,rank,conf:CONF});
