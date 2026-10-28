@@ -124,6 +124,17 @@ details.how b{font-size:13px;color:var(--muted)}
 .bb-t span{font-size:13px;color:var(--muted)}
 .blist{padding-left:20px;display:grid;gap:8px;margin:10px 0 14px}.blist span{display:block;font-size:12px;color:var(--muted)}
 .prog{margin:10px 0}.prog-w{margin-bottom:8px;font-size:14px}.prog-w .ps{display:block}
+/* conquistas, Stories */
+.card.ach-top{display:flex;flex-direction:row;align-items:center;gap:14px}.ach-fire{font-size:46px}
+.ach-n{font-family:var(--f-display);font-size:44px;line-height:1;margin-right:6px}.ach-top span{font-weight:600}.ach-top small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+.ach-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.ach{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:3px;opacity:.55;filter:grayscale(1)}
+.ach.ok{opacity:1;filter:none;border-color:var(--target)}.ach-i{font-size:26px}.ach b{font-size:14px}.ach small{font-size:11px;color:var(--muted);line-height:1.3}
+.ach em{position:absolute;top:8px;right:10px;font-style:normal;font-size:12px;font-weight:700;color:var(--muted)}.ach.ok em{color:var(--target)}
+.ach-bar{height:4px;border-radius:2px;background:var(--chip);overflow:hidden;margin-top:4px}.ach-bar i{display:block;height:100%;background:var(--target)}
+.streak{color:var(--target);font-weight:700}
+.card-prev{display:block;width:min(260px,70%);margin:0 auto 10px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.rk-share{background:rgba(255,255,255,.12);color:inherit;border-color:rgba(255,255,255,.2)}
 /* configurações */
 .cf{gap:0;padding-block:4px}
 .cf-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
@@ -2262,7 +2273,8 @@ function updateIdle(){
   const sel=model==="art"?curJ:cur;if(sel)listOpen=false;
   if(sel!==lastSel){peek=false;lastSel=sel}
   $("tab-atlas").classList.toggle("idle",!sel&&!listOpen);
-  const cov=!!sel&&!peek;
+  /* the open list (Ver lista) also gets the small figure in the corner, so the list has room (owner: 2–3 items visible) */
+  const cov=(!!sel||listOpen)&&!peek;
   if(cov&&!$("tab-atlas").classList.contains("covered")&&matchMedia("(max-width:900px)").matches){vb=[...BOX[view]];applyVB()}
   $("tab-atlas").classList.toggle("covered",cov);
   const lb=$("listBtn");lb.hidden=!!sel;lb.textContent=listOpen?"Fechar lista":"Ver lista";
@@ -2638,7 +2650,7 @@ function weekDone(){
       :`<button class="${cls}" data-day="${iso}" aria-pressed="${iso===sel}" aria-label="${lab}${iso===sel?"":". Toque para registrar neste dia"}">${inner}</button>`}).join("");
   const sun=new Date(mon);sun.setDate(mon.getDate()+6);
   const n=workouts.filter(x=>x.done!==false&&x.date>=isoDate(mon)&&x.date<=isoDate(sun)).length;
-  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">${hWeek===0?"Sua semana":hWeek===-1?"Semana passada":`${dm(mon)} – ${dm(sun)}`}</h3><span class="muted-s" style="margin:0">${CONF.goal?`${n} de ${CONF.goal} treinos${n>=CONF.goal?" · meta batida!":""}`:n?plural(n,"treino")+" feito"+(n===1?"":"s"):"Nenhum treino feito"}</span></div>
+  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">${hWeek===0?"Sua semana":hWeek===-1?"Semana passada":`${dm(mon)} – ${dm(sun)}`}</h3><span class="muted-s" style="margin:0">${(()=>{const k=streakNow();return k?`<b class="streak" title="${tx("Semanas seguidas batendo a meta","Weeks in a row hitting your goal","Semanas seguidas cumpliendo la meta")}">🔥 ${k}</b> `:""})()}${CONF.goal?`${n} de ${CONF.goal} treinos${n>=CONF.goal?" · meta batida!":""}`:n?plural(n,"treino")+" feito"+(n===1?"":"s"):"Nenhum treino feito"}</span></div>
     <div class="wkrow"><button class="ib" data-act="wkPrev" aria-label="Semana anterior">‹</button><div class="wkgrid">${cells}</div><button class="ib" data-act="wkNext" aria-label="Próxima semana"${hWeek>=0?" disabled":""}>›</button></div>
     <span class="muted-s" style="margin:0">Esqueceu de registrar? Toque num dia que já passou.</span></div>`;
 }
@@ -2723,7 +2735,7 @@ $("treinoBody").addEventListener("click",e=>{
   if(a==="toToday"&&!w){hDate=null;hWeek=0;return renderTreino()}
   const byW=()=>workouts.find(x=>x.id===b.dataset.wid),byP=()=>plans.find(x=>x.id===b.dataset.pid);
   if(a==="log"||a==="startFree"){const nw=startPlan(a==="log"?byP():null,selDate());openW=nw.id;askDel=false;$("tab-treino").scrollTop=0}
-  else if(a==="quickDone"){const pl=byP();if(!pl)return;const nw=startPlan(pl,selDate());nw.done=true;toast(`${pl.name||"Treino"} marcado como feito${hDate?" em "+fmtDate(nw.date):""}`)}
+  else if(a==="quickDone"){const pl=byP();if(!pl)return;const nw=startPlan(pl,selDate());nw.done=true;setTimeout(()=>checkAch(),0);toast(`${pl.name||"Treino"} marcado como feito${hDate?" em "+fmtDate(nw.date):""}`)}
   else if(a==="markDone"){const x=byW();if(x){x.done=true;toast(`${x.title||"Treino"} marcado como feito`);celebrate(x);if(live&&live.wid===x.id){live=null;saveLive()}}}
   else if(a==="undo"){const x=byW();if(!x)return;
     const touched=x.notes||x.items.some(it=>it.notes||it.sets.some(st=>st.r!==""||st.kg!==""));
@@ -2778,7 +2790,7 @@ function setPR(it,s,w){const kg=numKg(s.kg),r=parseInt(s.r)||0;if(!(kg>0&&r>0))r
 function workoutPRs(w){const out=[];for(const it of w.items){let best=null;
   for(const s of it.sets){const p=setPR(it,s,w);if(p&&(!best||p.e>best.e))best=p}if(best)out.push({name:dName(it.name,it.ref),...best})}return out}
 const prTxt=p=>`${p.name}: ${fkg(p.kg)} kg × ${p.r}`;
-function celebrate(w){const prs=workoutPRs(w);if(!prs.length)return prs;
+function celebrate(w){checkAch();const prs=workoutPRs(w);if(!prs.length)return prs;
   toast(prs.length===1?tx(`🏆 Novo recorde! ${prTxt(prs[0])}`,`🏆 New record! ${prTxt(prs[0])}`,`🏆 ¡Nuevo récord! ${prTxt(prs[0])}`)
     :tx(`🏆 ${prs.length} recordes novos! ${prTxt(prs[0])}…`,`🏆 ${prs.length} new records! ${prTxt(prs[0])}…`,`🏆 ¡${prs.length} récords nuevos! ${prTxt(prs[0])}…`));beep(2);return prs}
 
@@ -2832,6 +2844,7 @@ function liveHTML(){
     <div class="lv-stats"><div><b>${mmss(S.dur)}</b><span>${tx("duração","duration","duración")}</span></div><div><b>${S.sets}</b><span>${tx("séries","sets","series")}</span></div><div><b>${S.prs.length}</b><span>${tx("recordes","records","récords")}</span></div></div>
     ${S.prs.length?`<ul class="lv-prs">${S.prs.map(p=>`<li>🏆 ${esc(p.name)}: <b>${fkg(p.kg)} kg × ${p.r}</b></li>`).join("")}</ul>`:""}
     <p class="muted">${tx("Já conta no Progresso e no ranking de força.","It already counts in Progress and in the strength ranking.","Ya cuenta en el Progreso y en la clasificación de fuerza.")}</p>
+    <div class="row" style="justify-content:center"><button class="btn" data-share="workout">📤 ${tx("Cartão para Stories","Story card","Tarjeta para Stories")}</button></div>
     <button class="btn primary wide" data-lv="sumOk">OK</button></div>`}
   if(!w){const d=todayIdx(),list=[...plans].sort((x,y)=>(y.days.includes(d)?1:0)-(x.days.includes(d)?1:0));
     const open=workouts.filter(x=>x.done===false&&x.date===isoDate(new Date())&&x.items.length);
@@ -2875,7 +2888,7 @@ function liveHTML(){
 function liveFinish(w){w.done=true;w.dur=Math.round((Date.now()-(w.start||Date.now()))/1000);
   /* sets never done and left empty are dropped, so they don't count in Progress */
   w.items.forEach(it=>it.sets=it.sets.filter(s=>s.ok||s.r!==""||s.kg!==""));w.items=w.items.filter(it=>it.sets.length);
-  const prs=workoutPRs(w);saveW();liveSum={dur:w.dur,sets:w.items.reduce((a,it)=>a+it.sets.length,0),prs};live=null;saveLive();stopRest();
+  const prs=workoutPRs(w);saveW();liveSumW=w.id;checkAch();liveSum={dur:w.dur,sets:w.items.reduce((a,it)=>a+it.sets.length,0),prs};live=null;saveLive();stopRest();
   if(prs.length)beep(2);toast(tx("Treino marcado como feito","Workout marked as done","Entreno marcado como hecho"))}
 $("treinoBody").addEventListener("click",e=>{
   const v=e.target.closest("[data-hv]");if(v){e.stopPropagation();hView=v.dataset.hv;LS.set("atlas-hview",hView);openW=null;renderTreino();$("tab-treino").scrollTop=0;return}
@@ -2996,6 +3009,120 @@ function openPrograms(){
       ${P.w.map(w=>`<div class="prog-w"><b>${esc(p3(w[0]))}</b> <span class="muted-s">${w[1].map(i=>DSH[i]).join(" · ")}</span><span class="ps">${progItems(w).map(it=>`${esc(it.name)} ${it.sets}×${esc(it.reps)}`).join(" · ")}</span></div>`).join("")}
       <button class="btn primary" data-g="${P.k}">${tx("Adicionar este programa","Add this program","Agregar este programa")}</button></div>`).join("")}`)}
 
+/* ---------------------------------------------------------- 3rd batch: streak, achievements, Stories card
+   Everything is computed from the workouts; atlas-ach keeps only what was already announced (seen) and the
+   best ranking level ever reached (lvMax), so a level badge is not lost when the 6-month window moves. */
+let ach=LS.get("atlas-ach",null);if(!ach||typeof ach!=="object")ach={};if(!Array.isArray(ach.seen))ach.seen=[];if(!(ach.lvMax>=0))ach.lvMax=-1;
+const saveAch=()=>LS.set("atlas-ach",ach);
+const monOf=iso=>{const d=fromIso(iso);d.setDate(d.getDate()-dayIdxOf(iso));return isoDate(d)};
+function achStats(){
+  const done=workouts.filter(w=>w.done!==false&&w.items&&w.items.length).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+  const weeks={};done.forEach(w=>{const k=monOf(w.date);weeks[k]=(weeks[k]||0)+1});
+  const goal=CONF.goal||1,thisMon=monOf(isoDate(new Date()));
+  /* weekly streak: weeks in a row that reached the weekly goal (1 workout when there is no goal); the current week
+     counts once it is reached, and does not break the streak while it is still going */
+  let streak=0;{let m=fromIso(thisMon);if((weeks[thisMon]||0)<goal)m.setDate(m.getDate()-7);
+    while((weeks[isoDate(m)]||0)>=goal){streak++;m.setDate(m.getDate()-7)}}
+  let best=0;{const ks=Object.keys(weeks).filter(k=>weeks[k]>=goal).sort();let run=0,prev=null;
+    for(const k of ks){run=prev&&(fromIso(k)-fromIso(prev))/864e5===7?run+1:1;best=Math.max(best,run);prev=k}}
+  /* records over the whole history: a set that beats every earlier session of that exercise */
+  let prs=0;const bestE={};for(const w of done)for(const it of w.items){const key=exKey(it);let top=0;
+    for(const s of it.sets||[]){const kg=numKg(s.kg),r=parseInt(s.r)||0;if(kg>0&&r>0)top=Math.max(top,e1rm(kg,r))}
+    if(top>0){if(bestE[key]!==undefined&&top>bestE[key]+.05)prs++;bestE[key]=Math.max(bestE[key]||0,top)}}
+  /* weeks where every muscle group was trained / where many groups were in the ideal range */
+  let full=false,ideal=false;for(const k of Object.keys(weeks)){const e=fromIso(k);e.setDate(e.getDate()+6);const T=tally({from:k,to:isoDate(e)});
+    const g=Object.keys(BASIC).filter(x=>(T.grp[x]||0)>0).length;if(g===Object.keys(BASIC).length)full=true;
+    if(Object.keys(BASIC).filter(x=>(T.grp[x]||0)>=10&&(T.grp[x]||0)<=20).length>=8)ideal=true}
+  let lv=-1;try{const D=rankData();if(D.all!=null)lv=rLv(D.all)}catch(e){}
+  if(lv>ach.lvMax){ach.lvMax=lv;saveAch()}
+  return {n:done.length,live:done.filter(w=>w.start).length,streak,best:Math.max(best,streak),prs,full,ideal,lv:ach.lvMax,weeks}}
+/* [id, icon, pt, en, es, value from the stats, target] */
+const ACH=[
+  ["t1","🏁","Primeiro treino","First workout","Primer entreno",S=>S.n,1],["t10","💪","10 treinos","10 workouts","10 entrenos",S=>S.n,10],
+  ["t25","💪","25 treinos","25 workouts","25 entrenos",S=>S.n,25],["t50","🏋️","50 treinos","50 workouts","50 entrenos",S=>S.n,50],
+  ["t100","🏋️","100 treinos","100 workouts","100 entrenos",S=>S.n,100],["t250","👑","250 treinos","250 workouts","250 entrenos",S=>S.n,250],
+  ["s2","🔥","2 semanas seguidas","2 weeks in a row","2 semanas seguidas",S=>S.best,2],["s4","🔥","1 mês sem falhar","1 month without missing","1 mes sin fallar",S=>S.best,4],
+  ["s8","🔥","8 semanas seguidas","8 weeks in a row","8 semanas seguidas",S=>S.best,8],["s12","🔥","3 meses seguidos","3 months in a row","3 meses seguidos",S=>S.best,12],
+  ["s26","☄️","6 meses seguidos","6 months in a row","6 meses seguidos",S=>S.best,26],["s52","☄️","1 ano sem falhar","1 year without missing","1 año sin fallar",S=>S.best,52],
+  ["p1","🏆","Primeiro recorde","First record","Primer récord",S=>S.prs,1],["p10","🏆","10 recordes","10 records","10 récords",S=>S.prs,10],["p50","🏆","50 recordes","50 records","50 récords",S=>S.prs,50],
+  ["l1","⏱️","Primeiro treino ao vivo","First live workout","Primer entreno en vivo",S=>S.live,1],["l10","⏱️","10 treinos ao vivo","10 live workouts","10 entrenos en vivo",S=>S.live,10],
+  ["full","🧍","Corpo inteiro na semana","Whole body in a week","Cuerpo completo en la semana",S=>S.full?1:0,1],["ideal","🎯","Semana na faixa ideal","Week in the ideal range","Semana en el rango ideal",S=>S.ideal?1:0,1],
+  ...[3,4,5,6,7,8].map(i=>["r"+i,"🎖️",null,null,null,S=>S.lv>=i?1:0,1,i])];
+const achName=a=>a[2]?p3([a[2],a[3],a[4]]):tx(`Chegar a ${RLV[a[7]][0]}`,`Reach ${RLV[a[7]][0]}`,`Llegar a ${RLV[a[7]][0]}`);
+const achDesc=a=>a[0][0]==="t"?tx("Treinos marcados como feitos.","Workouts marked as done.","Entrenos marcados como hechos."):a[0][0]==="s"?tx(`Semanas seguidas batendo a meta (${CONF.goal||1} por semana).`,`Weeks in a row hitting your goal (${CONF.goal||1} a week).`,`Semanas seguidas cumpliendo la meta (${CONF.goal||1} por semana).`)
+  :a[0][0]==="p"?tx("Séries que superam todas as vezes anteriores do exercício.","Sets that beat every earlier session of that exercise.","Series que superan todas las veces anteriores del ejercicio."):a[0][0]==="l"?tx("Treinos feitos na aba Ao vivo.","Workouts done in the Live tab.","Entrenos hechos en la pestaña En vivo.")
+  :a[0]==="full"?tx("Todos os 14 grupos musculares na mesma semana.","All 14 muscle groups in the same week.","Los 14 grupos musculares en la misma semana."):a[0]==="ideal"?tx("8 grupos ou mais com 10–20 séries na mesma semana.","8 or more groups with 10–20 sets in the same week.","8 grupos o más con 10–20 series en la misma semana.")
+  :tx("Nível geral do ranking de força.","Overall strength ranking level.","Nivel general de la clasificación de fuerza.");
+/* announce badges unlocked since last time (after a workout is marked done) */
+function checkAch(quiet){const S=achStats(),got=ACH.filter(a=>a[5](S)>=a[6]).map(a=>a[0]),nw=got.filter(id=>!ach.seen.includes(id));
+  if(nw.length){ach.seen=[...ach.seen,...nw];saveAch();if(!quiet){const a=ACH.find(x=>x[0]===nw[nw.length-1]);
+    setTimeout(()=>{toast(tx(`🏅 Conquista: ${achName(a)}`,`🏅 Achievement: ${achName(a)}`,`🏅 Logro: ${achName(a)}`));beep(2)},2400)}}
+  return S}
+function achHTML(){const S=checkAch(true),got=ACH.filter(a=>a[5](S)>=a[6]).length;
+  return `<div class="card ach-top"><div class="ach-fire">🔥</div><div><b class="ach-n">${S.streak}</b><span>${tx(S.streak===1?"semana seguida":"semanas seguidas",S.streak===1?"week in a row":"weeks in a row",S.streak===1?"semana seguida":"semanas seguidas")}</span>
+      <small>${tx(`Meta: ${CONF.goal||1} treino(s) por semana · melhor sequência: ${S.best}`,`Goal: ${CONF.goal||1} workout(s) a week · best streak: ${S.best}`,`Meta: ${CONF.goal||1} entreno(s) por semana · mejor racha: ${S.best}`)}</small></div></div>
+    <div class="pstat"><div><b>${S.n}</b><span>${tx("Treinos","Workouts","Entrenos")}</span></div><div><b>${S.prs}</b><span>${tx("Recordes","Records","Récords")}</span></div><div><b>${got}/${ACH.length}</b><span>${tx("Conquistas","Achievements","Logros")}</span></div></div>
+    <div class="row" style="margin:4px 0 12px"><button class="btn" data-share="ach">📤 ${tx("Compartilhar","Share","Compartir")}</button></div>
+    <div class="ach-grid">${ACH.map(a=>{const v=a[5](S),ok=v>=a[6];return `<div class="ach${ok?" ok":""}"><span class="ach-i">${a[1]}</span><b>${esc(achName(a))}</b><small>${esc(achDesc(a))}</small>${ok?`<em>✓</em>`:a[6]>1?`<span class="ach-bar"><i style="width:${Math.min(100,v/a[6]*100).toFixed(0)}%"></i></span><em>${Math.min(v,a[6])}/${a[6]}</em>`:""}</div>`}).join("")}</div>`}
+
+/* ---- Stories card (1080 × 1920 PNG): the painted figure, a title and a few numbers. Built on a canvas, shown
+   in a sheet with Share / Save (iPhone: a share sheet needs a fresh tap, so the image is prepared first). */
+async function figImg(svg){const host=document.createElement("div");host.style.cssText="position:fixed;left:-20000px;top:0;width:992px";document.body.appendChild(host);host.appendChild(svg);
+  const all=[svg,...svg.querySelectorAll("*")],cl=svg.cloneNode(true),dst=[cl,...cl.querySelectorAll("*")];
+  all.forEach((e,i)=>{const cs=getComputedStyle(e),d=dst[i];if(!d||!d.style)return;
+    for(const k of ["fill","stroke","stroke-width","opacity","display","fill-opacity","stroke-opacity","stroke-linecap","stroke-linejoin","font-family","font-size","font-weight","letter-spacing","visibility"]){const v=cs.getPropertyValue(k);if(v)d.style.setProperty(k,v)}});
+  host.remove();cl.setAttribute("xmlns","http://www.w3.org/2000/svg");cl.removeAttribute("class");cl.removeAttribute("style");
+  const vb=cl.getAttribute("viewBox").split(" ").map(Number);cl.setAttribute("width",vb[2]*2);cl.setAttribute("height",vb[3]*2);
+  const img=new Image();img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(new XMLSerializer().serializeToString(cl));await img.decode();return {img,ar:vb[3]/vb[2]}}
+function musOf(w){const mus={};let sets=0;for(const it of w.items||[]){const n=(it.sets||[]).length;const e=exInfo(it.name,it.ref);sets+=n;if(!e)continue;
+  e.p.forEach(id=>mus[id]=(mus[id]||0)+n);e.s.forEach(id=>mus[id]=(mus[id]||0)+n/2)}return {mus,sets}}
+async function makeCard(kind){
+  const W=1080,H=1920,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+  const bg=g.createLinearGradient(0,0,0,H);bg.addColorStop(0,"#1E252D");bg.addColorStop(1,"#0E1115");g.fillStyle=bg;g.fillRect(0,0,W,H);
+  const F=(w,s)=>`${w} ${s}px "Barlow Condensed","Arial Narrow",system-ui,sans-serif`,FB=(w,s)=>`${w} ${s}px Barlow,system-ui,sans-serif`;
+  const text=(t,x,y,font,col,al="left")=>{g.font=font;g.fillStyle=col;g.textAlign=al;g.fillText(t,x,y)};
+  /* header: logo + name */
+  try{const lg=document.querySelector(".brand .logo").cloneNode(true);const {img}=await figImg(lg);g.drawImage(img,70,70,120,120)}catch(e){}
+  text("MUSCLE",210,160,F(700,72),"#E7EAEE");g.font=F(700,72);text("ATLAS",210+g.measureText("MUSCLE ").width,160,F(700,72),"#FF4A5C");
+  let title="",sub="",fig=null,stats=[],lines=[],accent="#FF4A5C";
+  if(kind==="week"){const r=pRange(),T=tally(r),B=BANDS[pMode];title=pMode==="week"?tx("Minha semana","My week","Mi semana"):tx("Meu treino do dia","My workout of the day","Mi entreno del día");sub=r.label;
+    fig=progFig(T.mus,B).querySelector("svg");const gs=Object.keys(BASIC).filter(x=>(T.grp[x]||0)>0).length;
+    stats=[[T.days,tx("treinos","workouts","entrenos")],[T.sets,tx("séries","sets","series")],[gs,tx("grupos","groups","grupos")]]}
+  else if(kind==="rank"){const D=rankData();const lv=D.all!=null?rLv(D.all):0;title=tx("Ranking de força","Strength ranking","Clasificación de fuerza");
+    sub=D.all!=null?tx(`Mais forte que ~${rPct(D.all)}% de quem treina`,`Stronger than ~${rPct(D.all)}% of lifters`,`Más fuerte que ~${rPct(D.all)}% de quienes entrenan`):"";
+    fig=rankFig(D.gs).querySelector("svg");accent=lv===RLV.length-1?"#C9CFD6":RHERO[lv];
+    lines=[[RLV[lv][0].toUpperCase(),accent,F(700,150)],...D.gs.slice().sort((a,b)=>b.s-a.s).slice(0,3).map(x=>[`${BASIC[x.g].n}: ${RLV[rLv(x.s)][0]}`,"#C9CFD6",F(600,52)])]}
+  else if(kind==="workout"){const w=workouts.find(x=>x.id===liveSumW)||workouts.filter(x=>x.done!==false&&x.items&&x.items.length).sort((a,b)=>a.date<b.date?1:-1)[0];if(!w)return null;const m=musOf(w),prs=workoutPRs(w);
+    title=w.title||tx("Treino","Workout","Entreno");sub=fmtLong(fromIso(w.date));fig=progFig(m.mus,BANDS.day).querySelector("svg");
+    stats=[[w.dur?mmss(w.dur):"—",tx("duração","duration","duración")],[m.sets,tx("séries","sets","series")],[prs.length,tx("recordes","records","récords")]];
+    lines=prs.slice(0,3).map(p=>[`🏆 ${p.name}: ${fkg(p.kg)} kg × ${p.r}`,"#F5D040",FB(600,40)])}
+  else if(kind==="ach"){const S=achStats();title=tx("Minhas conquistas","My achievements","Mis logros");sub=tx(`${S.streak} semanas seguidas 🔥`,`${S.streak} weeks in a row 🔥`,`${S.streak} semanas seguidas 🔥`);
+    const got=ACH.filter(a=>a[5](S)>=a[6]);stats=[[S.n,tx("treinos","workouts","entrenos")],[S.prs,tx("recordes","records","récords")],[got.length,tx("conquistas","achievements","logros")]];
+    lines=got.slice(-6).reverse().map(a=>[`${a[1]} ${achName(a)}`,"#E7EAEE",FB(600,46)])}
+  text(title.toUpperCase(),W/2,330,F(700,96),"#FFFFFF","center");if(sub)text(sub,W/2,400,FB(500,44),"#AEB6C0","center");
+  let y=460;
+  if(fig){const {img,ar}=await figImg(fig);const fw=kind==="rank"?860:980,fh=fw*ar;g.drawImage(img,(W-fw)/2,y,fw,fh);y+=fh+40}
+  else y+=80;
+  if(lines.length&&kind==="rank"){const [t,col,font]=lines[0];text(t,W/2,y+120,font,col,"center");y+=170;lines=lines.slice(1)}
+  if(stats.length){const cw=W/stats.length;stats.forEach(([v,l],i)=>{text(String(v),cw*i+cw/2,y+90,F(700,110),"#FFFFFF","center");text(l.toUpperCase(),cw*i+cw/2,y+145,F(600,40),"#8C95A1","center")});y+=210}
+  lines.forEach(([t,col,font])=>{text(t,W/2,y+50,font,col,"center");y+=72});
+  text("holmgds-gui.github.io/atlas-muscular",W/2,H-80,FB(500,34),"#6B737E","center");
+  return await new Promise(r=>c.toBlob(r,"image/png"))}
+let liveSumW=null;
+async function shareCard(kind){toast(tx("Preparando a imagem…","Preparing the image…","Preparando la imagen…"));
+  let blob;try{blob=await makeCard(kind)}catch(e){blob=null}
+  if(!blob){toast(tx("Não foi possível criar a imagem","Couldn't create the image","No se pudo crear la imagen"));return}
+  const url=URL.createObjectURL(blob),file=new File([blob],`muscle-atlas-${kind}.png`,{type:"image/png"});
+  gAct=b=>{if(b.dataset.g==="share"){if(navigator.canShare&&navigator.canShare({files:[file]}))navigator.share({files:[file],title:"Muscle Atlas"}).catch(()=>{});
+      else toast(tx("Este navegador não compartilha imagens: use Salvar.","This browser can't share images: use Save.","Este navegador no comparte imágenes: usa Guardar."))}
+    if(b.dataset.g==="save"){const a=document.createElement("a");a.href=url;a.download=file.name;document.body.appendChild(a);a.click();a.remove()}};
+  openG(tx("Cartão para Stories","Story card","Tarjeta para Stories"),`<img class="card-prev" src="${url}" alt="">
+    <p class="muted" style="font-size:13px">${tx("No iPhone, também dá para tocar e segurar a imagem para salvar nas Fotos.","On iPhone you can also tap and hold the image to save it to Photos.","En iPhone también puedes mantener pulsada la imagen para guardarla en Fotos.")}</p>
+    <div class="row"><button class="btn primary" data-g="share">📤 ${tx("Compartilhar","Share","Compartir")}</button><button class="btn" data-g="save">⬇ ${tx("Salvar imagem","Save image","Guardar imagen")}</button></div>`)}
+document.addEventListener("click",e=>{const b=e.target.closest("[data-share]");if(!b)return;e.preventDefault();e.stopPropagation();shareCard(b.dataset.share)},true);
+/* weekly streak for the Hoje week card (cheap version of achStats) */
+function streakNow(){const goal=CONF.goal||1,wk={};workouts.forEach(w=>{if(w.done!==false&&w.items&&w.items.length){const k=monOf(w.date);wk[k]=(wk[k]||0)+1}});
+  let n=0,m=fromIso(monOf(isoDate(new Date())));if((wk[isoDate(m)]||0)<goal)m.setDate(m.getDate()-7);while((wk[isoDate(m)]||0)>=goal){n++;m.setDate(m.getDate()-7)}return n}
 function exportBackup(){
   const data=JSON.stringify({app:"atlas-muscular",version:2,exported:new Date().toISOString(),plans,workouts,rank,conf:CONF});
   const name=`atlas-backup-${isoDate(new Date())}.json`;
@@ -3111,10 +3238,10 @@ function bandsInfo(){return `<details class="about"><summary>Como as faixas fora
 /* ---------------------------------------------------------- cargas (load progress)
    Per exercise and per day: the heaviest set (kg × reps) and the estimated
    1-rep max, Epley: kg × (1 + reps/30). Only workouts marked as done count. */
-let pView=LS.get("atlas-pview","mus");if(!["mus","kg"].includes(pView))pView="mus";
+let pView=LS.get("atlas-pview","mus");if(!["mus","kg","ach"].includes(pView))pView="mus";
 let kgRange=LS.get("atlas-kgrange","3m");if(!["1m","3m","all"].includes(kgRange))kgRange="3m";
 let kgOpen=null,kgList=[];
-const pvSeg=()=>`<div class="seg pview" role="tablist" aria-label="Tipo de progresso"><button role="tab" data-pv="mus" aria-pressed="${pView==="mus"}">Músculos</button><button role="tab" data-pv="kg" aria-pressed="${pView==="kg"}">Força</button></div>`;
+const pvSeg=()=>`<div class="seg pview" role="tablist" aria-label="Tipo de progresso"><button role="tab" data-pv="mus" aria-pressed="${pView==="mus"}">Músculos</button><button role="tab" data-pv="kg" aria-pressed="${pView==="kg"}">Força</button><button role="tab" data-pv="ach" aria-pressed="${pView==="ach"}">${tx("Conquistas","Badges","Logros")}</button></div>`;
 const numKg=v=>{const n=parseFloat(String(v??"").replace(",","."));return isFinite(n)?n:NaN};
 const e1rm=(kg,r)=>r<=1?kg:kg*(1+r/30);
 const fkg=v=>(Math.round(v*10)/10).toLocaleString(LOC);
@@ -3236,6 +3363,7 @@ function applyRadSel(){
 }
 function renderProg(){
   if(pView==="kg")return renderKg();
+  if(pView==="ach"){$("progBody").innerHTML=`<div class="page-h"><h2>Progresso<button class="help" data-help="prog" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2></div>${pvSeg()}`+achHTML();return}
   const r=pRange(),T=tally(r),body=$("progBody"),B=BANDS[pMode];
   const gs=Object.keys(BASIC).map(g=>[g,T.grp[g]||0]);const done=gs.filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]),none=gs.filter(x=>!x[1]);
   const top=Math.max(B.bar,...done.map(x=>x[1]));
@@ -3250,6 +3378,7 @@ function renderProg(){
     <div id="pfigBox"></div>
     ${bandLegend(B)}
     <div class="pstat"><div><b>${T.days}</b><span>${T.days===1?"Treino":"Treinos"}</span></div><div><b>${T.sets}</b><span>Séries feitas</span></div><div><b>${done.length}</b><span>Grupos treinados</span></div></div>
+    ${T.sets?`<div class="row"><button class="btn" data-share="week">📤 ${tx("Cartão para Stories","Story card","Tarjeta para Stories")}</button></div>`:""}
   </div>
   ${over.length?`<div class="warnbox"><b>Muitas séries no mesmo treino</b>${over.map(([g,v])=>`${BASIC[g].n} (${nf(v)})`).join(", ")} ${over.length>1?"passaram":"passou"} de ~11 séries ${pOff===0?"hoje":"neste dia"}. Os estudos não mostram ganho extra a partir daí; vale dividir em outro dia da semana.</div>`:""}
   ${T.sets?radarCard(T,B):""}
@@ -3545,6 +3674,7 @@ function rankHTML(D){
   const hero=has?`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big" style="${lv===RLV.length-1?`background-image:${RHERO[lv]};color:transparent`:`color:${RHERO[lv]}`}">${RLV[lv][0]}</b>
       <span class="rk-sub">${RLV[lv][1]} · mais forte que ~${rPct(D.all)}% de quem treina, do mesmo sexo.</span>
       <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem" class="${i<lv?"past":i===lv?"now":""}"${i===lv?' aria-current="true"':""}><i style="background:${RHERO[i]}"></i>${x[0]}</span>`).join("")}</div>
+      <div class="row" style="margin-top:4px"><button class="btn rk-share" data-share="rank">📤 ${tx("Cartão para Stories","Story card","Tarjeta para Stories")}</button></div>
       <span class="rk-sub sm">${LANG==="en"?`${D.gs.length} of ${Object.keys(BASIC).length} groups rated · ${plural(D.list.length,"exercise")} · ${sex==="f"?"female":"male"} body, ${fkg(rBW())} kg${rank.bw>0?"":" (default)"}${rAgeF()<1?`, ${rAge()} years`:""}`:LANG==="es"?`${plural(D.gs.length,"grupo")} de ${Object.keys(BASIC).length} evaluado${D.gs.length===1?"":"s"} · ${plural(D.list.length,"ejercicio")} · cuerpo ${sex==="f"?"femenino":"masculino"}, ${fkg(rBW())} kg${rank.bw>0?"":" (por defecto)"}${rAgeF()<1?`, ${rAge()} años`:""}`:`${plural(D.gs.length,"grupo")} de ${Object.keys(BASIC).length} avaliado${D.gs.length===1?"":"s"} · ${plural(D.list.length,"exercício")} · corpo ${sex==="f"?"feminino":"masculino"}, ${fkg(rBW())} kg${rank.bw>0?"":" (padrão)"}${rAgeF()<1?`, ${rAge()} anos`:""}`}</span></div>`
     :`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big">Sem dados</b>
       <span class="rk-sub">Anote carga e repetições nos treinos da aba Hoje e marque como feito, ou digite aqui embaixo uma carga que você já levanta.</span>
