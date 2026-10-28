@@ -1781,7 +1781,7 @@ const BACK = [
   ["sh","panturrilha_soleo","M-24,84 C-24,110 -18,132 -10,150 L10,150 C18,132 24,112 26,90 C20,104 14,114 10,118 C4,112 -4,112 -10,114 C-16,108 -21,98 -24,84 Z"],
   ["sh","panturrilha_gastro","M-2,-4 C-16,0 -27,24 -27,56 C-27,82 -20,104 -10,112 C-6,108 -3,100 -2,90 Z M2,-4 C16,-2 29,22 29,54 C29,86 22,108 11,116 C7,112 4,104 2,94 Z"],
   ["t","trapezio_superior","M250,100 L236,100 C235,120 224,136 198,145 C186,148 176,150 168,151 C190,159 220,163 250,165 Z"],
-  ["t","trapezio_medio","M250,168 C222,166 196,162 172,156 C178,172 192,186 208,196 L250,200 Z"],
+  ["t","trapezio_medio","M250,168 C222,166 196,162 178,157 C183,172 194,186 208,196 L250,200 Z"],
   ["t","trapezio_inferior","M250,202 L211.5,198 C221.5,230 236,266 250,296 Z"],
   ["t","romboides","M209.5,202 C215.5,216 220.5,228 224.5,240 C218.5,242 212.5,242 208.5,240 C205.5,226 203.5,214 201.5,202 Z"],
   ["t","infraespinhal","M180,162 C173,182 175,202 183,218 C192,222 200,218 205,209 C201,198 197,188 193,178 C189,170 185,165 180,162 Z"],
@@ -1882,14 +1882,21 @@ function addFib(g,d,spec,tor){const fd=fibD(d,spec,tor);if(!fd)return;
    the midline, by height; each limb frame is rebuilt from the shoulder or hip
    so the joints stay connected. w = [y, sideways scale]. */
 const BODY={
-  /* owner (Oct 2026): more typical silhouettes — broader shoulders and a less pinched waist for the man,
-     wider hips for the woman. S (shoulder joint) and H (hip joint) follow the torso scale at their height. */
-  m:{w:[[0,1],[130,1],[175,1.05],[230,1.05],[270,1.07],[330,1.17],[370,1.17],[420,1.08],[470,1.02],[540,1]],delt:.05,
-     head:[37,54,60],S:[162.3,168],arm:[[14,150,1],[8,125,1],[5,0,1]],
-     H:[213.3,468],leg:[[-1.5,200,1],[0.5,178,1]]},
-  f:{w:[[0,.9],[96,.84],[120,.84],[245,.84],[295,.86],[345,.88],[398,.98],[440,1.07],[482,1.14],[512,1.13],[540,1.1]],delt:-.04,
-     head:[34,51,62],S:[181.5,170],arm:[[14,148,.79],[8,121,.8],[5,0,.86]],
-     H:[209.3,472],leg:[[-2.5,198,1.12],[0.5,176,.95]]}
+  /* owner (Oct 2026): the man like a bodybuilding anatomy chart — high traps, thick neck, wide round shoulders,
+     big arms, full chest and wide lats, thick thighs with the quad sweep and big calves; the woman stronger too.
+     w = torso sideways scale by height; delt = extra on the outer shoulders; trap = how far the trapezius rises
+     towards the ears; lw = limb thickness along each limb [pivot x (+ = inner side), [[local y, scale]…]].
+     S (shoulder joint) and H (hip joint) follow the torso scale at their height. */
+  m:{w:[[0,1],[105,1.1],[135,1.22],[175,1.14],[230,1.14],[265,1.16],[310,1.12],[350,1.1],[400,1.1],[440,1.06],[540,1.05]],delt:.1,trap:26,
+     head:[35,51,60],S:[153,165],arm:[[17,150,1],[9,125,1],[5,0,1]],
+     H:[211.8,468],leg:[[0,200,1],[1,178,1]],
+     lw:{ua:[0,[[-8,1.12],[30,1.3],[75,1.38],[125,1.28],[162,1.12]]],fa:[0,[[-12,1.18],[20,1.3],[60,1.22],[132,1.04]]],
+         th:[34,[[-54,1],[-10,1.06],[40,1.3],[120,1.3],[185,1.1],[216,1.05]]],sh:[20,[[-14,1.1],[25,1.28],[65,1.3],[115,1.12],[150,1],[230,1]]]}},
+  f:{w:[[0,.9],[96,.86],[120,.87],[245,.87],[295,.88],[345,.9],[398,1],[440,1.08],[482,1.15],[512,1.15],[540,1.12]],delt:0,trap:0,
+     head:[34,51,62],S:[178.1,170],arm:[[15,148,.86],[8,121,.86],[5,0,.88]],
+     H:[209,472],leg:[[-2,198,1.12],[0.5,176,1]],
+     lw:{ua:[0,[[-8,1.04],[40,1.12],[90,1.12],[162,1.04]]],fa:[0,[[-12,1.06],[30,1.1],[132,1]]],
+         th:[34,[[-54,1.02],[0,1.06],[60,1.14],[130,1.1],[216,1.02]]],sh:[20,[[-14,1.04],[45,1.12],[110,1.04],[150,1],[230,1]]]}}
 };
 let sex=(()=>{try{return localStorage.getItem("atlas-sex")==="f"?"f":"m"}catch(e){return "m"}})();
 let BD,FRX,JPT;
@@ -1900,14 +1907,24 @@ function shapeBody(){
   chain(BD.S,["ua","fa","hd"],BD.arm);const ank=chain(BD.H,["th","sh"],BD.leg);
   JPT={ombro:[pts.ua[0],pts.ua[1]-2],cotovelo:pts.fa,punho:pts.hd,quadril:[pts.th[0]-4,pts.th[1]-4],joelho:[pts.sh[0],pts.sh[1]-1],tornozelo:ank};
 }
-function wscale(y){const w=BD.w;if(y<=w[0][0])return w[0][1];
+/* smooth interpolation through [y, value] points */
+function lerpS(w,y){if(y<=w[0][0])return w[0][1];
   for(let i=1;i<w.length;i++)if(y<=w[i][0]){const [y0,s0]=w[i-1],[y1,s1]=w[i];const t=(y-y0)/(y1-y0);return s0+(s1-s0)*t*t*(3-2*t)}
   return w[w.length-1][1]}
+const wscale=y=>lerpS(BD.w,y);
 /* shoulder width tweak (delt: + wider for the man, − narrower for the woman): the outer part of the torso between y 140 and 250 */
 const bump=y=>y<=135||y>=255?0:Math.sin(Math.PI*(y-135)/120);
+/* trapezius lift: the part of the torso between the neck and the shoulder moves up (most halfway out), fading
+   below the collarbone */
+const trapLift=(x,y)=>{if(!BD.trap)return 0;const dx=Math.abs(250-x);if(dx<=14||dx>=95||y<=70||y>=212)return 0;
+  /* the fades are long enough that points never swap order (no folds) */
+  const g=Math.sin(Math.PI*(dx-14)/81),h=y<130?(y-70)/60:y<=162?1:1-(y-162)/50;return BD.trap*g*h*h*(3-2*h)};
 const warp=d=>d.replace(/(-?\d*\.?\d+),(-?\d*\.?\d+)/g,(_,x,y)=>{x=+x;y=+y;let nx=250-(250-x)*wscale(y);
-  if(x<196)nx-=BD.delt*(196-x)*bump(y);return nx.toFixed(1)+","+y});
-const PD=(f,d)=>f==="t"?warp(d):d;
+  if(x<196)nx-=BD.delt*(196-x)*bump(y);return nx.toFixed(1)+","+(y-trapLift(x,y)).toFixed(1)});
+/* limb thickness: scale x around the pivot by an amount that changes along the limb (belly of the muscle) */
+const lwarp=(f,d)=>{const L=BD.lw&&BD.lw[f];if(!L)return d;const [c,w]=L;
+  return d.replace(/(-?\d*\.?\d+),(-?\d*\.?\d+)/g,(_,x,y)=>{x=+x;y=+y;return (c+(x-c)*lerpS(w,y)).toFixed(1)+","+y})};
+const PD=(f,d)=>f==="t"?warp(d):lwarp(f,d);
 /* head outline from its half width, half height and centre */
 function headPath(rx,ry,cy){const t=cy-ry,b=cy+ry*.98,p=(x,y)=>`${(250+x).toFixed(1)},${y.toFixed(1)}`;
   return `M${p(0,t)} C${p(-rx*.6,t)} ${p(-rx,t+ry*.3)} ${p(-rx,cy-ry*.12)} C${p(-rx,cy+ry*.18)} ${p(-rx*.93,cy+ry*.38)} ${p(-rx*.8,cy+ry*.55)} C${p(-rx*.62,cy+ry*.78)} ${p(-rx*.36,b)} ${p(0,b)} C${p(rx*.36,b)} ${p(rx*.62,cy+ry*.78)} ${p(rx*.8,cy+ry*.55)} C${p(rx*.93,cy+ry*.38)} ${p(rx,cy+ry*.18)} ${p(rx,cy-ry*.12)} C${p(rx,t+ry*.3)} ${p(rx*.6,t)} ${p(0,t)} Z`}
