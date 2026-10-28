@@ -168,6 +168,9 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .bar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-block:10px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px}
 .seg{display:inline-flex;background:var(--chip);border-radius:10px;padding:3px}
 .seg button{border:0;background:none;padding:6px 14px;border-radius:8px;font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tgl{border:0;background:var(--chip);border-radius:10px;padding:9px 16px;font-family:var(--f-display);font-weight:600;font-size:15px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink);min-width:96px}
+.tgl-sex{min-width:0;display:inline-grid;place-items:center;padding:8px 14px}.tgl-sex svg{width:19px;height:19px;display:block;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.tgl:active{transform:scale(.96)}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
 .zoom{display:inline-flex;gap:4px}
 .zoom button{border:1px solid var(--line);background:var(--surface);border-radius:10px;min-width:36px;height:36px;font-weight:600;font-size:16px;display:inline-grid;place-items:center;padding:0 8px}
@@ -615,15 +618,9 @@ button.brand:hover{background:var(--chip)}
           <button data-model="bas" aria-pressed="false">Básico</button>
           <button data-model="art" aria-pressed="false">Articulações</button>
         </div>
-        <div class="seg" role="group" aria-label="Vista">
-          <button id="vFront" data-v="front" aria-pressed="true">Frente</button>
-          <button id="vBack" data-v="back" aria-pressed="false">Costas</button>
-          <button id="vBoth" class="both" data-v="both" aria-pressed="false">Ambos</button>
-        </div>
-        <div class="seg sex" role="group" aria-label="Corpo">
-          <button data-sex="m" aria-pressed="true" aria-label="Corpo masculino" title="Masculino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="14.5" r="5.5"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg></button>
-          <button data-sex="f" aria-pressed="false" aria-label="Corpo feminino" title="Feminino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5V22M8.5 18.5h7"/></svg></button>
-        </div>
+        <!-- one button each (owner: simpler): it shows the current view / body and switches on tap -->
+        <button class="tgl" id="vTgl" data-notr>Frente</button>
+        <button class="tgl tgl-sex" id="sexTgl" data-notr><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="14.5" r="5.5"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg></button>
         <div class="zoom">
           <button id="zIn" aria-label="Aproximar">+</button>
           <button id="zOut" aria-label="Afastar">−</button>
@@ -715,6 +712,8 @@ button.brand:hover{background:var(--chip)}
 const LANG=(()=>{try{const c=JSON.parse(localStorage.getItem("atlas-conf")||"null");if(c&&["pt","en","es"].includes(c.lang))return c.lang}catch(e){}
   const n=navigator.language||"pt";return /^pt\b/i.test(n)?"pt":/^es\b/i.test(n)?"es":"en"})();
 const LOC={pt:"pt-BR",en:"en-US",es:"es-ES"}[LANG];
+/* texts written in place in the 3 languages (newer features use this instead of the EN_/ES_ tables) */
+const tx=(pt,en,es)=>LANG==="en"?en:LANG==="es"?es:pt;
 document.documentElement.lang={pt:"pt-BR",en:"en",es:"es"}[LANG];
 const EN_DATA={
 /* exercise families, variation axes and options, muscles, joints, sources */
@@ -1952,7 +1951,8 @@ function applyVB(){svg.setAttribute("viewBox",vb.map(n=>n.toFixed(2)).join(" "))
 function setView(v,keepZoom){
   if(v==="both"&&narrow())v="front";
   view=v;try{localStorage.setItem("atlas-view",v)}catch(e){}
-  document.querySelectorAll("[data-v]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.v===v));
+  const vt=document.getElementById("vTgl");if(vt){const nx=nextView(v);vt.textContent=v==="front"?tx("Frente","Front","Frente"):v==="back"?tx("Costas","Back","Espalda"):tx("Ambos","Both","Ambos");
+    const nl=nx==="front"?tx("frente","front","frente"):nx==="back"?tx("costas","back","espalda"):tx("ambos","both","ambos");vt.title=vt.ariaLabel=tx(`Vista: toque para ver ${nl}`,`View: tap to see ${nl}`,`Vista: toca para ver ${nl}`)}
   VG.front.style.display=(v==="back")?"none":"";VG.back.style.display=(v==="front")?"none":"";
   if(!keepZoom){vb=[...BOX[v]];applyVB()}
 }
@@ -1969,7 +1969,8 @@ function clampVB(){
   vb[0]=Math.min(Math.max(vb[0],b[0]-vb[2]*0.3),b[0]+b[2]-vb[2]*0.7);
   vb[1]=Math.min(Math.max(vb[1],b[1]-vb[3]*0.3),b[1]+b[3]-vb[3]*0.7);
 }
-document.querySelectorAll(".seg [data-v]").forEach(b=>b.addEventListener("click",()=>setView(b.dataset.v)));
+const nextView=v=>v==="front"?"back":v==="back"&&!narrow()?"both":"front";
+document.getElementById("vTgl").addEventListener("click",()=>setView(nextView(view)));
 document.getElementById("zIn").onclick=()=>zoomAt(1.4);
 document.getElementById("zOut").onclick=()=>zoomAt(1/1.4);
 document.getElementById("zReset").onclick=()=>{vb=[...BOX[view]];applyVB()};
@@ -2165,12 +2166,14 @@ function setModel(m){if(m==="art")build=null;
   paint();render();
 }
 document.querySelectorAll("[data-model]").forEach(b=>b.onclick=()=>setModel(b.dataset.model));
+const SEXSVG={m:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="14.5" r="5.5"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg>',f:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5V22M8.5 18.5h7"/></svg>'};
+function sexTgl(){const b=document.getElementById("sexTgl");if(!b)return;b.innerHTML=SEXSVG[sex];b.title=b.ariaLabel=sex==="m"?tx("Corpo masculino: toque para feminino","Male body: tap for female","Cuerpo masculino: toca para femenino"):tx("Corpo feminino: toque para masculino","Female body: tap for male","Cuerpo femenino: toca para masculino")}
 function setSex(x){
   sex=x;try{localStorage.setItem("atlas-sex",x)}catch(e){}
-  document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===x));
+  document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===x));sexTgl();
   buildFigure();setView(view,true);paint();
 }
-document.querySelectorAll("[data-sex]").forEach(b=>b.onclick=()=>setSex(b.dataset.sex));
+document.getElementById("sexTgl").addEventListener("click",()=>setSex(sex==="m"?"f":"m"));sexTgl();
 document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===sex));
 
 function viewsOf(ids){const s=new Set();ids.forEach(i=>(inViews[i]||[]).forEach(v=>s.add(v)));return s}
@@ -2754,7 +2757,6 @@ $("treinoBody").addEventListener("click",e=>{
    A live workout is a normal workout (done:false) with w.start; `live` = {wid, i, j} is the exercise and set on
    screen. "Série feita" saves the set (s.ok), checks for a record, starts the rest timer and moves on.
    "Concluir" marks it done (w.done=true, w.dur in seconds). New texts use tx(pt,en,es) directly. */
-const tx=(pt,en,es)=>LANG==="en"?en:LANG==="es"?es:pt;
 let hView=LS.get("atlas-hview","reg");if(!["reg","live"].includes(hView))hView="reg";
 let live=LS.get("atlas-live",null),liveSum=null,lvHow=false;
 const saveLive=()=>LS.set("atlas-live",live);

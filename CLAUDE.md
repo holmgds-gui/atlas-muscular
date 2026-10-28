@@ -26,7 +26,7 @@ App de academia em português (pt-BR), instalável no celular (PWA), publicado p
 - Cada aba tem um **+** pequeno ao lado do título que abre uma ajuda da página.
 - **Idioma** (português / inglês / espanhol, tudo traduzido a pedido do dono): `LANG` (`pt`/`en`/`es`) é lido no início (Configurações › Idioma; na primeira vez segue o idioma do celular: pt → português, es → espanhol, outro → inglês) e trocar recarrega o app. Inglês e espanhol usam as mesmas chaves em português: `EN_DATA`/`EN_UI`/`EN_PAT` e `ES_DATA`/`ES_UI`/`ES_PAT`; o código usa `TR_D`/`TR_U`/`TR_P` (a tabela do idioma atual). Duas camadas:
   1. Dados (exercícios, variações, notas, músculos, articulações, fontes) traduzidos no lugar por `trData()` com `TR_D` antes de montar as listas. No espanhol o sufixo do banco concorda com o nome ("Press de banca plano", "Aperturas planas": `SUFM`/`SUFF`); no inglês vira prefixo ("Flat bench press"). No espanhol o nome em inglês continua como subtítulo do cartão. A busca continua aceitando nomes em português (`f.np`, `f._pt`, `o.npt`) e usa `famPop()` para desempatar.
-  2. Todo o resto passa pelo tradutor da página (`trStr`, `trEl` e um `MutationObserver`): cada texto, `title`, `aria-label` e `placeholder` é procurado em `TR_U` (texto exato), `TR_D` ou `TR_P` (texto com números/nomes, `{0}`, `{1}`…). Datas usam `LOC`; dias em `DAYS`/`DSH`. Trechos montados no código usam `LANG==="en"?…:LANG==="es"?…:…`.
+  2. Todo o resto passa pelo tradutor da página (`trStr`, `trEl` e um `MutationObserver`): cada texto, `title`, `aria-label` e `placeholder` é procurado em `TR_U` (texto exato), `TR_D` ou `TR_P` (texto com números/nomes, `{0}`, `{1}`…). Datas usam `LOC`; dias em `DAYS`/`DSH`. Trechos montados no código usam `tx(pt,en,es)` (definido logo depois de `LANG`) ou `LANG==="en"?…:LANG==="es"?…:…`.
   - **Regra**: todo texto novo na interface precisa de entrada em `EN_UI`/`EN_PAT` **e** em `ES_UI`/`ES_PAT` (ou de um ternário com os três idiomas), senão aparece em português. Use `data-notr` em elementos que não devem ser traduzidos. Teste rodando o app com `locale:"en-US"` e `"es-ES"` e comparando com o português (textos iguais = sobras).
   - Níveis do ranking em inglês: Amoeba, Rookie, Chicken, Rooster, Buff, Beefy, Monster, Legend, Freak. Em espanhol: Ameba, Aprendiz, Pollito, Gallo, Fuertecito, Macizo, Monstruo, Leyenda, Fenómeno.
 
@@ -46,7 +46,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v47` → `atlas-v48`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v48` → `atlas-v49`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 
@@ -110,7 +110,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 - **Sinergistas**: cada exercício tem uma lista canônica de músculos envolvidos, em ordem de importância. A lista de sinergistas mostrada para um músculo é essa lista menos ele mesmo, então é igual em qualquer tela. Estabilizadores só entram quando o exercício os treina de propósito (prancha, caminhada do fazendeiro, pegada pesada). Exercícios sem sinergista visível aparecem como "Isolado".
 - Sinergistas ficam laranja **só ao tocar num exercício**, nunca ao tocar só no músculo.
 - **Selos**: Hipertrofia (vermelho), Estudo EMG (escuro), Biomecânica (contorno).
-- **Corpo**: físico "atlético natural", com cara de quem treina mas sem exagero. Silhueta natural com braços um pouco abertos e cinza sólido (escolha do dono; referência: pranchas de anatomia lisas). No computador o Atlas abre com frente e costas lado a lado ("Ambos"); no celular, a última vista usada. Botão ♂/♀ em SVG (o glifo de fonte ficava torto no iPhone).
+- **Corpo**: físico "atlético natural", com cara de quem treina mas sem exagero. Silhueta natural com braços um pouco abertos e cinza sólido (escolha do dono; referência: pranchas de anatomia lisas). No computador o Atlas abre com frente e costas lado a lado ("Ambos"); no celular, a última vista usada. Botão ♂/♀ em SVG (o glifo de fonte ficava torto no iPhone). Vista e corpo são **um botão cada** (pedido do dono, mais simples): `#vTgl` mostra a vista atual e troca ao tocar (celular: frente ↔ costas; computador: frente → costas → ambos, `nextView()`), `#sexTgl` mostra ♂ ou ♀ e troca (`sexTgl()`). O ranking e as Configurações continuam com os dois botões ♂/♀.
 - **Celular**: boneco grande até escolher algo; depois ele fica pequeno no canto superior esquerdo e a lista cobre a tela. Vale também para Articulações.
 - **Faixas do Progresso**
   - Semana: 0 · 1–3 abaixo do mínimo · 4–9 moderado · 10–20 ideal · 20+ volume alto.
