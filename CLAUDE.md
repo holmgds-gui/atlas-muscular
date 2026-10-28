@@ -40,7 +40,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v37` → `atlas-v38`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v38` → `atlas-v39`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 
@@ -57,9 +57,11 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
   - `LEGACY`: nome antigo → ref, para treinos salvos antes. `refByName`/`exInfo(name, ref)` resolvem qualquer nome (antigo ou novo).
   - Busca (`famSearch`): nomes de academia (`aka`), rótulos das opções e sinônimos (`OSYN`); palavras que batem com uma opção já a escolhem; ignora "com/de/na…".
   - Evidência: `H` (estudo de hipertrofia), `E` (EMG), `B` (biomecânica). A lista já está **ordenada por estímulo**: crescimento > EMG > mecânica.
-- **Boneco**
-  - `FR`, `SKIN`, `EXTR`, `FRONT`, `BACK`, `DECO`, `TEND`: caminhos SVG. Metade esquerda desenhada e espelhada. Membros em referenciais locais.
-  - `BODY` (m/f) + `shapeBody()` + `warp()`: as duas silhuetas atléticas. O tronco é escalado de lado conforme a altura (`w`), com um leve volume extra no deltoide (`delt`). Os membros são reconstruídos a partir do ombro (`S`) e do quadril (`H`), e as juntas (`JPT`) acompanham.
+- **Boneco** (redesenhado a pedido do dono para ficar natural, no estilo de pranchas de anatomia: pose em pé com os braços um pouco abertos, ~8 cabeças de altura, mãos com dedos e pés; músculos em cinza sólido sobre a "pele" mais clara, sem fibras nem degradê)
+  - `SKIN` (base do corpo), `EXTR.front/back` (mãos e pés), `FRONT`, `BACK` (clicáveis), `DECO` (músculos de enfeite: esternocleidomastoide, sartório, tibial), `TEND`, `LINES` (dedos): caminhos SVG. Metade esquerda desenhada e espelhada. Músculos dos membros vêm antes no array, para os do tronco (deltoide, glúteos) ficarem por cima.
+  - O tronco ("t") está em coordenadas da página do corpo masculino; os membros em referenciais locais (y ao longo do membro, −x lateral). `headPath()`/`earPath()` desenham a cabeça a partir de `BD.head` = [meia largura, meia altura, centro].
+  - `BODY` (m/f) + `shapeBody()` + `warp()`: masculino sem distorção (`w`=1); o feminino estreita o tronco por altura (`w`) e alarga o quadril, com ombros (`S`), braços e pernas próprios. Ângulos: braço 14°, antebraço 8°, coxa −1,5° (joelho para dentro).
+  - Cores: `--m` (músculo), `--fig-skin` (pele e separação entre músculos), `--fig-art`/`--fig-art2` (modo Articulações). Classe `.ext` = cabeça, mãos e pés.
   - O feminino tem cabelo preso (coque), contorno suave dos seios (`BREAST`, sem clique) e ombros, cintura e quadril próprios.
   - `buildFigure()` redesenha tudo ao trocar ♂/♀.
 - **Zoom/pan**: `BOX`, `vb`, `setView`, `zoomAt`, gestos de ponteiro.
@@ -96,7 +98,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 - **Sinergistas**: cada exercício tem uma lista canônica de músculos envolvidos, em ordem de importância. A lista de sinergistas mostrada para um músculo é essa lista menos ele mesmo, então é igual em qualquer tela. Estabilizadores só entram quando o exercício os treina de propósito (prancha, caminhada do fazendeiro, pegada pesada). Exercícios sem sinergista visível aparecem como "Isolado".
 - Sinergistas ficam laranja **só ao tocar num exercício**, nunca ao tocar só no músculo.
 - **Selos**: Hipertrofia (vermelho), Estudo EMG (escuro), Biomecânica (contorno).
-- **Corpo**: físico "atlético natural", com cara de quem treina mas sem exagero. Botão ♂/♀ em SVG (o glifo de fonte ficava torto no iPhone).
+- **Corpo**: físico "atlético natural", com cara de quem treina mas sem exagero. Silhueta natural com braços um pouco abertos e cinza sólido (escolha do dono; referência: pranchas de anatomia lisas). No computador o Atlas abre com frente e costas lado a lado ("Ambos"); no celular, a última vista usada. Botão ♂/♀ em SVG (o glifo de fonte ficava torto no iPhone).
 - **Celular**: boneco grande até escolher algo; depois ele fica pequeno no canto superior esquerdo e a lista cobre a tela. Vale também para Articulações.
 - **Faixas do Progresso**
   - Semana: 0 · 1–3 abaixo do mínimo · 4–9 moderado · 10–20 ideal · 20+ volume alto.
