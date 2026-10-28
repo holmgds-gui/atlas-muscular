@@ -116,6 +116,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - Funcionando: perfil (nome, peso, corpo; idade, altura e experiência guardadas), tema, cor de destaque, tamanho da letra, reduzir animações, séries × reps padrão, meta semanal, backup (saiu da aba Hoje), apagar dados, compartilhar, sugestões, fontes e versão.
   - "Em breve": idioma, libras, timer de descanso, lembretes, sons, vibração, conta e sincronização.
   - Correção junto: importar backup não salvava o histórico de treinos.
+- **Inglês** (pedido do dono, com escolha "Tudo" e "seguir o celular + trocar nas Configurações"): interface, ajudas, 98 exercícios com variações e explicações, músculos, articulações, ranking (Amoeba, Rookie, Chicken, Rooster, Buff, Beefy, Monster, Legend, Freak) e configurações. A busca aceita nomes em inglês e em português nos dois idiomas. Espanhol fica "em breve".
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)

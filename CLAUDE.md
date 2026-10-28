@@ -15,8 +15,14 @@ App de academia em português (pt-BR), instalável no celular (PWA), publicado p
 - O título "Atlas Muscular" (`#brandBtn`) leva sempre para o Atlas.
 - **Configurações** (aba `conf`, `#tab-conf`, `renderConf()`): abre pela engrenagem no canto superior direito, ao lado da busca (`#gearBtn`). Ajustes em `CONF` (`localStorage` `atlas-conf`, padrões em `CONF_DEF`, `applyConf()`; vai no backup).
   - Funcionam: nome (saudação na aba Hoje), peso e ♂/♀ (os mesmos do ranking), tema (`data-theme`), cor de destaque (`--accent`: título, aba atual e interruptores; o músculo-alvo continua vermelho), tamanho da letra (classes `fs-s`/`fs-l`; `buildFsCSS()` copia todo `font-size` em px das folhas de estilo com fator 0,9/1,15, menos cabeçalho, abas e grade da semana; `zoom` falhou), reduzir animações (`noanim`), séries × reps padrão ao adicionar exercício, meta semanal ("2 de 4 treinos" na grade de Hoje), backup (saiu da aba Hoje), apagar histórico/cargas digitadas/tudo (com confirmação), compartilhar, sugestões (issue no GitHub), fontes e versão (lida do cache do service worker).
-  - Guardados mas "em breve" (pedido do dono: mostrar mesmo sem função): idioma, libras, timer de descanso, lembrete de treino (dias e hora), sons, vibração, conta e sincronização; idade, altura e experiência ficam só no perfil.
+  - Idioma: português ou inglês (ver **Idioma** abaixo); espanhol "em breve".
+  - Guardados mas "em breve" (pedido do dono: mostrar mesmo sem função): libras, timer de descanso, lembrete de treino (dias e hora), sons, vibração, conta e sincronização; idade, altura e experiência ficam só no perfil.
 - Cada aba tem um **+** pequeno ao lado do título que abre uma ajuda da página.
+- **Idioma** (português / inglês, tudo traduzido a pedido do dono): `LANG` é lido no início (Configurações › Idioma; na primeira vez segue o idioma do celular) e trocar recarrega o app. Duas camadas:
+  1. Dados (exercícios, variações, notas, músculos, articulações, fontes) traduzidos no lugar por `trData()` com `EN_DATA` antes de montar as listas. A busca continua aceitando nomes em português (`f.np`, `f._pt`, `o.npt`) e usa `famPop()` para desempatar.
+  2. Todo o resto passa pelo tradutor da página (`trStr`, `trEl` e um `MutationObserver`): cada texto, `title`, `aria-label` e `placeholder` é procurado em `EN_UI` (texto exato) ou `EN_PAT` (texto com números/nomes, `{0}`, `{1}`…). Ajudas longas têm versão em inglês própria. Datas usam `LOC`; dias em `DAYS`/`DSH`.
+  - **Regra**: todo texto novo na interface precisa de entrada em `EN_UI` ou `EN_PAT` (ou de um `LANG==="en"?…:…`), senão aparece em português no modo inglês. Use `data-notr` em elementos que não devem ser traduzidos. Teste rodando o app com `locale:"en-US"` e procurando sobras em português.
+  - Níveis do ranking em inglês: Amoeba, Rookie, Chicken, Rooster, Buff, Beefy, Monster, Legend, Freak.
 
 Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-gui`. Uma conta errada (`davigms-pve`) já apareceu conectada uma vez; ela **não** é do dono, não use.
 
@@ -34,7 +40,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v36` → `atlas-v37`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v37` → `atlas-v38`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 

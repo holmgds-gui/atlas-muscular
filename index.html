@@ -623,6 +623,605 @@ button.brand:hover{background:var(--chip)}
 <input type="file" id="importFile" accept="application/json,.json" hidden>
 
 <script>
+/* ------------------------------------------------------------------ language (pt / en)
+   LANG comes from Configurações (atlas-conf.lang); the first time it follows the phone.
+   English works in two layers:
+   1. data (exercises, variations, muscles, joints, sources) is translated in place at start
+      with EN_DATA (see trData in the main script), so names built from it come out in English;
+   2. everything else on screen goes through the DOM translator below: every text node and
+      title/aria-label/placeholder is looked up in EN_UI (exact text) or EN_PAT (text with
+      numbers or names in it, written with {0} {1}…). Long help texts have their own English. */
+const LANG=(()=>{try{const c=JSON.parse(localStorage.getItem("atlas-conf")||"null");if(c&&(c.lang==="pt"||c.lang==="en"))return c.lang}catch(e){}
+  return /^pt\b/i.test(navigator.language||"pt")?"pt":"en"})();
+const LOC=LANG==="en"?"en-US":"pt-BR";
+document.documentElement.lang=LANG==="en"?"en":"pt-BR";
+const EN_DATA={
+/* exercise families, variation axes and options, muscles, joints, sources */
+"Supino":"Bench press","Crucifixo":"Chest fly","Supino no landmine":"Landmine press","Flexão de braço":"Push-up","Mergulho":"Dip",
+"Desenvolvimento":"Shoulder press","Elevação frontal":"Front raise","Flexão pike":"Pike push-up","Elevação lateral":"Lateral raise",
+"Elevação em Y":"Y raise","Elevações I-Y-T de bruços":"Prone I-Y-T raises","Abdução horizontal deitado de bruços (T)":"Prone horizontal abduction (T)",
+"Remada alta":"Upright row","Crucifixo inverso":"Reverse fly","Face pull":"Face pull","Rotação externa":"External rotation","Cuban press":"Cuban press",
+"Rosca direta":"Biceps curl","Rosca Scott":"Preacher curl","Rosca inclinada":"Incline curl","Rosca concentrada":"Concentration curl","Rosca spider":"Spider curl",
+"Rosca na polia alta (duplo bíceps)":"High cable curl (double biceps)","Rosca drag (barra rente ao corpo)":"Drag curl (bar close to the body)","Rosca 21":"21s curl",
+"Rosca Zottman":"Zottman curl","Tríceps na polia":"Triceps pushdown","Tríceps francês (acima da cabeça)":"Overhead triceps extension","Tríceps testa":"Skull crusher",
+"Tríceps coice":"Triceps kickback","JM press":"JM press","Tríceps na máquina":"Triceps machine","Rosca de punho":"Wrist curl","Caminhada do fazendeiro":"Farmer's walk",
+"Pendurar na barra fixa":"Dead hang","Rolo de punho":"Wrist roller","Encolhimento":"Shrug","Levantamento terra":"Deadlift","Stiff (terra romeno)":"Romanian deadlift",
+"Bom dia":"Good morning","Remada curvada":"Bent-over row","Remada baixa":"Seated row","Remada com peito apoiado":"Chest-supported row",
+"Remada unilateral (serrote)":"One-arm row","Remada invertida":"Inverted row","Barra fixa":"Pull-up","Puxada alta":"Lat pulldown",
+"Depressão escapular na barra fixa":"Scapular pull-up","Pullover":"Pullover","Extensão lombar":"Back extension","Bird-dog (quatro apoios)":"Bird-dog",
+"Soco do serrátil":"Serratus punch","Elevação no plano da escápula acima de 120°":"Scaption above 120°","Flexão com protração (push-up plus)":"Push-up plus",
+"Prancha com protração":"Plank with protraction","Deslizamento na parede com rolo":"Wall slide with foam roller","Abdominal":"Crunch",
+"Abdominal bicicleta":"Bicycle crunch","Abdominal reverso":"Reverse crunch","Elevação de pernas":"Leg raise","Dragon flag":"Dragon flag",
+"Tesoura (flutter kicks)":"Flutter kicks","Prancha":"Plank","Prancha lateral":"Side plank","Lenhador (woodchopper)":"Woodchopper","Pallof press":"Pallof press",
+"Rotação russa":"Russian twist","Limpador de para-brisa na barra":"Hanging windshield wiper","Flexão lateral do tronco":"Side bend","Roda abdominal":"Ab wheel rollout",
+"Elevação pélvica":"Hip thrust","Coice (extensão de quadril)":"Glute kickback","Kettlebell swing":"Kettlebell swing","Abdução de quadril":"Hip abduction",
+"Caminhada lateral com elástico":"Banded lateral walk","Ostra com elástico":"Banded clamshell","Hidrante (quatro apoios)":"Fire hydrant",
+"Elevação de joelho na polia":"Cable knee raise","Adução de quadril":"Hip adduction","Prancha de Copenhagen":"Copenhagen plank","Agachamento":"Squat",
+"Agachamento hack":"Hack squat","Leg press":"Leg press","Agachamento sissy":"Sissy squat","Agachamento espanhol (com faixa)":"Spanish squat (with band)",
+"Afundo":"Lunge","Subida no banco (step-up)":"Step-up","Agachamento unilateral":"Pistol squat","Afundo lateral":"Lateral lunge","Cadeira extensora":"Leg extension",
+"Cadeira flexora":"Leg curl","Flexão nórdica":"Nordic curl","Glute-ham raise":"Glute-ham raise","Flexão de pernas na bola suíça":"Stability ball leg curl",
+"Abdominal canivete (V-up)":"V-up","Levantamento terra parcial (rack pull)":"Rack pull","Panturrilha":"Calf raise","Pular corda":"Jump rope",
+"Banco":"Bench","Equipamento":"Equipment","Largura":"Width","Pegada":"Grip","Banco / direção":"Bench / direction","Braços":"Arms","Inclinação":"Incline",
+"Mãos":"Hands","Apoio":"Support","Tronco":"Torso","Posição":"Position","Pés":"Feet","Cotovelo":"Elbow","Braço":"Arm","Palma":"Palm","Lado":"Side","Estilo":"Style",
+"Pernas":"Legs","Cotovelos":"Elbows","Carga":"Load","Pegador":"Handle","Onde":"Where","Variação":"Variation","Direção":"Direction","Joelho":"Knee",
+"Profundidade":"Depth","Máquina":"Machine","Tipo":"Type","Encosto":"Backrest",
+"reto":"flat","inclinado":"incline","declinado":"decline","barra":"barbell","halteres":"dumbbells","Smith":"Smith","máquina":"machine","média":"medium",
+"aberta":"wide","fechada":"close","pronada":"overhand","neutra (halteres)":"neutral (dumbbells)","supinada (invertida)":"underhand (reverse)",
+"polia (crossover)":"cable (crossover)","máquina (voador)":"machine (pec deck)","dois braços":"both arms","alternado":"alternating","um braço":"one arm",
+"landmine":"landmine","no chão":"on the floor","pés elevados":"feet elevated","mãos elevadas":"hands elevated","largura dos ombros":"shoulder width",
+"abertas":"wide","juntas (diamante)":"close (diamond)","chão":"floor","bola suíça":"stability ball","suspensa (TRX)":"suspended (TRX)","tronco reto":"upright torso",
+"tronco à frente":"torso leaning forward","paralelas":"parallel bars","máquina / assistido":"machine / assisted","banco (atrás do corpo)":"bench (behind the body)",
+"sentado":"seated","em pé":"standing","neutra":"neutral","Arnold (girando)":"Arnold (rotating)","polia":"cable","anilha":"plate","supinada":"underhand",
+"pés no chão":"feet on the floor","elástico":"band","inclinado para o lado":"leaning to the side","deitado de lado":"side-lying","cabo por trás do corpo":"cable behind the body",
+"levemente dobrado":"slightly bent","dobrado a 90°":"bent at 90°","polia (em pé)":"cable (standing)","halteres (deitado de bruços)":"dumbbells (lying face down)",
+"halteres leves":"light dumbbells","sem peso":"no weight","barra W":"EZ bar","máquina (voador inverso)":"machine (reverse pec deck)",
+"peito apoiado no banco inclinado":"chest on an incline bench","polia cruzada":"crossed cables","polia com corda":"cable with rope","halter":"dumbbell",
+"em pé, braço colado":"standing, arm at your side","braço a 90°":"arm at 90°","neutra (martelo)":"neutral (hammer)","pronada (inversa)":"overhand (reverse)",
+"barra reta":"straight bar","à frente":"in front","cruzando o corpo":"across the body","halteres (banco inclinado)":"dumbbells (incline bench)",
+"polia de costas (Bayesian)":"cable facing away (Bayesian)","barra (pronada)":"bar (overhand)","corda (neutra)":"rope (neutral)","barra supinada":"underhand bar",
+"para cima (flexores)":"palms up (flexors)","para baixo (extensores)":"palms down (extensors)","antebraço no banco":"forearm on the bench",
+"barra por trás das costas":"bar behind the back","kettlebell":"kettlebell","barra hexagonal":"trap bar","dois lados":"both sides","um lado (mala)":"one side (suitcase)",
+"duas mãos":"two hands","uma mão":"one hand","convencional":"conventional","sumô (pés afastados)":"sumo (wide stance)","duas pernas":"both legs","uma perna":"one leg",
+"cavalinho (T)":"T-bar","junto ao corpo":"close to the body","abertos (para os lados)":"flared (out to the sides)","máquina articulada":"plate-loaded machine",
+"barra / cavalinho apoiado":"bar / supported T-bar","halter (apoiado no banco)":"dumbbell (on a bench)","polia baixa":"low cable","landmine (Meadows)":"landmine (Meadows)",
+"barra (Smith ou rack)":"bar (Smith or rack)","argolas / TRX":"rings / TRX","peso do corpo":"bodyweight","assistida (graviton)":"assisted (machine)",
+"com peso extra":"weighted","polia (braços estendidos)":"cable (straight arms)","halter (deitado)":"dumbbell (lying)","corda":"rope","banco a 45°":"45° bench",
+"banco romano (90°)":"Roman chair (90°)","no chão (super-homem)":"on the floor (superman)","anilha no peito":"plate on the chest","polia ajoelhado":"kneeling cable",
+"banco declinado":"decline bench","tradicional":"traditional","braços estendidos":"arms extended","pernas na vertical":"legs vertical",
+"empurrando os calcanhares":"pressing the heels down","pendurado na barra":"hanging from a bar","cadeira (paralelas)":"captain's chair","deitado no chão":"lying on the floor",
+"estendidas":"straight","joelhos dobrados":"knees bent","antebraços":"forearms","mãos (braços estendidos)":"hands (arms straight)","parada":"static",
+"com abdução da perna de cima":"with top-leg abduction","de cima para baixo":"high to low","de baixo para cima":"low to high","anilha / halter":"plate / dumbbell",
+"bola de peso":"medicine ball","de joelhos":"from the knees","rodinha":"ab wheel","barra com anilhas":"loaded barbell","costas no banco":"back on a bench",
+"no chão (ponte)":"on the floor (bridge)","máquina de glúteo":"glute machine","máquina de 4 posições":"4-way machine","quatro apoios":"all fours","caneleira":"ankle weight",
+"estendido":"straight","dobrado":"bent","cadeira abdutora":"abductor machine","ereto":"upright","inclinado à frente":"leaning forward","cadeira adutora":"adductor machine",
+"bola entre os joelhos":"ball between the knees","barra nas costas":"back squat (bar on the back)","barra na frente (frontal)":"front squat (bar in front)",
+"halter / goblet":"dumbbell / goblet","no cinto (belt squat)":"belt squat","até o paralelo":"to parallel","profundo (completo)":"deep (full)","afastados (sumô)":"wide (sumo)",
+"hack":"hack","pêndulo":"pendulum","pés no meio":"feet in the middle","pés altos":"feet high","pés baixos":"feet low","45°":"45°","horizontal (sentado)":"horizontal (seated)",
+"pés afastados":"feet wide","máquina / apoio":"machine / support","para a frente":"forward","para trás":"reverse","andando":"walking",
+"búlgaro (pé de trás no banco)":"Bulgarian (back foot on a bench)","lateral":"lateral","cossaco (bem fundo)":"Cossack (very deep)","reclinado":"reclined",
+"normal (90°)":"normal (90°)","sentado (cadeira)":"seated (machine)","deitado (mesa)":"lying (machine)","no leg press":"on the leg press","burrinho":"donkey",
+"degrau sem carga":"step, no load",
+"Supino fechado":"Close-grip bench press","Flexão declinada":"Decline push-up","Flexão inclinada":"Incline push-up","Flexão diamante":"Diamond push-up",
+"Mergulho no banco":"Bench dip","Desenvolvimento Arnold":"Arnold press","Rosca martelo":"Hammer curl","Rosca inversa":"Reverse curl",
+"Rosca martelo no Scott":"Hammer preacher curl","Extensão de punho":"Wrist extension","Levantamento terra sumô":"Sumo deadlift",
+"Remada com cotovelos abertos":"Wide-elbow row","Super-homem no chão":"Superman","Abdominal declinado":"Decline sit-up","Elevação de joelhos":"Knee raise",
+"Prancha lateral com abdução de perna":"Side plank with leg abduction","Ponte de glúteo":"Glute bridge","Apertar bola entre os joelhos":"Ball squeeze between the knees",
+"Agachamento frontal":"Front squat","Agachamento sumô":"Sumo squat","Afundo reverso":"Reverse lunge","Afundo andando":"Walking lunge","Afundo búlgaro":"Bulgarian split squat",
+"Agachamento cossaco":"Cossack squat","Mesa flexora":"Lying leg curl","Flexora em pé":"Standing leg curl","Panturrilha em pé":"Standing calf raise",
+"Panturrilha sentado":"Seated calf raise","Panturrilha no leg press":"Leg press calf raise","Panturrilha burrinho":"Donkey calf raise",
+"Inclinado (~30°): mais peitoral superior e deltoide anterior (Rodríguez-Ridao 2020).":"Incline (~30°): more upper chest and front delt (Rodríguez-Ridao 2020).",
+"Declinado: mais peitoral inferior e tríceps, menos ombro.":"Decline: more lower chest and triceps, less shoulder.",
+"Halteres: mais amplitude embaixo e cada lado trabalha sozinho.":"Dumbbells: more range at the bottom and each side works on its own.",
+"Smith: trilho fixo, mais estável.":"Smith: fixed track, more stable.","Máquina: mais estável, fácil de levar perto da falha.":"Machine: more stable, easy to take close to failure.",
+"Pegada aberta: menos tríceps; mais carga no peito e no ombro.":"Wide grip: less triceps; more load on the chest and shoulder.",
+"Pegada fechada: o tríceps vira músculo principal.":"Close grip: the triceps becomes the main muscle.",
+"Neutra: cotovelos junto ao corpo, mais tríceps e mais confortável para o ombro.":"Neutral: elbows close to the body, more triceps and easier on the shoulder.",
+"Supinada (invertida): mais peitoral superior.":"Underhand (reverse): more upper chest.","Na polia: cabos na altura do peito.":"On cables: handles at chest height.",
+"Inclinado ou polia de baixo para cima: mais peitoral superior.":"Incline or cables low to high: more upper chest.",
+"Declinado, polia de cima para baixo ou tronco inclinado à frente: mais peitoral inferior.":"Decline, cables high to low or leaning forward: more lower chest.",
+"Halteres: mais tensão com o peito alongado, embaixo.":"Dumbbells: more tension with the chest stretched, at the bottom.",
+"Polia: tensão no movimento todo.":"Cable: tension through the whole movement.","Máquina: estável, fácil de ir perto da falha.":"Machine: stable, easy to go close to failure.",
+"Alternado: um braço de cada vez, mais foco em cada lado.":"Alternating: one arm at a time, more focus on each side.",
+"Unilateral: mais foco e amplitude em cada lado.":"One side: more focus and range on each side.",
+"Pés elevados: mais peitoral superior e ombro.":"Feet elevated: more upper chest and shoulder.","Mãos elevadas: mais fácil e mais peitoral inferior.":"Hands elevated: easier and more lower chest.",
+"Mãos abertas: mais peito, menos tríceps.":"Wide hands: more chest, less triceps.","Mãos juntas: tríceps vira o principal.":"Hands together: the triceps becomes the main muscle.",
+"Instável: mais abdômen.":"Unstable: more abs.","Suspensa: mais estabilidade de ombro e abdômen.":"Suspended: more shoulder and core stability.",
+"Tronco reto: mais tríceps.":"Upright torso: more triceps.","Tronco à frente: mais peito (inferior).":"Leaning forward: more (lower) chest.",
+"No banco: mais tríceps e ombro; desça só até onde o ombro não incomoda.":"On a bench: more triceps and shoulder; only go as low as your shoulder is comfortable.",
+"Em pé: mais abdômen e estabilidade.":"Standing: more core and stability.","Neutra: mais confortável para o ombro, mais deltoide anterior.":"Neutral: easier on the shoulder, more front delt.",
+"Arnold: gira as palmas no caminho, mais amplitude para o deltoide anterior.":"Arnold: rotate the palms on the way up, more range for the front delt.",
+"Supinada: um pouco mais peitoral superior e bíceps.":"Underhand: a bit more upper chest and biceps.",
+"Pés elevados: mais carga, mais perto de um desenvolvimento.":"Feet elevated: more load, closer to a shoulder press.",
+"Sentado: menos impulso do corpo.":"Seated: less body momentum.","Inclinado para o lado (lean-away): mais tensão no começo do movimento.":"Leaning away: more tension at the start of the movement.",
+"Deitado de lado: tensão maior embaixo.":"Side-lying: more tension at the bottom.","Cabo por trás do corpo: mais tensão com o deltoide alongado.":"Cable behind the body: more tension with the delt stretched.",
+"Cotovelo dobrado: alavanca menor, mais leve para o ombro.":"Bent elbow: shorter lever, easier on the shoulder.",
+"De bruços: mais trapézio inferior e médio.":"Lying face down: more lower and middle traps.","Aberta: mais deltoide lateral e mais seguro para o ombro.":"Wide: more side delt and safer for the shoulder.",
+"Fechada: mais trapézio superior; pode incomodar o ombro.":"Close: more upper traps; may bother the shoulder.","Peito apoiado: sem ajuda da lombar.":"Chest supported: no help from the lower back.",
+"Polia cruzada: tensão o tempo todo no deltoide posterior.":"Crossed cables: constant tension on the rear delt.",
+"Braço a 90°: posição de arremesso, mais trapézio inferior.":"Arm at 90°: throwing position, more lower traps.",
+"Martelo: mais braquial e braquiorradial.":"Hammer: more brachialis and brachioradialis.",
+"Inversa: mais braquiorradial e extensores do punho; carga menor.":"Reverse: more brachioradialis and wrist extensors; lighter load.",
+"Polia: tensão constante, inclusive embaixo.":"Cable: constant tension, including at the bottom.","Aberta: um pouco mais cabeça curta.":"Wide: a bit more short head.",
+"Fechada: um pouco mais cabeça longa.":"Close: a bit more long head.","Cruzando o corpo (martelo): mais braquial.":"Across the body (hammer): more brachialis.",
+"Scott: mais crescimento perto do cotovelo (Kassiano 2025).":"Preacher: more growth near the elbow (Kassiano 2025).",
+"Martelo no Scott: braquial bem isolado.":"Hammer preacher: brachialis well isolated.",
+"Braço atrás do corpo: mais crescimento na parte de cima do bíceps (Kassiano 2025).":"Arm behind the body: more growth in the upper biceps (Kassiano 2025).",
+"Bayesian: braço atrás do corpo com tensão constante.":"Bayesian: arm behind the body with constant tension.",
+"Barra: costuma permitir mais carga; mais cabeça lateral.":"Bar: usually allows more load; more lateral head.",
+"Corda: abre no fim, contração mais forte embaixo.":"Rope: spread it at the end, stronger squeeze at the bottom.","Supinada: carga menor, mais cabeça medial.":"Underhand: lighter load, more medial head.",
+"Acima da cabeça: cabeça longa alongada, ~1,4× o crescimento da polia normal (Maeo 2022).":"Overhead: long head stretched, ~1.4× the growth of a regular pushdown (Maeo 2022).",
+"Inclinado: cabeça longa mais alongada.":"Incline: long head more stretched.","Declinado: tensão maior perto do fim.":"Decline: more tension near the end.",
+"Palma para baixo: trabalha os extensores do punho.":"Palms down: works the wrist extensors.","Por trás das costas: deixa usar mais carga.":"Behind the back: lets you use more load.",
+"Carregar de um lado só: muito mais oblíquo.":"Carrying on one side: much more obliques.","Uma mão: pegada muito mais exigida.":"One hand: grip is worked much harder.",
+"Sumô: mais adutores e quadríceps, costas mais retas.":"Sumo: more adductors and quads, more upright back.","Barra hexagonal: mais quadríceps, menos lombar.":"Trap bar: more quads, less lower back.",
+"Uma perna: muito glúteo médio para equilibrar.":"One leg: lots of glute medius to balance.","Cavalinho: pegada neutra/fechada, fácil de pôr carga.":"T-bar: neutral/close grip, easy to load.",
+"Pronada: cotovelos mais abertos, mais trapézio médio e deltoide posterior.":"Overhand: elbows wider, more middle traps and rear delt.",
+"Neutra: posição natural, equilíbrio entre dorsal e meio das costas.":"Neutral: natural position, balance between lats and mid-back.",
+"Supinada: cotovelos junto ao corpo, mais dorsal inferior e bíceps.":"Underhand: elbows close to the body, more lower lats and biceps.",
+"Aberta: mais trapézio e deltoide (Padovan, Coratella et al.).":"Wide: more traps and delts (Padovan, Coratella et al.).",
+"Fechada: mais grande dorsal (Padovan, Coratella et al.).":"Close: more lats (Padovan, Coratella et al.).",
+"Cotovelos abertos: vira exercício de deltoide posterior e lateral, trapézio médio e romboides.":"Elbows wide: becomes a rear and side delt, middle trap and rhomboid exercise.",
+"Meadows: pegada pronada na ponta da barra, um pouco mais deltoide posterior.":"Meadows: overhand grip on the end of the bar, a bit more rear delt.",
+"Pronada: mais grande dorsal que a supinada (Lusk 2010).":"Overhand: more lats than underhand (Lusk 2010).",
+"Supinada: mais bíceps e dorsal inferior; cotovelos junto ao corpo.":"Underhand: more biceps and lower lats; elbows close to the body.",
+"Neutra: mais braquial e braquiorradial; confortável para o ombro.":"Neutral: more brachialis and brachioradialis; easy on the shoulder.",
+"Aberta: ativação do dorsal parecida com a média (Andersen 2014); um pouco mais trapézio inferior e romboides, menos amplitude.":"Wide: lat activation similar to medium (Andersen 2014); a bit more lower traps and rhomboids, less range.",
+"Fechada: mais amplitude, cotovelos junto ao corpo, mais bíceps.":"Close: more range, elbows close to the body, more biceps.",
+"Assistida: mesma ação com menos peso.":"Assisted: same movement with less weight.","Um braço: mais amplitude, mais dorsal inferior.":"One arm: more range, more lower lats.",
+"Polia em pé: tensão o tempo todo no dorsal.":"Standing cable: constant tension on the lats.",
+"Deitado com halter: mais peitoral e serrátil, mais alongamento.":"Lying with a dumbbell: more chest and serratus, more stretch.",
+"No chão: mais leve, também trabalha o meio das costas.":"On the floor: lighter, also works the mid-back.","Bola: mais amplitude, abdômen alongado embaixo.":"Ball: more range, abs stretched at the bottom.",
+"Polia: dá para aumentar a carga.":"Cable: lets you add load.","Declinado subindo o tronco todo: mais flexor do quadril.":"Decline, coming all the way up: more hip flexors.",
+"Braços estendidos acima da cabeça: alavanca maior, mais difícil.":"Arms extended overhead: longer lever, harder.",
+"Pernas para cima: mais parte de baixo do abdômen.":"Legs up: more lower abs.","Calcanhares no chão: menos flexor do quadril.":"Heels down: less hip flexors.",
+"Declinado: mais difícil.":"Decline: harder.","Pendurado: mais difícil, também exige pegada.":"Hanging: harder, also works your grip.",
+"Captain's chair: muito reto abdominal e oblíquos (ACE).":"Captain's chair: lots of rectus abdominis and obliques (ACE).","Joelhos dobrados: mais fácil.":"Knees bent: easier.",
+"Levantando a perna: glúteo médio vira o principal.":"Lifting the leg: the glute medius becomes the main muscle.","Em pé: muito mais difícil.":"Standing: much harder.",
+"No chão: amplitude menor, bom para começar.":"On the floor: smaller range, good for starting out.",
+"Uma perna em pé ou apoiada: mais glúteo médio para equilibrar; corrige diferença entre os lados.":"One leg, standing or supported: more glute medius to balance; evens out the sides.",
+"Quatro apoios: muito glúteo máximo e médio (ACE).":"All fours: lots of glute max and medius (ACE).","Joelho dobrado: menos posterior de coxa, mais glúteo.":"Bent knee: less hamstrings, more glutes.",
+"Tronco à frente na cadeira: mais glúteo máximo (parte de cima).":"Leaning forward on the machine: more glute max (upper part).",
+"Frontal: tronco mais reto, mais quadríceps.":"Front: more upright torso, more quads.","No cinto: carga sem pesar na coluna.":"Belt: load without weighing on the spine.",
+"Profundo: mais glúteo e adutores (Kubo 2019).":"Deep: more glutes and adductors (Kubo 2019).","Pés afastados: mais adutores.":"Feet wide: more adductors.",
+"Pêndulo: muito quadríceps com o joelho bem dobrado.":"Pendulum: lots of quads with the knee deeply bent.","Pés altos: mais glúteo.":"Feet high: more glutes.",
+"Pés baixos: mais quadríceps.":"Feet low: more quads.","Pés altos: mais glúteo e posterior de coxa.":"Feet high: more glutes and hamstrings.",
+"Pés baixos: joelho vai mais à frente, mais quadríceps.":"Feet low: knee travels further forward, more quads.","Uma perna: corrige diferença entre os lados.":"One leg: evens out the sides.",
+"Para trás: mais fácil para o joelho.":"Reverse: easier on the knee.","Andando: mais equilíbrio e glúteo.":"Walking: more balance and glutes.",
+"Búlgaro: muita carga numa perna, glúteo e quadríceps alongados.":"Bulgarian: lots of load on one leg, glutes and quads stretched.",
+"Cossaco: mais amplitude para os adutores.":"Cossack: more range for the adductors.",
+"Encosto para trás (quadril estendido): mais reto femoral (Larsen 2024).":"Backrest reclined (hip extended): more rectus femoris (Larsen 2024).",
+"Sentado: posterior mais alongado, cresce mais (Maeo 2021).":"Seated: hamstrings more stretched, more growth (Maeo 2021).",
+"Em pé (joelho estendido): cresce o gastrocnêmio; sentado quase não (Kinoshita 2023).":"Standing (knee straight): grows the gastrocnemius; seated barely does (Kinoshita 2023).",
+"Sentado: joelho dobrado, foca o sóleo.":"Seated: knee bent, focuses the soleus.","Joelho dobrado: mais sóleo.":"Bent knee: more soleus.",
+"Peitoral superior":"Upper chest","Peitoral médio":"Middle chest","Peitoral inferior":"Lower chest","Deltoide anterior":"Front delt","Deltoide lateral":"Side delt",
+"Deltoide posterior":"Rear delt","Bíceps, cabeça longa":"Biceps, long head","Bíceps, cabeça curta":"Biceps, short head","Braquial":"Brachialis",
+"Tríceps, cabeça longa":"Triceps, long head","Tríceps, cabeça lateral":"Triceps, lateral head","Tríceps, cabeça medial":"Triceps, medial head","Braquiorradial":"Brachioradialis",
+"Flexores do punho":"Wrist flexors","Extensores do punho":"Wrist extensors","Trapézio superior":"Upper traps","Trapézio médio":"Middle traps","Trapézio inferior":"Lower traps",
+"Romboides":"Rhomboids","Infraespinhal e redondo menor":"Infraspinatus and teres minor","Redondo maior":"Teres major","Grande dorsal superior":"Upper lats",
+"Grande dorsal inferior":"Lower lats","Eretores da espinha":"Spinal erectors","Serrátil anterior":"Serratus anterior","Reto abdominal, parte superior":"Rectus abdominis, upper part",
+"Reto abdominal, parte inferior":"Rectus abdominis, lower part","Oblíquos":"Obliques","Glúteo máximo":"Gluteus maximus","Glúteo médio e mínimo":"Gluteus medius and minimus",
+"Tensor da fáscia lata":"Tensor fasciae latae","Adutores":"Adductors","Reto femoral":"Rectus femoris","Vasto lateral":"Vastus lateralis","Vasto medial":"Vastus medialis",
+"Bíceps femoral":"Biceps femoris","Semitendíneo e semimembranáceo":"Semitendinosus and semimembranosus","Gastrocnêmio":"Gastrocnemius","Sóleo":"Soleus",
+"Pectoralis major, parte clavicular":"Pectoralis major, clavicular part","Pectoralis major, parte esternocostal":"Pectoralis major, sternocostal part",
+"Pectoralis major, parte abdominal":"Pectoralis major, abdominal part","Deltoideus, parte clavicular":"Deltoideus, clavicular part","Deltoideus, parte acromial":"Deltoideus, acromial part",
+"Deltoideus, parte espinal":"Deltoideus, spinal part","Flexor carpi radialis e ulnaris":"Flexor carpi radialis and ulnaris","Extensor carpi radialis e ulnaris":"Extensor carpi radialis and ulnaris",
+"Trapezius, parte descendente":"Trapezius, descending part","Trapezius, parte transversa":"Trapezius, transverse part","Trapezius, parte ascendente":"Trapezius, ascending part",
+"Rhomboideus major e minor":"Rhomboideus major and minor","Latissimus dorsi, fibras torácicas":"Latissimus dorsi, thoracic fibers",
+"Latissimus dorsi, fibras lombares e ilíacas":"Latissimus dorsi, lumbar and iliac fibers","Obliquus externus e internus":"Obliquus externus and internus",
+"Adductor longus, brevis e magnus":"Adductor longus, brevis and magnus",
+"Peito":"Chest","Ombros":"Shoulders","Antebraço":"Forearms","Costas":"Back","Abdômen":"Abs","Quadril":"Hips","Coxas":"Thighs","Panturrilhas":"Calves",
+"Bíceps":"Biceps","Tríceps":"Triceps","Trapézio":"Traps","Lombar":"Lower back","Glúteos":"Glutes","Quadríceps":"Quads","Posterior de coxa":"Hamstrings",
+"Halteres":"Dumbbells","Polia / Cabo":"Cable","Barra":"Barbell","Peso corporal":"Bodyweight","Outros":"Other",
+"mais peitoral superior que o reto":"more upper chest than flat","100% (referência)":"100% (reference)","98% do supino":"98% of the bench press","93% do supino":"93% of the bench press",
+"cresce igual à polia":"grows the same as the cable version","mais crescimento na parte de cima":"more growth in the upper part","mais crescimento perto do cotovelo":"more growth near the elbow",
+"≈1,4× o crescimento do tríceps na polia":"≈1.4× the growth of the pushdown","cresce igual ao agachamento":"grows the same as the squat","mais glúteo que meio agachamento":"more glutes than a half squat",
+"+6% de volume nos adutores":"+6% adductor volume","menos que o agachamento":"less than the squat","mais que sentado a 90°":"more than seated at 90°","mais que elevação pélvica":"more than the hip thrust",
+"+14% vs +7% deitado":"+14% vs +7% lying","+24% vs +19% deitado":"+24% vs +19% lying","+9 a 12% vs ~1% sentado":"+9 to 12% vs ~1% seated",
+"quase não cresce o gastrocnêmio":"barely grows the gastrocnemius","igual ao em pé":"same as standing","igual ao sentado":"same as seated",
+"Pescoço (coluna cervical)":"Neck (cervical spine)","Inclinar a cabeça devagar para cada lado":"Slowly tilt your head to each side",
+"Girar a cabeça para olhar por cima de cada ombro":"Turn your head to look over each shoulder","Movimento de \"sim\" lento (queixo ao peito e olhar para cima)":"Slow \"yes\" nod (chin to chest, then look up)",
+"Encolher e soltar os ombros":"Shrug and drop the shoulders","Retração do queixo (puxar o queixo para trás, fazendo \"papada\")":"Chin tucks (pull the chin straight back, making a \"double chin\")",
+"Meio círculo com a cabeça pela frente, de um ombro ao outro":"Half circle with your head in front, from one shoulder to the other",
+"Rotação com a mão ajudando no fim do movimento":"Rotation with your hand helping at the end of the movement",
+"Trapézio superior: orelha em direção ao ombro, a mão puxa de leve":"Upper traps: ear toward the shoulder, hand pulls gently",
+"Elevador da escápula: olhar para a axila e levar o queixo nessa direção":"Levator scapulae: look toward your armpit and bring your chin that way",
+"Lateral do pescoço: olhar para cima e para o lado oposto":"Side of the neck: look up and to the opposite side","Ombro":"Shoulder",
+"Círculos com os braços, para frente e para trás":"Arm circles, forward and backward","Rotação externa com elástico":"Banded external rotation",
+"Face pull com elástico ou polia bem leve":"Face pull with a band or a very light cable","Uma ou duas séries leves do primeiro exercício do treino":"One or two light sets of the first exercise of the workout",
+"Deslizamento na parede (wall slide)":"Wall slide","Passar o bastão ou elástico por cima da cabeça, ida e volta":"Stick or band pass-throughs over the head and back",
+"Abertura em quatro apoios (open book)":"Open book on all fours","Pendurar na barra fixa, relaxando os ombros":"Hang from a pull-up bar, relaxing the shoulders",
+"Braço cruzado à frente do peito":"Arm across the chest","Peitoral no batente da porta, braço a 90°":"Chest in a doorway, arm at 90°",
+"Grande dorsal: segurar num apoio e jogar o quadril para trás":"Lats: hold a support and push your hips back","Tríceps e dorsal com o braço acima da cabeça":"Triceps and lats with the arm overhead",
+"Cotovelo":"Elbow","Dobrar e esticar o cotovelo sem carga":"Bend and straighten the elbow without load","Girar o antebraço (palma para cima e para baixo)":"Rotate the forearm (palm up and down)",
+"Rosca leve com elástico":"Light band curls","Tríceps na polia com carga leve":"Light triceps pushdowns",
+"Girar um halter leve segurando numa ponta (pronação e supinação)":"Rotate a light dumbbell held at one end (pronation and supination)",
+"Esticar o braço por completo apoiado na coxa":"Fully straighten the arm resting on your thigh","Rosca martelo bem leve, devagar, amplitude total":"Very light hammer curls, slow, full range",
+"Bíceps: braço esticado com a palma apoiada na parede, girar o corpo para fora":"Biceps: arm straight with palm on the wall, turn your body away",
+"Tríceps: mão nas costas por cima da cabeça, a outra mão empurra o cotovelo":"Triceps: hand behind your back over your head, the other hand pushes the elbow",
+"Flexores do antebraço: braço esticado, puxar os dedos para trás":"Forearm flexors: arm straight, pull the fingers back","Punho":"Wrist",
+"Círculos com os punhos":"Wrist circles","Abrir e fechar as mãos com força":"Open and close your hands hard","Dobrar e esticar o punho apoiado no joelho":"Bend and extend the wrist resting on your knee",
+"Rolo de punho com carga leve":"Light wrist roller","Em quatro apoios, mãos no chão, levar o corpo para frente e para trás":"On all fours, hands on the floor, rock your body forward and back",
+"Apoiar o dorso da mão no chão e balançar de leve":"Back of the hand on the floor, rock gently","Girar um bastão segurando com as duas mãos":"Rotate a stick held with both hands",
+"Flexores: braço esticado, palma para frente, puxar os dedos para trás":"Flexors: arm straight, palm forward, pull the fingers back",
+"Extensores: braço esticado, palma para baixo, puxar a mão para baixo":"Extensors: arm straight, palm down, pull the hand down",
+"Posição de oração: mãos unidas na frente do peito, descer devagar":"Prayer position: palms together in front of the chest, lower slowly",
+"Coluna torácica (meio das costas)":"Thoracic spine (mid-back)","Gato-camelo em quatro apoios":"Cat-camel on all fours","Girar o tronco em pé com os braços soltos":"Standing torso rotations with loose arms",
+"Abertura de livro deitado de lado (open book)":"Side-lying open book","Extensão no rolo de espuma, rolo na altura das escápulas":"Foam roller extension, roller at shoulder-blade height",
+"Rotação em quatro apoios com a mão na nuca":"Rotation on all fours with hand behind the head","Passar o braço por baixo do corpo em quatro apoios (thread the needle)":"Thread the needle on all fours",
+"Postura da criança com os braços esticados à frente":"Child's pose with arms stretched forward","Grande dorsal: mãos num banco, peito descendo em direção ao chão":"Lats: hands on a bench, chest sinking toward the floor",
+"Peitoral no batente da porta":"Chest in a doorway","Lombar e pelve":"Lower back and pelvis","Gato-camelo":"Cat-camel","Bird-dog (braço e perna opostos esticados)":"Bird-dog (opposite arm and leg extended)",
+"Ponte de glúteo sem carga":"Glute bridge without load","Inclinação da pelve deitado (encaixar e soltar o quadril)":"Lying pelvic tilts (tuck and release the hips)",
+"Joelhos de um lado para o outro deitado de costas":"Knees side to side, lying on your back","Abraçar os joelhos no peito e balançar":"Hug your knees to your chest and rock",
+"Treinar a dobradiça de quadril com um bastão nas costas":"Practice the hip hinge with a stick along your back","Postura da criança":"Child's pose","Joelhos no peito, deitado":"Knees to chest, lying down",
+"Torção deitado: joelho cruza o corpo, ombros no chão":"Lying twist: knee crosses the body, shoulders on the floor","Inclinação lateral em pé, braço acima da cabeça":"Standing side bend, arm overhead",
+"Balançar a perna para frente e para trás, segurando num apoio":"Leg swings forward and back, holding a support","Balançar a perna de um lado para o outro":"Leg swings side to side",
+"Agachamento sem carga":"Bodyweight squat","Círculos de quadril em pé (abrir e fechar o portão)":"Standing hip circles (open and close the gate)",
+"Posição 90/90 sentado, trocando de lado":"Seated 90/90, switching sides","Avanço com rotação do tronco (world's greatest stretch)":"Lunge with torso rotation (world's greatest stretch)",
+"Ficar no agachamento profundo segurando um apoio":"Hold a deep squat while holding a support","Agachamento cossaco leve":"Light Cossack squat",
+"Flexor do quadril: avanço ajoelhado, quadril para frente":"Hip flexor: kneeling lunge, hips forward","Glúteo: figura 4 deitado ou postura do pombo":"Glutes: lying figure 4 or pigeon pose",
+"Adutores: borboleta sentado":"Adductors: seated butterfly","Posterior de coxa sentado, uma perna esticada":"Seated hamstring stretch, one leg straight",
+"Cadeira extensora com carga leve":"Light leg extensions","Afundo sem carga":"Bodyweight lunge","5 minutos de bicicleta ergométrica":"5 minutes on a stationary bike",
+"Deslizar o calcanhar deitado de costas (dobrar e esticar o joelho)":"Heel slides lying on your back (bend and straighten the knee)",
+"Agachamento profundo segurando num apoio":"Deep squat holding a support","Deitado de bruços, puxar o pé em direção ao glúteo":"Lying face down, pull your foot toward your glutes",
+"Quadríceps em pé, segurando o pé atrás":"Standing quad stretch, holding your foot behind you","Posterior de coxa com o pé apoiado num banco":"Hamstring stretch with the foot on a bench",
+"Panturrilha na parede":"Calf stretch against the wall","Tornozelo":"Ankle","Círculos com o tornozelo":"Ankle circles","Subir na ponta dos pés sem carga":"Bodyweight calf raises",
+"Pular corda leve":"Light jump rope","Andar na ponta dos pés e depois nos calcanhares":"Walk on your toes, then on your heels",
+"Joelho à parede: pé a um palmo da parede, levar o joelho até ela sem tirar o calcanhar":"Knee to wall: foot a hand's width from the wall, bring the knee to it without lifting the heel",
+"Agachamento profundo segurando num apoio, joelhos à frente":"Deep squat holding a support, knees forward","Puxar o tornozelo para cima com elástico preso à frente":"Pull the ankle up with a band anchored in front",
+"Gastrocnêmio: panturrilha na parede com o joelho esticado":"Gastrocnemius: wall calf stretch with the knee straight","Sóleo: mesma posição com o joelho dobrado":"Soleus: same position with the knee bent",
+"Frente da canela: ajoelhado, sentar sobre os pés":"Front of the shin: kneel and sit back on your feet",
+"ACE (2012): EMG do peitoral em 9 exercícios de peito":"ACE (2012): chest EMG in 9 chest exercises","ACE (2014): EMG do bíceps em 8 exercícios":"ACE (2014): biceps EMG in 8 exercises",
+"ACE (2012): EMG do tríceps em 8 exercícios":"ACE (2012): triceps EMG in 8 exercises","ACE (2014): EMG dos três deltoides em 10 exercícios":"ACE (2014): EMG of the three delts in 10 exercises",
+"ACE (2001): EMG do reto abdominal e oblíquos em 13 exercícios":"ACE (2001): rectus abdominis and obliques EMG in 13 exercises","ACE (2006): EMG do glúteo máximo e médio":"ACE (2006): glute max and medius EMG",
+"Contreras et al. (2015): elevação pélvica vs agachamento":"Contreras et al. (2015): hip thrust vs squat","Delgado et al. (2019): agachamento, stiff e elevação pélvica":"Delgado et al. (2019): squat, Romanian deadlift and hip thrust",
+"McAllister et al. (2014): EMG dos isquiotibiais em 4 exercícios":"McAllister et al. (2014): hamstring EMG in 4 exercises","Andersen et al. (2014): largura da pegada na puxada":"Andersen et al. (2014): grip width in the lat pulldown",
+"Universidade de Wisconsin–La Crosse: EMG das costas em 8 exercícios":"University of Wisconsin–La Crosse: back EMG in 8 exercises","Ekstrom et al. (2003): exercícios para trapézio e serrátil":"Ekstrom et al. (2003): exercises for the traps and serratus",
+"Reinold et al. (2004): manguito rotador e deltoide":"Reinold et al. (2004): rotator cuff and deltoid","Distefano et al. (2009): glúteos em exercícios comuns":"Distefano et al. (2009): glutes in common exercises",
+"Serner et al. (2014): exercícios de adutores":"Serner et al. (2014): adductor exercises","Rodríguez-Ridao et al. (2020): inclinação do banco no supino":"Rodríguez-Ridao et al. (2020): bench incline in the bench press",
+"Coratella et al. (2020): variações de elevação lateral":"Coratella et al. (2020): lateral raise variations",
+"Maeo et al. (2022): tríceps acima da cabeça vs na polia, crescimento medido por ressonância":"Maeo et al. (2022): overhead triceps vs pushdown, growth measured by MRI",
+"Maeo et al. (2021): cadeira flexora sentado vs deitado, crescimento por ressonância":"Maeo et al. (2021): seated vs lying leg curl, growth by MRI",
+"Larsen et al. (2024, preprint): ângulo do quadril na cadeira extensora, crescimento":"Larsen et al. (2024, preprint): hip angle on the leg extension, growth",
+"Kinoshita et al. (2023): panturrilha em pé vs sentado, crescimento por ressonância":"Kinoshita et al. (2023): standing vs seated calf raise, growth by MRI",
+"Plotkin et al. (2023): elevação pélvica vs agachamento, crescimento por ressonância":"Plotkin et al. (2023): hip thrust vs squat, growth by MRI",
+"Kubo et al. (2019): agachamento completo vs meio agachamento, crescimento":"Kubo et al. (2019): full vs half squat, growth",
+"Chaves et al. (2020): supino inclinado vs reto, crescimento por ultrassom":"Chaves et al. (2020): incline vs flat bench press, growth by ultrasound",
+"Kassiano et al. (2025): rosca Scott vs rosca inclinada, crescimento por região":"Kassiano et al. (2025): preacher vs incline curl, growth by region",
+"Estudo de 2025 (Frontiers in Physiology): elevação lateral com halter vs polia, crescimento":"2025 study (Frontiers in Physiology): dumbbell vs cable lateral raise, growth"
+};
+const EN_UI={
+"Meus treinos":"My workouts","Hoje":"Today","hoje":"today","Progresso":"Progress","Detalhado":"Detailed","Básico":"Basic","Articulações":"Joints","Frente":"Front","Ambos":"Both",
+"Alvo":"Target","Sinergista":"Synergist","FRENTE":"FRONT","COSTAS":"BACK","Toque num músculo · pinça para zoom · arraste para mover":"Tap a muscle · pinch to zoom · drag to move",
+"Escolha um músculo":"Choose a muscle","Toque no boneco":"Tap the figure","O músculo fica vermelho e a lista mostra os exercícios em ordem.":"The muscle turns red and the list shows the exercises in order.",
+"Ver lista":"See list","Todos":"All","Como o ranking funciona":"How the ranking works",
+"Cada lista está em ordem de estímulo estimado para aquele músculo. O selo mostra de onde vem a posição do exercício:":"Each list is sorted by the estimated stimulus for that muscle. The badge shows where the exercise's position comes from:",
+"Hipertrofia":"Hypertrophy",": um estudo treinou pessoas por semanas e mediu quanto o músculo cresceu (ressonância ou ultrassom), comparando exercícios. É a evidência mais forte.":": a study trained people for weeks and measured how much the muscle grew (MRI or ultrasound), comparing exercises. It's the strongest evidence.",
+"Estudo EMG":"EMG study",": um estudo mediu a ativação elétrica do músculo durante o exercício. Mostra quanto o músculo trabalha, mas nem sempre prevê o crescimento.":": a study measured the muscle's electrical activity during the exercise. It shows how hard the muscle works, but doesn't always predict growth.",
+"Biomecânica":"Biomechanics",": não há medição comparável. A posição vem da mecânica: quanto o músculo é alongado e carregado no movimento.":": there's no comparable measurement. The position comes from mechanics: how much the muscle is stretched and loaded in the movement.",
+"Quando o estudo publicou um número, ele aparece no cartão (ex.: \"98% do supino\", \"+14% vs +7% deitado\").":"When the study published a number, it appears on the card (e.g. \"98% of the bench press\", \"+14% vs +7% lying\").",
+"Variações":"Variations",": cada cartão é um exercício (ex.: Puxada alta). Ao tocar nele aparecem botões de pegada, largura, equipamento, banco, posição e lado. Cada escolha muda o alvo e os sinergistas no boneco e explica a diferença. A posição na lista e o selo valem para a variação que o estudo usou (aparece no cartão quando você muda).":": each card is one exercise (e.g. Lat pulldown). Tap it to see buttons for grip, width, equipment, bench, position and side. Each choice changes the target and synergists on the figure and explains the difference. The list position and badge apply to the variation the study used (shown on the card when you change it).",
+"Sinergistas":"Synergists","(laranja): músculos que ajudam a fazer o movimento, do mais para o menos importante. Cada exercício tem uma lista única de músculos, então ele mostra os mesmos sinergistas em qualquer músculo em que aparece. Estabilizadores só entram quando o exercício os treina de propósito (prancha, caminhada do fazendeiro, pegada pesada). Alguns músculos pequenos, como o supraespinhal e o peitoral menor, não estão no boneco. Exercícios de isolamento, como rosca de punho, aparecem como \"Isolado\".":"(orange): muscles that help perform the movement, from most to least important. Each exercise has a single list of muscles, so it shows the same synergists on every muscle where it appears. Stabilizers only count when the exercise trains them on purpose (plank, farmer's walk, heavy grip). Some small muscles, like the supraspinatus and pec minor, aren't on the figure. Isolation exercises, like wrist curls, show as \"Isolated\".",
+"Treinos":"Workouts","Início":"Home","Atlas Muscular: ir para o início":"Atlas Muscular: go home","Seções":"Sections","Buscar músculo ou exercício":"Search muscle or exercise","Buscar":"Search",
+"Configurações":"Settings","Boneco anatômico":"Anatomical figure","Modelo":"Model","Vista":"View","Corpo":"Body","Masculino":"Male","Corpo masculino":"Male body","Feminino":"Female","Corpo feminino":"Female body",
+"Aproximar":"Zoom in","Afastar":"Zoom out","Enquadrar":"Fit","Boneco com músculos e articulações clicáveis":"Figure with clickable muscles and joints","Sobre esta página":"About this page",
+"Limpar":"Clear","Ampliar boneco":"Enlarge figure","Diminuir boneco":"Shrink figure","Toque num exercício para ver os sinergistas. Use + para mandar para um dos seus treinos.":"Tap an exercise to see the synergists. Use + to send it to one of your workouts.",
+"Não há estudo de EMG comparando estes exercícios entre si. A ordem segue a mecânica do movimento e a prática comum de treino.":"There's no EMG study comparing these exercises with each other. The order follows the movement mechanics and common training practice.",
+"Isolado":"Isolated","Sinergistas de":"Synergists of","marcados em laranja. Toque no boneco pequeno para ampliar.":"marked in orange. Tap the small figure to enlarge it.","marcados em laranja.":"marked in orange.",
+"Ver sinergistas na vista de costas →":"See synergists in the back view →","Ver sinergistas na vista de frente →":"See synergists in the front view →",
+"Modelo básico":"Basic model","Grupos musculares sem divisões. Cada grupo junta os exercícios das partes dele.":"Muscle groups without divisions. Each group combines the exercises of its parts.","Grupos":"Groups",
+"Toque numa articulação · pinça para zoom · arraste para mover":"Tap a joint · pinch to zoom · drag to move","Toque numa articulação":"Tap a joint",
+"Aquecimento e mobilidade antes do treino; alongamento estático depois.":"Warm-up and mobility before training; static stretching after.","A coluna torácica e a lombar aparecem na vista de costas.":"The thoracic and lower spine appear in the back view.",
+"Articulação":"Joint","Aquecimento":"Warm-up","Antes do treino, para aquecer a região":"Before training, to warm up the area","Mobilidade":"Mobility","Antes do treino, para ganhar amplitude":"Before training, to gain range of motion",
+"Alongamento estático":"Static stretching","Depois do treino, segurando a posição":"After training, holding the position","Movimentos sem dor. Se uma articulação dói durante o treino, procure um fisioterapeuta.":"Pain-free movements. If a joint hurts during training, see a physical therapist.",
+"Fechar":"Close","O boneco mostra os músculos. Toque num músculo para ele ficar vermelho e ver a lista de exercícios para ele, do que mais estimula para o que menos estimula.":"The figure shows the muscles. Tap a muscle to turn it red and see its list of exercises, from most to least stimulating.",
+"O que dá para fazer":"What you can do","Tocar num exercício":"Tap an exercise",": os músculos que ajudam no movimento (sinergistas) ficam laranja.":": the muscles that help in the movement (synergists) turn orange.",
+": com o exercício aberto, escolha pegada (pronada, supinada, neutra), largura, equipamento (barra, halteres, polia, máquina, Smith…), banco, posição e lado. O boneco e a lista de alvo e sinergistas mudam na hora, e o + manda exatamente essa variação para o treino.":": with the exercise open, choose grip (overhand, underhand, neutral), width, equipment (barbell, dumbbells, cable, machine, Smith…), bench, position and side. The figure and the target and synergist lists change right away, and + sends exactly that variation to your workout.",
+"Selos":"Badges","vem de estudos que mediram o músculo crescer;":"comes from studies that measured the muscle growing;","mediu a ativação;":"measured activation;","vem da mecânica do movimento.":"comes from the movement mechanics.",
+"Modelos":"Models",": Detalhado (cada parte do músculo), Básico (grupos inteiros) e Articulações (aquecimento, mobilidade e alongamento de cada junta).":": Detailed (each part of the muscle), Basic (whole groups) and Joints (warm-up, mobility and stretching for each joint).",
+"Frente / Costas":"Front / Back","trocam a vista e o corpo.":"switch the view and the body.","Filtros":"Filters","de equipamento (halteres, polia, barra…) logo acima da lista.":"for equipment (dumbbells, cable, barbell…) just above the list.",
+"+ no exercício":"+ on an exercise",": manda o exercício para um dos seus treinos ou cria um novo.":": sends the exercise to one of your workouts or creates a new one.","Busca":"Search",
+", no topo, acha músculos e exercícios pelo nome, inclusive nomes de academia (\"puxada alta\", \"pulley\", \"voador\") e variações (\"puxada supinada fechada\", \"crucifixo inclinado máquina\").":", at the top, finds muscles and exercises by name, in English or Portuguese, including gym names (\"lat pulldown\", \"pec deck\") and variations (\"close underhand pulldown\", \"incline machine fly\").",
+"Dicas":"Tips","Pinça com dois dedos dá zoom; arraste para mover; ⤢ volta ao enquadramento.":"Pinch with two fingers to zoom; drag to move; ⤢ resets the framing.",
+"No celular, depois de escolher um músculo o boneco fica pequeno no canto. Toque nele para ampliar.":"On a phone, after you pick a muscle the figure shrinks into the corner. Tap it to enlarge.",
+"Em \"Como o ranking funciona\", no fim da lista, estão as fontes.":"The sources are in \"How the ranking works\", at the end of the list.",
+"Aqui você monta seus treinos: nome, exercícios, séries e repetições. Montar ou mudar um treino não conta no Progresso.":"Build your workouts here: name, exercises, sets and reps. Building or changing a workout doesn't count in Progress.",
+"+ Novo treino":"+ New workout","cria um treino. Dê um nome, como \"Peito e tríceps\".":"creates a workout. Give it a name, like \"Chest and triceps\".","Editar":"Edit",
+"abre o treino: adicione exercícios, mude séries e reps, reordene com ↑ ↓ e remova com ✕.":"opens the workout: add exercises, change sets and reps, reorder with ↑ ↓ and remove with ✕.",
+"Dias da semana":"Days of the week","são opcionais: nesses dias o treino aparece primeiro na aba Hoje.":"are optional: on those days the workout shows first in the Today tab.",
+"Excluir treino":"Delete workout","apaga o modelo; o que você já fez continua no histórico.":"deletes the template; what you've already done stays in the history.",
+"Montar um treino só para hoje":"Build a workout just for today","abre um treino avulso na aba Hoje; depois dá para salvá-lo aqui.":"opens a one-off workout in the Today tab; you can save it here later.",
+"No Atlas, o + de cada exercício manda ele direto para um treino daqui.":"In the Atlas, the + on each exercise sends it straight to one of these workouts.",
+"Para o treino contar, vá na aba Hoje e toque em Marcar como feito.":"For a workout to count, go to the Today tab and tap Mark as done.",
+"Aqui você registra o que treinou. Só o que estiver marcado como feito entra no Progresso.":"Log what you trained here. Only what's marked as done counts in Progress.",
+"Sua semana":"Your week","mostra, de segunda a domingo, os treinos que você fez em cada dia.":"shows, from Monday to Sunday, the workouts you did each day.","Esqueceu de registrar?":"Forgot to log?",
+"Toque num dia que já passou na grade (ou use ‹ para semanas anteriores) e marque o treino; ele fica naquele dia. Dias futuros não podem ser escolhidos.":"Tap a past day in the grid (or use ‹ for earlier weeks) and mark the workout; it's saved on that day. Future days can't be picked.",
+"Marcar como feito":"Mark as done",": um toque e o treino conta, com todas as séries dele.":": one tap and the workout counts, with all its sets.","Anotar séries":"Log sets",
+": abre o treino para anotar repetições e carga de cada série. \"Última vez\" mostra o que você fez antes.":": opens the workout to log reps and load for each set. \"Last time\" shows what you did before.",
+"Desfazer":"Undo","tira o treino do Progresso.":"removes the workout from Progress.","Treino personalizado":"Custom workout",": monte um treino só para hoje. Se gostar, toque em":": build a workout just for today. If you like it, tap",
+"Salvar em Meus treinos":"Save to My workouts","e ele vira um treino fixo.":"and it becomes a saved workout.","Histórico":"History","guarda os treinos de outros dias.":"keeps the workouts from other days.",
+"Backup":"Backup","salva tudo num arquivo.":"saves everything to a file.","Os dados ficam só neste aparelho. Exporte um backup de vez em quando.":"Your data stays only on this device. Export a backup now and then.",
+"Anotar a carga ajuda a ver se você está progredindo.":"Logging the load helps you see if you're progressing.",
+"Força estimada":"Estimated strength","É uma estimativa de":"It's an estimate of","quanto você conseguiria levantar numa única repetição":"how much you could lift for a single rep",
+", no máximo, calculada a partir de uma série que você fez.":", at most, calculated from a set you did.","Como é calculada":"How it's calculated","Carga × (1 + repetições ÷ 30)":"Load × (1 + reps ÷ 30)",
+". É a fórmula de Epley, muito usada em academias e estudos.":". It's the Epley formula, widely used in gyms and studies.",
+"Exemplo: 72 kg × 8 repetições → 72 × (1 + 8 ÷ 30) = 72 × 1,27 ≈":"Example: 72 kg × 8 reps → 72 × (1 + 8 ÷ 30) = 72 × 1.27 ≈",
+"Em cada treino, o app usa a série que dá o maior número.":"In each workout, the app uses the set that gives the highest number.","Por que fica acima da linha vermelha":"Why it's above the red line",
+"A vermelha é o peso que você":"The red one is the weight you","levantou":"lifted","(ex.: 72 kg, 8 vezes).":"(e.g. 72 kg, 8 times).","A azul é o máximo que você":"The blue one is the most you",
+"aguentaria uma vez só":"could handle just once","com essa força (≈ 91 kg). Só são iguais quando a série tem 1 repetição.":"with that strength (≈ 91 kg). They're only equal when the set has 1 rep.",
+"Com o mesmo peso, mais repetições = estimativa maior: 72 × 6 ≈ 86 kg · 72 × 8 ≈ 91 kg · 72 × 10 ≈ 96 kg.":"With the same weight, more reps = a higher estimate: 72 × 6 ≈ 86 kg · 72 × 8 ≈ 91 kg · 72 × 10 ≈ 96 kg.",
+"Para que serve":"What it's for","Comparar treinos em que você mudou o peso":"Comparing workouts where you changed the weight",
+"as repetições. Ex.: 65 kg × 6 ≈ 78 kg e depois 62,5 kg × 9 ≈ 81 kg: o peso caiu, mas você ficou mais forte.":"the reps. E.g. 65 kg × 6 ≈ 78 kg and then 62.5 kg × 9 ≈ 81 kg: the weight went down, but you got stronger.",
+"Se a linha azul sobe com o tempo, sua força está subindo.":"If the blue line goes up over time, your strength is going up.","Cuidados":"Caveats",
+"É uma conta, não um teste: não precisa (nem deve) tentar levantar esse peso.":"It's a calculation, not a test: you don't need to (and shouldn't) try to lift that weight.",
+"Fica menos precisa acima de ~12 repetições.":"It gets less accurate above ~12 reps.","Só aparece quando você anota carga":"It only shows when you log load","repetições.":"reps.",
+"O boneco fica colorido conforme quantas séries cada músculo recebeu nos treinos marcados como feitos.":"The figure is colored by how many sets each muscle got in workouts marked as done.",
+"Semana / Dia":"Week / Day","trocam o período; as setas voltam para semanas ou dias anteriores.":"switch the period; the arrows go back to earlier weeks or days.","Toque num músculo":"Tap a muscle",
+"do boneco para ver quantas séries ele teve.":"on the figure to see how many sets it got.","Toque num grupo":"Tap a group","da lista para ver as partes (ex.: peitoral superior, médio e inferior).":"in the list to see its parts (e.g. upper, middle and lower chest).",
+"Equilíbrio":"Balance",": radar com 6 grupos (média de séries por músculo de cada um). A faixa sombreada é a faixa ideal; toque numa ponta para ver as partes e destacar os músculos no boneco.":": a radar with 6 groups (average sets per muscle in each). The shaded band is the ideal range; tap a point to see its parts and highlight the muscles on the figure.",
+"Força":"Strength",": em cima, o":": at the top, the","ranking de força":"strength ranking",
+"(seu nível em cada grupo muscular, de Ameba a Bizarro, comparado com quem treina; toque no + dele para entender). Embaixo, a evolução de cada exercício em que você anotou carga, com gráfico da maior carga do dia (linha cheia) e da força estimada (tracejada), recorde, última carga e quanto subiu. Toque no gráfico para ver cada treino.":"(your level in each muscle group, from Amoeba to Freak, compared with people who train; tap its + to learn more). Below, the progress of each exercise where you logged load, with a chart of the day's heaviest load (solid line) and estimated strength (dashed), record, last load and how much it went up. Tap the chart to see each workout.",
+"Como conta":"How it counts","Cada série vale 1 para o músculo alvo do exercício e ½ para os sinergistas.":"Each set counts 1 for the exercise's target muscle and ½ for the synergists.",
+"Semana":"Week",": 4–9 séries é estímulo moderado, 10–20 é a faixa ideal, mais de 20 é volume alto.":": 4–9 sets is a moderate stimulus, 10–20 is the ideal range, over 20 is high volume.","Dia":"Day",
+": até ~11 séries por músculo no mesmo treino ainda trazem ganho; depois disso, quase nada a mais.":": up to ~11 sets per muscle in the same workout still add gains; beyond that, almost nothing more.",
+"Mire 10–20 séries por semana em cada grupo que quer crescer, divididas em 2 ou mais treinos.":"Aim for 10–20 sets a week for each group you want to grow, split over 2 or more workouts.",
+"Grupos em \"Não treinados\" mostram o que ficou de fora na semana.":"Groups under \"Not trained\" show what was left out that week.",
+"Ajustes do app. Tudo fica salvo só neste aparelho e vai junto no backup.":"App settings. Everything is saved only on this device and goes into the backup.","O que já funciona":"What works now",
+"Perfil":"Profile",": nome (aparece na aba Hoje), peso e corpo ♂/♀ (usados no ranking de força).":": name (shown in the Today tab), weight and ♂/♀ body (used in the strength ranking).",
+"Aparência":"Appearance",": tema claro/escuro/automático, cor de destaque, tamanho da letra e reduzir animações.":": light/dark/automatic theme, accent color, text size and reduce motion.",
+"Treino":"Workout",": séries e repetições que já vêm ao adicionar um exercício.":": sets and reps that are pre-filled when you add an exercise.","Meta semanal":"Weekly goal",
+": aparece na grade da aba Hoje (\"2 de 4 treinos\").":": shows in the Today tab grid (\"2 of 4 workouts\").","Seus dados":"Your data",
+": exportar e importar backup, apagar histórico, cargas digitadas ou tudo.":": export and import a backup, delete history, entered loads or everything.","Sobre":"About",
+": compartilhar o app, mandar sugestões e ver as fontes.":": share the app, send suggestions and see the sources.","Em breve":"Coming soon",
+"Idioma, libras, timer de descanso, lembretes, sons e vibração, e conta com sincronização. As escolhas já ficam guardadas.":"Pounds, rest timer, reminders, sounds and vibration, and an account with sync. Your choices are already saved.",
+"Ranking de força":"Strength ranking","Mostra quão forte você é em cada grupo muscular, em 9 níveis:":"Shows how strong you are in each muscle group, in 9 levels:",
+"Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda e Bizarro":"Amoeba, Rookie, Chicken, Rooster, Buff, Beefy, Monster, Legend and Freak",
+". A comparação é com milhões de registros de pessoas que treinam, do mesmo sexo, ajustada ao seu peso.":". It's compared with millions of records from people who train, of the same sex, adjusted to your weight.",
+"Seu peso":"Your weight","corpo ♂/♀":"♂/♀ body",": mudam as faixas. Coloque seu peso para o resultado ficar certo.":": change the bands. Enter your weight so the result is right.",
+"para ver cada exercício que entrou na conta, o nível dele e quanto falta para o próximo nível.":"to see each exercise that counted, its level and how far you are from the next level.",
+"+ Digitar uma carga":"+ Enter a load",": para exercícios que você faz mas ainda não anotou nos treinos. Escolha o exercício e a variação, coloque a carga e as repetições.":": for exercises you do but haven't logged in your workouts yet. Pick the exercise and variation, enter the load and reps.",
+"Toque no boneco para ver o nível de cada parte.":"Tap the figure to see the level of each part.",
+"As cargas vêm dos treinos marcados como feitos (com carga e repetições anotadas) nos últimos 6 meses e do que você digitar aqui. Vale a melhor série de cada exercício.":"Loads come from workouts marked as done (with load and reps logged) in the last 6 months and from what you enter here. The best set of each exercise counts.",
+"Cada série vira força estimada (carga × (1 + reps ÷ 30)) e é comparada com as faixas daquele exercício.":"Each set becomes an estimated strength (load × (1 + reps ÷ 30)) and is compared with that exercise's bands.",
+"O nível do grupo é a média de todos os exercícios dele; o nível geral é a média dos grupos.":"A group's level is the average of all its exercises; the overall level is the average of the groups.",
+"Halteres: use o peso de cada halter.":"Dumbbells: use the weight of each dumbbell.",
+"Barra fixa, mergulho, flexão e remada invertida contam o seu peso corporal. Se fizer só com o corpo, deixe a carga em branco (ou 0) e anote as repetições.":"Pull-ups, dips, push-ups and inverted rows count your bodyweight. If you do them with just your body, leave the load blank (or 0) and log the reps.",
+"Fortinho fica em volta da média de quem treina (45–60%). Monstro já é mais forte que 3 em cada 4 pessoas.":"Buff is around the average of people who train (45–60%). Monster is already stronger than 3 out of 4 people.",
+"Séries de 3 a 12 repetições dão a estimativa mais confiável.":"Sets of 3 to 12 reps give the most reliable estimate.",
+"O ranking fica em Progresso › Força, em cima da evolução das cargas.":"The ranking is in Progress › Strength, above the load progress.",
+"Adicionar exercício":"Add exercise","Treino sem nome":"Untitled workout","+ Novo treino com este exercício":"+ New workout with this exercise","Treino de hoje":"Today's workout","Em andamento":"In progress",
+"Buscar exercício":"Search exercise","Buscar ou digitar um exercício":"Search or type an exercise","Grupo muscular":"Muscle group","Adicionar":"Add","Exercício próprio, fora da lista":"Your own exercise, not on the list",
+"Monte seus treinos aqui. Para registrar um treino, vá na aba Hoje e toque em Marcar como feito.":"Build your workouts here. To log a workout, go to the Today tab and tap Mark as done.",
+"Dias da semana (opcional)":"Days of the week (optional)","Nos dias marcados, este treino aparece primeiro na aba Hoje.":"On the selected days, this workout shows first in the Today tab.",
+"Séries":"Sets","Reps":"Reps","+ Adicionar exercício":"+ Add exercise","Nome do treino":"Workout name","Nome, ex.: Peito e tríceps":"Name, e.g. Chest and triceps","Subir":"Move up","Descer":"Move down",
+"Excluir este treino? O que você já fez continua no histórico.":"Delete this workout? What you've already done stays in the history.","Excluir":"Delete","Cancelar":"Cancel","Nenhum exercício ainda.":"No exercises yet.",
+"Esqueceu de registrar? Toque num dia que já passou.":"Forgot to log? Tap a day that has passed.","Seus treinos":"Your workouts","Não feito":"Not done","Continuar anotando":"Keep logging",
+"Sem exercícios. Monte na aba Treinos.":"No exercises. Build it in the Workouts tab.","Treino personalizado de hoje":"Today's custom workout","Continuar":"Continue","+ Montar um treino só para hoje":"+ Build a workout just for today",
+"Backup, apagar dados e outros ajustes ficam em Configurações (engrenagem lá em cima).":"Backup, deleting data and other options are in Settings (the gear at the top).",
+"Semana anterior":"Previous week","Próxima semana":"Next week","‹ Hoje":"‹ Today","Carga (kg)":"Load (kg)","+ Série":"+ Set","Anotações do treino":"Workout notes","Excluir do histórico":"Delete from history",
+"kg":"kg","Anotações deste exercício":"Notes for this exercise","Como foi o treino, energia, sono, dores…":"How the workout went, energy, sleep, aches…","Excluir este treino do histórico?":"Delete this workout from the history?",
+"Voltar para hoje":"Back to today","Feito ✓":"Done ✓","Ver séries":"See sets","+ Montar um treino só para este dia":"+ Build a workout just for this day","‹ Voltar":"‹ Back","Vira um treino fixo na aba Treinos.":"Becomes a saved workout in the Workouts tab.",
+"Nenhum exercício ainda. Adicione abaixo ou pelo + nos cartões do Atlas.":"No exercises yet. Add them below or with the + on the Atlas cards.","Semana passada":"Last week",
+"Músculos que você treinou, pelos treinos marcados como feitos na aba Hoje. Cada série conta 1 para o músculo alvo e ½ para os sinergistas.":"Muscles you trained, from workouts marked as done in the Today tab. Each set counts 1 for the target muscle and ½ for the synergists.",
+"Músculos":"Muscles","Esta semana":"This week","Não treinado":"Not trained","Abaixo do mínimo":"Below minimum","Estímulo moderado":"Moderate stimulus","Faixa ideal":"Ideal range","Volume alto":"High volume",
+"Treino":"Workout","Treinos":"Workouts","Séries feitas":"Sets done","Grupos treinados":"Groups trained","faixa ideal (10–20)":"ideal range (10–20)","Core":"Core",
+"Toque num grupo para ver as partes e destacar os músculos no boneco.":"Tap a group to see its parts and highlight the muscles on the figure.",
+"Cada ponta mostra a média de séries por músculo do grupo (ex.: Pernas = média de quadríceps, posterior, glúteos, adutores e panturrilha).":"Each point shows the average sets per muscle in the group (e.g. Legs = average of quads, hamstrings, glutes, adductors and calves).",
+"Séries por músculo na semana":"Sets per muscle this week","Séries por músculo no treino":"Sets per muscle in the workout","Como as faixas foram definidas":"How the bands were set",
+"As séries contam como nos estudos: série do músculo alvo vale 1, de sinergista vale ½. As faixas valem para o músculo inteiro (o número de cada grupo na lista). No boneco, cada parte é pintada pelo próprio número.":"Sets count like in the studies: a target-muscle set counts 1, a synergist set counts ½. The bands apply to the whole muscle (each group's number in the list). On the figure, each part is colored by its own number.",
+"Semana.":"Week.","Cerca de 4 séries já dão crescimento mensurável. 10 ou mais são necessárias para maximizar. Entre 12 e 20 é a provável faixa ideal para quem já treina. Acima de 20 ainda pode ajudar, mas cada série a mais rende menos e quase não há estudos acima de 25–30.":"About 4 sets already give measurable growth. 10 or more are needed to maximize it. 12 to 20 is the likely ideal range for people who already train. Above 20 can still help, but each extra set gives less, and there are almost no studies above 25–30.",
+"Treino do dia.":"The day's workout.","Até cerca de 11 séries por músculo no mesmo treino ainda trazem ganho mensurável. Depois disso, os estudos não mostram ganho extra.":"Up to about 11 sets per muscle in the same workout still bring measurable gains. Beyond that, studies show no extra gain.",
+"Repetições e esforço.":"Reps and effort.","De cerca de 6 a 30 repetições o crescimento é parecido, se a série terminar perto da falha (sobrando 0 a 2 repetições). Séries muito leves ou longe da falha estimulam menos, mas o app conta todas as séries marcadas.":"From about 6 to 30 reps growth is similar, as long as the set ends close to failure (0 to 2 reps left). Very light sets or sets far from failure stimulate less, but the app counts every set marked.",
+"Pelland et al. (2024/2026, Sports Medicine): volume semanal e frequência, 67 estudos":"Pelland et al. (2024/2026, Sports Medicine): weekly volume and frequency, 67 studies",
+"Remmert et al. (2025, pré-publicação): volume por treino, 35 estudos":"Remmert et al. (2025, preprint): volume per session, 35 studies","Schoenfeld, Ogborn e Krieger (2017): 10+ séries por semana":"Schoenfeld, Ogborn and Krieger (2017): 10+ sets per week",
+"Baz-Valle et al. (2022, J. Human Kinetics): 12–20 séries por semana em treinados":"Baz-Valle et al. (2022, J. Human Kinetics): 12–20 sets per week in trained people",
+"Schoenfeld et al. (2017, JSCR): carga leve vs pesada até a falha":"Schoenfeld et al. (2017, JSCR): light vs heavy loads to failure",
+"Robinson et al. (2024, Sports Medicine) e Refalo et al. (2024, J. Sports Sciences): proximidade da falha":"Robinson et al. (2024, Sports Medicine) and Refalo et al. (2024, J. Sports Sciences): proximity to failure",
+"Spiering et al. (2021, JSCR): dose mínima para manter":"Spiering et al. (2021, JSCR): minimum dose to maintain",
+"Tipo de progresso":"Progress type","Período":"Period","Músculos treinados no período, frente e costas":"Muscles trained in the period, front and back","Faixas de séries":"Set bands",
+"Ontem":"Yesterday","Leve":"Light","Bom":"Good","Forte":"Strong","Pouco ganho extra":"Little extra gain","bom a forte (3–11)":"good to strong (3–11)","Dia anterior":"Previous day","Próximo dia":"Next day",
+"Nenhum treino feito nesta semana. Na aba Hoje, abra o treino e toque em Marcar como feito.":"No workouts done this week. In the Today tab, open a workout and tap Mark as done.",
+"Nenhum treino feito neste dia. Na aba Hoje, abra o treino e toque em Marcar como feito.":"No workouts done on this day. In the Today tab, open a workout and tap Mark as done.","Ir para Hoje":"Go to Today",
+"Seu nível de força comparado com quem treina e a evolução das cargas que você anotou nos treinos marcados como feitos.":"Your strength level compared with people who train, and the progress of the loads you logged in workouts marked as done.",
+"Evolução das cargas que você anotou nos treinos marcados como feitos.":"Progress of the loads you logged in workouts marked as done.",
+"Nível geral":"Overall level","Sem dados":"No data","Nível por grupo":"Level by group","mais forte que":"stronger than","apagar":"delete","Evolução por exercício":"Progress by exercise",
+"Maior carga do dia":"Day's heaviest load","novo":"new",
+"Força estimada = carga × (1 + repetições ÷ 30). É uma estimativa da carga máxima para 1 repetição, útil para comparar treinos com repetições diferentes; fica menos precisa acima de ~12 repetições.":"Estimated strength = load × (1 + reps ÷ 30). It estimates your max load for 1 rep, useful for comparing workouts with different reps; it gets less accurate above ~12 reps.",
+"De onde vêm os números.":"Where the numbers come from.",
+"As faixas são os padrões de força do Strength Level, feitos com cerca de 11 milhões de registros de pessoas que treinam (entre 48 milhões de levantamentos enviados). As faixas do site são percentis entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%. O app usa o corpo ♂/♀ escolhido.":"The bands are Strength Level's strength standards, built from about 11 million records of people who train (out of 48 million lifts submitted). The site's bands are percentiles among people of the same sex: beginner 5%, novice 20%, intermediate 50%, advanced 80% and elite 95%. The app uses the ♂/♀ body you chose.",
+"Os 9 níveis":"The 9 levels",
+"(quanto % de quem treina você supera): Ameba = menos de 5% · Aprendiz = 5–15% · Frango = 15–30% · Galo = 30–45% · Fortinho = 45–60% · Parrudo = 60–75% · Monstro = 75–88% · Lenda = 88–96% · Bizarro = top 4%. Os níveis do meio têm a mesma largura; as pontas são mais difíceis. Entre as faixas do site, o app interpola.":"(what % of people who train you beat): Amoeba = under 5% · Rookie = 5–15% · Chicken = 15–30% · Rooster = 30–45% · Buff = 45–60% · Beefy = 60–75% · Monster = 75–88% · Legend = 88–96% · Freak = top 4%. The middle levels are the same width; the ends are harder. Between the site's bands, the app interpolates.",
+"Peso corporal.":"Bodyweight.",
+"As faixas publicadas são para o praticante típico (cerca de 77 kg no masculino e 65 kg no feminino). O app ajusta para o seu peso pela regra de ⅔: a força cresce com a área do músculo, que acompanha o peso elevado a ⅔. Quem é mais leve precisa levantar menos, mas não proporcionalmente menos.":"The published bands are for the typical lifter (about 77 kg for men and 65 kg for women). The app adjusts them to your weight with the ⅔ rule: strength grows with muscle cross-section, which tracks bodyweight to the ⅔ power. Lighter people need to lift less, but not proportionally less.",
+"Sua força em cada exercício.":"Your strength in each exercise.",
+"Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Séries de até ~12 repetições dão a estimativa mais confiável. Exercícios com o peso do corpo contam o corpo: barra fixa e mergulho (o corpo todo), flexão (cerca de 69% do peso no chão, 74% com os pés elevados, 45% com as mãos elevadas, comparada com o supino) e remada invertida (cerca de 55%, comparada com a remada curvada). Peso extra (colete, anilha) soma; na barra assistida (graviton), a ajuda é descontada. Nesses exercícios valem até 30 repetições na conta.":"For each set, the app calculates the estimated strength (load × (1 + reps ÷ 30), the Epley formula) and keeps the best of the last 6 months, from workouts marked as done or entered here. Sets of up to ~12 reps give the most reliable estimate. Bodyweight exercises count your body: pull-ups and dips (the whole body), push-ups (about 69% of your weight on the floor, 74% with feet elevated, 45% with hands elevated, compared with the bench press) and inverted rows (about 55%, compared with the bent-over row). Extra weight (vest, plate) adds on; on the assisted machine, the assistance is subtracted. Up to 30 reps count for these exercises.",
+"Nível do grupo.":"Group level.","É a média de":"It's the average of","todos":"all",
+"os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos.":"the group's exercises you did, not just one. An exercise counts for every group it targets (e.g. squats count for quads and glutes). The overall level is the average of the groups.",
+"Aproximações.":"Approximations.",
+"Halteres: o peso é de cada halter. Variações sem padrão próprio usam o mais próximo com um fator (ex.: supino inclinado com halteres ≈ 90% do reto; máquina com um braço só ≈ metade do peso dos dois). Prancha, abdominais e afundo ou ponte só com o corpo ficam fora, porque não há um padrão de carga justo para eles. Máquinas variam de marca para marca, então use o nível delas como referência, não como verdade absoluta.":"Dumbbells: the weight is per dumbbell. Variations without their own standard use the closest one with a factor (e.g. incline dumbbell press ≈ 90% of flat; a one-arm machine ≈ half the weight of two arms). Planks, crunches, and bodyweight-only lunges or bridges are left out because there's no fair load standard for them. Machines vary by brand, so treat their level as a reference, not absolute truth.",
+"Strength Level: padrões de força por exercício, sexo e peso corporal (strengthlevel.com)":"Strength Level: strength standards by exercise, sex and bodyweight (strengthlevel.com)",
+"StrengthLog: padrões de força em kg para agachamento, terra, supino e desenvolvimento (strengthlog.com)":"StrengthLog: strength standards in kg for squat, deadlift, bench press and overhead press (strengthlog.com)",
+"Jaric (2002, Sports Medicine): normalizar força pelo peso corporal elevado a ⅔":"Jaric (2002, Sports Medicine): normalizing strength by bodyweight to the ⅔ power","Epley (1985): fórmula da força estimada":"Epley (1985): estimated strength formula",
+"Como funciona o ranking":"How the ranking works","Boneco colorido pelo nível de força de cada grupo, frente e costas":"Figure colored by each group's strength level, front and back","Cores dos níveis":"Level colors",
+"O que é força estimada":"What estimated strength is","1 mês":"1 month","3 meses":"3 months","Tudo":"All","Registre mais treinos com carga para ver a linha.":"Log more workouts with load to see the line.",
+"Nenhum registro neste período. Escolha \"Tudo\".":"No records in this period. Choose \"All\".",
+"Recorde":"Record","Última":"Last","Desde o início":"Since the start","1 treino só":"only 1 workout","Data":"Date","Maior carga":"Heaviest load","Força est.":"Est. strength","anote as reps":"log the reps",
+"Digitar carga":"Enter load","Peso extra (kg, 0 = só o corpo)":"Extra weight (kg, 0 = bodyweight only)","Ajuda da máquina (kg)":"Machine assistance (kg)","Repetições":"Reps",
+"Use a série mais pesada que você faz hoje, com boa execução.":"Use the heaviest set you can do today with good form.","Peso de cada halter.":"Weight of each dumbbell.","Salvar":"Save","ex.: 8":"e.g. 8","ex.: 60":"e.g. 60",
+"Preencha a carga e as repetições":"Fill in the load and reps",
+"Anote carga e repetições nos treinos da aba Hoje e marque como feito, ou digite aqui embaixo uma carga que você já levanta.":"Log load and reps in the Today tab workouts and mark them as done, or enter below a load you already lift.",
+"Nenhum exercício com carga ainda.":"No exercises with load yet.","Nenhuma carga anotada ainda. Na aba Hoje, toque em":"No loads logged yet. In the Today tab, tap",
+", preencha a carga (kg) e as repetições e marque o treino como feito.":", fill in the load (kg) and reps, and mark the workout as done.",
+"Nome ou apelido":"Name or nickname","Aparece na aba Hoje.":"Shown in the Today tab.","Usado no ranking de força.":"Used in the strength ranking.","Boneco e faixas do ranking.":"Figure and ranking bands.",
+"Idade":"Age","anos":"years","Altura":"Height","cm":"cm","Experiência":"Experience","Há quanto tempo você treina.":"How long you've been training.","Iniciante":"Beginner","Intermediário":"Intermediate","Avançado":"Advanced",
+"Tema":"Theme","Automático":"Automatic","Claro":"Light","Escuro":"Dark","Cor de destaque":"Accent color","Título, aba atual e botões de destaque. O músculo-alvo continua vermelho.":"Title, current tab and highlighted buttons. The target muscle stays red.",
+"Tamanho da letra":"Text size","Pequena":"Small","Normal":"Normal","Grande":"Large","Reduzir animações":"Reduce motion","Desliga as transições.":"Turns off transitions.","Idioma":"Language",
+"Unidade de peso":"Weight unit","em breve":"coming soon","Séries e repetições padrão":"Default sets and reps","O que já vem preenchido ao adicionar um exercício.":"What's pre-filled when you add an exercise.",
+"Timer de descanso":"Rest timer","Tempo padrão entre séries.":"Default time between sets.","1 min":"1 min","2 min":"2 min","3 min":"3 min","Lembretes e metas":"Reminders and goals",
+"Treinos por semana. Aparece na grade da aba Hoje.":"Workouts per week. Shown in the Today tab grid.","Sem meta":"No goal","Lembrete de treino":"Workout reminder","Notificação nos dias e horário escolhidos.":"A notification on the days and time you choose.",
+"Sons":"Sounds","Ao acabar o descanso e ao marcar treino como feito.":"When rest ends and when you mark a workout as done.","Vibração":"Vibration","Conta":"Account","Conta e sincronização":"Account and sync",
+"Entrar com uma conta e salvar na nuvem, para usar em outro celular.":"Sign in and save to the cloud, to use on another phone.","Entrar":"Sign in",
+"Seus treinos, cargas e ajustes num arquivo. Faça de vez em quando.":"Your workouts, loads and settings in one file. Do it now and then.","Exportar":"Export","Importar":"Import",
+"Apagar histórico de treinos":"Delete workout history","Apagar":"Delete","Apagar cargas digitadas":"Delete entered loads","Apagar tudo":"Delete everything",
+"Treinos, histórico, cargas e ajustes. O app volta ao começo.":"Workouts, history, loads and settings. The app starts over.","Compartilhar o app":"Share the app","Mande o link para os amigos.":"Send the link to your friends.",
+"Compartilhar":"Share","Sugestões e avaliação":"Suggestions and feedback","Abre uma página no GitHub para mandar ideias ou problemas.":"Opens a page on GitHub to send ideas or problems.","Enviar":"Send",
+"Fontes dos estudos":"Study sources","Todos os artigos e links usados no app.":"All the articles and links used in the app.","Ver":"See","Versão":"Version","Seu nome":"Your name",
+"Vermelho":"Red","Azul":"Blue","Verde":"Green","Roxo":"Purple","Laranja":"Orange","Rosa":"Pink","Unidade":"Unit","Descanso":"Rest","Dias do lembrete":"Reminder days",
+"Apagar todo o histórico de treinos? Não dá para desfazer.":"Delete all workout history? This can't be undone.","Apagar histórico":"Delete history",
+"Apagar as cargas digitadas no ranking? Não dá para desfazer.":"Delete the loads entered in the ranking? This can't be undone.","Apagar cargas":"Delete loads",
+"Apagar TODOS os dados deste aparelho? Exporte um backup antes se quiser guardar.":"Delete ALL data on this device? Export a backup first if you want to keep it.","Substituir":"Replace",
+"Adicionado ao treino de hoje":"Added to today's workout","Apagado":"Deleted","Backup importado":"Backup imported","Carga salva":"Load saved","Desfeito: saiu do Progresso":"Undone: removed from Progress",
+"Escolha um exercício da lista":"Pick an exercise from the list","Essa variação não tem padrão de força. Tente com barra, halteres ou máquina.":"That variation has no strength standard. Try barbell, dumbbells or machine.",
+"Esse arquivo não é um backup do Atlas Muscular":"That file isn't an Atlas Muscular backup","Link copiado":"Link copied","Não foi possível salvar neste aparelho":"Couldn't save on this device",
+"Peso entre 30 e 250 kg":"Weight between 30 and 250 kg","Treino criado. Dê um nome e escolha os dias":"Workout created. Give it a name and pick the days","Treino excluído":"Workout deleted",
+"Treino marcado como feito":"Workout marked as done","Treino desmarcado: saiu do Progresso":"Workout unmarked: removed from Progress","Salvo em Meus treinos. Dê um nome a ele":"Saved to My workouts. Give it a name",
+"Exercício para o ranking":"Exercise for the ranking","Adicionar ao treino":"Add to workout","Qualquer dia":"Any day","Todos os dias":"Every day","Exercício próprio":"Your own exercise","Sem nome":"Untitled",
+"Ajustes do app. Tudo fica salvo só neste aparelho.":"App settings. Everything is saved only on this device.","Português":"Português","English":"English",
+"Iniciar":"Start","Começar":"Start","Pronto":"Done","Feito":"Done","não feito":"not done","feito":"done",
+"Sem padrão":"No standard","Exercício":"Exercise","Exercícios":"Exercises","Músculo":"Muscle","Grupo":"Group",
+"Atlas":"Atlas","Muscular":"Muscular","e":"and","ou":"or",
+"Dia de hoje":"Scheduled for today","Dia deste treino":"Scheduled for this day","Treino antigo: conta no Progresso pelas séries preenchidas.":"Old workout: counts in Progress by the filled-in sets.",
+"Nenhum exercício encontrado.":"No exercises found.","Você ainda não tem treinos. Crie o primeiro, por exemplo \"Peito e tríceps\", e escolha os dias.":"You don't have any workouts yet. Create the first one, for example \"Chest and triceps\", and pick the days.",
+"Você ainda não tem treinos montados.":"You haven't built any workouts yet.","Montar um treino":"Build a workout","Os treinos que você fizer aparecem aqui.":"The workouts you do show up here.",
+"Toque no boneco pequeno para ampliar.":"Tap the small figure to enlarge it.","Última vez":"Last time","Não treinados":"Not trained",
+"Lista combinada das partes deste grupo, alternando o 1º de cada parte, depois o 2º, e assim por diante. Para ver cada parte separada, use o modelo Detalhado.":"Combined list of this group's parts, alternating the 1st of each part, then the 2nd, and so on. To see each part separately, use the Detailed model.",
+"App de academia: músculos, treinos e ranking de força":"Gym app: muscles, workouts and strength ranking"
+};
+const EN_PAT=[
+["Adicionar {0} a um treino","Add {0} to a workout"],
+["Este treino conta no Progresso (1 série).","This workout counts in Progress (1 set)."],
+["Este treino conta no Progresso ({0} séries).","This workout counts in Progress ({0} sets)."],
+["Enquanto não marcar, este treino não entra no Progresso. Ao marcar, contam as 1 série listada, preenchidas ou não.","Until you mark it, this workout doesn't count in Progress. When you do, the 1 listed set counts, filled in or not."],
+["Fontes: {0}. A ordem segue o estímulo estimado: primeiro o que estudos de crescimento mostraram, depois a ativação medida por EMG, depois a mecânica do movimento.","Sources: {0}. The order follows the estimated stimulus: first what growth studies showed, then activation measured by EMG, then movement mechanics."],
+["Lista combinada das partes deste grupo, alternando o 1º de cada parte, depois o 2º, e assim por diante. Para ver cada parte separada, use o modelo Detalhado. {0}","Combined list of this group's parts, alternating the 1st of each part, then the 2nd, and so on. To see each part separately, use the Detailed model. {0}"],
+["Inclui: {0}","Includes: {0}"],
+["Posição e selo do ranking valem para: {0}","Ranking position and badge apply to: {0}"],
+["Nesta variação, {0} quase não trabalha.","In this variation, {0} barely works."],
+["Exercício · {0}","Exercise · {0}"],
+["Nada encontrado para \"{0}\".","Nothing found for \"{0}\"."],
+["{0} · 1 exercício","{0} · 1 exercise"],
+["{0} · {1} exercícios","{0} · {1} exercises"],
+["{0} · tem variações","{0} · has variations"],
+["Alvo: {0} · Sinergistas: {1}","Target: {0} · Synergists: {1}"],
+["Alvo: {0}","Target: {0}"],
+["Adicionar \"{0}\"","Add \"{0}\""],
+["Adicionar a {0}","Add to {0}"],
+["Adicionado a {0}","Added to {0}"],
+["Remover {0}","Remove {0}"],
+["Olá, {0}! {1}","Hi, {0}! {1}"],
+["Olá, {0}!","Hi, {0}!"],
+["{0} de {1} treinos · meta batida!","{0} of {1} workouts · goal reached!"],
+["{0} de {1} treinos","{0} of {1} workouts"],
+["1 treino feito","1 workout done"],
+["{0} treinos feitos","{0} workouts done"],
+["Nenhum treino feito","No workouts done"],
+["{0} {1}: nada feito. Toque para registrar neste dia","{0} {1}: nothing done. Tap to log on this day"],
+["{0} {1}: nada feito","{0} {1}: nothing done"],
+["{0} {1}: ainda não chegou","{0} {1}: not here yet"],
+["{0} {1}: {2}. Toque para registrar neste dia","{0} {1}: {2}. Tap to log on this day"],
+["Última vez ({0}):","Last time ({0}):"],
+["{0} · meta {1} reps","{0} · target {1} reps"],
+["Repetições, série {0}","Reps, set {0}"],
+["Carga em kg, série {0}","Load in kg, set {0}"],
+["Remover série {0}","Remove set {0}"],
+["Anotações de {0}","Notes for {0}"],
+["Enquanto não marcar, este treino não entra no Progresso. Ao marcar, contam as {0} séries listadas, preenchidas ou não.","Until you mark it, this workout doesn't count in Progress. When you do, all {0} listed sets count, filled in or not."],
+["Registrando {0}","Logging {0}"],
+["1 treino feito neste dia. O que você marcar agora fica nesse dia.","1 workout done on this day. What you mark now is saved on this day."],
+["{0} treinos feitos neste dia. O que você marcar agora fica nesse dia.","{0} workouts done on this day. What you mark now is saved on this day."],
+["O que você marcar agora fica nesse dia.","What you mark now is saved on this day."],
+["Seus treinos · {0}","Your workouts · {0}"],
+["Treino personalizado de {0}","Custom workout for {0}"],
+["{0} · não feito","{0} · not done"],
+["{0} · 1 exercício","{0} · 1 exercise"],
+["Treino de {0}","Workout {0}"],
+["{0} marcado como feito em {1}","{0} marked as done on {1}"],
+["{0} marcado como feito","{0} marked as done"],
+["{0} salvo em Meus treinos","{0} saved to My workouts"],
+["{0}: não treinado","{0}: not trained"],
+["{0}: {1} séries por músculo","{0}: {1} sets per muscle"],
+["{0}: {1} séries","{0}: {1} sets"],
+["Não treinados: {0}.","Not trained: {0}."],
+["Não entram no boneco porque o app não conhece o exercício: {0}.","Not on the figure because the app doesn't know the exercise: {0}."],
+["Equilíbrio, média de séries por músculo: {0}","Balance, average sets per muscle: {0}"],
+["média {0} · {1}","average {0} · {1}"],
+["Os músculos de {0} estão destacados no boneco acima.","The {0} muscles are highlighted on the figure above."],
+["Muitas séries no mesmo treino","Too many sets in one workout"],
+["{0} passaram de ~11 séries hoje. Os estudos não mostram ganho extra a partir daí; vale dividir em outro dia da semana.","{0} went over ~11 sets today. Studies show no extra gain past that; consider splitting it over another day of the week."],
+["{0} passou de ~11 séries hoje. Os estudos não mostram ganho extra a partir daí; vale dividir em outro dia da semana.","{0} went over ~11 sets today. Studies show no extra gain past that; consider splitting it over another day of the week."],
+["{0} passaram de ~11 séries neste dia. Os estudos não mostram ganho extra a partir daí; vale dividir em outro dia da semana.","{0} went over ~11 sets on this day. Studies show no extra gain past that; consider splitting it over another day of the week."],
+["{0} passou de ~11 séries neste dia. Os estudos não mostram ganho extra a partir daí; vale dividir em outro dia da semana.","{0} went over ~11 sets on this day. Studies show no extra gain past that; consider splitting it over another day of the week."],
+["{0} · mais forte que ~{1}% de quem treina, do mesmo sexo.","{0} · stronger than ~{1}% of people who train, of the same sex."],
+["{0}: sem dados","{0}: no data"],
+["{0} × {1} · treino de {2}","{0} × {1} · workout on {2}"],
+["{0} × {1} · digitado de {2}","{0} × {1} · entered on {2}"],
+["só o corpo","bodyweight"],
+["sem ajuda","no assistance"],
+["ajuda de {0} kg","{0} kg assistance"],
+["Para {0}: {1}","For {0}: {1}"],
+["1 repetição com {0} kg (ou {1} kg × 8)","1 rep with {0} kg (or {1} kg × 8)"],
+["{0} repetições seguidas só com o corpo","{0} reps in a row with bodyweight only"],
+["1 repetição só com o corpo","1 rep with bodyweight only"],
+["10 repetições com +{0} kg de peso extra","10 reps with +{0} kg extra weight"],
+["com ajuda de até {0} kg","with up to {0} kg assistance"],
+["1 repetição com +{0} kg","1 rep with +{0} kg"],
+["Nível do grupo = média de 1 exercício.","Group level = average of 1 exercise."],
+["Nível do grupo = média de {0} exercícios.","Group level = average of {0} exercises."],
+["Digitado: {0} kg × {1}","Entered: {0} kg × {1}"],
+["Sem dados: {0}.","No data: {0}."],
+["Sem padrão de força (não entram): {0}.","No strength standard (not counted): {0}."],
+["Última: {0} · {1} · 1 treino","Last: {0} · {1} · 1 workout"],
+["Última: {0} · {1} · {2} treinos","Last: {0} · {1} · {2} workouts"],
+["recorde {0} kg","record {0} kg"],
+["desde {0}","since {0}"],
+["Gráfico de cargas: {0}","Load chart: {0}"],
+["Maior carga: {0}","Heaviest load: {0}"],
+["Força est.: {0}","Est. strength: {0}"],
+["Coloque seu peso para o ranking ficar certo. Enquanto isso, o app usa {0} kg.","Enter your weight so the ranking is right. Until then, the app uses {0} kg."],
+["1 registro. Os treinos montados continuam.","1 record. Your built workouts stay."],
+["{0} registros. Os treinos montados continuam.","{0} records. Your built workouts stay."],
+["1 carga digitada no ranking.","1 load entered in the ranking."],
+["{0} cargas digitadas no ranking.","{0} loads entered in the ranking."],
+["Substituir seus dados atuais pelo backup ({0} treino montado, {1} no histórico)?","Replace your current data with the backup ({0} built workout, {1} in history)?"],
+["Substituir seus dados atuais pelo backup ({0} treinos montados, {1} no histórico)?","Replace your current data with the backup ({0} built workouts, {1} in history)?"],
+["Tocar num exercício de {0}","Tap a {0} exercise"],
+["{0} séries","{0} sets"],
+["1 série","1 set"],
+["{0} treinos","{0} workouts"],
+["1 treino","1 workout"],
+["{0} exercícios","{0} exercises"],
+["1 exercício","1 exercise"],
+["Exercícios para {0}","Exercises for {0}"]
+];
+/* compile pattern keys: "{0} de {1} treinos" -> /^(.+?) de (.+?) treinos$/ ; captured parts are translated again */
+const EN_RX=EN_PAT.slice().sort((a,b)=>b[0].replace(/\{\d\}/g,"").length-a[0].replace(/\{\d\}/g,"").length).map(([k,v])=>[new RegExp("^"+k.replace(/[.*+?^$()|[\]\\]/g,"\\$&").replace(/\{(\d)\}/g,"(.+?)")+"$"),v]);
+function trStr(s){
+  if(LANG!=="en"||!s)return s;
+  const t=s.trim();if(!t||!/[A-Za-zÀ-ú]/.test(t))return s;
+  let r=EN_UI[t];if(r===undefined)r=EN_DATA[t];
+  if(r===undefined)for(const [rx,v] of EN_RX){const m=t.match(rx);if(m){r=v.replace(/\{(\d)\}/g,(_,i)=>trStr(m[+i+1]));break}}
+  return r===undefined?s:s.replace(t,r);
+}
+const L=trStr;
+const TR_ATTR=["title","aria-label","placeholder"];
+const TR_SKIP=new Set(["SCRIPT","STYLE","TEXTAREA","INPUT"]);
+function trEl(el){
+  if(el.nodeType===3){const p=el.parentNode;if(!p||TR_SKIP.has(p.nodeName)||p.closest&&p.closest("[data-notr]"))return;const v=trStr(el.nodeValue);if(v!==el.nodeValue)el.nodeValue=v;return}
+  if(el.nodeType!==1||TR_SKIP.has(el.nodeName)&&el.nodeName!=="INPUT"&&el.nodeName!=="TEXTAREA")return;
+  for(const a of TR_ATTR){if(el.hasAttribute&&el.hasAttribute(a)){const o=el.getAttribute(a),v=trStr(o);if(v!==o)el.setAttribute(a,v)}}
+  if(el.nodeName==="INPUT"||el.nodeName==="TEXTAREA"||el.closest&&el.closest("[data-notr]"))return;
+  const w=document.createTreeWalker(el,NodeFilter.SHOW_ELEMENT|NodeFilter.SHOW_TEXT);let n;
+  while((n=w.nextNode())){if(n.nodeType===3)trEl(n);else for(const a of TR_ATTR){if(n.hasAttribute(a)){const o=n.getAttribute(a),v=trStr(o);if(v!==o)n.setAttribute(a,v)}}}
+}
+if(LANG==="en"){
+  new MutationObserver(ms=>{for(const m of ms){
+    if(m.type==="characterData")trEl(m.target);
+    else if(m.type==="attributes")trEl(m.target);
+    else m.addedNodes.forEach(trEl)}})
+  .observe(document.documentElement,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:TR_ATTR});
+  document.addEventListener("DOMContentLoaded",()=>trEl(document.body));
+}
+</script>
+<script>
 /* ------------------------------------------------------------------ data */
 const EQ = {"H":"Halteres","P":"Polia / Cabo","B":"Barra","M":"Máquina","C":"Peso corporal","K":"Outros"};
 const SRC = {
@@ -672,15 +1271,16 @@ function resolveV(f,sel){const key=mkRef(f,sel);if(RESC.has(key))return RESC.get
       if(o==="*"){s=rm(s,c);if(!p.includes(c))p.push(c)}else if(o==="~"){p=rm(p,c);s=rm(s,c);s.unshift(c)}
       else if(o==="^"){if(!p.includes(c)){s=rm(s,c);s.unshift(c)}}else if(o==="+"){if(!p.includes(c)&&!s.includes(c))s.push(c)}else if(o==="-"){p=rm(p,c);s=rm(s,c)}}}
   const r={p:p.map(c=>MC[c]),s:s.map(c=>MC[c])};RESC.set(key,r);return r}
-function vName(f,sel){let base=f.n,suf="";const parts=[];
+function vName(f,sel){let base=f.n,suf="",pre="";const parts=[];
   for(const [k,,,opts] of f.ax){const op=opts.find(o=>o.k===sel[k]);if(!op)continue;
-    if(op.nm){base=op.nm;continue}if(op.suf){suf+=op.suf;continue}if(op.q||opts.length<2)continue;parts.push(op.n)}
-  if(base!==f.n)suf=suf.replace(" reto","");
+    if(op.nm){base=op.nm;continue}if(op.suf){suf+=op.suf;continue}if(op.pre!==undefined){pre+=op.pre;continue}if(op.q||opts.length<2)continue;parts.push(op.n)}
+  if(base!==f.n){suf=suf.replace(" reto","");pre=pre.replace("Flat ","")}
+  if(pre)base=pre+base[0].toLowerCase()+base.slice(1);
   return base+suf+(parts.length?" · "+parts.join(" · "):"")}
 function vEq(f,sel){for(const [k,,,opts] of f.ax){const op=opts.find(o=>o.k===sel[k]);if(op&&op.eq)return op.eq}return f.eq0||"K"}
 const vNotes=(f,sel)=>f.ax.map(([k,,,opts])=>opts.find(o=>o.k===sel[k])).filter(o=>o&&o.t).map(o=>o.t);
 const splitKey=(f,sel)=>f.id+"|"+f.ax.filter(a=>a[2]).map(a=>sel[a[0]]).join(",");
-function fillEntry(e){const v=resolveV(e.f,e.sel);e[0]=vName(e.f,e.sel);e[1]=e.f.en;e[2]=vEq(e.f,e.sel);e[3]=e.ev;
+function fillEntry(e){const v=resolveV(e.f,e.sel);e[0]=vName(e.f,e.sel);e[1]=LANG==="en"?"":e.f.en;e[2]=vEq(e.f,e.sel);e[3]=e.ev;
   e[4]=[...v.p,...v.s].filter(m=>m!==e.host);e[5]=e.stat;e[6]=mkRef(e.f,e.sel);e.p=v.p;e.s=v.s;return e}
 function mkEntry(host,ref,ev,stat){const r=parseRef(ref);const e=[];e.f=r.f;e.pre={...r.sel};e.sel={...r.sel};e.host=host;e.ev=ev;e.stat=stat||null;return fillEntry(e)}
 /* names saved in treinos -> family + variation (old names via LEGACY, new names via an index of all combinations) */
@@ -690,16 +1290,20 @@ function refByName(name){if(!name)return null;if(LEGACY[name])return LEGACY[name
     for(const f of FAMS){const rec=(i,sel)=>{if(i===f.ax.length){const nm=norm(vName(f,sel));if(!NAMEIDX.has(nm))NAMEIDX.set(nm,mkRef(f,sel));return}
       for(const o of f.ax[i][3])rec(i+1,{...sel,[f.ax[i][0]]:o.k})};rec(0,{})}}
   return NAMEIDX.get(norm(name))||null}
+/* name to show for a saved item: rebuilt from its variation, so it follows the language (old names too) */
+const dName=(name,ref)=>{const r=parseRef(ref)||parseRef(refByName(name));return r?vName(r.f,r.sel):name};
 function exInfo(name,ref){const r=parseRef(ref)||parseRef(refByName(name));if(!r)return null;const v=resolveV(r.f,r.sel);return {f:r.f,sel:r.sel,p:v.p,s:v.s}}
 /* search: every word must appear in the family's name, gym names or option labels; words that match an option select it */
 const OSYN={un:"unilateral",al:"alternado alternada",bi:"bilateral"};
 /* words that select an option; words of the exercise's own name never select one (e.g. "supino" must not pick "Supino fechado") */
-const optWords=(o,f)=>{const own=f?new Set(norm(f.n).split(/\s+/)):null;return norm(o.n+" "+(o.nm||"")+" "+(OSYN[o.k]||"")).split(/[\s()/]+/).filter(w=>w&&!(own&&own.has(w)))};
-function famText(f){return f._t||(f._t=norm([f.n,f.en,...f.aka,...f.ax.map(a=>a[1]),...f.ax.flatMap(a=>a[3].map(o=>optWords(o,f).join(" ")))].join(" ")))}
-const STOPW=new Set(["com","de","da","do","das","dos","na","no","nas","nos","em","para","pra","e","a","o","as","os","um","uma","the","with"]);
+const optWords=(o,f)=>{const own=f?new Set(norm(f.n+" "+(f.np||"")).split(/\s+/)):null;return norm(o.n+" "+(o.nm||"")+" "+(o.npt||"")+" "+(OSYN[o.k]||"")).split(/[\s()/]+/).filter(w=>w&&!(own&&own.has(w)))};
+function famText(f){return f._t||(f._t=norm([f.n,f.en,f._pt||"",...f.aka,...f.ax.map(a=>a[1]),...f.ax.flatMap(a=>a[3].map(o=>optWords(o,f).join(" ")))].join(" ")))}
+const STOPW=new Set(["com","de","da","do","das","dos","na","no","nas","nos","em","para","pra","e","a","o","as","os","um","uma","the","with","on","of","and","in","to"]);
+/* how many muscle lists use the family: common exercises win ties ("incline bench" → incline bench press, not incline curl) */
+const famPop=f=>f._pop??(f._pop=Math.min(8,Object.values(M).reduce((a,m)=>a+m.x.filter(e=>e.f===f).length,0)));
 function famSearch(q){const toks=norm(q).split(/[\s,·()]+/).filter(t=>t.length>1&&!STOPW.has(t));if(!toks.length)return [];
   const out=[];for(const f of FAMS){const tx=famText(f);if(!toks.every(t=>tx.includes(t)))continue;
-    const core=norm([f.n,f.en,...f.aka].join(" "));const score=toks.filter(t=>core.includes(t)).length;if(!score)continue;
+    const core=norm([f.n,f.en,f.np||"",...f.aka].join(" "));const score=toks.filter(t=>core.includes(t)).length;if(!score)continue;
     const sel={...f.d},set=new Set();for(const t of toks){if(core.includes(t)&&!f.ax.some(a=>a[3].some(o=>optWords(o,f).includes(t))))continue;
       for(const [k,,,opts] of f.ax){const o=opts.find(o=>optWords(o,f).includes(t));if(o){sel[k]=o.k;set.add(k);break}}}
     /* axes the user did not mention follow the usual version of that exercise (the ranked one) */
@@ -708,7 +1312,7 @@ function famSearch(q){const toks=norm(q).split(/[\s,·()]+/).filter(t=>t.length>
       if(!best||sc<best[0])best=[sc,e]});
     if(best)for(const [k] of f.ax)if(!set.has(k))sel[k]=best[1].pre[k];
     const phrase=norm(q).trim();const exact=[f.n,...f.aka].some(a=>norm(a)===phrase)?40:[f.n,f.en,...f.aka].some(a=>norm(a).includes(phrase))?20:0;
-    out.push({f,sel,score:score*10+exact+(norm(f.n).startsWith(toks[0])?5:0)})}
+    out.push({f,sel,score:score*10+exact+(norm(f.n).startsWith(toks[0])?5:0)+famPop(f)})}
   return out.sort((a,b)=>b.score-a.score)}
 const M = {
   peito_superior:{n:"Peitoral superior",l:"Pectoralis major, parte clavicular",c:"Peito",s:["chaves","ridao","ace_peito"],x:[
@@ -992,8 +1596,20 @@ const M = {
     ["pant|p=pe,e=ma,j=es,l=bi","H","igual ao sentado"],
     ["pant|p=lp,e=ma,j=fl,l=bi","B"]]}
 };
+/* English: translate the data in place before the lists are built (see the language note at the top) */
+function trData(){const T=s=>s&&EN_DATA[s]!==undefined?EN_DATA[s]:s;
+  for(const k in EQ)EQ[k]=T(EQ[k]);for(const k in SRC)SRC[k]=T(SRC[k]);
+  const PRE={" reto":"Flat "," inclinado":"Incline "," declinado":"Decline "};
+  const nrm=x=>String(x).normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase();
+  for(const f of FAMS){f.np=f.n;f._pt=nrm([f.n,...f.ax.map(a=>a[1]),...f.ax.flatMap(a=>a[3].flatMap(o=>[o.n,o.nm||""]))].join(" "));
+    f.n=T(f.n)===f.n?(f.en||f.n):T(f.n);
+    for(const a of f.ax){a[1]=T(a[1]);for(const o of a[3]){o.npt=o.n+" "+(o.nm||"");o.n=T(o.n);if(o.t)o.t=T(o.t);if(o.nm)o.nm=T(o.nm);if(o.suf){o.pre=PRE[o.suf]||"";delete o.suf}}}}
+  for(const m of Object.values(M)){m.n=T(m.n);m.l=T(m.l);m.c=T(m.c);m.x.forEach(x=>{if(x[2])x[2]=T(x[2])})}
+}
+if(LANG==="en")trData();
 for(const [id,m] of Object.entries(M))m.x=m.x.map(([ref,ev,stat])=>mkEntry(id,ref,ev,stat));
 const GROUPS = ["Peito","Ombros","Braços","Antebraço","Costas","Abdômen","Quadril","Coxas","Panturrilhas"];
+if(LANG==="en")GROUPS.forEach((g,i)=>GROUPS[i]=EN_DATA[g]||g);
 
 /* ---------------------------------------------------------------- figure
    Left half of each view is drawn once and mirrored. Limb muscles are drawn
@@ -1283,7 +1899,7 @@ const LS={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.pa
           set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 /* app settings (Configurações). Some are saved but not active yet; see renderConf. */
-const CONF_DEF={name:"",age:null,height:null,exp:"",theme:"auto",accent:"",fs:"m",noanim:false,lang:"pt",unit:"kg",sets:3,reps:"8-12",rest:90,goal:0,remind:false,rdays:[0,2,4],rtime:"18:00",sound:true,vibe:true};
+const CONF_DEF={name:"",age:null,height:null,exp:"",theme:"auto",accent:"",fs:"m",noanim:false,lang:null,unit:"kg",sets:3,reps:"8-12",rest:90,goal:0,remind:false,rdays:[0,2,4],rtime:"18:00",sound:true,vibe:true};
 let CONF=(()=>{const c=LS.get("atlas-conf",null);return {...CONF_DEF,...(c&&typeof c==="object"?c:{})}})();
 const saveConf=()=>{if(!LS.set("atlas-conf",CONF))toast("Não foi possível salvar neste aparelho")};
 function applyConf(){
@@ -1305,11 +1921,11 @@ function applyConf(){
   for(const sh of document.styleSheets){try{walk(sh.cssRules)}catch(_){}}
   const st=document.createElement("style");st.textContent=out;document.head.appendChild(st)})();
 applyConf();matchMedia("(prefers-color-scheme: dark)").addEventListener("change",applyConf);
-const DAYS=["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
+const DAYS=LANG==="en"?["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"]:["Segunda","Terça","Quarta","Quinta","Sexta","Sábado","Domingo"];
 const todayIdx=()=>(new Date().getDay()+6)%7;
 const isoDate=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*60000);return z.toISOString().slice(0,10)};
-const fmtDate=iso=>{const [y,m,d]=iso.split("-");return `${d}/${m}`+(y!==String(new Date().getFullYear())?`/${y.slice(2)}`:"")};
-const fmtLong=d=>d.toLocaleDateString("pt-BR",{weekday:"long",day:"numeric",month:"long"});
+const fmtDate=iso=>{const [y,m,d]=iso.split("-");return (LANG==="en"?`${m}/${d}`:`${d}/${m}`)+(y!==String(new Date().getFullYear())?`/${y.slice(2)}`:"")};
+const fmtLong=d=>d.toLocaleDateString(LOC,{weekday:"long",day:"numeric",month:"long"});
 let toastT;
 function toast(msg){const t=$("toast");t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,2200)}
 
@@ -1330,6 +1946,7 @@ const BASIC={
   adutores:{n:"Adutores",m:["adutores"]},
   panturrilha:{n:"Panturrilha",m:["panturrilha_gastro","panturrilha_soleo"]}
 };
+if(LANG==="en"){const G={peito:"Chest",ombro:"Shoulders",biceps:"Biceps",triceps:"Triceps",antebraco:"Forearms",trapezio:"Traps",costas:"Back",lombar:"Lower back",abdomen:"Abs",gluteo:"Glutes",quadriceps:"Quads",posterior:"Hamstrings",adutores:"Adductors",panturrilha:"Calves"};for(const g in BASIC)if(G[g])BASIC[g].n=G[g]}
 const TOB={};for(const [g,o] of Object.entries(BASIC))o.m.forEach(m=>TOB[m]=g);
 /* merged list: rank 1 of each part, then rank 2 of each part, and so on */
 function basicList(g){
@@ -1378,6 +1995,7 @@ const JOINTS={
     mob:["Joelho à parede: pé a um palmo da parede, levar o joelho até ela sem tirar o calcanhar","Agachamento profundo segurando num apoio, joelhos à frente","Puxar o tornozelo para cima com elástico preso à frente"],
     al:["Gastrocnêmio: panturrilha na parede com o joelho esticado","Sóleo: mesma posição com o joelho dobrado","Frente da canela: ajoelhado, sentar sobre os pés"]}
 };
+if(LANG==="en"){const T=s=>EN_DATA[s]!==undefined?EN_DATA[s]:s;for(const j of Object.values(JOINTS)){j.n=T(j.n);["aq","mob","al"].forEach(k=>{if(j[k])j[k]=j[k].map(T)})}}
 function drawJoints(){
   for(const name of ["front","back"]){
     const g=el("g",{class:"joints"},VG[name]);
@@ -1736,7 +2354,7 @@ document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModals()});
 
 /* add-from-atlas sheet */
 let addName=null,addRef=null;
-const DSH=["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
+const DSH=LANG==="en"?["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]:["Seg","Ter","Qua","Qui","Sex","Sáb","Dom"];
 const plural=(n,w)=>`${n} ${w}${n===1?"":"s"}`;
 const daysTxt=p=>p.days.length===7?"Todos os dias":p.days.length?[...p.days].sort((a,b)=>a-b).map(i=>DSH[i]).join(" · "):"Qualquer dia";
 function openAddSheet(name,ref){
@@ -1802,10 +2420,10 @@ function renderFicha(){
       ${open?`<input class="inp title-inp" data-pf="name" data-pid="${p.id}" value="${esc(p.name)}" placeholder="Nome, ex.: Peito e tríceps" aria-label="Nome do treino">
       <div><div class="fl" style="margin-bottom:6px">Dias da semana (opcional)</div><div class="dpick" role="group" aria-label="Dias da semana">${DSH.map((n,i)=>`<button data-act="day" data-pid="${p.id}" data-day="${i}" aria-pressed="${p.days.includes(i)}" aria-label="${DAYS[i]}">${n}</button>`).join("")}</div><span class="muted-s">Nos dias marcados, este treino aparece primeiro na aba Hoje.</span></div>
       ${p.items.length?p.items.map((it,j)=>`<div class="fi">
-        <div class="fi-n">${esc(it.name)}<span class="muted-s">${esc(muscleLabel(it.name,it.ref))}</span></div>
+        <div class="fi-n">${esc(dName(it.name,it.ref))}<span class="muted-s">${esc(muscleLabel(it.name,it.ref))}</span></div>
         <label class="fl">Séries<input class="inp" inputmode="numeric" data-pid="${p.id}" data-j="${j}" data-f="sets" value="${esc(it.sets)}"></label>
         <label class="fl">Reps<input class="inp" data-pid="${p.id}" data-j="${j}" data-f="reps" value="${esc(it.reps)}"></label>
-        <div class="fi-act"><button class="ib" data-act="up" data-pid="${p.id}" data-j="${j}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-pid="${p.id}" data-j="${j}" aria-label="Descer">↓</button><button class="ib del" data-act="rm" data-pid="${p.id}" data-j="${j}" aria-label="Remover ${esc(it.name)}">✕</button></div>
+        <div class="fi-act"><button class="ib" data-act="up" data-pid="${p.id}" data-j="${j}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-pid="${p.id}" data-j="${j}" aria-label="Descer">↓</button><button class="ib del" data-act="rm" data-pid="${p.id}" data-j="${j}" aria-label="Remover ${esc(dName(it.name,it.ref))}">✕</button></div>
       </div>`).join(""):`<p class="muted">Nenhum exercício ainda.</p>`}
       <div class="row"><button class="btn" data-act="add" data-pid="${p.id}">+ Adicionar exercício</button></div>
       <div class="confirm">${askDelPlan===p.id?`<span>Excluir este treino? O que você já fez continua no histórico.</span><button class="btn danger" data-act="delPlan" data-pid="${p.id}">Excluir</button><button class="btn" data-act="noDelPlan">Cancelar</button>`:`<button class="btn danger" data-act="askDelPlan" data-pid="${p.id}">Excluir treino</button>`}</div>`:""}
@@ -1873,7 +2491,7 @@ function renderTreino(){
   const w=openW?workouts.find(x=>x.id===openW):null;if(!w)openW=null;
   let h="";
   if(!w){
-    const sel=selDate(),isT=sel===today,sd=dayIdxOf(sel),dayName=isT?"hoje":`${DAYS[sd].toLowerCase()}, ${fromIso(sel).getDate()}`;
+    const sel=selDate(),isT=sel===today,sd=dayIdxOf(sel),dayName=isT?"hoje":`${LANG==="en"?DAYS[sd]:DAYS[sd].toLowerCase()}, ${fromIso(sel).getDate()}`;
     const tw=workouts.filter(x=>x.date===sel);
     const list=[...plans].sort((x,y)=>(y.days.includes(sd)?1:0)-(x.days.includes(sd)?1:0));
     const nDone=tw.filter(x=>x.done!==false).length;
@@ -1882,7 +2500,7 @@ function renderTreino(){
       ${isT?"":`<div class="pastbox"><div><b>Registrando ${esc(fmtLong(fromIso(sel)))}</b><span>${nDone?`${plural(nDone,"treino")} feito${nDone===1?"":"s"} neste dia. `:""}O que você marcar agora fica nesse dia.</span></div><button class="btn" data-act="toToday">Voltar para hoje</button></div>`}
       <h3 class="section-t">Seus treinos${isT?"":` · ${esc(dayName)}`}</h3>`;
     h+=list.length?list.map(p=>{const ex=tw.filter(x=>x.planId===p.id).pop(),tag=p.days.includes(sd)?`<span class="pill soft">${isT?"Dia de hoje":"Dia deste treino"}</span>`:"";
-      const sum=p.items.length?p.items.map(it=>esc(it.name)).join(" · "):"Sem exercícios. Monte na aba Treinos.";
+      const sum=p.items.length?p.items.map(it=>esc(dName(it.name,it.ref))).join(" · "):"Sem exercícios. Monte na aba Treinos.";
       let btns;
       if(ex&&ex.done!==false)btns=`<button class="btn" data-open="${ex.id}">Ver séries</button><button class="btn" data-act="undo" data-wid="${ex.id}">Desfazer</button>`;
       else if(ex)btns=`<button class="btn primary" data-act="markDone" data-wid="${ex.id}">Marcar como feito</button><button class="btn" data-open="${ex.id}">Continuar anotando</button>`;
@@ -1902,8 +2520,8 @@ function renderTreino(){
       <input class="inp title-inp" data-wf="title" value="${esc(w.title)}" placeholder="Nome do treino" aria-label="Nome do treino">
       ${isCustom(w)?`<div class="row">${saveBtn(w)}<span class="muted-s" style="margin:0">Vira um treino fixo na aba Treinos.</span></div>`:""}</div>`;
     h+=w.items.map((it,i)=>{const last=lastFor(it.name,w);return `<div class="card">
-      <div class="wx-h"><div><div class="wx-n">${esc(it.name)}</div><span class="muted-s">${esc(muscleLabel(it.name,it.ref))}${it.target?` · meta ${esc(it.target)} reps`:""}</span></div>
-        <div class="fi-act"><button class="ib" data-act="up" data-i="${i}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-i="${i}" aria-label="Descer">↓</button><button class="ib del" data-act="rmItem" data-i="${i}" aria-label="Remover ${esc(it.name)}">✕</button></div></div>
+      <div class="wx-h"><div><div class="wx-n">${esc(dName(it.name,it.ref))}</div><span class="muted-s">${esc(muscleLabel(it.name,it.ref))}${it.target?` · meta ${esc(it.target)} reps`:""}</span></div>
+        <div class="fi-act"><button class="ib" data-act="up" data-i="${i}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-i="${i}" aria-label="Descer">↓</button><button class="ib del" data-act="rmItem" data-i="${i}" aria-label="Remover ${esc(dName(it.name,it.ref))}">✕</button></div></div>
       ${last?`<div class="last">Última vez (${fmtDate(last.date)}): <b>${last.sets.map(setTxt).join(" · ")}</b></div>`:""}
       <div class="sets"><div class="set set-h"><span></span><span>Reps</span><span>Carga (kg)</span><span></span></div>
       ${it.sets.map((s,j)=>`<div class="set"><span class="set-n">${j+1}</span>
@@ -1911,7 +2529,7 @@ function renderTreino(){
         <input class="inp" inputmode="decimal" data-i="${i}" data-s="${j}" data-sf="kg" value="${esc(s.kg)}" placeholder="kg" aria-label="Carga em kg, série ${j+1}">
         <button class="ib del" data-act="rmSet" data-i="${i}" data-s="${j}" aria-label="Remover série ${j+1}">✕</button></div>`).join("")}</div>
       <div class="row"><button class="btn" data-act="addSet" data-i="${i}">+ Série</button></div>
-      <textarea class="inp" data-i="${i}" data-if="notes" placeholder="Anotações deste exercício" aria-label="Anotações de ${esc(it.name)}">${esc(it.notes)}</textarea>
+      <textarea class="inp" data-i="${i}" data-if="notes" placeholder="Anotações deste exercício" aria-label="Anotações de ${esc(dName(it.name,it.ref))}">${esc(it.notes)}</textarea>
     </div>`}).join("");
     if(!w.items.length)h+=`<p class="muted">Nenhum exercício ainda. Adicione abaixo ou pelo + nos cartões do Atlas.</p>`;
     const nSets=w.items.reduce((a,it)=>a+it.sets.length,0);
@@ -1997,7 +2615,7 @@ let tab=LS.get("atlas-tab","atlas");if(tab==="rank"){tab="prog";LS.set("atlas-pv
    exercise (the lists it appears in) and 1/2 for each synergist. */
 let pMode=LS.get("atlas-pmode","week");if(!["week","day"].includes(pMode))pMode="week";
 let pOff=0;
-const dm=d=>d.toLocaleDateString("pt-BR",{day:"numeric",month:"short"}).replace(".","");
+const dm=d=>d.toLocaleDateString(LOC,{day:"numeric",month:"short"}).replace(".","");
 function pRange(){
   const t=new Date();t.setHours(12,0,0,0);
   if(pMode==="day"){t.setDate(t.getDate()+pOff);const s=isoDate(t);
@@ -2025,13 +2643,14 @@ const BANDS={
   day:{t:[3,6,11],max:16,bar:14,names:["Não treinado","Leve","Bom","Forte","Pouco ganho extra"],ranges:["0","1–2","3–5","6–11","12+"],
     stops:[[.5,"#F7E38C"],[3,"#F5B041"],[6,"#EF7A24"],[11,"#D3222A"],[16,"#8E1018"]]}
 };
+if(LANG==="en"){BANDS.week.names=["Not trained","Below minimum","Moderate stimulus","Ideal range","High volume"];BANDS.day.names=["Not trained","Light","Good","Strong","Little extra gain"]}
 const bandOf=(v,B)=>v<=0?0:v>B.t[2]?4:v>=B.t[1]?3:v>=B.t[0]?2:1;
 const rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
 function heat(v,B){const st=B.stops;if(v<=st[0][0])return st[0][1];
   for(let i=1;i<st.length;i++)if(v<=st[i][0]){const [v0,c0]=st[i-1],[v1,c1]=st[i];const f=(v-v0)/(v1-v0);const a=rgb(c0),b=rgb(c1);
     return `rgb(${a.map((c,k)=>Math.round(c+(b[k]-c)*f)).join(",")})`}
   return st[st.length-1][1]}
-const nf=v=>(Math.round(v*2)/2).toLocaleString("pt-BR");
+const nf=v=>(Math.round(v*2)/2).toLocaleString(LOC);
 function bandLegend(B){
   const edges=[0,.5,...B.t,B.max];
   return `<div class="bands" role="list" aria-label="Faixas de séries">${B.names.map((n,i)=>{
@@ -2063,7 +2682,7 @@ let kgOpen=null,kgList=[];
 const pvSeg=()=>`<div class="seg pview" role="tablist" aria-label="Tipo de progresso"><button role="tab" data-pv="mus" aria-pressed="${pView==="mus"}">Músculos</button><button role="tab" data-pv="kg" aria-pressed="${pView==="kg"}">Força</button></div>`;
 const numKg=v=>{const n=parseFloat(String(v??"").replace(",","."));return isFinite(n)?n:NaN};
 const e1rm=(kg,r)=>r<=1?kg:kg*(1+r/30);
-const fkg=v=>(Math.round(v*10)/10).toLocaleString("pt-BR");
+const fkg=v=>(Math.round(v*10)/10).toLocaleString(LOC);
 function loadData(){
   const m=new Map();
   for(const w of workouts){if(w.done===false)continue;
@@ -2071,10 +2690,10 @@ function loadData(){
       for(const st of it.sets||[]){const kg=numKg(st.kg),r=parseInt(st.r)||0;if(!(kg>0))continue;
         if(!top||kg>top.kg||(kg===top.kg&&r>top.r))top={kg,r};if(r>0)best=Math.max(best,e1rm(kg,r))}
       if(!top)continue;
-      const arr=m.get(it.name)||[];const ex=arr.find(x=>x.date===w.date);
+      const nm=dName(it.name,it.ref);const arr=m.get(nm)||[];const ex=arr.find(x=>x.date===w.date);
       if(ex){if(top.kg>ex.kg||(top.kg===ex.kg&&top.r>ex.r)){ex.kg=top.kg;ex.r=top.r}if(best&&(!ex.e||best>ex.e))ex.e=best}
       else arr.push({date:w.date,kg:top.kg,r:top.r,e:best||null});
-      m.set(it.name,arr)}}
+      m.set(nm,arr)}}
   for(const a of m.values())a.sort((x,y)=>x.date<y.date?-1:1);
   return [...m].sort((a,b)=>a[1][a[1].length-1].date<b[1][b[1].length-1].date?1:-1);
 }
@@ -2144,6 +2763,7 @@ addEventListener("resize",()=>{if(tab==="prog"&&pView==="kg")document.querySelec
    inside it, so the same ideal band (week 10–20, day 3–11) applies to every axis. */
 const RAD=[{k:"peito",n:"Peito",g:["peito"]},{k:"ombros",n:"Ombros",g:["ombro"]},{k:"bracos",n:"Braços",g:["biceps","triceps","antebraco"]},
   {k:"core",n:"Core",g:["abdomen","lombar"]},{k:"pernas",n:"Pernas",g:["quadriceps","posterior","gluteo","adutores","panturrilha"]},{k:"costas",n:"Costas",g:["costas","trapezio"]}];
+if(LANG==="en"){const N={peito:"Chest",ombros:"Shoulders",bracos:"Arms",core:"Core",pernas:"Legs",costas:"Back"};RAD.forEach(r=>r.n=N[r.k]||r.n)}
 let radSel=null;
 function radarCard(T,B){
   const ring=pMode==="week"?[B.t[1],B.t[2]]:[B.t[0],B.t[2]],ringTxt=pMode==="week"?"faixa ideal (10–20)":"bom a forte (3–11)";
@@ -2366,6 +2986,7 @@ function rStd(f,s){
   return null;
 }
 const RLV=[["Ameba","Abaixo do iniciante"],["Aprendiz","Iniciante"],["Frango","Novato"],["Galo","Quase na média"],["Fortinho","Na média"],["Parrudo","Acima da média"],["Monstro","Avançado"],["Lenda","Elite"],["Bizarro","Elite da elite"]];
+if(LANG==="en")[["Amoeba","Below beginner"],["Rookie","Beginner"],["Chicken","Novice"],["Rooster","Almost average"],["Buff","Average"],["Beefy","Above average"],["Monster","Advanced"],["Legend","Elite"],["Freak","Elite of the elite"]].forEach((x,i)=>RLV[i]=x);
 /* level boundaries on the score scale (1 Beginner 5% · 2 Novice 20% · 3 Intermediate 50% · 4 Advanced 80% · 5 Elite 95% · 6 = one step past Elite);
    the 9 levels start at these percentiles (owner's choice: middle levels 15% wide each, the ends rarer) */
 const RPCT=[[0,1],[1,5],[2,20],[3,50],[4,80],[5,95],[6,99]];
@@ -2465,7 +3086,7 @@ function rankHTML(D){
   const hero=has?`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big" style="${lv===RLV.length-1?`background-image:${RHERO[lv]};color:transparent`:`color:${RHERO[lv]}`}">${RLV[lv][0]}</b>
       <span class="rk-sub">${RLV[lv][1]} · mais forte que ~${rPct(D.all)}% de quem treina, do mesmo sexo.</span>
       <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem" class="${i<lv?"past":i===lv?"now":""}"${i===lv?' aria-current="true"':""}><i style="background:${RHERO[i]}"></i>${x[0]}</span>`).join("")}</div>
-      <span class="rk-sub sm">${plural(D.gs.length,"grupo")} de ${Object.keys(BASIC).length} avaliado${D.gs.length===1?"":"s"} · ${plural(D.list.length,"exercício")} · corpo ${sex==="f"?"feminino":"masculino"}, ${fkg(rBW())} kg${rank.bw>0?"":" (padrão)"}</span></div>`
+      <span class="rk-sub sm">${LANG==="en"?`${D.gs.length} of ${Object.keys(BASIC).length} groups rated · ${plural(D.list.length,"exercise")} · ${sex==="f"?"female":"male"} body, ${fkg(rBW())} kg${rank.bw>0?"":" (default)"}`:`${plural(D.gs.length,"grupo")} de ${Object.keys(BASIC).length} avaliado${D.gs.length===1?"":"s"} · ${plural(D.list.length,"exercício")} · corpo ${sex==="f"?"feminino":"masculino"}, ${fkg(rBW())} kg${rank.bw>0?"":" (padrão)"}`}</span></div>`
     :`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big">Sem dados</b>
       <span class="rk-sub">Anote carga e repetições nos treinos da aba Hoje e marque como feito, ou digite aqui embaixo uma carga que você já levanta.</span>
       <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:${RHERO[i]}"></i>${x[0]}</span>`).join("")}</div></div>`;
@@ -2522,6 +3143,7 @@ $("progBody").addEventListener("change",e=>{if(e.target.id!=="rkBw")return;const
    reminders, sounds/vibration, account/sync, age/height/experience (profile only). */
 let cfConfirm=null;
 const ACCENTS=[["","Vermelho","var(--target)"],["#3A7BD5","Azul"],["#2FA866","Verde"],["#8B5CF6","Roxo"],["#F07818","Laranja"],["#E0559A","Rosa"]];
+if(LANG==="en")["Red","Blue","Green","Purple","Orange","Pink"].forEach((n,i)=>ACCENTS[i][1]=n);
 const cfSeg=(key,opts,cur,label)=>`<div class="seg cf-seg" role="group" aria-label="${label}">${opts.map(([v,t,dis])=>`<button data-cf="${key}" data-v="${v}" aria-pressed="${String(cur)===String(v)}"${dis?" disabled":""}>${t}</button>`).join("")}</div>`;
 const cfSw=(key,on,dis)=>`<label class="sw"><input type="checkbox" data-cfsw="${key}"${on?" checked":""}${dis?" disabled":""}><i></i></label>`;
 const cfRow=(t,sub,ctl,soon,stack)=>`<div class="cf-row${stack?" st":""}"><div class="cf-l"><b>${t}${soon?` <span class="pill soft">em breve</span>`:""}</b>${sub?`<small>${sub}</small>`:""}</div><div class="cf-c">${ctl}</div></div>`;
@@ -2546,7 +3168,7 @@ function renderConf(){
     ${cfRow("Cor de destaque","Título, aba atual e botões de destaque. O músculo-alvo continua vermelho.",`<div class="cf-dots" role="group" aria-label="Cor de destaque">${ACCENTS.map(([v,t,css])=>`<button data-cf="accent" data-v="${v}" aria-pressed="${c.accent===v}" aria-label="${t}" title="${t}" style="background:${css||v}"></button>`).join("")}</div>`,false,1)}
     ${cfRow("Tamanho da letra","",cfSeg("fs",[["s","Pequena"],["m","Normal"],["l","Grande"]],c.fs,"Tamanho da letra"),false,1)}
     ${cfRow("Reduzir animações","Desliga as transições.",cfSw("noanim",c.noanim))}
-    ${cfRow("Idioma","",`<select class="inp cf-in" data-cfsel="lang"><option value="pt" selected>Português</option><option disabled>English (em breve)</option><option disabled>Español (em breve)</option></select>`)}
+    ${cfRow("Idioma","",`<select class="inp cf-in" data-cfsel="lang" data-notr><option value="pt"${LANG==="pt"?" selected":""}>Português</option><option value="en"${LANG==="en"?" selected":""}>English</option><option disabled>${LANG==="en"?"Español (coming soon)":"Español (em breve)"}</option></select>`)}
   </div>
 
   <h3 class="section-t">Treino</h3>
@@ -2614,7 +3236,7 @@ $("confBody").addEventListener("click",e=>{
   if(k==="delAll!"){try{Object.keys(localStorage).filter(x=>x.startsWith("atlas-")).forEach(x=>localStorage.removeItem(x))}catch(_){}location.reload();return}
   if(k.endsWith("!")){cfConfirm=null;toast("Apagado");return renderConf()}
   if(k==="share"){const url="https://holmgds-gui.github.io/atlas-muscular/";
-    if(navigator.share)navigator.share({title:"Atlas Muscular",text:"App de academia: músculos, treinos e ranking de força",url}).catch(()=>{});
+    if(navigator.share)navigator.share({title:"Atlas Muscular",text:L("App de academia: músculos, treinos e ranking de força"),url}).catch(()=>{});
     else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast("Link copiado")).catch(()=>toast(url));
     else toast(url)}
 });
@@ -2628,6 +3250,9 @@ $("confBody").addEventListener("change",e=>{
   if(k==="sets"){const n=parseInt(v);CONF.sets=n>=1&&n<=10?n:CONF.sets;saveConf();return renderConf()}
   if(k==="reps"){CONF.reps=v.slice(0,10);saveConf();return}
   if(k==="rtime"){CONF.rtime=v||"18:00";saveConf();return}
+});
+$("confBody").addEventListener("change",e=>{const t=e.target;if(t.dataset.cfsel!=="lang")return;
+  CONF.lang=t.value;saveConf();location.reload();
 });
 $("gearBtn").addEventListener("click",()=>setTab("conf"));
 /* the title goes back to the home page (Atlas) */
