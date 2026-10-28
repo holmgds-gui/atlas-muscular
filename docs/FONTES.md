@@ -170,6 +170,9 @@ Páginas do Strength Level consultadas:
 | Wolf et al. 2023, *Int J Strength Cond* | Amplitude: completa ou parcial na parte alongada cresce mais que parcial na parte encurtada | [IUSCA](https://journal.iusca.org/index.php/Journal/article/view/182) |
 | Morton et al. 2018, *Br J Sports Med* | Proteína: benefício até ~1,6 g/kg/dia | [PubMed 28698222](https://pubmed.ncbi.nlm.nih.gov/28698222/) |
 | Grgic & Schoenfeld 2018, *Front Physiol* | Carga leve vs pesada e tipo de fibra | [Frontiers](https://www.frontiersin.org/journals/physiology/articles/10.3389/fphys.2018.00402/pdf) |
+| Schoenfeld et al. 2016, *J Strength Cond Res* | Descanso de 3 min cresceu e fortaleceu mais que 1 min em homens treinados (base do descanso maior nos compostos do Ao vivo) | [PubMed 26605807](https://pubmed.ncbi.nlm.nih.gov/26605807/) |
+| Singer et al. 2024, *Front Sports Act Living* | Meta-análise: descansos de 60 s ou mais dão um pouco mais de hipertrofia | [Frontiers](https://www.frontiersin.org/articles/10.3389/fspor.2024.1429789/full) · [PubMed 39205815](https://pubmed.ncbi.nlm.nih.gov/39205815/) |
+| Plotkin et al. 2022, *PeerJ* | Subir repetições ou subir carga dá ganhos parecidos (base da "próxima carga": +1 rep até o topo da faixa, depois sobe o peso) | [PeerJ](https://peerj.com/articles/14142) · [PubMed 36199287](https://pubmed.ncbi.nlm.nih.gov/36199287/) |
 
 ## 5. Desenho do boneco
 

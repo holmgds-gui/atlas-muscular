@@ -79,7 +79,7 @@ header{position:relative}
 .lv-pick{display:grid;grid-template-columns:1fr auto;align-items:center;gap:2px 10px;width:100%;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:8px;color:var(--ink)}
 .lv-pick .pn,.lv-pick .ps{grid-column:1}.lv-pick b{grid-column:2;grid-row:1/3;font-size:18px;color:var(--target)}
 .lv-pick:disabled{opacity:.5}
-.lv-top{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.card.lv-top{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:12px;padding-block:12px}
 .lv-clock{font-family:var(--f-display);font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
 .lv-rest .row{gap:6px}.lv-big{font-family:var(--f-display);font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 .lv-rest.on .lv-big{color:var(--target)}
@@ -89,6 +89,8 @@ header{position:relative}
 .lv-name{font-size:22px;margin-top:4px}
 .lv-sug{margin-top:8px;font-size:14px;font-weight:600;color:var(--ink);background:var(--chip);border-radius:8px;padding:7px 10px}
 .lv-sug.up{color:var(--target)}
+.lv-tips{margin-top:8px;font-size:13px;display:grid;gap:4px;color:var(--ink)}.lv-tips b{font-weight:600}
+.lv-rnote{display:block;margin-top:8px}
 .lv-setn{margin-top:12px;font-family:var(--f-display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-size:14px}
 .lv-inps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 .lv-inps label span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
@@ -2824,7 +2826,7 @@ function tickLive(force){const w=liveW(),now=Date.now();
   if(rest&&now>=rest.end){restDone();return}
   const c=$("lvClock");if(c&&w)c.textContent=mmss((now-(w.start||now))/1000);
   const left=rest?(rest.end-now)/1000:0;
-  const rc=$("restBig");if(rc)rc.textContent=mmss(rest?left:CONF.rest);
+  const rc=$("restBig");if(rc)rc.textContent=mmss(rest?left:restFor(w&&live&&w.items[live.i]));
   const rb=$("restBar");if(rb)rb.style.width=rest?(100*left/rest.total).toFixed(1)+"%":"0%";
   const onLive=tab==="treino"&&hView==="live"&&!openW;
   const pill=$("restPill");if(pill){pill.hidden=!(rest||(w&&!onLive));
@@ -2832,6 +2834,15 @@ function tickLive(force){const w=liveW(),now=Date.now();
   if(force&&onLive)renderTreino()}
 setInterval(()=>tickLive(false),1000);
 
+/* ---- rest by exercise type: multi-joint lifts rest 1 min more than the base time (Schoenfeld 2016: 3 min beat
+   1 min for growth in trained men; Singer 2024 meta-analysis: ≥60 s helps). Base = Configurações › Timer de descanso. */
+const isIso=it=>{const r=parseRef(it.ref)||parseRef(refByName(it.name));return r?ISO.has(r.f.id):true};
+const restFor=it=>it?(isIso(it)?CONF.rest:CONF.rest+60):CONF.rest;
+/* warm-up before the first heavy set of a compound (≈50%×8, 70%×4, 85%×2) and plates per side on a 20 kg bar */
+const r25=v=>Math.round(v/2.5)*2.5;
+const warmTxt=kg=>[[.5,8],[.7,4],[.85,2]].map(([p,n])=>`${fkg(r25(kg*p))} × ${n}`).join(" · ");
+function platesTxt(kg){let side=(kg-20)/2;if(!(side>0))return "";const out=[];for(const pl of [25,20,15,10,5,2.5,1.25])while(side>=pl-.001){out.push(pl);side-=pl}
+  return side>.01?"":out.map(v=>v.toLocaleString(LOC)).join(" + ")}
 /* ---- live page */
 function liveStart(pl){const w=startPlan(pl||null);w.start=Date.now();live={wid:w.id,i:0,j:0};liveSum=null;saveW();saveLive();hView="live";LS.set("atlas-hview",hView)}
 function liveFix(w){if(!w.items.length){live.i=0;live.j=0;return}
@@ -2859,12 +2870,14 @@ function liveHTML(){
   liveFix(w);const it=w.items[live.i],tot=w.items.reduce((a,x)=>a+x.sets.length,0),ok=w.items.reduce((a,x)=>a+x.sets.filter(s=>s.ok).length,0);
   const now=Date.now(),left=rest?(rest.end-now)/1000:0;
   let h=`<div class="card lv-top"><div><div class="eyebrow">${tx("Ao vivo","Live","En vivo")}</div><div class="wx-n">${esc(w.title||"Treino")}</div><span class="muted-s">${tx(`${ok} de ${tot} séries`,`${ok} of ${tot} sets`,`${ok} de ${tot} series`)}</span></div><b class="lv-clock" id="lvClock">${mmss((now-(w.start||now))/1000)}</b></div>
-    <div class="card lv-rest${rest?" on":""}"><div class="row between"><div><div class="eyebrow">${tx("Descanso","Rest","Descanso")}</div><b class="lv-big" id="restBig">${mmss(rest?left:CONF.rest)}</b></div>
+`;
+  const restCard=`    <div class="card lv-rest${rest?" on":""}"><div class="row between"><div><div class="eyebrow">${tx("Descanso","Rest","Descanso")}</div><b class="lv-big" id="restBig">${mmss(rest?left:restFor(w.items[live.i]))}</b></div>
       <div class="row">${rest?`<button class="btn" data-lv="r-15">−15 s</button><button class="btn" data-lv="r+15">+15 s</button><button class="btn" data-lv="rStop">${tx("Pular","Skip","Saltar")}</button>`
         :`<button class="btn" data-lv="rStart">⏱ ${tx("Iniciar","Start","Iniciar")}</button>`}</div></div>
       <div class="lv-bar"><i id="restBar" style="width:${rest?(100*left/rest.total).toFixed(1):0}%"></i></div>
-      <div class="lv-rsel" role="group" aria-label="${tx("Tempo de descanso","Rest time","Tiempo de descanso")}">${[60,90,120,180].map(v=>`<button data-lv="rSet" data-v="${v}" aria-pressed="${CONF.rest===v}">${mmss(v)}</button>`).join("")}</div></div>`;
-  if(!it){h+=`<div class="card"><p class="muted">${esc(L("Nenhum exercício ainda."))}</p><button class="btn primary" data-lv="addEx">+ ${esc(L("Adicionar exercício"))}</button></div>`}
+      <div class="lv-rsel" role="group" aria-label="${tx("Tempo de descanso","Rest time","Tiempo de descanso")}">${[60,90,120,180].map(v=>`<button data-lv="rSet" data-v="${v}" aria-pressed="${CONF.rest===v}">${mmss(v)}</button>`).join("")}</div>
+      <small class="muted-s lv-rnote">${tx(`Exercícios compostos (supino, agachamento, remada…) descansam 1 min a mais: ${mmss(CONF.rest+60)}. Descansos maiores dão um pouco mais de crescimento.`,`Compound lifts (bench, squat, rows…) rest 1 min longer: ${mmss(CONF.rest+60)}. Longer rests give a bit more growth.`,`Los ejercicios compuestos (press, sentadilla, remo…) descansan 1 min más: ${mmss(CONF.rest+60)}. Descansos más largos dan un poco más de crecimiento.`)}</small></div>`;
+  if(!it){h+=restCard+`<div class="card"><p class="muted">${esc(L("Nenhum exercício ainda."))}</p><button class="btn primary" data-lv="addEx">+ ${esc(L("Adicionar exercício"))}</button></div>`}
   else{const s=it.sets[live.j],last=lastFor(it.name,w),g=suggest(it,w),allOk=w.items.every(x=>x.sets.every(y=>y.ok));
     const how=typeof HOW!=="undefined"?howHTML(it):"";
     h+=`<div class="card lv-ex"><div class="row between"><div class="eyebrow">${tx(`Exercício ${live.i+1} de ${w.items.length}`,`Exercise ${live.i+1} of ${w.items.length}`,`Ejercicio ${live.i+1} de ${w.items.length}`)}</div>
@@ -2872,6 +2885,9 @@ function liveHTML(){
       <div class="wx-n lv-name">${esc(dName(it.name,it.ref))}</div><span class="muted-s">${esc(muscleLabel(it.name,it.ref))}</span>
       ${last?`<div class="last">${esc(L(`Última vez (${fmtDate(last.date)}):`))} <b>${last.sets.map(setTxt).join(" · ")}</b></div>`:""}
       ${g?`<div class="lv-sug${g.up?" up":""}">${sugTxt(g)}</div>`:""}
+      ${(()=>{const kg=numKg(s.kg)>0?numKg(s.kg):g&&g.kg>0?g.kg:0,r=parseRef(it.ref)||parseRef(refByName(it.name)),eq=r?vEq(r.f,r.sel):"";
+        const warm=live.j===0&&!s.ok&&!isIso(it)&&kg>=40?`<div><b>${tx("Aquecimento","Warm-up","Calentamiento")}:</b> ${warmTxt(kg)}</div>`:"",pl=eq==="B"&&kg>20?platesTxt(kg):"";
+        return warm||pl?`<div class="lv-tips">${warm}${pl?`<div><b>${tx("Anilhas por lado","Plates per side","Discos por lado")}:</b> ${pl} <span class="muted-s">(${tx("barra de 20 kg","20 kg bar","barra de 20 kg")})</span></div>`:""}</div>`:""})()}
       <div class="lv-setn">${tx(`Série ${live.j+1} de ${it.sets.length}`,`Set ${live.j+1} of ${it.sets.length}`,`Serie ${live.j+1} de ${it.sets.length}`)}${it.target?` · ${tx("meta","target","meta")} ${esc(it.target)}`:""}${s.ok?" · ✓":""}</div>
       <div class="lv-inps"><label><span>${tx("Carga (kg)","Load (kg)","Carga (kg)")}</span><input class="inp" id="lvKg" inputmode="decimal" value="${esc(s.kg)}" placeholder="${g&&g.kg!==""?fkg(g.kg):"kg"}"></label>
         <label><span>${tx("Repetições","Reps","Repeticiones")}</span><input class="inp" id="lvR" inputmode="numeric" value="${esc(s.r)}" placeholder="${g?g.r:esc(it.target||"reps")}"></label></div>
@@ -2879,6 +2895,7 @@ function liveHTML(){
       <div class="lv-sets">${it.sets.map((x,j)=>`<button data-lv="pickSet" data-j="${j}" class="${j===live.j?"cur":""}${x.ok?" ok":""}" aria-pressed="${j===live.j}">${j+1}<small>${x.ok?`${x.kg!==""?esc(x.kg)+"×":""}${esc(x.r)}`:"—"}</small></button>`).join("")}<button data-lv="addSet" aria-label="${esc(L("+ Série"))}">+</button></div>
       <div class="row lv-tools">${typeof swapOpts==="function"?`<button class="btn" data-lv="swap">⇄ ${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}</button>`:""}</div>
       ${how}</div>`;
+    h+=restCard;
     h+=`<div class="card"><h3 class="section-t" style="margin:0">${tx("Exercícios","Exercises","Ejercicios")}</h3><div class="lv-list">${w.items.map((x,i)=>{const n=x.sets.filter(y=>y.ok).length;
       return `<button data-lv="pickEx" data-i="${i}" class="${i===live.i?"cur":""}${n===x.sets.length?" ok":""}"><span>${esc(dName(x.name,x.ref))}</span><b>${n}/${x.sets.length}</b></button>`}).join("")}</div>
       <button class="btn" data-lv="addEx">+ ${esc(L("Adicionar exercício"))}</button></div>`;
@@ -2900,7 +2917,7 @@ $("treinoBody").addEventListener("click",e=>{
   else if(a==="resume"){const x=workouts.find(y=>y.id===b.dataset.wid);if(x){x.start=x.start||Date.now();live={wid:x.id,i:0,j:0};liveNext(x);saveW();saveLive()}}
   else if(a==="sumOk"){liveSum=null}
   else if(a==="rSet"){CONF.rest=+b.dataset.v;saveConf();if(rest){rest.total=CONF.rest;rest.end=Date.now()+CONF.rest*1000;LS.set("atlas-rest",rest)}}
-  else if(a==="rStart")startRest(CONF.rest);
+  else if(a==="rStart")startRest(restFor(w&&w.items[live.i]));
   else if(a==="rStop")stopRest();
   else if(a==="r-15"||a==="r+15"){if(rest){rest.end+=a==="r+15"?15000:-15000;rest.total=Math.max(rest.total,(rest.end-Date.now())/1000);LS.set("atlas-rest",rest);tickLive(false);return}}
   else if(!w)return;
@@ -2909,7 +2926,7 @@ $("treinoBody").addEventListener("click",e=>{
     if(!(parseInt(r)>0)){toast(tx("Coloque as repetições","Enter the reps","Pon las repeticiones"));$("lvR").focus();return}
     s.kg=kg;s.r=r;const first=!s.ok;s.ok=true;const p=setPR(it,s,w);
     if(p){toast(tx(`🏆 Recorde! ${fkg(p.kg)} kg × ${p.r}`,`🏆 Record! ${fkg(p.kg)} kg × ${p.r}`,`🏆 ¡Récord! ${fkg(p.kg)} kg × ${p.r}`));beep(2)}
-    saveW();if(first){liveNext(w);if(!w.items.every(x=>x.sets.every(y=>y.ok)))startRest(CONF.rest)}}
+    saveW();if(first){liveNext(w);if(!w.items.every(x=>x.sets.every(y=>y.ok)))startRest(restFor(it))}}
   else if(a==="pickSet")live.j=+b.dataset.j;
   else if(a==="pickEx"){live.i=+b.dataset.i;const j=w.items[live.i].sets.findIndex(s=>!s.ok);live.j=j<0?0:j}
   else if(a==="prevEx"||a==="nextEx"){live.i+=a==="nextEx"?1:-1;liveFix(w);const j=w.items[live.i].sets.findIndex(s=>!s.ok);live.j=j<0?0:j}

@@ -135,6 +135,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 - **Hoje › Ao vivo** (1ª leva das 9 ideias escolhidas pelo dono depois da comparação com Hevy, Strong, Fitbod, Jefit e MuscleWiki): treino série a série com cronômetro, timer de descanso (som e vibração), sugestão da próxima carga, aviso de recorde e resumo no fim. O timer, sons e vibração das Configurações passaram a funcionar.
 - **2ª leva**: "Como fazer" (passo a passo e erros comuns nos 98 exercícios, nos 3 idiomas), trocar exercício por equivalente (⇄), montar treino tocando no boneco e programas prontos (corpo inteiro 2× e 3×, superior/inferior 4×, push/pull/legs 6×).
 - **3ª leva**: sequência semanal (🔥), 25 conquistas em Progresso › Conquistas e cartão para Stories (semana, ranking, treino e conquistas). "Ver lista" no celular passou a deixar o boneco pequeno no canto para a lista ter espaço.
+- **Upgrade do Ao vivo com base em estudos** (pedido do dono: "estude mais e continue dando upgrade"): descanso 1 min maior nos exercícios compostos (Schoenfeld 2016, Singer 2024), aquecimento sugerido na 1ª série dos compostos pesados (50% × 8, 70% × 4, 85% × 2), anilhas por lado nos exercícios com barra, e o cartão do descanso foi para baixo do exercício. A regra da próxima carga (repetições primeiro, depois peso) foi conferida com Plotkin 2022.
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)
