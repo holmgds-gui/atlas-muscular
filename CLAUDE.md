@@ -15,14 +15,14 @@ App de academia em português (pt-BR), instalável no celular (PWA), publicado p
 - O título "Atlas Muscular" (`#brandBtn`) leva sempre para o Atlas.
 - **Configurações** (aba `conf`, `#tab-conf`, `renderConf()`): abre pela engrenagem no canto superior direito, ao lado da busca (`#gearBtn`). Ajustes em `CONF` (`localStorage` `atlas-conf`, padrões em `CONF_DEF`, `applyConf()`; vai no backup).
   - Funcionam: nome (saudação na aba Hoje), peso e ♂/♀ (os mesmos do ranking), tema (`data-theme`), cor de destaque (`--accent`: título, aba atual e interruptores; o músculo-alvo continua vermelho), tamanho da letra (classes `fs-s`/`fs-l`; `buildFsCSS()` copia todo `font-size` em px das folhas de estilo com fator 0,9/1,15, menos cabeçalho, abas e grade da semana; `zoom` falhou), reduzir animações (`noanim`), séries × reps padrão ao adicionar exercício, meta semanal ("2 de 4 treinos" na grade de Hoje), backup (saiu da aba Hoje), apagar histórico/cargas digitadas/tudo (com confirmação), compartilhar, sugestões (issue no GitHub), fontes e versão (lida do cache do service worker).
-  - Idioma: português ou inglês (ver **Idioma** abaixo); espanhol "em breve".
+  - Idioma: português, inglês ou espanhol (ver **Idioma** abaixo).
   - Guardados mas "em breve" (pedido do dono: mostrar mesmo sem função): libras, timer de descanso, lembrete de treino (dias e hora), sons, vibração, conta e sincronização; altura e experiência ficam só no perfil; a idade ajusta o ranking a partir dos 40.
 - Cada aba tem um **+** pequeno ao lado do título que abre uma ajuda da página.
-- **Idioma** (português / inglês, tudo traduzido a pedido do dono): `LANG` é lido no início (Configurações › Idioma; na primeira vez segue o idioma do celular) e trocar recarrega o app. Duas camadas:
-  1. Dados (exercícios, variações, notas, músculos, articulações, fontes) traduzidos no lugar por `trData()` com `EN_DATA` antes de montar as listas. A busca continua aceitando nomes em português (`f.np`, `f._pt`, `o.npt`) e usa `famPop()` para desempatar.
-  2. Todo o resto passa pelo tradutor da página (`trStr`, `trEl` e um `MutationObserver`): cada texto, `title`, `aria-label` e `placeholder` é procurado em `EN_UI` (texto exato) ou `EN_PAT` (texto com números/nomes, `{0}`, `{1}`…). Ajudas longas têm versão em inglês própria. Datas usam `LOC`; dias em `DAYS`/`DSH`.
-  - **Regra**: todo texto novo na interface precisa de entrada em `EN_UI` ou `EN_PAT` (ou de um `LANG==="en"?…:…`), senão aparece em português no modo inglês. Use `data-notr` em elementos que não devem ser traduzidos. Teste rodando o app com `locale:"en-US"` e procurando sobras em português.
-  - Níveis do ranking em inglês: Amoeba, Rookie, Chicken, Rooster, Buff, Beefy, Monster, Legend, Freak.
+- **Idioma** (português / inglês / espanhol, tudo traduzido a pedido do dono): `LANG` (`pt`/`en`/`es`) é lido no início (Configurações › Idioma; na primeira vez segue o idioma do celular: pt → português, es → espanhol, outro → inglês) e trocar recarrega o app. Inglês e espanhol usam as mesmas chaves em português: `EN_DATA`/`EN_UI`/`EN_PAT` e `ES_DATA`/`ES_UI`/`ES_PAT`; o código usa `TR_D`/`TR_U`/`TR_P` (a tabela do idioma atual). Duas camadas:
+  1. Dados (exercícios, variações, notas, músculos, articulações, fontes) traduzidos no lugar por `trData()` com `TR_D` antes de montar as listas. No espanhol o sufixo do banco concorda com o nome ("Press de banca plano", "Aperturas planas": `SUFM`/`SUFF`); no inglês vira prefixo ("Flat bench press"). No espanhol o nome em inglês continua como subtítulo do cartão. A busca continua aceitando nomes em português (`f.np`, `f._pt`, `o.npt`) e usa `famPop()` para desempatar.
+  2. Todo o resto passa pelo tradutor da página (`trStr`, `trEl` e um `MutationObserver`): cada texto, `title`, `aria-label` e `placeholder` é procurado em `TR_U` (texto exato), `TR_D` ou `TR_P` (texto com números/nomes, `{0}`, `{1}`…). Datas usam `LOC`; dias em `DAYS`/`DSH`. Trechos montados no código usam `LANG==="en"?…:LANG==="es"?…:…`.
+  - **Regra**: todo texto novo na interface precisa de entrada em `EN_UI`/`EN_PAT` **e** em `ES_UI`/`ES_PAT` (ou de um ternário com os três idiomas), senão aparece em português. Use `data-notr` em elementos que não devem ser traduzidos. Teste rodando o app com `locale:"en-US"` e `"es-ES"` e comparando com o português (textos iguais = sobras).
+  - Níveis do ranking em inglês: Amoeba, Rookie, Chicken, Rooster, Buff, Beefy, Monster, Legend, Freak. Em espanhol: Ameba, Aprendiz, Pollito, Gallo, Fuertecito, Macizo, Monstruo, Leyenda, Fenómeno.
 
 Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-gui`. Uma conta errada (`davigms-pve`) já apareceu conectada uma vez; ela **não** é do dono, não use.
 
@@ -40,7 +40,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v39` → `atlas-v40`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v40` → `atlas-v41`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 
@@ -57,12 +57,13 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
   - `LEGACY`: nome antigo → ref, para treinos salvos antes. `refByName`/`exInfo(name, ref)` resolvem qualquer nome (antigo ou novo).
   - Busca (`famSearch`): nomes de academia (`aka`), rótulos das opções e sinônimos (`OSYN`); palavras que batem com uma opção já a escolhem; ignora "com/de/na…".
   - Evidência: `H` (estudo de hipertrofia), `E` (EMG), `B` (biomecânica). A lista já está **ordenada por estímulo**: crescimento > EMG > mecânica.
-- **Boneco** (redesenhado a pedido do dono para ficar natural, no estilo de pranchas de anatomia: pose em pé com os braços um pouco abertos, ~8 cabeças de altura, mãos com dedos e pés; músculos em cinza sólido sobre a "pele" mais clara, sem fibras nem degradê)
+- **Boneco** (redesenhado a pedido do dono para ficar natural, no estilo de pranchas de anatomia: pose em pé com os braços um pouco abertos, ~8 cabeças de altura, mãos com dedos e pés; músculos em cinza sólido sobre a "pele" mais clara, sem degradê, **com fibras** — o dono pediu as fibras de volta)
   - `SKIN` (base do corpo), `EXTR.front/back` (mãos e pés), `FRONT`, `BACK` (clicáveis), `DECO` (músculos de enfeite: esternocleidomastoide, sartório, tibial), `TEND`, `LINES` (dedos): caminhos SVG. Metade esquerda desenhada e espelhada. Músculos dos membros vêm antes no array, para os do tronco (deltoide, glúteos) ficarem por cima.
   - O tronco ("t") está em coordenadas da página do corpo masculino; os membros em referenciais locais (y ao longo do membro, −x lateral). `headPath()`/`earPath()` desenham a cabeça a partir de `BD.head` = [meia largura, meia altura, centro].
   - `BODY` (m/f) + `shapeBody()` + `warp()`: masculino sem distorção (`w`=1); o feminino estreita o tronco por altura (`w`) e alarga o quadril, com ombros (`S`), braços e pernas próprios. Ângulos: braço 14°, antebraço 8°, coxa −1,5° (joelho para dentro).
+  - Fibras (`FIB`, `fibD()`, `addFib()`): linhas finas (`.fib`, cor `--fiber`) cortadas pelo formato de cada músculo com um `clipPath`. Padrão = fuso (curvas de ponta a ponta no eixo mais comprido do músculo, calculado pelos pontos do desenho); `["f",x,y]` = leque convergindo num tendão (peitoral, deltoides, dorsal, trapézio, glúteo médio, infraespinhal); `["a",graus]` = folha de fibras paralelas (abdômen, oblíquos, romboides, eretores, glúteo máximo). Também nos músculos de enfeite. Ficam escondidas no boneco do Progresso/ranking (`.pfig .fib`).
   - Cores: `--m` (músculo), `--fig-skin` (pele e separação entre músculos), `--fig-art`/`--fig-art2` (modo Articulações). Classe `.ext` = cabeça, mãos e pés.
-  - O feminino tem cabelo preso (coque), contorno suave dos seios (`BREAST`, sem clique) e ombros, cintura e quadril próprios.
+  - O feminino tem cabelo preso (coque, com linha do cabelo na testa), contorno suave dos seios (`BREAST`, sem contorno branco, sem clique), braços mais finos (o dono achou "robustão": largura 0,79/0,80/0,86) e ombros, cintura e quadril próprios.
   - `buildFigure()` redesenha tudo ao trocar ♂/♀.
 - **Zoom/pan**: `BOX`, `vb`, `setView`, `zoomAt`, gestos de ponteiro.
 - **Modelos**
