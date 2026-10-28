@@ -501,6 +501,7 @@ button.brand:hover{background:var(--chip)}
 .rfig [data-m]:not(.rk-has) .m{fill:var(--m-hi);opacity:.45}
 .rk-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--muted)}
 .rk-legend span{display:flex;align-items:center;gap:5px}.rk-legend i{width:12px;height:12px;border-radius:3px;flex:none}
+.rk-low{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:1px}
 .rk-chip{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap}
 .pg-n .rk-chip{display:flex;margin-top:3px;font-weight:500;color:var(--muted)}
 .rk-chip i{width:10px;height:10px;border-radius:50%;flex:none}
@@ -978,14 +979,17 @@ const EN_UI={
 "Idioma, libras, timer de descanso, lembretes, sons e vibração, e conta com sincronização. As escolhas já ficam guardadas.":"Pounds, rest timer, reminders, sounds and vibration, and an account with sync. Your choices are already saved.",
 "Ranking de força":"Strength ranking","Mostra quão forte você é em cada grupo muscular, em 9 níveis:":"Shows how strong you are in each muscle group, in 9 levels:",
 "Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda e Bizarro":"Amoeba, Rookie, Chicken, Rooster, Buff, Beefy, Monster, Legend and Freak",
-". A comparação é com milhões de registros de pessoas que treinam, do mesmo sexo, ajustada ao seu peso.":". It's compared with millions of records from people who train, of the same sex, adjusted to your weight.",
+". A comparação mistura duas bases de pessoas que treinam (Strength Level e StrengthLog), do mesmo sexo, ajustada ao seu peso e, a partir dos 40 anos, à sua idade.":". It's compared with a mix of two databases of people who train (Strength Level and StrengthLog), of the same sex, adjusted to your weight and, from age 40, to your age.",
 "Seu peso":"Your weight","corpo ♂/♀":"♂/♀ body",": mudam as faixas. Coloque seu peso para o resultado ficar certo.":": change the bands. Enter your weight so the result is right.",
 "para ver cada exercício que entrou na conta, o nível dele e quanto falta para o próximo nível.":"to see each exercise that counted, its level and how far you are from the next level.",
 "+ Digitar uma carga":"+ Enter a load",": para exercícios que você faz mas ainda não anotou nos treinos. Escolha o exercício e a variação, coloque a carga e as repetições.":": for exercises you do but haven't logged in your workouts yet. Pick the exercise and variation, enter the load and reps.",
 "Toque no boneco para ver o nível de cada parte.":"Tap the figure to see the level of each part.",
 "As cargas vêm dos treinos marcados como feitos (com carga e repetições anotadas) nos últimos 6 meses e do que você digitar aqui. Vale a melhor série de cada exercício.":"Loads come from workouts marked as done (with load and reps logged) in the last 6 months and from what you enter here. The best set of each exercise counts.",
-"Cada série vira força estimada (carga × (1 + reps ÷ 30)) e é comparada com as faixas daquele exercício.":"Each set becomes an estimated strength (load × (1 + reps ÷ 30)) and is compared with that exercise's bands.",
-"O nível do grupo é a média de todos os exercícios dele; o nível geral é a média dos grupos.":"A group's level is the average of all its exercises; the overall level is the average of the groups.",
+"Cada série vira força estimada (carga × (1 + reps ÷ 30); acima de 12 reps, cada uma vale metade) e é comparada com as faixas daquele exercício.":"Each set becomes an estimated strength (load × (1 + reps ÷ 30); past 12 reps, each one counts half) and is compared with that exercise's bands.",
+"O nível do grupo é a média de todos os exercícios dele; o nível geral é a média dos grupos. Com um exercício só, aparece \"pouca informação\".":"A group's level is the average of all its exercises; the overall level is the average of the groups. With a single exercise it says \"little data\".",
+"Idade (em Configurações): a partir dos 40, as faixas se ajustam à sua idade.":"Age (in Settings): from 40 on, the bands adjust to your age.",
+"pouca informação":"little data","Só 1 exercício: o nível é pouco confiável. Registre outro exercício deste grupo para ficar mais certo.":"Only 1 exercise: the level isn't very reliable. Log another exercise for this group to make it more accurate.",
+"Ajusta o ranking de força a partir dos 40.":"Adjusts the strength ranking from age 40.",
 "Halteres: use o peso de cada halter.":"Dumbbells: use the weight of each dumbbell.",
 "Barra fixa, mergulho, flexão e remada invertida contam o seu peso corporal. Se fizer só com o corpo, deixe a carga em branco (ou 0) e anote as repetições.":"Pull-ups, dips, push-ups and inverted rows count your bodyweight. If you do them with just your body, leave the load blank (or 0) and log the reps.",
 "Fortinho fica em volta da média de quem treina (45–60%). Monstro já é mais forte que 3 em cada 4 pessoas.":"Buff is around the average of people who train (45–60%). Monster is already stronger than 3 out of 4 people.",
@@ -1030,20 +1034,21 @@ const EN_UI={
 "Maior carga do dia":"Day's heaviest load","novo":"new",
 "Força estimada = carga × (1 + repetições ÷ 30). É uma estimativa da carga máxima para 1 repetição, útil para comparar treinos com repetições diferentes; fica menos precisa acima de ~12 repetições.":"Estimated strength = load × (1 + reps ÷ 30). It estimates your max load for 1 rep, useful for comparing workouts with different reps; it gets less accurate above ~12 reps.",
 "De onde vêm os números.":"Where the numbers come from.",
-"As faixas são os padrões de força do Strength Level, feitos com cerca de 11 milhões de registros de pessoas que treinam (entre 48 milhões de levantamentos enviados). As faixas do site são percentis entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%. O app usa o corpo ♂/♀ escolhido.":"The bands are Strength Level's strength standards, built from about 11 million records of people who train (out of 48 million lifts submitted). The site's bands are percentiles among people of the same sex: beginner 5%, novice 20%, intermediate 50%, advanced 80% and elite 95%. The app uses the ♂/♀ body you chose.",
+"As faixas misturam duas bases de pessoas que treinam: o Strength Level (cerca de 11 milhões de registros digitados) e o StrengthLog (cerca de 24 mil usuários de um app de treino). Nos exercícios que as duas têm (supino, agachamento, terra e desenvolvimento), o app usa a média das duas. Nos outros, usa o Strength Level corrigido pela diferença média entre elas. No iniciante as duas concordam; no topo o Strength Level é 15–40% mais difícil (o elite dele fica perto do top 10% de atletas de powerlifting com antidoping), então a mistura fica mais realista para quem treina em academia. As faixas são percentis entre pessoas do mesmo sexo: iniciante 5%, novato ~20%, intermediário 50%, avançado ~80% e elite 95%. O app usa o corpo ♂/♀ escolhido.":"The bands mix two databases of people who train: Strength Level (about 11 million entered records) and StrengthLog (about 24 thousand users of a training app). For the exercises both have (bench press, squat, deadlift and overhead press), the app uses the average of the two. For the others, it uses Strength Level corrected by the average gap between them. At beginner the two agree; at the top Strength Level is 15–40% harder (its elite is close to the top 10% of drug-tested powerlifters), so the mix is more realistic for people who train at a gym. The bands are percentiles among people of the same sex: beginner 5%, novice ~20%, intermediate 50%, advanced ~80% and elite 95%. The app uses the ♂/♀ body you chose.",
 "Os 9 níveis":"The 9 levels",
 "(quanto % de quem treina você supera): Ameba = menos de 5% · Aprendiz = 5–15% · Frango = 15–30% · Galo = 30–45% · Fortinho = 45–60% · Parrudo = 60–75% · Monstro = 75–88% · Lenda = 88–96% · Bizarro = top 4%. Os níveis do meio têm a mesma largura; as pontas são mais difíceis. Entre as faixas do site, o app interpola.":"(what % of people who train you beat): Amoeba = under 5% · Rookie = 5–15% · Chicken = 15–30% · Rooster = 30–45% · Buff = 45–60% · Beefy = 60–75% · Monster = 75–88% · Legend = 88–96% · Freak = top 4%. The middle levels are the same width; the ends are harder. Between the site's bands, the app interpolates.",
 "Peso corporal.":"Bodyweight.",
-"As faixas publicadas são para o praticante típico (cerca de 77 kg no masculino e 65 kg no feminino). O app ajusta para o seu peso pela regra de ⅔: a força cresce com a área do músculo, que acompanha o peso elevado a ⅔. Quem é mais leve precisa levantar menos, mas não proporcionalmente menos.":"The published bands are for the typical lifter (about 77 kg for men and 65 kg for women). The app adjusts them to your weight with the ⅔ rule: strength grows with muscle cross-section, which tracks bodyweight to the ⅔ power. Lighter people need to lift less, but not proportionally less.",
+"As faixas publicadas são para o praticante típico (cerca de 77 kg no masculino e 65 kg no feminino). Para outros pesos, o app segue as tabelas das duas bases: nos homens, a força cresce quase na mesma proporção do peso; nas mulheres, bem menos. Ex.: um homem 10% mais pesado precisa levantar cerca de 9% a mais para o mesmo nível; uma mulher 10% mais pesada, cerca de 6% a mais.":"The published bands are for the typical lifter (about 77 kg for men and 65 kg for women). For other weights, the app follows both databases' tables: in men, strength grows almost in proportion to weight; in women, much less. E.g. a man 10% heavier needs to lift about 9% more for the same level; a woman 10% heavier, about 6% more.",
+"Idade.":"Age.","Se você puser sua idade em Configurações, a partir dos 40 anos as faixas descem para comparar você com gente da sua idade: cerca de 95% aos 45, 89% aos 50, 82% aos 55, 75% aos 60, 67% aos 65 e 61% aos 70. Antes dos 40, nada muda.":"If you enter your age in Settings, from age 40 the bands come down to compare you with people your age: about 95% at 45, 89% at 50, 82% at 55, 75% at 60, 67% at 65 and 61% at 70. Before 40, nothing changes.",
 "Sua força em cada exercício.":"Your strength in each exercise.",
-"Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Séries de até ~12 repetições dão a estimativa mais confiável. Exercícios com o peso do corpo contam o corpo: barra fixa e mergulho (o corpo todo), flexão (cerca de 69% do peso no chão, 74% com os pés elevados, 45% com as mãos elevadas, comparada com o supino) e remada invertida (cerca de 55%, comparada com a remada curvada). Peso extra (colete, anilha) soma; na barra assistida (graviton), a ajuda é descontada. Nesses exercícios valem até 30 repetições na conta.":"For each set, the app calculates the estimated strength (load × (1 + reps ÷ 30), the Epley formula) and keeps the best of the last 6 months, from workouts marked as done or entered here. Sets of up to ~12 reps give the most reliable estimate. Bodyweight exercises count your body: pull-ups and dips (the whole body), push-ups (about 69% of your weight on the floor, 74% with feet elevated, 45% with hands elevated, compared with the bench press) and inverted rows (about 55%, compared with the bent-over row). Extra weight (vest, plate) adds on; on the assisted machine, the assistance is subtracted. Up to 30 reps count for these exercises.",
+"Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Acima de 12 repetições a estimativa erra mais, então cada repetição a mais vale metade (ex.: 20 repetições contam como 1,53 × a carga, em vez de 1,67). Exercícios com o peso do corpo contam o corpo: barra fixa e mergulho (o corpo todo), flexão (cerca de 69% do peso no chão, 74% com os pés elevados, 45% com as mãos elevadas, comparada com o supino) e remada invertida (cerca de 55%, comparada com a remada curvada). Peso extra (colete, anilha) soma; na barra assistida (graviton), a ajuda é descontada. Nesses exercícios valem até 30 repetições na conta.":"For each set, the app calculates the estimated strength (load × (1 + reps ÷ 30), the Epley formula) and keeps the best of the last 6 months, from workouts marked as done or entered here. Past 12 reps the estimate drifts, so each extra rep counts half (e.g. 20 reps count as 1.53 × the load instead of 1.67). Bodyweight exercises count your body: pull-ups and dips (the whole body), push-ups (about 69% of your weight on the floor, 74% with feet elevated, 45% with hands elevated, compared with the bench press) and inverted rows (about 55%, compared with the bent-over row). Extra weight (vest, plate) adds on; on the assisted machine, the assistance is subtracted. Up to 30 reps count for these exercises.",
 "Nível do grupo.":"Group level.","É a média de":"It's the average of","todos":"all",
-"os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos.":"the group's exercises you did, not just one. An exercise counts for every group it targets (e.g. squats count for quads and glutes). The overall level is the average of the groups.",
+"os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos. Grupo com um exercício só aparece com \"pouca informação\": o nível vale, mas é menos confiável.":"the group's exercises you did, not just one. An exercise counts for every group it targets (e.g. squats count for quads and glutes). The overall level is the average of the groups. A group with a single exercise says \"little data\": the level counts, but it's less reliable.",
 "Aproximações.":"Approximations.",
 "Halteres: o peso é de cada halter. Variações sem padrão próprio usam o mais próximo com um fator (ex.: supino inclinado com halteres ≈ 90% do reto; máquina com um braço só ≈ metade do peso dos dois). Prancha, abdominais e afundo ou ponte só com o corpo ficam fora, porque não há um padrão de carga justo para eles. Máquinas variam de marca para marca, então use o nível delas como referência, não como verdade absoluta.":"Dumbbells: the weight is per dumbbell. Variations without their own standard use the closest one with a factor (e.g. incline dumbbell press ≈ 90% of flat; a one-arm machine ≈ half the weight of two arms). Planks, crunches, and bodyweight-only lunges or bridges are left out because there's no fair load standard for them. Machines vary by brand, so treat their level as a reference, not absolute truth.",
 "Strength Level: padrões de força por exercício, sexo e peso corporal (strengthlevel.com)":"Strength Level: strength standards by exercise, sex and bodyweight (strengthlevel.com)",
 "StrengthLog: padrões de força em kg para agachamento, terra, supino e desenvolvimento (strengthlog.com)":"StrengthLog: strength standards in kg for squat, deadlift, bench press and overhead press (strengthlog.com)",
-"Jaric (2002, Sports Medicine): normalizar força pelo peso corporal elevado a ⅔":"Jaric (2002, Sports Medicine): normalizing strength by bodyweight to the ⅔ power","Epley (1985): fórmula da força estimada":"Epley (1985): estimated strength formula",
+"van den Hoek e colegas (2024, Journal of Science and Medicine in Sport): percentis de força em 810 mil participações de powerlifting com antidoping":"van den Hoek and colleagues (2024, Journal of Science and Medicine in Sport): strength percentiles from 810 thousand drug-tested powerlifting entries","Fatores de idade do Strength Level e de estudos de powerlifting master":"Age factors from Strength Level and masters powerlifting studies","Epley (1985): fórmula da força estimada":"Epley (1985): estimated strength formula",
 "Como funciona o ranking":"How the ranking works","Boneco colorido pelo nível de força de cada grupo, frente e costas":"Figure colored by each group's strength level, front and back","Cores dos níveis":"Level colors",
 "O que é força estimada":"What estimated strength is","1 mês":"1 month","3 meses":"3 months","Tudo":"All","Registre mais treinos com carga para ver a linha.":"Log more workouts with load to see the line.",
 "Nenhum registro neste período. Escolha \"Tudo\".":"No records in this period. Choose \"All\".",
@@ -2332,15 +2337,16 @@ const HELP={
     <li><b>Seus dados</b>: exportar e importar backup, apagar histórico, cargas digitadas ou tudo.</li>
     <li><b>Sobre</b>: compartilhar o app, mandar sugestões e ver as fontes.</li></ul>
     <h4>Em breve</h4><ul><li>Idioma, libras, timer de descanso, lembretes, sons e vibração, e conta com sincronização. As escolhas já ficam guardadas.</li></ul>`],
-  rank:["Ranking de força",`<p>Mostra quão forte você é em cada grupo muscular, em 9 níveis: <b>Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda e Bizarro</b>. A comparação é com milhões de registros de pessoas que treinam, do mesmo sexo, ajustada ao seu peso.</p>
+  rank:["Ranking de força",`<p>Mostra quão forte você é em cada grupo muscular, em 9 níveis: <b>Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda e Bizarro</b>. A comparação mistura duas bases de pessoas que treinam (Strength Level e StrengthLog), do mesmo sexo, ajustada ao seu peso e, a partir dos 40 anos, à sua idade.</p>
     <h4>O que dá para fazer</h4><ul>
     <li><b>Seu peso</b> e <b>corpo ♂/♀</b>: mudam as faixas. Coloque seu peso para o resultado ficar certo.</li>
     <li><b>Toque num grupo</b> para ver cada exercício que entrou na conta, o nível dele e quanto falta para o próximo nível.</li>
     <li><b>+ Digitar uma carga</b>: para exercícios que você faz mas ainda não anotou nos treinos. Escolha o exercício e a variação, coloque a carga e as repetições.</li>
     <li>Toque no boneco para ver o nível de cada parte.</li></ul>
     <h4>Como conta</h4><ul><li>As cargas vêm dos treinos marcados como feitos (com carga e repetições anotadas) nos últimos 6 meses e do que você digitar aqui. Vale a melhor série de cada exercício.</li>
-    <li>Cada série vira força estimada (carga × (1 + reps ÷ 30)) e é comparada com as faixas daquele exercício.</li>
-    <li>O nível do grupo é a média de todos os exercícios dele; o nível geral é a média dos grupos.</li>
+    <li>Cada série vira força estimada (carga × (1 + reps ÷ 30); acima de 12 reps, cada uma vale metade) e é comparada com as faixas daquele exercício.</li>
+    <li>O nível do grupo é a média de todos os exercícios dele; o nível geral é a média dos grupos. Com um exercício só, aparece "pouca informação".</li>
+    <li>Idade (em Configurações): a partir dos 40, as faixas se ajustam à sua idade.</li>
     <li>Halteres: use o peso de cada halter.</li>
     <li>Barra fixa, mergulho, flexão e remada invertida contam o seu peso corporal. Se fizer só com o corpo, deixe a carga em branco (ou 0) e anote as repetições.</li></ul>
     <h4>Dicas</h4><ul><li>Fortinho fica em volta da média de quem treina (45–60%). Monstro já é mais forte que 3 em cada 4 pessoas.</li>
@@ -2840,15 +2846,22 @@ $("progBody").addEventListener("click",e=>{
 });
 
 /* ---------------------------------------------------------- ranking de força (title "Atlas Muscular" opens it)
-   Standards: Strength Level (strengthlevel.com), 1-rep-max levels built from ~11 million
-   logged lifts. Each level is a percentile among lifters of the same sex: Beginner 5%,
-   Novice 20%, Intermediate 50%, Advanced 80%, Elite 95%. The numbers below are the site's
-   values for its typical lifter (~77 kg men, ~65 kg women); thresholds are rescaled to
-   the user's bodyweight with (BW/ref)^(2/3) (allometric scaling: strength grows with
-   muscle cross-section, i.e. bodyweight to the 2/3 power).
+   Standards: a mix of Strength Level (strengthlevel.com, 1-rep-max levels built from ~11 million
+   logged lifts) and StrengthLog (strengthlog.com, ~24k app users). Each level is a percentile
+   among lifters of the same sex: Beginner 5%, Novice 20–25%, Intermediate 50%, Advanced 75–80%,
+   Elite 95%. RSTD holds Strength Level's values for its typical lifter (~77 kg men, ~65 kg women).
+   Owner's choice (owner saw the comparison): mix both. For the 4 lifts StrengthLog publishes
+   (RSLOG) the band is the geometric mean of the two; every other lift gets Strength Level × RMIX,
+   the average gap between the sources at that level (the two agree at Beginner; at Elite
+   Strength Level is 15–40% higher, about the top 10% of tested powerlifters, van den Hoek 2024).
+   Bodyweight: (BW/ref)^RBWX, exponent fitted on both sources' bodyweight tables (men ≈0.9,
+   women ≈0.6) instead of the theoretical 2/3. Age: from 40 on, bands × rAgeF (Strength Level
+   age factors). e1RM: Epley up to 12 reps, each rep past 12 counts half (rE1).
    Entry: [name, unit l=lb k=kg, male x5, female x5, k?]. With k the values are weight
    ADDED to the body (pull-up, dip, back extension) and k is the share of bodyweight moved. */
-const RSW={m:77,f:65},LB=.4536;
+const RSW={m:77,f:65},LB=.4536,RBWX={m:.9,f:.6};
+/* StrengthLog bands in kg at the reference bodyweights (interpolated from its 70/80 kg ♂ and 60/70 kg ♀ rows) */
+const RSLOG={bench:[[51.6,71,86.4,104.5,138.2],[23,34,43.5,53.5,79]],squat:[[55.2,86.3,108.4,131.9,173.1],[25,49.5,68.5,87.5,122]],deadlift:[[70.9,107.7,138.1,166.9,208.8],[38.5,66.5,83.5,107,140]],ohp:[[31.1,43.8,51.5,59.9,76],[14.5,23.5,29,35,45]]};
 const RSTD={
   bench:["Supino reto (barra)","l",[107,154,212,280,353],[43,72,112,159,213]],
   incline:["Supino inclinado (barra)","l",[96,138,190,251,317],[34,60,95,138,187]],
@@ -2996,9 +3009,19 @@ let rank=LS.get("atlas-rank",null);if(!rank||typeof rank!=="object")rank={};if(!
 const saveRank=()=>{if(!LS.set("atlas-rank",rank))toast("Não foi possível salvar neste aparelho")};
 let rForm=null,rOpen=null;
 const rBW=()=>rank.bw>0?rank.bw:RSW[sex];
+/* per level, sqrt(StrengthLog ÷ Strength Level) averaged over the 4 shared lifts: applied to every other lift */
+const RMIX={m:[],f:[]};
+["m","f"].forEach((x,j)=>{for(let i=0;i<5;i++){let z=0,n=0;for(const k in RSLOG){const S=RSTD[k];z+=Math.log(RSLOG[k][j][i]/(S[2+j][i]*LB));n++}RMIX[x][i]=Math.exp(z/n/2)}});
+/* age: relative strength holds until ~40, then drops (Strength Level age factors; masters powerlifting) */
+const RAGE=[[40,1],[45,.95],[50,.89],[55,.82],[60,.75],[65,.67],[70,.61],[80,.5]];
+const rAge=()=>{const a=parseInt(CONF.age);return a>=10&&a<=110?a:null};
+function rAgeF(){const a=rAge();if(!a||a<=40)return 1;if(a>=80)return .5;
+  for(let i=1;i<RAGE.length;i++)if(a<=RAGE[i][0]){const [a0,f0]=RAGE[i-1],[a1,f1]=RAGE[i];return f0+(a-a0)/(a1-a0)*(f1-f0)}return .5}
 function rThr(key){
-  const S=RSTD[key],ref=RSW[sex],bw=rBW(),sc=Math.pow(bw/ref,2/3);
-  const a=S[sex==="f"?3:2].map(v=>S[1]==="l"?v*LB:v);
+  const S=RSTD[key],ref=RSW[sex],j=sex==="f"?1:0,bw=rBW(),sc=Math.pow(bw/ref,RBWX[sex])*rAgeF(),L=RSLOG[key];
+  const a=S[2+j].map((v,i)=>{v=S[1]==="l"?v*LB:v;
+    if(L)return Math.sqrt(v*L[j][i]);
+    return S[4]!=null?(S[4]*ref+v)*RMIX[sex][i]-S[4]*ref:v*RMIX[sex][i]});
   return S[4]!=null?a.map(v=>(S[4]*ref+v)*sc-S[4]*bw):a.map(v=>v*sc);
 }
 function rScore(v,T){
@@ -3011,14 +3034,18 @@ const rLv=s=>RB.filter(b=>s>=b).length;
 function rPct(s){const P=RPCT;if(s>=6)return 99;
   const i=Math.floor(s);return Math.round(P[i][1]+(s-i)*(P[i+1][1]-P[i][1]))}
 /* value of one set in "standard units": estimated 1-rep max × x, or for bodyweight lifts
-   the estimated extra weight for 1 rep. Reps above 20 count as 20 (Epley overshoots there). */
+   the estimated extra weight for 1 rep. Reps above 20 count as 20 (30 for bodyweight lifts).
+   rE1: Epley up to 12 reps; past 12 the estimate drifts, so each extra rep counts half
+   (20 reps → ×1.53, close to the Mayhew/O'Conner equations). rE1r is its inverse in reps. */
+const rE1=(kg,r)=>r<=1?kg:kg*(r<=12?1+r/30:1.4+(r-12)/60);
+const rE1r=m=>m<=1.4?30*(m-1):12+60*(m-1.4);
 const rBody=st=>RSTD[st.k][4]!=null||!!st.bw;
 function rSetVal(st,kg,r){
   /* bodyweight lifts are often done for many reps: count up to 30 there, 20 elsewhere */
   const S=RSTD[st.k];r=Math.min(r,rBody(st)?30:20);if(!(r>0))return null;
-  if(st.bw){const eff=st.bw*rBW()+(isFinite(kg)&&kg>0?kg:0);return e1rm(eff,r)*st.x}
-  if(S[4]!=null){const bw=rBW(),body=S[4]*bw;let a=isFinite(kg)?kg:0;if(st.as)a=-Math.abs(a);const eff=body+a;if(eff<=0)return null;return eff*(r<=1?1:1+r/30)-body}
-  if(!(kg>0))return null;return e1rm(kg,r)*st.x;
+  if(st.bw){const eff=st.bw*rBW()+(isFinite(kg)&&kg>0?kg:0);return rE1(eff,r)*st.x}
+  if(S[4]!=null){const bw=rBW(),body=S[4]*bw;let a=isFinite(kg)?kg:0;if(st.as)a=-Math.abs(a);const eff=body+a;if(eff<=0)return null;return rE1(eff,r)-body}
+  if(!(kg>0))return null;return rE1(kg,r)*st.x;
 }
 function rankData(){
   const t=new Date();t.setHours(12,0,0,0);const from=isoDate(new Date(t.getTime()-182*864e5));
@@ -3043,7 +3070,7 @@ function rankData(){
 const rKg=v=>fkg(Math.round(v*2)/2);
 function rNeed(o){const lv=rLv(o.s);if(lv>=RB.length)return "";const v=rVal(RB[lv],o.T),S=RSTD[o.st.k];
   /* bodyweight lifts: say how many reps with just the body, or how much extra weight if that is over 30 */
-  const reps=(body,need)=>{const r=Math.ceil(30*(need/body-1));return r<=1?"1 repetição só com o corpo":r<=30?`${r} repetições seguidas só com o corpo`:`10 repetições com +${rKg(need/(1+10/30)-body)} kg de peso extra`};
+  const reps=(body,need)=>{const r=Math.ceil(rE1r(need/body));return r<=1?"1 repetição só com o corpo":r<=30?`${r} repetições seguidas só com o corpo`:`10 repetições com +${rKg(need/(1+10/30)-body)} kg de peso extra`};
   if(o.st.bw)return `Para ${RLV[lv+1][0]}: ${reps(o.st.bw*rBW(),v/o.st.x)}`;
   if(S[4]!=null){const body=S[4]*rBW();const t=o.st.as?(v<0?`com ajuda de até ${rKg(-v)} kg`:reps(body,body+v)):(v<=0?`1 repetição só com o corpo`:reps(body,body+v));return `Para ${RLV[lv+1][0]}: ${t}`}
   const one=v/o.st.x;return `Para ${RLV[lv+1][0]}: 1 repetição com ${rKg(one)} kg (ou ${rKg(one/(1+8/30))} kg × 8)`}
@@ -3071,13 +3098,14 @@ const rChip=s=>{const lv=rLv(s);return `<span class="rk-chip"><i style="backgrou
 const rPos=s=>{const lv=rLv(s),lo=lv?RB[lv-1]:0,hi=lv<RB.length?RB[lv]:RB[RB.length-1]+1;return (lv+Math.min(1,Math.max(0,(s-lo)/(hi-lo))))/RLV.length};
 const rBar=s=>`<span class="rk-bar"><i style="width:${Math.max(3,rPos(s)*100).toFixed(1)}%;background:${rBg(rLv(s))}"></i>${RB.map((_,k)=>`<b style="left:${((k+1)/RLV.length*100).toFixed(2)}%"></b>`).join("")}</span>`;
 function rankAbout(){return `<details class="about"><summary>Como o ranking funciona</summary>
-  <p><b>De onde vêm os números.</b> As faixas são os padrões de força do Strength Level, feitos com cerca de 11 milhões de registros de pessoas que treinam (entre 48 milhões de levantamentos enviados). As faixas do site são percentis entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%. O app usa o corpo ♂/♀ escolhido.</p>
+  <p><b>De onde vêm os números.</b> As faixas misturam duas bases de pessoas que treinam: o Strength Level (cerca de 11 milhões de registros digitados) e o StrengthLog (cerca de 24 mil usuários de um app de treino). Nos exercícios que as duas têm (supino, agachamento, terra e desenvolvimento), o app usa a média das duas. Nos outros, usa o Strength Level corrigido pela diferença média entre elas. No iniciante as duas concordam; no topo o Strength Level é 15–40% mais difícil (o elite dele fica perto do top 10% de atletas de powerlifting com antidoping), então a mistura fica mais realista para quem treina em academia. As faixas são percentis entre pessoas do mesmo sexo: iniciante 5%, novato ~20%, intermediário 50%, avançado ~80% e elite 95%. O app usa o corpo ♂/♀ escolhido.</p>
   <p><b>Os 9 níveis</b> (quanto % de quem treina você supera): Ameba = menos de 5% · Aprendiz = 5–15% · Frango = 15–30% · Galo = 30–45% · Fortinho = 45–60% · Parrudo = 60–75% · Monstro = 75–88% · Lenda = 88–96% · Bizarro = top 4%. Os níveis do meio têm a mesma largura; as pontas são mais difíceis. Entre as faixas do site, o app interpola.</p>
-  <p><b>Peso corporal.</b> As faixas publicadas são para o praticante típico (cerca de 77 kg no masculino e 65 kg no feminino). O app ajusta para o seu peso pela regra de ⅔: a força cresce com a área do músculo, que acompanha o peso elevado a ⅔. Quem é mais leve precisa levantar menos, mas não proporcionalmente menos.</p>
-  <p><b>Sua força em cada exercício.</b> Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Séries de até ~12 repetições dão a estimativa mais confiável. Exercícios com o peso do corpo contam o corpo: barra fixa e mergulho (o corpo todo), flexão (cerca de 69% do peso no chão, 74% com os pés elevados, 45% com as mãos elevadas, comparada com o supino) e remada invertida (cerca de 55%, comparada com a remada curvada). Peso extra (colete, anilha) soma; na barra assistida (graviton), a ajuda é descontada. Nesses exercícios valem até 30 repetições na conta.</p>
-  <p><b>Nível do grupo.</b> É a média de <b>todos</b> os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos.</p>
+  <p><b>Peso corporal.</b> As faixas publicadas são para o praticante típico (cerca de 77 kg no masculino e 65 kg no feminino). Para outros pesos, o app segue as tabelas das duas bases: nos homens, a força cresce quase na mesma proporção do peso; nas mulheres, bem menos. Ex.: um homem 10% mais pesado precisa levantar cerca de 9% a mais para o mesmo nível; uma mulher 10% mais pesada, cerca de 6% a mais.</p>
+  <p><b>Idade.</b> Se você puser sua idade em Configurações, a partir dos 40 anos as faixas descem para comparar você com gente da sua idade: cerca de 95% aos 45, 89% aos 50, 82% aos 55, 75% aos 60, 67% aos 65 e 61% aos 70. Antes dos 40, nada muda.</p>
+  <p><b>Sua força em cada exercício.</b> Para cada série, o app calcula a força estimada (carga × (1 + repetições ÷ 30), fórmula de Epley) e guarda a melhor dos últimos 6 meses, dos treinos marcados como feitos ou digitada aqui. Acima de 12 repetições a estimativa erra mais, então cada repetição a mais vale metade (ex.: 20 repetições contam como 1,53 × a carga, em vez de 1,67). Exercícios com o peso do corpo contam o corpo: barra fixa e mergulho (o corpo todo), flexão (cerca de 69% do peso no chão, 74% com os pés elevados, 45% com as mãos elevadas, comparada com o supino) e remada invertida (cerca de 55%, comparada com a remada curvada). Peso extra (colete, anilha) soma; na barra assistida (graviton), a ajuda é descontada. Nesses exercícios valem até 30 repetições na conta.</p>
+  <p><b>Nível do grupo.</b> É a média de <b>todos</b> os exercícios do grupo que você fez, não só um. Um exercício conta para cada grupo que ele tem como alvo (ex.: agachamento conta para quadríceps e glúteos). O nível geral é a média dos grupos. Grupo com um exercício só aparece com "pouca informação": o nível vale, mas é menos confiável.</p>
   <p><b>Aproximações.</b> Halteres: o peso é de cada halter. Variações sem padrão próprio usam o mais próximo com um fator (ex.: supino inclinado com halteres ≈ 90% do reto; máquina com um braço só ≈ metade do peso dos dois). Prancha, abdominais e afundo ou ponte só com o corpo ficam fora, porque não há um padrão de carga justo para eles. Máquinas variam de marca para marca, então use o nível delas como referência, não como verdade absoluta.</p>
-  <ul><li>Strength Level: padrões de força por exercício, sexo e peso corporal (strengthlevel.com)</li><li>StrengthLog: padrões de força em kg para agachamento, terra, supino e desenvolvimento (strengthlog.com)</li><li>Jaric (2002, Sports Medicine): normalizar força pelo peso corporal elevado a ⅔</li><li>Epley (1985): fórmula da força estimada</li></ul></details>`}
+  <ul><li>Strength Level: padrões de força por exercício, sexo e peso corporal (strengthlevel.com)</li><li>StrengthLog: padrões de força em kg para agachamento, terra, supino e desenvolvimento (strengthlog.com)</li><li>van den Hoek e colegas (2024, Journal of Science and Medicine in Sport): percentis de força em 810 mil participações de powerlifting com antidoping</li><li>Fatores de idade do Strength Level e de estudos de powerlifting master</li><li>Epley (1985): fórmula da força estimada</li></ul></details>`}
 /* the ranking lives at the top of Progresso › Força; renderRank re-renders that view keeping the scroll */
 function renderRank(){const sc=$("tab-prog"),y=sc.scrollTop;renderKg();sc.scrollTop=y}
 function rankAfter(D){const b=$("rkFigBox");if(b)b.appendChild(rankFig(D.gs))}
@@ -3086,7 +3114,7 @@ function rankHTML(D){
   const hero=has?`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big" style="${lv===RLV.length-1?`background-image:${RHERO[lv]};color:transparent`:`color:${RHERO[lv]}`}">${RLV[lv][0]}</b>
       <span class="rk-sub">${RLV[lv][1]} · mais forte que ~${rPct(D.all)}% de quem treina, do mesmo sexo.</span>
       <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem" class="${i<lv?"past":i===lv?"now":""}"${i===lv?' aria-current="true"':""}><i style="background:${RHERO[i]}"></i>${x[0]}</span>`).join("")}</div>
-      <span class="rk-sub sm">${LANG==="en"?`${D.gs.length} of ${Object.keys(BASIC).length} groups rated · ${plural(D.list.length,"exercise")} · ${sex==="f"?"female":"male"} body, ${fkg(rBW())} kg${rank.bw>0?"":" (default)"}`:`${plural(D.gs.length,"grupo")} de ${Object.keys(BASIC).length} avaliado${D.gs.length===1?"":"s"} · ${plural(D.list.length,"exercício")} · corpo ${sex==="f"?"feminino":"masculino"}, ${fkg(rBW())} kg${rank.bw>0?"":" (padrão)"}`}</span></div>`
+      <span class="rk-sub sm">${LANG==="en"?`${D.gs.length} of ${Object.keys(BASIC).length} groups rated · ${plural(D.list.length,"exercise")} · ${sex==="f"?"female":"male"} body, ${fkg(rBW())} kg${rank.bw>0?"":" (default)"}${rAgeF()<1?`, ${rAge()} years`:""}`:`${plural(D.gs.length,"grupo")} de ${Object.keys(BASIC).length} avaliado${D.gs.length===1?"":"s"} · ${plural(D.list.length,"exercício")} · corpo ${sex==="f"?"feminino":"masculino"}, ${fkg(rBW())} kg${rank.bw>0?"":" (padrão)"}${rAgeF()<1?`, ${rAge()} anos`:""}`}</span></div>`
     :`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big">Sem dados</b>
       <span class="rk-sub">Anote carga e repetições nos treinos da aba Hoje e marque como feito, ou digite aqui embaixo uma carga que você já levanta.</span>
       <div class="rk-ladder" role="list" aria-label="Os 9 níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:${RHERO[i]}"></i>${x[0]}</span>`).join("")}</div></div>`;
@@ -3105,11 +3133,11 @@ function rankHTML(D){
   ${form}
   ${has?`<div class="card"><div id="rkFigBox"></div><div class="rk-legend" role="list" aria-label="Cores dos níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:${rBg(i)}"></i>${x[0]}</span>`).join("")}<span role="listitem"><i style="background:var(--m-hi);opacity:.55"></i>Sem dados</span></div></div>`:""}
   <div class="card"><div class="row between"><h3 class="section-t" style="margin:0">Nível por grupo</h3>${has?`<span class="muted-s" style="margin:0">mais forte que</span>`:""}</div>
-    ${has?D.gs.map(x=>`<details class="pg rk-g"${rOpen===x.g?" open":""} data-rg2="${x.g}"><summary><span class="pg-n">${BASIC[x.g].n}${rChip(x.s)}</span>${rBar(x.s)}<b>${rPct(x.s)}%</b></summary>
+    ${has?D.gs.map(x=>`<details class="pg rk-g"${rOpen===x.g?" open":""} data-rg2="${x.g}"><summary><span class="pg-n">${BASIC[x.g].n}${rChip(x.s)}${x.ex.length<2?`<small class="rk-low">pouca informação</small>`:""}</span>${rBar(x.s)}<b>${rPct(x.s)}%</b></summary>
       <div class="rk-exs">${x.ex.map(o=>`<div class="rk-ex"><div class="row between" style="flex-wrap:nowrap;align-items:flex-start"><span class="rk-exn">${esc(o.name)}<small>${rSetTxt(o)}</small></span>${rChip(o.s)}</div>
         ${rBar(o.s)}<small class="rk-next">${rNeed(o)}</small>
         ${o.man.length?`<div class="rk-man">${o.man.map(m=>`<span>Digitado: ${fkg(m.kg)} kg × ${m.r} <button class="lnk" data-rdel="${esc(m.id)}">apagar</button></span>`).join("")}</div>`:""}</div>`).join("")}
-        <span class="muted-s" style="margin:0">Nível do grupo = média de ${plural(x.ex.length,"exercício")}.</span></div></details>`).join(""):`<p class="muted">Nenhum exercício com carga ainda.</p>`}
+        <span class="muted-s" style="margin:0">${x.ex.length<2?"Só 1 exercício: o nível é pouco confiável. Registre outro exercício deste grupo para ficar mais certo.":`Nível do grupo = média de ${plural(x.ex.length,"exercício")}.`}</span></div></details>`).join(""):`<p class="muted">Nenhum exercício com carga ainda.</p>`}
     ${none.length&&has?`<p class="muted" style="font-size:13px">Sem dados: ${none.map(g=>BASIC[g].n).join(", ")}.</p>`:""}
     <button class="btn primary" data-ract="add">+ Digitar uma carga</button></div>
   ${D.noStd.length?`<p class="muted" style="font-size:13px">Sem padrão de força (não entram): ${D.noStd.map(esc).join(", ")}.</p>`:""}`;
@@ -3157,7 +3185,7 @@ function renderConf(){
     ${cfRow("Nome ou apelido","Aparece na aba Hoje.",`<input class="inp cf-in" data-cfin="name" maxlength="30" value="${esc(c.name)}" placeholder="Seu nome">`)}
     ${cfRow("Peso corporal","Usado no ranking de força.",`<span class="cf-unit"><input class="inp cf-in sm" data-cfin="bw" inputmode="decimal" value="${rank.bw>0?fkg(rank.bw):""}" placeholder="${RSW[sex]}"><small>kg</small></span>`)}
     ${cfRow("Corpo","Boneco e faixas do ranking.",`<div class="seg sex" role="group" aria-label="Corpo"><button data-cf="sex" data-v="m" aria-pressed="${sex==="m"}" aria-label="Masculino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="14.5" r="5.5"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg></button><button data-cf="sex" data-v="f" aria-pressed="${sex==="f"}" aria-label="Feminino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5V22M8.5 18.5h7"/></svg></button></div>`)}
-    ${cfRow("Idade","",`<span class="cf-unit"><input class="inp cf-in sm" data-cfin="age" inputmode="numeric" value="${c.age||""}" placeholder="—"><small>anos</small></span>`)}
+    ${cfRow("Idade","Ajusta o ranking de força a partir dos 40.",`<span class="cf-unit"><input class="inp cf-in sm" data-cfin="age" inputmode="numeric" value="${c.age||""}" placeholder="—"><small>anos</small></span>`)}
     ${cfRow("Altura","",`<span class="cf-unit"><input class="inp cf-in sm" data-cfin="height" inputmode="numeric" value="${c.height||""}" placeholder="—"><small>cm</small></span>`)}
     ${cfRow("Experiência","Há quanto tempo você treina.",cfSeg("exp",[["ini","Iniciante"],["int","Intermediário"],["ava","Avançado"]],c.exp,"Experiência"),false,1)}
   </div>

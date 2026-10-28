@@ -118,6 +118,13 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - Correção junto: importar backup não salvava o histórico de treinos.
 - **Boneco novo** (o dono mandou pranchas de anatomia de referência e perguntou se dava para deixar a silhueta mais natural): redesenhado do zero em estilo próprio, sem copiar as imagens. Pose natural com os braços um pouco abertos, proporção de ~8 cabeças (antes a cabeça era pequena demais), mãos com dedos, pés, pescoço com esternocleidomastoide, músculos preenchendo os membros e cinza sólido (sem fibras), como o dono pediu. Os dois corpos (♂/♀), frente e costas; teste de toque em todos os músculos e juntas passou. No computador, frente e costas aparecem juntas desde o início.
 - **Inglês** (pedido do dono, com escolha "Tudo" e "seguir o celular + trocar nas Configurações"): interface, ajudas, 98 exercícios com variações e explicações, músculos, articulações, ranking (Amoeba, Rookie, Chicken, Rooster, Buff, Beefy, Monster, Legend, Freak) e configurações. A busca aceita nomes em inglês e em português nos dois idiomas. Espanhol fica "em breve".
+- **Ranking mais fiel** (o dono pediu mais fontes e uma avaliação "mais fiel", e quis ver antes de mudar): comparação do Strength Level com o StrengthLog e com percentis de powerlifting testado (van den Hoek 2024). Escolhas do dono:
+  - Misturar as duas bases (média nos 4 exercícios que as duas têm; nos outros, Strength Level corrigido pela diferença média).
+  - Peso por sexo: expoente 0,9 ♂ e 0,6 ♀, tirado das tabelas (antes ⅔).
+  - Idade: a partir dos 40, as faixas se ajustam (idade em Configurações).
+  - Repetições: acima de 12, cada uma vale metade na força estimada do ranking.
+  - Aviso "pouca informação" em grupo com um exercício só.
+  - Não escolhido: dar peso maior aos exercícios principais.
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)

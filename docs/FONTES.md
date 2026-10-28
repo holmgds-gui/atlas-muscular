@@ -81,9 +81,28 @@ Textos de divulgação consultados:
 - [Fisiología del Ejercicio: dose-resposta](https://www.fisiologiadelejercicio.com/dosis-respuesta-en-volumen-y-frecuencia-en-la-mejora-de-hipertrofia-y-fuerza-muscular/)
 - [Train.fitness: nem toda série é igual](https://train.fitness/personal-trainer-blogs/not-all-sets-are-created-equal)
 
-## 3. Ranking de força (toque no título "Atlas Muscular")
+## 3. Ranking de força (Progresso › Força)
 
-Os 9 níveis (Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, Bizarro) vêm dos padrões de força do **Strength Level**: cerca de 11 milhões de resultados válidos, de 48 milhões de levantamentos enviados por quem treina. Cada nível é um percentil entre pessoas do mesmo sexo: iniciante 5%, novato 20%, intermediário 50%, avançado 80% e elite 95%.
+Os 9 níveis (Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, Bizarro) vêm de uma **mistura de duas bases** (escolha do dono depois de ver a comparação abaixo):
+
+- **Strength Level**: cerca de 11 milhões de resultados válidos, de 48 milhões de levantamentos digitados por quem treina. Percentis 5/20/50/80/95%.
+- **StrengthLog**: cerca de 24 mil usuários do app (22 mil no agachamento: 15 mil homens e 7 mil mulheres), números tirados dos treinos registrados. Percentis 5/25/50/75/95%. Só publica supino, agachamento, terra e desenvolvimento.
+
+Comparação no peso de referência (1RM em kg; iniciante / intermediário / elite):
+
+| Exercício | Strength Level ♂ 77 kg | StrengthLog ♂ 77 kg | Top 10% powerlifting ♂ | Strength Level ♀ 65 kg | StrengthLog ♀ 65 kg | Top 10% powerlifting ♀ |
+|---|---|---|---|---|---|---|
+| Supino | 49 / 96 / 160 | 52 / 86 / 138 | 150 | 20 / 51 / 97 | 23 / 44 / 79 | 88 |
+| Agachamento | 66 / 131 / 219 | 55 / 108 / 173 | 218 | 32 / 76 / 137 | 25 / 69 / 122 | 147 |
+| Terra | 80 / 154 / 253 | 71 / 138 / 209 | 250 | 41 / 91 / 160 | 39 / 84 / 140 | 173 |
+| Desenvolvimento | 29 / 62 / 107 | 31 / 52 / 76 | — | 13 / 33 / 61 | 15 / 29 / 45 | — |
+
+Top 10% powerlifting: van den Hoek et al. 2024, *Journal of Science and Medicine in Sport* 27(10):734–742, 809.986 participações em competições com antidoping, adultos jovens (agachamento 2,83 / supino 1,95 / terra 3,25 × peso no masculino; 2,26 / 1,35 / 2,66 no feminino) ([PubMed](https://pubmed.ncbi.nlm.nih.gov/39060209/)).
+
+Conclusão: as bases concordam no iniciante; no topo o Strength Level é 15–40% mais difícil e o elite dele bate com o top 10% de atletas de competição. Como o app é para quem treina em academia, a mistura fica mais realista:
+
+- Supino, agachamento, terra e desenvolvimento: média geométrica das duas bases em cada faixa.
+- Outros exercícios: Strength Level × a diferença média entre as bases naquela faixa (`RMIX`, ♂ 0,98 / 0,98 / 0,93 / 0,88 / 0,89; ♀ 0,99 / 1,02 / 0,94 / 0,89 / 0,91).
 
 | Nível do app | Mais forte que | Nota no app (1 = Beginner, 2 = Novice, 3 = Intermediate, 4 = Advanced, 5 = Elite) |
 |---|---|---|
@@ -99,11 +118,13 @@ Os 9 níveis (Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, 
 
 Escolha do dono ("meio-termo"): os níveis do meio têm 15% das pessoas cada; as pontas são mais raras. Entre as faixas do Strength Level (5%, 20%, 50%, 80%, 95%) o app interpola em linha reta; acima de 95%, assume 99% um degrau além da elite.
 
-- **Valores de referência**: as páginas de comparação do Strength Level mostram os números do praticante típico (calculado em ~77 kg no masculino e ~65 kg no feminino, comparando com as tabelas por peso de supino e puxada). O app ajusta para o peso da pessoa com peso^⅔.
-- **Ajuste por peso (⅔)**: Jaric 2002, *Sports Medicine*, "Muscle strength testing: use of normalisation for body size" ([🔎 PubMed](https://pubmed.ncbi.nlm.nih.gov/?term=Jaric+2002+muscle+strength+testing+normalisation+body+size)).
+- **Valores de referência**: as páginas de comparação do Strength Level mostram os números do praticante típico (calculado em ~77 kg no masculino e ~65 kg no feminino, comparando com as tabelas por peso de supino e puxada). Os números do StrengthLog foram interpolados para os mesmos pesos.
+- **Ajuste por peso** (pedido do dono: "peso por sexo"): ajustando uma reta (em log) nas tabelas por peso das duas bases, a força cresce com peso^0,8–1,1 nos homens e peso^0,3–0,9 nas mulheres. O app usa **0,9 no masculino e 0,6 no feminino** (antes era ⅔ para os dois, a regra teórica de Jaric 2002, *Sports Medicine*, [🔎 PubMed](https://pubmed.ncbi.nlm.nih.gov/?term=Jaric+2002+muscle+strength+testing+normalisation+body+size), que vale para atletas igualmente treinados; recordes mundiais dão ~0,6, JSCR 2000;14(1):32–36). Na população de academia, quem é mais pesado tende a ser mais treinado, por isso o expoente sai maior nos homens.
+- **Idade** (pedido do dono): a força relativa fica estável até ~40 anos (van den Hoek 2024: pico entre 18 e 35) e depois cai. Fatores usados (os do Strength Level, resumidos em [sensai.fit](https://sensai.fit/blog/strength-standards-by-age-bodyweight)): 45 → 95%, 50 → 89%, 55 → 82%, 60 → 75%, 65 → 67%, 70 → 61%, 80 → 50%. Usa a idade das Configurações; sem idade ou abaixo de 40, não muda.
 - **Exercícios com o peso do corpo**: a flexão movimenta ~64–75% do peso corporal no chão, ~70–74% com os pés elevados e ~41% com as mãos elevadas (Ebben et al. 2011, *JSCR*, [🔎 PubMed](https://pubmed.ncbi.nlm.nih.gov/?term=Ebben+2011+push-up+variations+ground+reaction+force); Suprak et al. 2011, *JSCR*, [🔎 PubMed](https://pubmed.ncbi.nlm.nih.gov/?term=Suprak+2011+percentage+of+body+mass+supported+push-up)). O app usa 69%, 74% e 45% e compara com o supino. Remada invertida: ~55% do peso (aproximação do app), comparada com a remada curvada. Barra fixa e mergulho: padrão do próprio Strength Level com peso extra.
-- **Força estimada**: fórmula de Epley (1985), carga × (1 + reps ÷ 30), a mesma da sub-aba Cargas.
-- **Conferência com outra base**: StrengthLog (razões por peso corporal, mesma ordem de grandeza): [agachamento](https://www.strengthlog.com/squat-strength-standards-kg/) · [terra](https://www.strengthlog.com/deadlift-strength-standards-kg/) · [supino](https://www.strengthlog.com/bench-press-strength-standards/) · [desenvolvimento](https://www.strengthlog.com/overhead-press-strength-standards-kg/).
+- **Força estimada**: fórmula de Epley (1985), carga × (1 + reps ÷ 30), até 12 repetições. Acima de 12 as fórmulas divergem muito (em 20 reps vão de 1,35 a 2,1 × a carga; o erro cresce acima de ~10 reps, ver [Marzagão, arXiv 2603.17495](https://arxiv.org/abs/2603.17495)), então no ranking cada repetição a mais vale metade: 20 reps = 1,53 × a carga, perto de Mayhew (1,51) e O'Conner (1,5). A sub-aba Cargas continua com Epley puro.
+- **Pouca informação**: grupo com um exercício só mostra o aviso (escolha do dono).
+- **Páginas do StrengthLog**: [agachamento](https://www.strengthlog.com/squat-strength-standards-kg/) · [terra](https://www.strengthlog.com/deadlift-strength-standards-kg/) · [supino](https://www.strengthlog.com/bench-press-strength-standards/) · [desenvolvimento](https://www.strengthlog.com/overhead-press-strength-standards-kg/).
 - **Halteres**: os números são de cada halter (o supino com halteres no intermediário fica em ~80% do supino com barra somado, o que bate com a proporção conhecida).
 - **Aproximações do app** (sem padrão próprio): supino inclinado com halteres ≈ 90% do reto; máquina ou polia com um braço/perna ≈ metade dos dois (fator 1,8); rosca martelo ≈ rosca com halteres; flexora deitada ≈ 87% da sentada; JM press ≈ 75% do supino fechado; barra hexagonal ≈ 107% do terra; voador inverso ≈ 77% do voador. Flexão, prancha e exercícios muito leves ficam fora.
 
