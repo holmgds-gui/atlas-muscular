@@ -55,7 +55,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v52` → `atlas-v53`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v53` → `atlas-v54`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 
@@ -76,7 +76,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 - **Boneco** (redesenhado a pedido do dono para ficar natural, no estilo de pranchas de anatomia: pose em pé com os braços um pouco abertos, ~8 cabeças de altura, mãos com dedos e pés; músculos em cinza sólido sobre a "pele" mais clara, sem degradê, **com fibras** — o dono pediu as fibras de volta)
   - `SKIN` (base do corpo), `EXTR.front/back` (mãos e pés), `FRONT`, `BACK` (clicáveis), `DECO` (músculos de enfeite: esternocleidomastoide, sartório, tibial), `TEND`, `LINES` (dedos): caminhos SVG. Metade esquerda desenhada e espelhada. Músculos dos membros vêm antes no array, para os do tronco (deltoide, glúteos) ficarem por cima.
   - O tronco ("t") está em coordenadas da página do corpo masculino; os membros em referenciais locais (y ao longo do membro, −x lateral). `headPath()`/`earPath()` desenham a cabeça a partir de `BD.head` = [meia largura, meia altura, centro].
-  - `BODY` (m/f) + `shapeBody()` + `warp()`: masculino sem distorção (`w`=1); o feminino estreita o tronco por altura (`w`) e alarga o quadril, com ombros (`S`), braços e pernas próprios. Ângulos: braço 14°, antebraço 8°, coxa −1,5° (joelho para dentro).
+  - `BODY` (m/f) + `shapeBody()` + `warp()`: o tronco é escalado de lado por altura (`w`) e `delt` mexe só na parte de fora dos ombros. Pedido do dono (silhuetas mais características): masculino com ombros mais largos (`w` 1,05 + `delt` 0,05) e cintura menos fina (1,17 na cintura); feminino com ombros mais estreitos (0,84, `delt` −0,04) e quadril mais largo (até 1,14, coxa 1,12). `S` (ombro) e `H` (quadril) acompanham a escala na altura deles (recalcular se mudar `w`). Depois de mexer, rodar o teste de clique (o redondo maior feminino fica perto do limite). Ângulos: braço 14°, antebraço 8°, coxa −1,5° (joelho para dentro).
   - Fibras (`FIB`, `fibD()`, `addFib()`): linhas finas (`.fib`, cor `--fiber`) cortadas pelo formato de cada músculo com um `clipPath`. Padrão = fuso (curvas de ponta a ponta no eixo mais comprido do músculo, calculado pelos pontos do desenho); `["f",x,y]` = leque convergindo num tendão (peitoral, deltoides, dorsal, trapézio, glúteo médio, infraespinhal); `["a",graus]` = folha de fibras paralelas (abdômen, oblíquos, romboides, eretores, glúteo máximo). Também nos músculos de enfeite. Aparecem também nos bonecos do Progresso e do ranking (o dono achou o de Força "liso"): `figCopy()` clona a vista e dá ids novos aos `clipPath`; os músculos de enfeite aparecem também.
   - Cores: `--m` (músculo), `--fig-skin` (pele e separação entre músculos), `--fig-art`/`--fig-art2` (modo Articulações). Classe `.ext` = cabeça, mãos e pés.
   - O feminino tem cabelo preso (coque, com linha do cabelo na testa), contorno suave dos seios (`BREAST`, sem contorno branco, sem clique), braços mais finos (o dono achou "robustão": largura 0,79/0,80/0,86) e ombros, cintura e quadril próprios.
