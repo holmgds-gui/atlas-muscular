@@ -1,4 +1,6 @@
-# Atlas Muscular
+# Muscle Atlas
+
+(Antes chamado Atlas Muscular; o endereço e o repositório continuam `atlas-muscular`.)
 
 Boneco anatômico clicável, com corpo masculino ou feminino (botão ♂/♀). Toque num músculo para ver os exercícios em ordem de estímulo (estudos de crescimento, EMG e biomecânica). Toque num exercício para ver os sinergistas em laranja e escolher a variação (pegada, largura, equipamento, banco, posição, lado): 98 exercícios, 1.325 variações.
 

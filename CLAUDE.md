@@ -1,4 +1,4 @@
-# Atlas Muscular — contexto para o Claude
+# Muscle Atlas (antes "Atlas Muscular") — contexto para o Claude
 
 Leia este arquivo antes de mexer no projeto. Ele resume como o app funciona e as decisões já tomadas com o dono.
 Histórico completo das mudanças: [docs/HISTORICO.md](docs/HISTORICO.md). Todas as fontes e links: [docs/FONTES.md](docs/FONTES.md).
@@ -12,7 +12,8 @@ App de academia em português (pt-BR), instalável no celular (PWA), publicado p
 - **Meus treinos** (aba `ficha`, rótulo "Treinos" na barra de baixo): biblioteca de treinos montados (nome, exercícios, séries, reps, dias opcionais).
 - **Hoje** (aba `treino`): grade da semana com o que foi feito, todos os treinos com "Marcar como feito", "Anotar séries" opcional e treino personalizado só para hoje (que pode virar treino fixo). Tocar num dia passado da grade (ou ‹ para semanas anteriores) registra naquele dia; futuro nunca.
 - **Progresso** (aba `prog`): duas sub-abas. **Músculos**: mapa de calor dos músculos treinados na semana ou no dia, com faixas baseadas em pesquisa, e radar de **Equilíbrio** (6 grupos). **Força** (`pView` `kg`): em cima o **Ranking de força** (nível por grupo em 9 faixas: Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, Bizarro; boneco colorido, peso corporal, ♂/♀ e cargas digitadas); embaixo a evolução de carga por exercício (gráfico da maior carga do dia + força estimada, recorde, última, quanto subiu, 1 mês/3 meses/Tudo).
-- O título "Atlas Muscular" (`#brandBtn`) leva sempre para o Atlas.
+- **Nome e logo** (escolha do dono): o app se chama **Muscle Atlas** em todos os idiomas (antes "Atlas Muscular"); no topo "MUSCLE" na cor do texto e "ATLAS" em vermelho. Logo = um "A" feito de dois músculos (com fibras e um tendão claro na barra) na frente de um globo com linhas de mapa, vermelho e grafite. A logo pequena fica no botão do título (`.brand .logo`, ids `lgR`…) e os ícones `icon-180/192/512.png` vêm do mesmo desenho. O endereço, o repositório, as chaves do `localStorage` e o `app` do backup continuam `atlas-muscular` (não mudar: quebraria instalações e backups).
+- O título "Muscle Atlas" (`#brandBtn`) leva sempre para o Atlas.
 - **Configurações** (aba `conf`, `#tab-conf`, `renderConf()`): abre pela engrenagem no canto superior direito, ao lado da busca (`#gearBtn`). Ajustes em `CONF` (`localStorage` `atlas-conf`, padrões em `CONF_DEF`, `applyConf()`; vai no backup).
   - Funcionam: nome (saudação na aba Hoje), peso e ♂/♀ (os mesmos do ranking), tema (`data-theme`), cor de destaque (`--accent`: título, aba atual e interruptores; o músculo-alvo continua vermelho), tamanho da letra (classes `fs-s`/`fs-l`; `buildFsCSS()` copia todo `font-size` em px das folhas de estilo com fator 0,9/1,15, menos cabeçalho, abas e grade da semana; `zoom` falhou), reduzir animações (`noanim`), séries × reps padrão ao adicionar exercício, meta semanal ("2 de 4 treinos" na grade de Hoje), backup (saiu da aba Hoje), apagar histórico/cargas digitadas/tudo (com confirmação), compartilhar, sugestões (issue no GitHub), fontes e versão (lida do cache do service worker).
   - Idioma: português, inglês ou espanhol (ver **Idioma** abaixo).
@@ -40,7 +41,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v42` → `atlas-v43`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v43` → `atlas-v44`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 

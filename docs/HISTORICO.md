@@ -129,6 +129,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 - **Espanhol** (pedido do dono, "tudo"): interface, ajudas, 98 exercícios com variações e explicações, músculos, articulações, ranking (Ameba, Aprendiz, Pollito, Gallo, Fuertecito, Macizo, Monstruo, Leyenda, Fenómeno) e Configurações. Segue o celular na primeira vez e troca em Configurações › Idioma.
 - **Zoom só onde precisa** (pedido do dono): a página não dá mais zoom com dois dedos em nenhuma aba; o zoom fica nos bonecos (Atlas, como antes, e agora também nos bonecos do Progresso e do ranking, com botão ⤢ para voltar). Os bonecos do Progresso e do ranking ganharam as fibras (o de Força estava "liso").
 - Correção: o zoom do boneco no Atlas ficou estranho depois de travar o zoom da página; no celular o boneco passou a usar eventos de toque (pinça, arrastar e toque), que funcionam melhor no iPhone. Os bonecos do Progresso e do ranking ficaram iguais aos do Atlas (separações, músculos de enfeite e cinza normal nos músculos sem dados).
+- **Logo e nome novos** (pedido do dono, escolhas em 4 opções de logo e no nome): o app virou **Muscle Atlas**, com logo de um "A" feito de dois músculos na frente de um globo, em vermelho e grafite. Trocou o ícone da tela de início e entrou a logo pequena ao lado do nome no topo. O endereço do site continua o mesmo.
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)
