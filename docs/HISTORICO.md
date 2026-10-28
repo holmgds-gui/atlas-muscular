@@ -133,6 +133,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 - Logo refinada: o homem estava "gorila"; ficou com proporções clássicas (pernas mais longas, cintura fina, braços e trapézio menores).
 - Logo trocada por **Atlas carregando o globo** (pedido do dono): homem musculoso vermelho segurando um globo acima da cabeça, sobre fundo grafite. Busca no topo virou só a lupa; tocar abre o campo.
 - **Hoje › Ao vivo** (1ª leva das 9 ideias escolhidas pelo dono depois da comparação com Hevy, Strong, Fitbod, Jefit e MuscleWiki): treino série a série com cronômetro, timer de descanso (som e vibração), sugestão da próxima carga, aviso de recorde e resumo no fim. O timer, sons e vibração das Configurações passaram a funcionar.
+- **2ª leva**: "Como fazer" (passo a passo e erros comuns nos 98 exercícios, nos 3 idiomas), trocar exercício por equivalente (⇄), montar treino tocando no boneco e programas prontos (corpo inteiro 2× e 3×, superior/inferior 4×, push/pull/legs 6×).
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)
