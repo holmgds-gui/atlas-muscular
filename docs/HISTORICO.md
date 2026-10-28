@@ -127,6 +127,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - Não escolhido: dar peso maior aos exercícios principais.
 - **Fibras de volta e acabamento do boneco** (o dono sentiu falta das fibras e pediu músculos marcados, com as pranchas de referência): fibras desenhadas seguindo cada músculo (fuso nos músculos dos membros, leque nos que convergem num tendão, paralelas no abdômen, oblíquos, romboides, eretores e glúteo máximo); braço feminino mais fino; cabelo feminino de frente refeito (não parece mais uma tiara); seios sem contorno branco.
 - **Espanhol** (pedido do dono, "tudo"): interface, ajudas, 98 exercícios com variações e explicações, músculos, articulações, ranking (Ameba, Aprendiz, Pollito, Gallo, Fuertecito, Macizo, Monstruo, Leyenda, Fenómeno) e Configurações. Segue o celular na primeira vez e troca em Configurações › Idioma.
+- **Zoom só onde precisa** (pedido do dono): a página não dá mais zoom com dois dedos em nenhuma aba; o zoom fica nos bonecos (Atlas, como antes, e agora também nos bonecos do Progresso e do ranking, com botão ⤢ para voltar). Os bonecos do Progresso e do ranking ganharam as fibras (o de Força estava "liso").
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)

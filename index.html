@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Atlas Muscular</title>
 <meta name="description" content="Boneco anatômico clicável com exercícios ordenados por estudos de EMG.">
 <meta name="theme-color" content="#0E1115">
@@ -46,7 +46,7 @@ img{max-width:100%}
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
   --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --k1:#F0474D; --k2:#5B8FDB; --band:rgba(255,255,255,.09); --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}
 
-html{height:100%}body{height:100%}
+html{height:100%;touch-action:pan-x pan-y}body{height:100%;touch-action:pan-x pan-y}
 body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;overflow:hidden;-webkit-tap-highlight-color:transparent}
 button,input{font:inherit;color:inherit}
 button{cursor:pointer}
@@ -450,7 +450,13 @@ button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
 .pfig .m{fill:var(--m);transition:none}
 .pfig .dm{fill:none}
 .pfig .skin{fill:var(--fig-skin)}
-.pfig .fib{display:none}
+.pfig .deco .fib{display:none}
+.pfig.focus [data-m]:not(.hl) .fib,.rfig [data-m]:not(.rk-has) .fib{opacity:.4}
+.zwrap{position:relative}
+.zwrap .pfig{touch-action:pan-y}
+.zwrap.zoomed .pfig{touch-action:none}
+.zreset{position:absolute;top:6px;right:6px;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:17px;line-height:1;cursor:pointer}
+.zreset[hidden]{display:none}
 .pfig [data-m]{cursor:pointer}
 .bands{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
 .bands div{display:grid;gap:2px;align-content:start;min-width:0}
@@ -1935,6 +1941,8 @@ function endPtr(e){
 svg.addEventListener("pointerup",endPtr);svg.addEventListener("pointercancel",endPtr);
 svg.addEventListener("dblclick",e=>{e.preventDefault()});
 
+/* the page never zooms on iPhone (Safari ignores user-scalable=no); figures have their own zoom */
+["gesturestart","gesturechange"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
 /* ---------------------------------------------------------- helpers */
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -2704,15 +2712,44 @@ function bandLegend(B){
     const bg=i===0?"var(--m)":`linear-gradient(90deg,${heat(edges[i],B)},${heat(edges[i+1],B)})`;
     return `<div role="listitem"><i style="background:${bg}"></i><b>${B.ranges[i]}</b><small>${n}</small></div>`}).join("")}</div>`;
 }
+/* copy of the Atlas figure for Progress: the fibre clip paths get new ids so each copy clips with its own */
+let CLN=0;
+function figCopy(n){const g=VG[n].cloneNode(true);g.style.display="";
+  g.querySelectorAll("clipPath").forEach(cp=>{const id=cp.id+"c"+(CLN++);cp.id=id;const fb=cp.parentNode.querySelector(".fib");if(fb)fb.setAttribute("clip-path",`url(#${id})`)});return g}
+/* pinch zoom on the Progress figures (the page itself does not zoom). Phone: two fingers zoom; when zoomed in,
+   one finger moves the figure (otherwise it scrolls the page). Computer: trackpad pinch / ctrl + wheel. ⤢ goes back. */
+function zoomable(f){
+  const B=f.getAttribute("viewBox").split(" ").map(Number);let v=[...B],t0=null,moved=false;
+  const wrap=document.createElement("div");wrap.className="zwrap";wrap.appendChild(f);
+  const rb=document.createElement("button");rb.type="button";rb.className="zreset";rb.textContent="⤢";rb.title="Enquadrar";rb.setAttribute("aria-label","Enquadrar");rb.hidden=true;wrap.appendChild(rb);
+  const apply=()=>{f.setAttribute("viewBox",v.map(n=>n.toFixed(2)).join(" "));const z=v[2]<B[2]-.5;wrap.classList.toggle("zoomed",z);rb.hidden=!z};
+  const clamp=()=>{v[0]=Math.min(B[0]+B[2]-v[2],Math.max(B[0],v[0]));v[1]=Math.min(B[1]+B[3]-v[3],Math.max(B[1],v[1]))};
+  const toSvg=(cx,cy)=>{const q=f.createSVGPoint();q.x=cx;q.y=cy;return q.matrixTransform(f.getScreenCTM().inverse())};
+  const zoom=(k,cx,cy)=>{const w=Math.min(B[2],Math.max(B[2]/5,v[2]/k)),r=w/v[2],q=toSvg(cx,cy);v=[q.x-(q.x-v[0])*r,q.y-(q.y-v[1])*r,w,v[3]*r];clamp();apply()};
+  const upp=()=>{const r=f.getBoundingClientRect();return Math.max(v[2]/r.width,v[3]/r.height)};
+  const two=e=>{const [a,b]=e.touches;return {d:Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY),x:(a.clientX+b.clientX)/2,y:(a.clientY+b.clientY)/2}};
+  f.addEventListener("touchstart",e=>{
+    if(e.touches.length===2){const m=two(e);t0={pinch:1,...m,v:[...v]};moved=true;e.preventDefault()}
+    else if(e.touches.length===1){moved=false;t0=wrap.classList.contains("zoomed")?{x:e.touches[0].clientX,y:e.touches[0].clientY,v:[...v],k:upp()}:null}},{passive:false});
+  f.addEventListener("touchmove",e=>{if(!t0)return;
+    if(t0.pinch&&e.touches.length===2){e.preventDefault();const m=two(e);v=[...t0.v];apply();zoom(m.d/t0.d,t0.x,t0.y);return}
+    if(!t0.pinch&&e.touches.length===1){const dx=e.touches[0].clientX-t0.x,dy=e.touches[0].clientY-t0.y;if(Math.hypot(dx,dy)>6)moved=true;
+      if(moved){e.preventDefault();v=[t0.v[0]-dx*t0.k,t0.v[1]-dy*t0.k,v[2],v[3]];clamp();apply()}}},{passive:false});
+  f.addEventListener("touchend",e=>{if(e.touches.length===1&&t0&&t0.pinch)t0={x:e.touches[0].clientX,y:e.touches[0].clientY,v:[...v],k:upp()};else if(!e.touches.length)t0=null});
+  f.addEventListener("wheel",e=>{if(!e.ctrlKey)return;e.preventDefault();zoom(Math.exp(-e.deltaY/120),e.clientX,e.clientY)},{passive:false});
+  f.addEventListener("click",e=>{if(moved){e.stopPropagation();e.preventDefault();moved=false}},true);
+  rb.addEventListener("click",e=>{e.stopPropagation();v=[...B];apply()});
+  return wrap;
+}
 function progFig(mus,B){
   const f=document.createElementNS(NS,"svg");f.setAttribute("viewBox",BOX.both.join(" "));f.setAttribute("class","pfig");
   f.setAttribute("aria-label","Músculos treinados no período, frente e costas");
-  for(const n of ["front","back"]){const g=VG[n].cloneNode(true);g.style.display="";f.appendChild(g)}
+  for(const n of ["front","back"])f.appendChild(figCopy(n));
   f.querySelectorAll(".on,.syn").forEach(e=>e.classList.remove("on","syn"));
   f.querySelectorAll("[data-m]").forEach(g=>{const v=mus[g.dataset.m];const t=g.querySelector("title");
     if(t)t.textContent=M[g.dataset.m].n+(v?`: ${nf(v)} séries`:": não treinado");
     if(v)g.querySelector(".m").style.fill=heat(v,B)});
-  return f;
+  return zoomable(f);
 }
 function bandsInfo(){return `<details class="about"><summary>Como as faixas foram definidas</summary>
   <p>As séries contam como nos estudos: série do músculo alvo vale 1, de sinergista vale ½. As faixas valem para o músculo inteiro (o número de cada grupo na lista). No boneco, cada parte é pintada pelo próprio número.</p>
@@ -3123,7 +3160,7 @@ function rSetTxt(o){const b=o.best,S=RSTD[o.st.k];
 function rankFig(gs){
   const f=document.createElementNS(NS,"svg");f.setAttribute("viewBox",BOX.both.join(" "));f.setAttribute("class","pfig rfig");
   f.setAttribute("aria-label","Boneco colorido pelo nível de força de cada grupo, frente e costas");
-  for(const n of ["front","back"]){const g=VG[n].cloneNode(true);g.style.display="";f.appendChild(g)}
+  for(const n of ["front","back"])f.appendChild(figCopy(n));
   f.querySelectorAll(".on,.syn").forEach(e=>e.classList.remove("on","syn"));
   const by={};gs.forEach(x=>by[x.g]=x);
   f.querySelectorAll("[data-m]").forEach(g=>{const x=by[TOB[g.dataset.m]],t=g.querySelector("title"),lv=x?rLv(x.s):-1;
@@ -3131,7 +3168,7 @@ function rankFig(gs){
     if(x){g.classList.add("rk-has");g.querySelector(".m").style.fill=lv===RLV.length-1?"url(#rkMetal)":`var(--lv${lv})`}});
   const d=document.createElementNS(NS,"defs");d.innerHTML='<linearGradient id="rkMetal" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--lv8a)"/><stop offset=".48" style="stop-color:var(--lv8)"/><stop offset=".55" style="stop-color:var(--lv8b)"/><stop offset=".65" style="stop-color:var(--lv8)"/><stop offset="1" style="stop-color:var(--lv8a)"/></linearGradient>';
   f.insertBefore(d,f.firstChild);
-  return f;
+  return zoomable(f);
 }
 /* game-style colours (owner's choice): grey, green, blue, purple, yellow, orange, red, pink, shiny dark grey.
    Not an ordered ramp, so the level name is always written next to the colour. */
