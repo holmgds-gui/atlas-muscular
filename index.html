@@ -448,10 +448,8 @@ button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
 .pnav .ib:disabled{opacity:.35}
 .pfig{display:block;width:100%;height:auto;max-height:min(60vh,520px);touch-action:manipulation}
 .pfig .m{fill:var(--m);transition:none}
-.pfig .dm{fill:none}
 .pfig .skin{fill:var(--fig-skin)}
-.pfig .deco .fib{display:none}
-.pfig.focus [data-m]:not(.hl) .fib,.rfig [data-m]:not(.rk-has) .fib{opacity:.4}
+.pfig.focus [data-m]:not(.hl) .fib{opacity:.4}
 .zwrap{position:relative}
 .zwrap .pfig{touch-action:pan-y}
 .zwrap.zoomed .pfig{touch-action:none}
@@ -504,7 +502,7 @@ button.brand:hover{background:var(--chip)}
 .rk-ladder .now{background:#fff;color:#14181E;font-weight:700}
 .rk-ladder span{display:inline-flex;align-items:center;gap:5px}.rk-ladder i{width:8px;height:8px;border-radius:50%;flex:none}
 .rk-big{background-clip:text;-webkit-background-clip:text}
-.rfig [data-m]:not(.rk-has) .m{fill:var(--m-hi);opacity:.45}
+.rfig [data-m]:not(.rk-has) .m{fill:var(--m)}
 .rk-legend{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12px;color:var(--muted)}
 .rk-legend span{display:flex;align-items:center;gap:5px}.rk-legend i{width:12px;height:12px;border-radius:3px;flex:none}
 .rk-low{display:block;font-size:11px;font-weight:500;color:var(--muted);margin-top:1px}
@@ -1906,6 +1904,7 @@ svg.addEventListener("wheel",e=>{e.preventDefault();if(document.getElementById("
 
 const ptrs=new Map();let gesture=null;
 svg.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="touch")return;
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   try{svg.setPointerCapture(e.pointerId)}catch(_){}
   if(ptrs.size===1){gesture={type:"tap",sx:e.clientX,sy:e.clientY,target:e.target.closest("[data-j],[data-m]"),vb0:[...vb],t:Date.now()}}
@@ -1940,6 +1939,22 @@ function endPtr(e){
 }
 svg.addEventListener("pointerup",endPtr);svg.addEventListener("pointercancel",endPtr);
 svg.addEventListener("dblclick",e=>{e.preventDefault()});
+/* phones: the figure uses touch events. On iPhone this is the reliable way to get both fingers of a pinch, and
+   preventing touchmove keeps Safari from zooming or moving the page while the figure zooms. */
+let tg=null;
+const tpts=e=>[...e.touches].map(t=>({x:t.clientX,y:t.clientY}));
+const isCovered=()=>document.getElementById("tab-atlas").classList.contains("covered");
+svg.addEventListener("touchstart",e=>{const P=tpts(e);
+  if(P.length===1)tg={type:"tap",sx:P[0].x,sy:P[0].y,target:e.target.closest("[data-j],[data-m]"),vb0:[...vb]};
+  else if(P.length===2){e.preventDefault();const [a,b]=P;tg={type:"pinch",d0:Math.hypot(a.x-b.x,a.y-b.y)||1,vb0:[...vb],mid:{x:(a.x+b.x)/2,y:(a.y+b.y)/2}}}},{passive:false});
+svg.addEventListener("touchmove",e=>{if(!tg)return;e.preventDefault();if(isCovered())return;const P=tpts(e);
+  if(tg.type!=="pinch"&&P.length===1){const dx=P[0].x-tg.sx,dy=P[0].y-tg.sy;if(tg.type==="tap"&&Math.hypot(dx,dy)>8)tg.type="pan";
+    if(tg.type==="pan"){const k=svgUnitsPerPx(tg.vb0);vb=[tg.vb0[0]-dx*k,tg.vb0[1]-dy*k,vb[2],vb[3]];clampVB();applyVB()}}
+  else if(tg.type==="pinch"&&P.length===2){const [a,b]=P;vb=[...tg.vb0];applyVB();zoomAt(Math.hypot(a.x-b.x,a.y-b.y)/tg.d0,tg.mid.x,tg.mid.y)}},{passive:false});
+svg.addEventListener("touchend",e=>{if(!tg)return;const P=tpts(e);
+  if(!P.length){if(tg.type==="tap"){e.preventDefault();if(tg.target||isCovered())onFigTap(tg.target||svg)}tg=null}
+  else if(P.length===1&&tg.type==="pinch")tg={type:"pan",sx:P[0].x,sy:P[0].y,vb0:[...vb]}},{passive:false});
+svg.addEventListener("touchcancel",()=>{tg=null});
 
 /* the page never zooms on iPhone (Safari ignores user-scalable=no); figures have their own zoom */
 ["gesturestart","gesturechange"].forEach(t=>document.addEventListener(t,e=>e.preventDefault(),{passive:false}));
@@ -3211,7 +3226,7 @@ function rankHTML(D){
     ${rank.bw>0?"":`<span class="muted-s rk-note">Coloque seu peso para o ranking ficar certo. Enquanto isso, o app usa ${RSW[sex]} kg.</span>`}</div>
   ${hero}
   ${form}
-  ${has?`<div class="card"><div id="rkFigBox"></div><div class="rk-legend" role="list" aria-label="Cores dos níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:${rBg(i)}"></i>${x[0]}</span>`).join("")}<span role="listitem"><i style="background:var(--m-hi);opacity:.55"></i>Sem dados</span></div></div>`:""}
+  ${has?`<div class="card"><div id="rkFigBox"></div><div class="rk-legend" role="list" aria-label="Cores dos níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:${rBg(i)}"></i>${x[0]}</span>`).join("")}<span role="listitem"><i style="background:var(--m)"></i>Sem dados</span></div></div>`:""}
   <div class="card"><div class="row between"><h3 class="section-t" style="margin:0">Nível por grupo</h3>${has?`<span class="muted-s" style="margin:0">mais forte que</span>`:""}</div>
     ${has?D.gs.map(x=>`<details class="pg rk-g"${rOpen===x.g?" open":""} data-rg2="${x.g}"><summary><span class="pg-n">${BASIC[x.g].n}${rChip(x.s)}${x.ex.length<2?`<small class="rk-low">pouca informação</small>`:""}</span>${rBar(x.s)}<b>${rPct(x.s)}%</b></summary>
       <div class="rk-exs">${x.ex.map(o=>`<div class="rk-ex"><div class="row between" style="flex-wrap:nowrap;align-items:flex-start"><span class="rk-exn">${esc(o.name)}<small>${rSetTxt(o)}</small></span>${rChip(o.s)}</div>
