@@ -57,12 +57,20 @@ header{display:flex;align-items:center;gap:12px;padding-block:10px;padding-left:
 .brand{display:flex;align-items:baseline;gap:8px;min-width:0}
 .brand h1{margin:0;font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
 .brand h1 b{color:var(--accent,var(--target));font-weight:700}
-.brand .logo{width:30px;height:30px;flex:none;display:block;align-self:center}
-@media (max-width:480px){.brand .logo{width:26px;height:26px}}
+.brand .logo{width:36px;height:36px;flex:none;display:block;align-self:center;margin:-4px 0}
+@media (max-width:480px){.brand .logo{width:32px;height:32px}}
 .brand small{color:var(--muted);font-size:12px;white-space:nowrap}
-.search{position:relative;margin-left:auto;flex:1;max-width:380px;min-width:0}
-.search input{width:100%;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px 9px 34px;font-size:15px}
-.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted)}
+/* search: only a magnifier in the header (owner's request); tapping it opens the field over the header */
+header{position:relative}
+.search{margin-left:auto;flex:none;display:flex;align-items:center;gap:2px}
+.sbtn svg{stroke:currentColor;fill:none;stroke-width:2}
+.sfield{display:none;position:absolute;z-index:25;top:0;bottom:0;right:max(16px,env(safe-area-inset-right,0px));width:min(440px,calc(100% - 32px));align-items:center;gap:6px;background:var(--surface)}
+.search.open .sfield{display:flex}
+.sfield input{flex:1;min-width:0;box-sizing:border-box;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px 12px 9px 34px;font-size:16px;color:var(--ink)}
+.sfield .smag{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;stroke:var(--muted)}
+.sfield input::-webkit-search-cancel-button{-webkit-appearance:none;appearance:none;display:none}
+.sclose{flex:none;width:40px;height:40px;border:0;border-radius:10px;background:none;color:var(--muted);font-size:18px}
+.sclose:hover{background:var(--chip);color:var(--ink)}
 .gear{flex:none;display:grid;place-items:center;width:40px;height:40px;margin-right:-6px;border:0;border-radius:10px;background:none;color:var(--muted);padding:0}
 .gear svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .gear:hover,.gear[aria-current="page"]{background:var(--chip);color:var(--ink)}
@@ -96,8 +104,8 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;color:inherit}
 .sw input:checked+i{background:var(--accent,var(--target))}.sw input:checked+i::after{transform:translateX(18px)}
 .sw input:disabled+i{opacity:.45}.sw input:focus-visible+i{outline:2px solid var(--focus);outline-offset:2px}
 html.noanim *,html.noanim *::before,html.noanim *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
-@media (max-width:400px){header{gap:8px}.gear{width:34px;margin-right:-4px}.search input{padding-right:6px}}
-.results{position:absolute;left:0;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);max-height:60vh;overflow:auto;z-index:20}
+@media (max-width:400px){header{gap:8px}.gear{width:34px;margin-right:-4px}.sbtn{margin-right:0}.sfield input{padding-right:6px}}
+.results{position:absolute;left:0;right:0;top:calc(100% - 2px);background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);max-height:60vh;overflow:auto;z-index:20}
 .results button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 14px;border-bottom:1px solid var(--line)}
 .results button:last-child{border-bottom:0}
 .results button:hover,.results button:focus-visible{background:var(--chip)}
@@ -530,17 +538,21 @@ button.brand:hover{background:var(--chip)}
 <body>
 <div class="app" id="app">
   <header>
-    <button class="brand" id="brandBtn" aria-label="Muscle Atlas: ir para o início" title="Início"><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="lgR" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2545A"/><stop offset="1" stop-color="#B3161E"/></linearGradient><radialGradient id="lgBG" cx=".5" cy=".38" r=".75"><stop offset="0" stop-color="#2A323C"/><stop offset="1" stop-color="#12161B"/></radialGradient><clipPath id="lgC"><rect width="512" height="512"/></clipPath></defs><g fill="none" stroke="#5E6976" stroke-width="7" opacity=".9"><circle cx="256" cy="262" r="186"/> <ellipse cx="256" cy="262" rx="102.30000000000001" ry="186"/><path d="M70,262 L442,262"/> <path d="M94.2,169.0 Q256,191.3 417.8,169.0 M94.2,355.0 Q256,377.3 417.8,355.0"/></g><path d="M256.0,104.0 C185.7,170.1 142.5,314.1 152.1,421.6 L167.9,426.4 C235.1,341.9 278.3,197.9 256.0,104.0Z" fill="url(#lgR)" stroke="#12161B" stroke-width="8" paint-order="stroke"/><path d="M256.0,104.0 Q257.6,278.9 165.9,425.8M256.0,104.0 Q241.0,273.9 164.0,425.2M256.0,104.0 Q224.5,269.0 162.0,424.6M256.0,104.0 Q208.0,264.0 160.0,424.0M256.0,104.0 Q191.5,259.0 158.0,423.4M256.0,104.0 Q175.0,254.1 156.0,422.8M256.0,104.0 Q158.4,249.1 154.1,422.2" fill="none" stroke="rgba(60,0,4,.28)" stroke-width="3"/> <path d="M256.0,104.0 C233.7,197.9 276.9,341.9 344.1,426.4 L359.9,421.6 C369.5,314.1 326.3,170.1 256.0,104.0Z" fill="url(#lgR)" stroke="#12161B" stroke-width="8" paint-order="stroke"/><path d="M256.0,104.0 Q353.6,249.1 357.9,422.2M256.0,104.0 Q337.0,254.1 356.0,422.8M256.0,104.0 Q320.5,259.0 354.0,423.4M256.0,104.0 Q304.0,264.0 352.0,424.0M256.0,104.0 Q287.5,269.0 350.0,424.6M256.0,104.0 Q271.0,273.9 348.0,425.2M256.0,104.0 Q254.4,278.9 346.1,425.8" fill="none" stroke="rgba(60,0,4,.28)" stroke-width="3"/> <path d="M196,322 L316,322 L323,350 L189,350 Z" fill="#D9DEE4" stroke="#12161B" stroke-width="6" paint-order="stroke"/></svg><h1>Muscle <b>Atlas</b></h1></button>
+    <button class="brand" id="brandBtn" aria-label="Muscle Atlas: ir para o início" title="Início"><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="lgR" gradientUnits="userSpaceOnUse" x1="0" y1="150" x2="0" y2="500"><stop offset="0" stop-color="#F45A60"/><stop offset="1" stop-color="#B3161E"/></linearGradient><radialGradient id="lgBG" cx=".5" cy=".4" r=".75"><stop offset="0" stop-color="#2A323C"/><stop offset="1" stop-color="#12161B"/></radialGradient></defs><g fill="none" stroke="#8A94A1" stroke-width="8" stroke-linecap="round"> <circle cx="256" cy="132" r="104" fill="#1E252D" stroke-width="10"/> <ellipse cx="256" cy="132" rx="52" ry="104"/><path d="M256,28 L256,236"/> <path d="M152,132 L360,132"/> <path d="M165.5,80.0 Q256,94.6 346.5,80.0"/> <path d="M165.5,184.0 Q256,198.6 346.5,184.0"/></g><g fill="#11151A" stroke="#11151A" stroke-width="12" stroke-linejoin="round"><path d="M215.2,357.6 C203.3,379.5 191.9,397.5 183.9,421.8 L216.1,442.2 C234.7,424.5 246.1,406.5 260.8,386.4Z"/><path d="M182.7,426.9 C178.0,446.0 173.2,462.2 173.5,482.9 L194.5,489.1 C206.0,472.0 210.8,455.8 217.3,437.1Z"/><path d="M172,480 C164,488 160,496 170,500 L198,500 C204,496 198,486 192,482 Z"/><path d="M223.2,267.3 C201.8,246.0 183.8,227.4 158.2,210.2 L133.8,233.8 C150.2,260.0 168.2,278.6 188.8,300.7Z"/><path d="M162.7,225.2 C166.8,199.9 171.0,178.3 171.8,152.3 L148.2,147.7 C139.2,172.1 135.0,193.7 129.3,218.8Z"/><path d="M184,292 C178,270 192,256 212,258 C226,262 230,276 222,290 C212,302 192,306 184,292 Z"/><path d="M183,432 a17,17 0 1 0 34,0 a17,17 0 1 0 -34,0Z"/><path d="M129.5,222 a16.5,16.5 0 1 0 33,0 a16.5,16.5 0 1 0 -33,0Z"/><path d="M147,148 a15,15 0 1 0 30,0 a15,15 0 1 0 -30,0Z"/><path d="M173,486 a11,11 0 1 0 22,0 a11,11 0 1 0 -22,0Z"/><g transform="matrix(-1,0,0,1,512,0)"><path d="M215.2,357.6 C203.3,379.5 191.9,397.5 183.9,421.8 L216.1,442.2 C234.7,424.5 246.1,406.5 260.8,386.4Z"/><path d="M182.7,426.9 C178.0,446.0 173.2,462.2 173.5,482.9 L194.5,489.1 C206.0,472.0 210.8,455.8 217.3,437.1Z"/><path d="M172,480 C164,488 160,496 170,500 L198,500 C204,496 198,486 192,482 Z"/><path d="M223.2,267.3 C201.8,246.0 183.8,227.4 158.2,210.2 L133.8,233.8 C150.2,260.0 168.2,278.6 188.8,300.7Z"/><path d="M162.7,225.2 C166.8,199.9 171.0,178.3 171.8,152.3 L148.2,147.7 C139.2,172.1 135.0,193.7 129.3,218.8Z"/><path d="M184,292 C178,270 192,256 212,258 C226,262 230,276 222,290 C212,302 192,306 184,292 Z"/><path d="M183,432 a17,17 0 1 0 34,0 a17,17 0 1 0 -34,0Z"/><path d="M129.5,222 a16.5,16.5 0 1 0 33,0 a16.5,16.5 0 1 0 -33,0Z"/><path d="M147,148 a15,15 0 1 0 30,0 a15,15 0 1 0 -30,0Z"/><path d="M173,486 a11,11 0 1 0 22,0 a11,11 0 1 0 -22,0Z"/></g><path d="M256,262 C236,262 220,264 206,270 C196,286 196,306 206,322 C212,338 220,352 224,366 C226,376 232,384 240,388 L256,392 L272,388 C280,384 286,376 288,366 C292,352 300,338 306,322 C316,306 316,286 306,270 C292,264 276,262 256,262 Z"/><path d="M238,262 C242,250 248,246 256,246 C264,246 270,250 274,262 Z"/><path d="M256,204 C241,204 234,216 234,230 C234,246 244,258 256,258 C268,258 278,246 278,230 C278,216 271,204 256,204 Z"/></g><g fill="url(#lgR)"><path d="M215.2,357.6 C203.3,379.5 191.9,397.5 183.9,421.8 L216.1,442.2 C234.7,424.5 246.1,406.5 260.8,386.4Z"/><path d="M182.7,426.9 C178.0,446.0 173.2,462.2 173.5,482.9 L194.5,489.1 C206.0,472.0 210.8,455.8 217.3,437.1Z"/><path d="M172,480 C164,488 160,496 170,500 L198,500 C204,496 198,486 192,482 Z"/><path d="M223.2,267.3 C201.8,246.0 183.8,227.4 158.2,210.2 L133.8,233.8 C150.2,260.0 168.2,278.6 188.8,300.7Z"/><path d="M162.7,225.2 C166.8,199.9 171.0,178.3 171.8,152.3 L148.2,147.7 C139.2,172.1 135.0,193.7 129.3,218.8Z"/><path d="M184,292 C178,270 192,256 212,258 C226,262 230,276 222,290 C212,302 192,306 184,292 Z"/><path d="M183,432 a17,17 0 1 0 34,0 a17,17 0 1 0 -34,0Z"/><path d="M129.5,222 a16.5,16.5 0 1 0 33,0 a16.5,16.5 0 1 0 -33,0Z"/><path d="M147,148 a15,15 0 1 0 30,0 a15,15 0 1 0 -30,0Z"/><path d="M173,486 a11,11 0 1 0 22,0 a11,11 0 1 0 -22,0Z"/><g transform="matrix(-1,0,0,1,512,0)"><path d="M215.2,357.6 C203.3,379.5 191.9,397.5 183.9,421.8 L216.1,442.2 C234.7,424.5 246.1,406.5 260.8,386.4Z"/><path d="M182.7,426.9 C178.0,446.0 173.2,462.2 173.5,482.9 L194.5,489.1 C206.0,472.0 210.8,455.8 217.3,437.1Z"/><path d="M172,480 C164,488 160,496 170,500 L198,500 C204,496 198,486 192,482 Z"/><path d="M223.2,267.3 C201.8,246.0 183.8,227.4 158.2,210.2 L133.8,233.8 C150.2,260.0 168.2,278.6 188.8,300.7Z"/><path d="M162.7,225.2 C166.8,199.9 171.0,178.3 171.8,152.3 L148.2,147.7 C139.2,172.1 135.0,193.7 129.3,218.8Z"/><path d="M184,292 C178,270 192,256 212,258 C226,262 230,276 222,290 C212,302 192,306 184,292 Z"/><path d="M183,432 a17,17 0 1 0 34,0 a17,17 0 1 0 -34,0Z"/><path d="M129.5,222 a16.5,16.5 0 1 0 33,0 a16.5,16.5 0 1 0 -33,0Z"/><path d="M147,148 a15,15 0 1 0 30,0 a15,15 0 1 0 -30,0Z"/><path d="M173,486 a11,11 0 1 0 22,0 a11,11 0 1 0 -22,0Z"/></g><path d="M256,262 C236,262 220,264 206,270 C196,286 196,306 206,322 C212,338 220,352 224,366 C226,376 232,384 240,388 L256,392 L272,388 C280,384 286,376 288,366 C292,352 300,338 306,322 C316,306 316,286 306,270 C292,264 276,262 256,262 Z"/><path d="M238,262 C242,250 248,246 256,246 C264,246 270,250 274,262 Z"/><path d="M256,204 C241,204 234,216 234,230 C234,246 244,258 256,258 C268,258 278,246 278,230 C278,216 271,204 256,204 Z"/></g><g fill="none" stroke="rgba(70,0,8,.6)" stroke-width="3.4" stroke-linecap="round"><path d="M256,276 L256,384 M210,296 C224,312 244,314 254,306 M238,322 C248,325 264,325 274,322 M240,342 C249,345 263,345 272,342 M242,362 C250,364 262,364 270,362 M232,320 C228,340 230,360 238,382 M190,298 C200,292 212,290 220,292 M178,256 C172,246 162,238 154,232 M228,398 C226,416 218,430 206,438 M246,396 C244,412 238,424 226,434 M194,446 C190,458 188,470 186,480"/><path d="M256,276 L256,384 M210,296 C224,312 244,314 254,306 M238,322 C248,325 264,325 274,322 M240,342 C249,345 263,345 272,342 M242,362 C250,364 262,364 270,362 M232,320 C228,340 230,360 238,382 M190,298 C200,292 212,290 220,292 M178,256 C172,246 162,238 154,232 M228,398 C226,416 218,430 206,438 M246,396 C244,412 238,424 226,434 M194,446 C190,458 188,470 186,480" transform="matrix(-1,0,0,1,512,0)"/></g></svg><h1>Muscle <b>Atlas</b></h1></button>
     <nav class="htabs" aria-label="Seções">
       <button data-tab="atlas">Atlas</button>
       <button data-tab="ficha">Meus treinos</button>
       <button data-tab="treino">Hoje</button>
       <button data-tab="prog">Progresso</button>
     </nav>
-    <div class="search">
-      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-      <input id="q" type="search" placeholder="Buscar músculo ou exercício" autocomplete="off" aria-label="Buscar músculo ou exercício">
-      <div class="results" id="results" hidden></div>
+    <div class="search" id="searchBox">
+      <button class="gear sbtn" id="searchBtn" aria-label="Buscar" title="Buscar" aria-expanded="false"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></button>
+      <div class="sfield">
+        <svg class="smag" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+        <input id="q" type="search" placeholder="Buscar músculo ou exercício" autocomplete="off" aria-label="Buscar músculo ou exercício">
+        <button class="sclose" id="searchClose" aria-label="Fechar" title="Fechar">✕</button>
+        <div class="results" id="results" hidden></div>
+      </div>
     </div>
     <button class="gear" id="gearBtn" aria-label="Configurações" title="Configurações"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3.2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg></button>
   </header>
@@ -2287,10 +2299,15 @@ q.addEventListener("input",()=>{
   res.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{setTab("atlas");if(model==="art")setModel("det");selectMuscle(b.dataset.go);
     if(b.dataset.fam){const r=parseRef(b.dataset.ref);eq="all";chips();const list=filtered();const i=list.findIndex(e=>e.f.id===b.dataset.fam&&splitKey(e.f,e.pre)===splitKey(r.f,r.sel));const j=i>=0?i:list.findIndex(e=>e.f.id===b.dataset.fam);
       if(j>=0){Object.assign(list[j].sel,r.sel);fillEntry(list[j]);curEx=j;paint();render();const c=document.querySelector(`.ex[data-i="${j}"]`);if(c)c.scrollIntoView({block:"start"})}}
-    res.hidden=true;q.value="";q.blur()});
+    closeSearch()});
 });
-document.addEventListener("pointerdown",e=>{if(!e.target.closest(".search"))res.hidden=true});
-q.addEventListener("keydown",e=>{if(e.key==="Escape"){res.hidden=true;q.blur()}if(e.key==="Enter"){const b=res.querySelector("[data-go]");if(b)b.click()}});
+const sBox=$("searchBox");
+function openSearch(){sBox.classList.add("open");$("searchBtn").setAttribute("aria-expanded","true");q.focus()}
+function closeSearch(){res.hidden=true;q.value="";q.blur();sBox.classList.remove("open");$("searchBtn").setAttribute("aria-expanded","false")}
+$("searchBtn").addEventListener("click",openSearch);
+$("searchClose").addEventListener("click",closeSearch);
+document.addEventListener("pointerdown",e=>{if(!e.target.closest(".search")){res.hidden=true;if(!q.value.trim())closeSearch()}});
+q.addEventListener("keydown",e=>{if(e.key==="Escape")closeSearch();if(e.key==="Enter"){const b=res.querySelector("[data-go]");if(b)b.click()}});
 
 /* ---------------------------------------------------------- exercise catalog (one item per family; pick a variation inside) */
 const famGroups=f=>{const v=resolveV(f,f.d);return [...new Set(v.p.map(m=>TOB[m]))]};
