@@ -144,6 +144,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 - **"Como fazer" completo** (pedido do dono: "estude, pesquise e coloque como fazer por escrito todos os exercícios"; escolheu completo, com dicas por variação e fechado até tocar): os 98 exercícios ganharam posição inicial, passo a passo, respiração, ritmo e amplitude, onde sentir, dicas, erros comuns e cuidados, mais 272 dicas por variação, nos 3 idiomas. O texto foi para arquivos próprios (o app ficou 58 KB menor). Corrigido: tocar em "Como fazer" fechava o cartão no Atlas.
 - **Correção** (o dono avisou que "Montar treino" não ia): a atualização do "Como fazer" apagou sem querer `openG()`/`gAct`, a janela usada por Montar treino, Trocar exercício, Programas prontos e Cartão para Stories. Restaurado e testado nos quatro.
 - "Montar treino" a partir do músculo selecionado (pedido do dono): o botão continua aparecendo com um músculo escolhido e já começa com ele marcado.
+- **Qual peso anotar** (pergunta do dono): "+" ao lado de "Carga (kg)" no Ao vivo, no Registro e no ranking, com explicação (halter = um halter; barra = total com a barra; polia = número da pilha; máquina de anilhas = só as anilhas; peso do corpo = só o extra) e aviso curto embaixo do campo conforme o exercício. Corrigida uma frase do ranking que aparecia em português no espanhol.
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)

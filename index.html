@@ -94,6 +94,11 @@ header{position:relative}
 .lv-setn{margin-top:12px;font-family:var(--f-display);font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-size:14px}
 .lv-inps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 .lv-inps label span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+.kgh.kgb{text-align:center;margin-top:4px}
+.lv-inps label>span,.rk-inps label>span{display:flex;align-items:center;height:18px}
+#hBody ul+p{margin-top:12px}
+.kgh{display:block;font-size:11px;font-weight:500;color:var(--muted);text-transform:none;letter-spacing:0;line-height:1.25;margin-top:1px}
+.set.set-h span .help.sm,.rk-inps .help.sm{width:16px;height:16px;font-size:16px}
 .lv-inps .inp{font-size:26px;font-weight:600;padding:10px 12px;width:100%;box-sizing:border-box;text-align:center}
 .lv-done{margin-top:10px;font-size:17px;padding:14px}
 .lv-sets{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
@@ -601,7 +606,7 @@ button.brand:hover{background:var(--chip)}
 .rk-man{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
 .lnk{border:0;background:none;padding:0;color:var(--target);font-size:12px;font-weight:600;text-decoration:underline}
 .rk-form{border-color:var(--ink)}
-.rk-inps{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rk-inps label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+.rk-inps{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rk-inps label{display:grid;gap:4px;font-size:12px;color:var(--muted);align-content:start}
 .rfig{max-height:min(56vh,480px)}
 @media (max-width:430px){.rk-big{font-size:44px}}
 </style>
@@ -2538,6 +2543,43 @@ const HELP={
     <li>Séries de 3 a 12 repetições dão a estimativa mais confiável.</li>
     <li>O ranking fica em Progresso › Força, em cima da evolução das cargas.</li></ul>`]
 };
+/* ---- which weight to write (owner's question): per dumbbell, total with the bar, cable stack number, extra weight only…
+   kgKind() reads the equipment of the chosen variation; kgHint() is the short text under "Carga (kg)"; HELP.peso explains it all. */
+function kgKind(name,ref){const r=parseRef(ref)||parseRef(refByName(name));if(!r)return "";
+  if(r.sel.e==="sm")return "sm";let st=null;try{st=rStd(r.f,r.sel)}catch(e){}
+  if(st&&rBody(st))return st.as?"as":"bw";
+  if(r.f.id==="swing"||r.sel.e==="kb"||r.sel.e==="an"||r.sel.e==="bo")return "k";
+  return {H:"h",B:"b",M:"m",P:"p",C:"bw"}[vEq(r.f,r.sel)]||""}
+const KGH={h:["por halter","per dumbbell","por mancuerna"],b:["total, com a barra","total, with the bar","total, con la barra"],sm:["anilhas + barra","plates + bar","discos + barra"],
+  m:["número do pino ou anilhas","pin number or plates","número del pasador o discos"],p:["número da pilha da polia","cable stack number","número de la pila de la polea"],
+  bw:["só o peso extra","extra weight only","solo el peso extra"],as:["ajuda da máquina","machine assistance","ayuda de la máquina"],k:["peso da peça","weight of the item","peso de la pieza"]};
+const kgHint=(name,ref)=>{const k=kgKind(name,ref);return k?p3(KGH[k]):""};
+const kgHelpBtn=()=>`<button class="help sm" data-help="peso" aria-label="${tx("Qual peso anotar","Which weight to write","Qué peso anotar")}" title="${tx("Qual peso anotar","Which weight to write","Qué peso anotar")}">+</button>`;
+HELP.peso=[tx("Qual peso anotar","Which weight to write","Qué peso anotar"),tx(
+`<ul><li><b>Halteres:</b> o peso de <b>um</b> halter. Dois de 20 kg → anote 20.</li>
+<li><b>Barra:</b> o <b>total, contando a barra</b>. Barra olímpica (20 kg) + 30 kg de cada lado → 80. Barra W ou reta curta: some o peso dela (uns 7–10 kg).</li>
+<li><b>Smith:</b> anilhas + barra. Se não souber quanto pesa a barra, anote só as anilhas.</li>
+<li><b>Polia:</b> o número da pilha onde está o pino.</li>
+<li><b>Máquina de pino:</b> o número da pilha. <b>Máquina de anilhas</b> (leg press, hack): só as anilhas, somando os dois lados; o carrinho não entra.</li>
+<li><b>Peso do corpo</b> (barra fixa, mergulho, flexão): deixe vazio ou anote só o <b>peso extra</b> (cinto, anilha). O app soma o seu peso das Configurações.</li>
+<li><b>Kettlebell ou anilha:</b> o peso da peça.</li></ul>
+<p>O mais importante é anotar <b>sempre do mesmo jeito</b>: assim a evolução, os recordes e a sugestão de carga fazem sentido.</p>`,
+`<ul><li><b>Dumbbells:</b> the weight of <b>one</b> dumbbell. Two 20 kg dumbbells → write 20.</li>
+<li><b>Barbell:</b> the <b>total, including the bar</b>. Olympic bar (20 kg) + 30 kg per side → 80. EZ or short straight bar: add its weight (about 7–10 kg).</li>
+<li><b>Smith:</b> plates + bar. If you don't know the bar's weight, write the plates only.</li>
+<li><b>Cable:</b> the number on the stack where the pin is.</li>
+<li><b>Pin machine:</b> the stack number. <b>Plate-loaded machine</b> (leg press, hack): only the plates, adding both sides; the sled doesn't count.</li>
+<li><b>Bodyweight</b> (pull-up, dip, push-up): leave it empty or write only the <b>extra weight</b> (belt, plate). The app adds your body weight from Settings.</li>
+<li><b>Kettlebell or plate:</b> the weight of the item.</li></ul>
+<p>Most important: write it <b>the same way every time</b>, so your progress, records and load suggestions make sense.</p>`,
+`<ul><li><b>Mancuernas:</b> el peso de <b>una</b> mancuerna. Dos de 20 kg → anota 20.</li>
+<li><b>Barra:</b> el <b>total, contando la barra</b>. Barra olímpica (20 kg) + 30 kg por lado → 80. Barra Z o recta corta: suma su peso (unos 7–10 kg).</li>
+<li><b>Smith:</b> discos + barra. Si no sabes cuánto pesa la barra, anota solo los discos.</li>
+<li><b>Polea:</b> el número de la pila donde está el pasador.</li>
+<li><b>Máquina de pasador:</b> el número de la pila. <b>Máquina de discos</b> (prensa, hack): solo los discos, sumando los dos lados; el carro no cuenta.</li>
+<li><b>Peso corporal</b> (dominadas, fondos, flexiones): déjalo vacío o anota solo el <b>peso extra</b> (cinturón, disco). La app suma tu peso de Ajustes.</li>
+<li><b>Kettlebell o disco:</b> el peso de la pieza.</li></ul>
+<p>Lo más importante: anótalo <b>siempre de la misma forma</b>, así la evolución, los récords y la sugerencia de carga tienen sentido.</p>`)];
 function openHelp(k){const h=HELP[k];if(!h)return;$("hTitle").textContent=h[0];$("hBody").innerHTML=h[1];$("helpSheet").hidden=false;$("hBody").scrollTop=0}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-help]");if(!b)return;e.preventDefault();e.stopPropagation();openHelp(b.dataset.help)},true);
 document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m||e.target.closest("[data-close]"))closeModals()}));
@@ -2721,7 +2763,7 @@ function renderTreino(){
         <div class="fi-act"><button class="ib" data-act="swapItem" data-i="${i}" aria-label="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}" title="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}">⇄</button><button class="ib" data-act="up" data-i="${i}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-i="${i}" aria-label="Descer">↓</button><button class="ib del" data-act="rmItem" data-i="${i}" aria-label="Remover ${esc(dName(it.name,it.ref))}">✕</button></div></div>
       ${last?`<div class="last">Última vez (${fmtDate(last.date)}): <b>${last.sets.map(setTxt).join(" · ")}</b></div>`:""}
       ${(()=>{const g=suggest(it,w);return g?`<div class="lv-sug${g.up?" up":""}">${sugTxt(g)}</div>`:""})()}
-      <div class="sets"><div class="set set-h"><span></span><span>Reps</span><span>Carga (kg)</span><span></span></div>
+      <div class="sets"><div class="set set-h"><span></span><span>Reps</span><span>${tx("Carga (kg)","Load (kg)","Carga (kg)")}${kgHelpBtn()}${(h=>h?`<small class="kgh">${esc(h)}</small>`:"")(kgHint(it.name,it.ref))}</span><span></span></div>
       ${it.sets.map((s,j)=>`<div class="set"><span class="set-n">${j+1}</span>
         <input class="inp" inputmode="numeric" data-i="${i}" data-s="${j}" data-sf="r" value="${esc(s.r)}" placeholder="${esc(it.target||"reps")}" aria-label="Repetições, série ${j+1}">
         <input class="inp" inputmode="decimal" data-i="${i}" data-s="${j}" data-sf="kg" value="${esc(s.kg)}" placeholder="kg" aria-label="Carga em kg, série ${j+1}">
@@ -2912,7 +2954,7 @@ function liveHTML(){
         const warm=live.j===0&&!s.ok&&!isIso(it)&&kg>=40?`<div><b>${tx("Aquecimento","Warm-up","Calentamiento")}:</b> ${warmTxt(kg)}</div>`:"",pl=eq==="B"&&kg>20?platesTxt(kg):"";
         return warm||pl?`<div class="lv-tips">${warm}${pl?`<div><b>${tx("Anilhas por lado","Plates per side","Discos por lado")}:</b> ${pl} <span class="muted-s">(${tx("barra de 20 kg","20 kg bar","barra de 20 kg")})</span></div>`:""}</div>`:""})()}
       <div class="lv-setn">${tx(`Série ${live.j+1} de ${it.sets.length}`,`Set ${live.j+1} of ${it.sets.length}`,`Serie ${live.j+1} de ${it.sets.length}`)}${it.target?` · ${tx("meta","target","meta")} ${esc(it.target)}`:""}${s.ok?" · ✓":""}</div>
-      <div class="lv-inps"><label><span>${tx("Carga (kg)","Load (kg)","Carga (kg)")}</span><input class="inp" id="lvKg" inputmode="decimal" value="${esc(s.kg)}" placeholder="${g&&g.kg!==""?fkg(g.kg):"kg"}"></label>
+      <div class="lv-inps"><label><span>${tx("Carga (kg)","Load (kg)","Carga (kg)")}${kgHelpBtn()}</span><input class="inp" id="lvKg" inputmode="decimal" value="${esc(s.kg)}" placeholder="${g&&g.kg!==""?fkg(g.kg):"kg"}">${(h=>h?`<small class="kgh kgb">${esc(h)}</small>`:"")(kgHint(it.name,it.ref))}</label>
         <label><span>${tx("Repetições","Reps","Repeticiones")}</span><input class="inp" id="lvR" inputmode="numeric" value="${esc(s.r)}" placeholder="${g?g.r:esc(it.target||"reps")}"></label></div>
       <button class="btn primary wide lv-done" data-lv="setDone">✓ ${s.ok?tx("Salvar série","Save set","Guardar serie"):tx("Série feita","Set done","Serie hecha")}</button>
       <div class="lv-sets">${it.sets.map((x,j)=>`<button data-lv="pickSet" data-j="${j}" class="${j===live.j?"cur":""}${x.ok?" ok":""}" aria-pressed="${j===live.j}">${j+1}<small>${x.ok?`${x.kg!==""?esc(x.kg)+"×":""}${esc(x.r)}`:"—"}</small></button>`).join("")}<button data-lv="addSet" aria-label="${esc(L("+ Série"))}">+</button></div>
@@ -3862,8 +3904,8 @@ function rankHTML(D){
   const form=rForm?(()=>{const r=parseRef(rForm.ref),st=rStd(r.f,r.sel),S=RSTD[st.k];
     const lab=rBody(st)?(st.as?"Ajuda da máquina (kg)":"Peso extra (kg, 0 = só o corpo)"):"Carga (kg)";
     return `<div class="card rk-form" id="rkForm"><h3 class="section-t" style="margin:0">Digitar carga</h3><b>${esc(rForm.name)}</b>
-      <div class="rk-inps"><label><span>${lab}</span><input class="inp" id="rkKg" inputmode="decimal" placeholder="${rBody(st)?"0":"ex.: 60"}"></label><label><span>Repetições</span><input class="inp" id="rkR" inputmode="numeric" placeholder="ex.: 8"></label></div>
-      <span class="muted-s" style="margin:0">Use a série mais pesada que você faz hoje, com boa execução.${S[1]&&/cada halter/.test(S[0])?" Peso de cada halter.":""}</span>
+      <div class="rk-inps"><label><span>${lab}${kgHelpBtn()}</span><input class="inp" id="rkKg" inputmode="decimal" placeholder="${rBody(st)?"0":"ex.: 60"}">${(h=>h&&!rBody(st)?`<small class="kgh kgb">${esc(h)}</small>`:"")(kgHint(rForm.name,rForm.ref))}</label><label><span>Repetições</span><input class="inp" id="rkR" inputmode="numeric" placeholder="ex.: 8"></label></div>
+      <span class="muted-s" style="margin:0">${tx("Use a série mais pesada que você faz hoje, com boa execução.","Use the heaviest set you do today, with good form.","Usa la serie más pesada que haces hoy, con buena ejecución.")}</span>
       <div class="row"><button class="btn primary" data-ract="save">Salvar</button><button class="btn" data-ract="cancel">Cancelar</button></div></div>`})():"";
   return `<h3 class="section-t rk-sec">Ranking de força<button class="help sm" data-help="rank" aria-label="Como funciona o ranking" title="Como funciona o ranking">+</button></h3>
   <div class="card rk-me"><label class="rk-bw"><span>Seu peso</span><span class="rk-bwi"><input class="inp" id="rkBw" inputmode="decimal" value="${rank.bw>0?fkg(rank.bw):""}" placeholder="${RSW[sex]}"><small>kg</small></span></label>
