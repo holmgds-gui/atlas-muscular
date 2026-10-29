@@ -174,6 +174,21 @@ Páginas do Strength Level consultadas:
 | Singer et al. 2024, *Front Sports Act Living* | Meta-análise: descansos de 60 s ou mais dão um pouco mais de hipertrofia | [Frontiers](https://www.frontiersin.org/articles/10.3389/fspor.2024.1429789/full) · [PubMed 39205815](https://pubmed.ncbi.nlm.nih.gov/39205815/) |
 | Plotkin et al. 2022, *PeerJ* | Subir repetições ou subir carga dá ganhos parecidos (base da "próxima carga": +1 rep até o topo da faixa, depois sobe o peso) | [PeerJ](https://peerj.com/articles/14142) · [PubMed 36199287](https://pubmed.ncbi.nlm.nih.gov/36199287/) |
 
+## 4b. "Como fazer" (instruções dos 98 exercícios)
+
+Texto próprio, escrito em linguagem simples a partir de guias de técnica e de estudos; os pontos gerais (ritmo, amplitude, respiração, joelho passando da ponta do pé, pegada do supino) seguem estas fontes:
+
+| Fonte | Usada para | Link |
+|---|---|---|
+| Schoenfeld, Ogborn & Krieger 2015, *Sports Med* | Duração da repetição de 0,5 a 8 s dá crescimento parecido → descida controlada de 2–3 s, sem exigir ritmo exato | [PubMed 25601394](https://pubmed.ncbi.nlm.nih.gov/25601394/) |
+| Wolf et al. 2023, *Int J Strength Cond* | Amplitude completa (ou com o músculo alongado) é a escolha padrão → "use a amplitude toda", pausas com o músculo alongado | [IUSCA](https://journal.iusca.org/index.php/Journal/article/view/182) |
+| NSCA, *Essentials of Strength Training and Conditioning*, cap. 15 (resumo) | Respiração: soltar o ar na parte difícil; prender o ar com abdômen firme (Valsalva curta) em cargas pesadas | [Resumo do capítulo](https://www.themovementsystem.com/blog/cscs-study-guide-chapter-15-exercise-technique) |
+| Fry, Smith & Schilling 2003, *J Strength Cond Res* | Joelho pode passar da ponta do pé no agachamento (travar o joelho aumenta a carga no quadril e na lombar) | [Physio Network](https://www.physio-network.com/blog/knees-shouldnt-pass-toes-during-the-squat-myth-or-truth/) |
+| Green & Comfort 2007, *Strength Cond J* | Pegada e cotovelos no supino: pegada muito aberta e cotovelos a 90° aumentam o estresse no ombro | [Salford](https://salford-repository.worktribe.com/output/1804489/the-affect-of-grip-width-on-bench-press-performance-and-risk-of-injury) |
+| ACE Exercise Library | Referência geral de posição inicial, execução e erros comuns | [ACE](https://www.acefitness.org/resources/everyone/exercise-library/) |
+
+Também valem para o "Como fazer" os estudos de descanso e progressão do Ao vivo (Schoenfeld 2016, Singer 2024, Plotkin 2022) e os de hipertrofia já listados na seção 1 (por exemplo, rosca inclinada e cadeira flexora sentada trabalhando o músculo alongado).
+
 ## 5. Desenho do boneco
 
 - Imagem de referência para a silhueta (só formato e detalhes, sem cores ou textos): [Toda Matéria](https://static.todamateria.com.br/upload/55/77/55771934478af-musculos-do-corpo-humano.jpg)

@@ -141,6 +141,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 - **Homem fisiculturista** (pedido do dono, com imagem de referência; escolheu "igual à referência" e mulher mais forte também): trapézio alto, pescoço grosso, ombros e braços grandes, V marcado, coxas com o quadríceps abrindo para fora e panturrilhas grandes. Novo `lwarp()` deixa os membros mais grossos no meio do músculo. O dono perguntou se um criador de imagens ajudaria: não, porque o boneco precisa de cada músculo como peça separada para tocar e pintar.
 - Ajuste do dono: cintura do homem menos fina, pernas dele bem mais finas e coxas/pernas da mulher um pouco mais finas.
 - Ajuste do dono: superiores do homem um pouco menores (ombros, trapézio, pescoço e braços).
+- **"Como fazer" completo** (pedido do dono: "estude, pesquise e coloque como fazer por escrito todos os exercícios"; escolheu completo, com dicas por variação e fechado até tocar): os 98 exercícios ganharam posição inicial, passo a passo, respiração, ritmo e amplitude, onde sentir, dicas, erros comuns e cuidados, mais 272 dicas por variação, nos 3 idiomas. O texto foi para arquivos próprios (o app ficou 58 KB menor). Corrigido: tocar em "Como fazer" fechava o cartão no Atlas.
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)
