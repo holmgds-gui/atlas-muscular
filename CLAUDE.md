@@ -9,7 +9,7 @@ App de academia em português (pt-BR), instalável no celular (PWA), publicado p
 **https://holmgds-gui.github.io/atlas-muscular/**
 
 - **Atlas**: boneco anatômico clicável (frente/costas, corpo ♂/♀). Tocar num músculo deixa ele vermelho e lista exercícios em ordem de estímulo. Tocar num exercício pinta os sinergistas de laranja e mostra botões de **variação** (pegada, largura, equipamento, banco, posição, lado) que mudam alvo e sinergistas.
-- **Meus treinos** (aba `ficha`, rótulo "Treinos" na barra de baixo): biblioteca de treinos montados (nome, exercícios, séries, reps, dias opcionais).
+- **Meus treinos** (aba `ficha`, rótulo "Treinos" na barra de baixo): biblioteca de treinos montados (nome, exercícios, séries, reps, dias opcionais). É a 1ª sub-aba da aba Treinos; a 2ª é **Treinos prontos** (abaixo).
 - **Hoje › Ao vivo** (pedido do dono: sub-aba dentro de Hoje; `hView` `reg`/`live`, `hvSeg()`): treino acompanhado série a série. `live` (`atlas-live`) = `{wid,i,j}`; o treino é um `workouts` normal com `done:false`, `start` e, ao concluir, `done:true` e `dur` (segundos); séries feitas têm `ok:true`; séries vazias e não feitas são removidas ao concluir. Timer de descanso (`rest` em `atlas-rest`, `startRest()`, `CONF.rest`; som por WebAudio `beep()` e vibração seguem `CONF.sound`/`CONF.vibe`), pílula flutuante `#restPill` (descanso ou treino ao vivo fora da tela; toque volta para Ao vivo). Recordes: `setPR()`/`workoutPRs()`/`celebrate()` (força estimada ou carga maior que todas as sessões anteriores; a 1ª vez não conta), também ao marcar como feito no Registro. Próxima carga: `suggest()` (faixa da meta "8-12"; se todas as séries da carga mais alta chegaram ao topo, sobe 2,5 kg — halteres 2 kg; senão +1 rep), mostrada no Ao vivo e no Registro. Descanso por tipo: `restFor(it)` = `CONF.rest` nos isolados (`isIso`, lista `ISO`) e `CONF.rest`+60 s nos compostos (Schoenfeld 2016, Singer 2024). Dicas `.lv-tips` no cartão do exercício: aquecimento `warmTxt()` (1ª série ainda não feita de composto com ≥40 kg) e anilhas por lado `platesTxt()` (equipamento barra, barra de 20 kg). O cartão do descanso fica abaixo do cartão do exercício. Qual peso anotar (pergunta do dono): `kgKind()`/`kgHint()` dão um aviso curto embaixo do campo de carga conforme o equipamento da variação (halter = por halter; barra = total com a barra; Smith = anilhas + barra; polia = número da pilha; máquina = pino ou anilhas; peso do corpo = só o peso extra; kettlebell/anilha = peso da peça) e `kgHelpBtn()` é o "+" que abre `HELP.peso` (Ao vivo, Registro e "Digitar carga" do ranking). Textos novos usam `tx(pt,en,es)` direto.
 - **Como fazer** (pedido do dono: completo, com dica por variação, fechado até tocar): arquivos `how/pt.json`, `how/en.json`, `how/es.json` (só o do idioma atual é baixado, por `loadHow()`; o service worker guarda os 3 no `CORE` para funcionar offline). Cada família: `p` posição inicial, `s` passos, `r` respiração, `a` ritmo e amplitude, `f` onde sentir, `d` dicas, `e` erros comuns, `c` cuidado (opcional), `v` dicas por variação (`"eixo.opção"`: texto; aparecem as das opções escolhidas agora, em "O que muda nesta variação", no topo do guia, porque o texto geral descreve a variação padrão). `howHTML(it, open)` monta o `<details class="how">` com `data-hf`/`data-hs` e `howInner()` preenche quando o arquivo chega (antes mostra "Carregando…"; sem internet e sem cópia, uma mensagem). `howOpen` lembra se o guia estava aberto, para continuar aberto ao trocar variação no Atlas ou marcar série no Ao vivo (no Registro fica sempre fechado). Tocar no guia não fecha mais o cartão do Atlas. Ao mudar um exercício ou variação, atualize os 3 arquivos com as mesmas chaves (há um teste que compara pt/en/es). Fontes em `docs/FONTES.md` (seção 4b).
 - **Trocar exercício** (`swapOpts()`/`openSwap()`, botão ⇄ no Registro, em Meus treinos e no Ao vivo): candidatos vêm das listas ranqueadas dos músculos-alvo do exercício, ordenados por quantos alvos/sinergistas batem.
@@ -51,12 +51,13 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 | `README.md` | Descrição curta para quem abre o repositório |
 | `docs/` | Histórico e fontes |
 | `how/` | Instruções "Como fazer" em pt/en/es (JSON) |
+| `tests/` | Testes automáticos com Playwright (ver `tests/README.md`) |
 | `tools/` | Fonte das famílias de exercícios (`fam1-3.js`), mapa dos nomes antigos (`map.js`) e o gerador (`build.js`) |
 
 ## Como publicar uma mudança
 
 1. Edite `index.html`.
-2. **Suba o número do cache** em `sw.js` (`atlas-v63` → `atlas-v64`). Sem isso, celulares podem continuar com a versão velha.
+2. **Suba o número do cache** em `sw.js` (`atlas-v64` → `atlas-v65`). Sem isso, celulares podem continuar com a versão velha.
 3. Commit na `main` e push. O GitHub Pages publica em ~1 minuto.
 4. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
 
@@ -141,7 +142,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 
 ## Testes que funcionam
 
-Sirva a pasta com um servidor local (por exemplo `python3 -m http.server 8765`) e use Playwright (Chromium headless):
+Os scripts prontos ficam em **`tests/`** (como rodar e o que cada um confere: [tests/README.md](tests/README.md)). Sirva a pasta com `python3 -m http.server 8765` e rode `node tests/<nome>.js` (variável `BASE` muda o endereço; prints e relatórios vão para `tests/out/`, fora do Git). Antes de publicar uma mudança grande, rode pelo menos `clique.js`, `variacoes.js`, `janelas.js` e o teste da parte mexida. O que eles fazem:
 
 - **Clique**: para cada `[data-m] > path.m`, amostre pontos e confira com `elementFromPoint` que o próprio músculo recebe o toque (≥85%). Faça para os dois corpos, desktop e celular. Faça o mesmo para as juntas (`.jt`) no modo Articulações.
 - **Sinergistas e variações**: para cada músculo e exercício, nos modelos Detalhado e Básico, e para cada opção de cada eixo, confira que todos os músculos esperados (`x[4]`) ficam com `.syn`; toda combinação tem alvo; todo nome em `LEGACY` resolve.

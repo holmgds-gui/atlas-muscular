@@ -1,6 +1,6 @@
 # Histórico do projeto
 
-Resumo das conversas com o Claude que construíram o app, em ordem. Datas em outubro de 2026.
+Resumo das conversas com o Claude que construíram o app, por tema e em ordem. Datas em outubro de 2026 (o grosso foi feito entre 27 e 29/10). Os commits do Git têm o detalhe de cada mudança.
 
 ## 1. Origem
 
@@ -22,9 +22,11 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - Detalhado.
   - Básico: mesma arte do Detalhado, mas o vermelho pinta o grupo inteiro (ex.: todo o bíceps).
   - Articulações: aquecimento, mobilidade e alongamento estático de cada junta.
-- **Celular**: o boneco fica grande enquanto nada está escolhido. Depois da escolha, ele vai para o canto superior esquerdo, pequeno, e a lista cobre o resto da tela. Tocar no boneco pequeno amplia.
+- **Celular**: o boneco fica grande enquanto nada está escolhido. Depois da escolha, ele vai para o canto superior esquerdo, pequeno, e a lista cobre o resto da tela. Tocar no boneco pequeno amplia. "Ver lista" também deixa o boneco pequeno, para aparecerem 2–3 itens da lista (pedido do dono).
+- **Botões** (pedido do dono, mais simples): vista e corpo são um botão cada; tocar troca frente/costas e ♂/♀.
+- **Busca**: no topo só a lupa; tocar abre o campo por cima do cabeçalho.
 
-## 3. Exercícios e ranking
+## 3. Exercícios e ranking por estímulo
 
 - A lista de exercícios foi ampliada com pesquisa (livros, artigos, vídeos). Hoje são 359 entradas e 248 exercícios diferentes em 39 músculos.
 - Ordem por estímulo, com selos:
@@ -37,7 +39,6 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - Os sinergistas de cada tela são essa lista menos o músculo tocado.
   - 299 de 359 entradas mudaram.
   - Regra para estabilizadores: só entram quando o exercício treina o músculo de propósito.
-
 - **Variações (pedido do dono: "puxada alta pegada pronada, supinada, neutra, aberta, fechada, na máquina, polia, halter…")**:
   - Os 248 exercícios viraram **98 famílias** com variações de pegada, largura, equipamento, banco, posição e lado: **1.325 combinações**.
   - Cada lista mostra um cartão por exercício; ao abrir, aparecem os botões e uma explicação curta de cada escolha (ex.: "Supinada: mais bíceps e dorsal inferior").
@@ -46,116 +47,113 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
   - Novos exercícios e variações que faltavam: crucifixo inclinado na máquina, agachamento pêndulo, leg press horizontal, puxada na máquina articulada e unilateral, abdominal canivete, levantamento terra parcial, entre outros.
   - A variação escolhida vai para o treino; treinos antigos continuam funcionando pelo nome antigo.
 
-## 4. Corpos
+## 4. Corpos (♂/♀) ao longo do tempo
 
-- Botão ♂/♀, válido nos três modelos. O app lembra a escolha.
-- Os dois corpos têm físico **atlético natural** (como quem treina há 1–3 anos):
-  - Masculino: ombros mais redondos e braços e pernas um pouco mais cheios.
-  - Feminino: ombros mais estreitos, cintura fina, quadril largo, coxas fortes, contorno suave dos seios e cabelo preso em coque.
-- Os ícones ♂/♀ viraram SVG, porque o glifo de fonte ficava torto no iPhone.
+1. **Primeiro**: botão ♂/♀, válido nos três modelos (o app lembra a escolha). Os dois corpos com físico **atlético natural**: masculino com ombros redondos; feminino com ombros mais estreitos, cintura fina, quadril largo, contorno suave dos seios e cabelo em coque. Os ícones ♂/♀ viraram SVG (o glifo de fonte ficava torto no iPhone).
+2. **Boneco novo** (o dono mandou pranchas de anatomia e pediu silhueta mais natural): redesenhado do zero em estilo próprio, sem copiar as imagens. Pose natural com braços um pouco abertos, ~8 cabeças de altura, mãos com dedos, pés, pescoço com esternocleidomastoide e cinza sólido. No computador, frente e costas aparecem juntas desde o início.
+3. **Fibras de volta** (o dono sentiu falta): fibras seguindo cada músculo (fuso, leque ou paralelas); braço feminino mais fino ("robustão"); cabelo de frente refeito; seios sem contorno branco.
+4. **Silhuetas mais características**: homem com ombros mais largos e cintura menos fina; mulher com quadril mais largo e ombros mais estreitos.
+5. **Homem fisiculturista** (o dono mandou uma prancha de fisiculturismo e escolheu "igual à referência"; mulher mais forte também): trapézio alto, pescoço grosso, ombros e braços grandes, V marcado, coxas abrindo para fora e panturrilhas grandes. Novo `lwarp()` deixa os membros mais grossos no meio do músculo.
+6. **Ajustes do dono**: cintura do homem menos fina, pernas dos dois bem mais finas, superiores do homem um pouco menores.
+- O dono perguntou se um criador de imagens ajudaria: não, porque o boneco precisa de cada músculo como peça separada para tocar e pintar; a imagem serve só como referência de formato.
 
-## 5. Treino, Ficha e depois Meus treinos / Hoje
+## 5. Treinos: Ficha → Meus treinos / Hoje
 
-1. **Primeira versão**:
-   - Ficha semanal (segunda a domingo).
-   - Aba Treino com séries, reps, carga e anotações, ligada à ficha.
-   - Backup no aparelho.
-2. **Segunda versão**: o dono quis treinos independentes do calendário.
-   - A Ficha virou **Meus treinos**: biblioteca de treinos com dias da semana.
-   - A aba Treino virou **Hoje**.
-   - O Progresso só conta depois de "Marcar como feito".
-   - Um dia pode ter vários treinos.
-   - Quando marcado como feito, contam todas as séries listadas, preenchidas ou não.
-3. **Simplificação** (o dono achou confuso):
-   - **Treinos**: só a lista e o botão de criar. Os dias ficaram opcionais e o quadro da semana saiu.
-   - **Hoje**: todos os treinos com "Marcar como feito" num toque, "Anotar séries" opcional e "Desfazer".
-   - Treino personalizado só para hoje.
-4. **Ajustes finais**:
-   - A grade da semana voltou na aba Hoje, mostrando o que foi **feito** em cada dia.
-   - O treino personalizado de hoje pode virar treino fixo ("Salvar em Meus treinos").
-   - Meus treinos ganhou o botão "Montar um treino só para hoje".
-   - Registrar em dia passado: tocar num dia que já passou na grade da semana (ou ‹ para semanas anteriores) faz "Marcar como feito", "Anotar séries" e o treino personalizado valerem para aquele dia. Dias futuros não podem ser escolhidos.
+1. **Primeira versão**: ficha semanal (segunda a domingo), aba Treino com séries, reps, carga e anotações, e backup no aparelho.
+2. **Segunda versão** (o dono quis treinos independentes do calendário): a Ficha virou **Meus treinos** (biblioteca com dias da semana) e a aba Treino virou **Hoje**. O Progresso só conta depois de "Marcar como feito". Um dia pode ter vários treinos. Quando marcado como feito, contam todas as séries listadas.
+3. **Simplificação** (o dono achou confuso): Treinos só com a lista e o botão de criar (dias opcionais); Hoje com "Marcar como feito" num toque, "Anotar séries" opcional e "Desfazer"; treino personalizado só para hoje.
+4. **Ajustes**: grade da semana na aba Hoje mostrando o que foi **feito**; treino personalizado pode virar treino fixo; registrar em dias que já passaram (nunca no futuro).
 
 ## 6. Progresso
 
-- Quarta aba: mapa de calor (frente e costas) dos músculos treinados.
-- Período semana ou dia, com setas para voltar no tempo.
-- Lista de séries por grupo, com as partes de cada um, e lista de grupos não treinados.
-- Exercícios digitados que o app não conhece aparecem à parte. Não mostra total de kg (pedido do dono).
-- **Contagem**: 1 série para cada músculo-alvo e ½ para sinergistas. É a "contagem fracionada" de Pelland et al., a que melhor previu o crescimento.
-- **Faixas** (pesquisa em [FONTES.md](FONTES.md)):
-  - Semana: 0 não treinado · 1–3 abaixo do mínimo · 4–9 estímulo moderado · 10–20 faixa ideal · 20+ volume alto.
-  - Dia: 1–2 leve · 3–5 bom · 6–11 forte · 12+ pouco ganho extra, com aviso.
-- Seção "Como as faixas foram definidas" dentro da aba.
-- **Radar de Equilíbrio** (o dono mandou um print de outro app com radar): 6 grupos, cada ponta com a média de séries por músculo do grupo, anel sombreado da faixa ideal e toque numa ponta para ver as partes e destacar os músculos no boneco. Outras ideias oferecidas e não escolhidas por enquanto: últimas 8 semanas, calendário de treinos, comparações empurrar × puxar / cima × baixo / frente × costas.
-- **Sub-aba Cargas**: para cada exercício com carga anotada (só treinos feitos), gráfico com a maior carga do dia (linha cheia) e a força estimada (tracejada, kg × (1 + reps ÷ 30)), botões 1 mês / 3 meses / Tudo, recorde, última carga, quanto subiu desde o primeiro registro e tabela dos últimos treinos. O dono escolheu as duas linhas depois de ver um exemplo em que a maior carga parece cair (65 kg × 6 → 62,5 kg × 9) mas a força estimada sobe.
+- Mapa de calor (frente e costas) dos músculos treinados, por semana ou dia, com setas para voltar no tempo. Não mostra total de kg (pedido do dono).
+- **Contagem**: 1 série para cada músculo-alvo e ½ para sinergistas (a "contagem fracionada" de Pelland et al.).
+- **Faixas** (pesquisa em [FONTES.md](FONTES.md)): semana 0 · 1–3 abaixo do mínimo · 4–9 moderado · 10–20 ideal · 20+ volume alto; dia 1–2 leve · 3–5 bom · 6–11 forte · 12+ pouco ganho extra.
+- **Radar de Equilíbrio** (o dono mandou um print de outro app): 6 grupos, anel da faixa ideal e toque numa ponta para destacar os músculos.
+- **Cargas** (depois parte de **Força**): gráfico da maior carga do dia e da força estimada (kg × (1 + reps ÷ 30)), recorde, última carga e quanto subiu. O dono escolheu as duas linhas depois de ver que a carga pode cair (65 × 6 → 62,5 × 9) enquanto a força estimada sobe.
 
 ## 7. Ajuda
 
-- Um "+" pequeno ao lado do título de cada aba abre uma explicação: o que a página faz, o que dá para fazer e dicas.
-- Só o "+", sem círculo em volta.
+- Um "+" pequeno ao lado do título de cada aba abre uma explicação da página. Só o "+", sem círculo em volta.
+- Outros "+" menores: força estimada, ranking, "qual peso anotar" e treinos prontos.
 
 ## 8. Ranking de força
 
-- Pedido do dono: tocar no título "Atlas Muscular" abre uma tela à parte com um ranking em 7 níveis (**Vegetal, Molenga, Frango, Decente, Fortinho, Monstro, Bizarro**). Depois o dono pediu mais 2 e escolheu dividir as faixas largas do meio: **Galo** (35–50%) e **Parrudo** (80–95%), e depois trocou os nomes para **Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, Bizarro** e pediu faixas mais iguais; escolheu o "meio-termo": Ameba <5% · Aprendiz 5–15 · Frango 15–30 · Galo 30–45 · Fortinho 45–60 · Parrudo 60–75 · Monstro 75–88 · Lenda 88–96 · Bizarro top 4%, por grupo muscular e com base no peso corporal.
-- Escolhas do dono:
-  - Cargas vêm dos treinos feitos e também dá para digitar.
-  - O nível do grupo usa **todos** os exercícios do grupo, não um só.
-  - Usa o ♂/♀ do app.
-  - A tela mostra o nível por grupo e o boneco colorido.
-- Como funciona:
-  - Padrões do Strength Level (percentis entre quem treina), ajustados ao peso pela regra de ⅔.
-  - Cada série vira força estimada (Epley); vale a melhor dos últimos 6 meses ou a digitada.
-  - Cada exercício conta para todos os grupos-alvo dele. Grupo = média dos exercícios; geral = média dos grupos.
-  - 66 exercícios-padrão cobrem 46 famílias e 1.046 das 1.325 variações.
-  - Cada exercício mostra quanto falta para o próximo nível.
-  - Pedido do dono: exercícios com o peso do corpo contam o corpo. Barra fixa e mergulho já contavam; flexão (vs supino) e remada invertida (vs remada curvada) entraram com a fração do peso que o braço movimenta; nesses, até 30 repetições entram na conta e "quanto falta" aparece em repetições.
-  - Cores: primeiro uma escala de azul; depois o dono escolheu o estilo videogame: Ameba cinza, Aprendiz verde, Frango azul, Galo roxo, Fortinho amarelo, Parrudo laranja, Monstro vermelho, Lenda rosa e Bizarro cinza metálico brilhante. Antes: uma escala de azul em 9 tons, validada para daltonismo nos dois temas.
-- O dono pediu para juntar o ranking com o progresso de cargas: a sub-aba Cargas virou **Força**, com o ranking em cima e a evolução por exercício embaixo. O título "Atlas Muscular" passou a levar sempre para o Atlas.
-- Engrenagem no canto superior direito, ao lado da busca, abre a página **Configurações**. O dono pediu tudo o que foi sugerido e mais opções comuns de app, mesmo sem função por enquanto:
-  - Funcionando: perfil (nome, peso, corpo; idade, altura e experiência guardadas), tema, cor de destaque, tamanho da letra, reduzir animações, séries × reps padrão, meta semanal, backup (saiu da aba Hoje), apagar dados, compartilhar, sugestões, fontes e versão.
-  - "Em breve": idioma, libras, timer de descanso, lembretes, sons, vibração, conta e sincronização.
-  - Correção junto: importar backup não salvava o histórico de treinos.
-- **Boneco novo** (o dono mandou pranchas de anatomia de referência e perguntou se dava para deixar a silhueta mais natural): redesenhado do zero em estilo próprio, sem copiar as imagens. Pose natural com os braços um pouco abertos, proporção de ~8 cabeças (antes a cabeça era pequena demais), mãos com dedos, pés, pescoço com esternocleidomastoide, músculos preenchendo os membros e cinza sólido (sem fibras), como o dono pediu. Os dois corpos (♂/♀), frente e costas; teste de toque em todos os músculos e juntas passou. No computador, frente e costas aparecem juntas desde o início.
-- **Inglês** (pedido do dono, com escolha "Tudo" e "seguir o celular + trocar nas Configurações"): interface, ajudas, 98 exercícios com variações e explicações, músculos, articulações, ranking (Amoeba, Rookie, Chicken, Rooster, Buff, Beefy, Monster, Legend, Freak) e configurações. A busca aceita nomes em inglês e em português nos dois idiomas. Espanhol fica "em breve".
-- **Ranking mais fiel** (o dono pediu mais fontes e uma avaliação "mais fiel", e quis ver antes de mudar): comparação do Strength Level com o StrengthLog e com percentis de powerlifting testado (van den Hoek 2024). Escolhas do dono:
-  - Misturar as duas bases (média nos 4 exercícios que as duas têm; nos outros, Strength Level corrigido pela diferença média).
-  - Peso por sexo: expoente 0,9 ♂ e 0,6 ♀, tirado das tabelas (antes ⅔).
-  - Idade: a partir dos 40, as faixas se ajustam (idade em Configurações).
-  - Repetições: acima de 12, cada uma vale metade na força estimada do ranking.
-  - Aviso "pouca informação" em grupo com um exercício só.
-  - Não escolhido: dar peso maior aos exercícios principais.
-- **Fibras de volta e acabamento do boneco** (o dono sentiu falta das fibras e pediu músculos marcados, com as pranchas de referência): fibras desenhadas seguindo cada músculo (fuso nos músculos dos membros, leque nos que convergem num tendão, paralelas no abdômen, oblíquos, romboides, eretores e glúteo máximo); braço feminino mais fino; cabelo feminino de frente refeito (não parece mais uma tiara); seios sem contorno branco.
-- **Espanhol** (pedido do dono, "tudo"): interface, ajudas, 98 exercícios com variações e explicações, músculos, articulações, ranking (Ameba, Aprendiz, Pollito, Gallo, Fuertecito, Macizo, Monstruo, Leyenda, Fenómeno) e Configurações. Segue o celular na primeira vez e troca em Configurações › Idioma.
-- **Zoom só onde precisa** (pedido do dono): a página não dá mais zoom com dois dedos em nenhuma aba; o zoom fica nos bonecos (Atlas, como antes, e agora também nos bonecos do Progresso e do ranking, com botão ⤢ para voltar). Os bonecos do Progresso e do ranking ganharam as fibras (o de Força estava "liso").
-- Correção: o zoom do boneco no Atlas ficou estranho depois de travar o zoom da página; no celular o boneco passou a usar eventos de toque (pinça, arrastar e toque), que funcionam melhor no iPhone. Os bonecos do Progresso e do ranking ficaram iguais aos do Atlas (separações, músculos de enfeite e cinza normal nos músculos sem dados).
-- **Logo e nome novos** (pedido do dono, escolhas em 4 opções de logo e no nome): o app virou **Muscle Atlas**, com logo de um "A" feito de dois músculos na frente de um globo, em vermelho e grafite. Trocou o ícone da tela de início e entrou a logo pequena ao lado do nome no topo. O endereço do site continua o mesmo.
-- Logo refinada: o homem estava "gorila"; ficou com proporções clássicas (pernas mais longas, cintura fina, braços e trapézio menores).
-- Logo trocada por **Atlas carregando o globo** (pedido do dono): homem musculoso vermelho segurando um globo acima da cabeça, sobre fundo grafite. Busca no topo virou só a lupa; tocar abre o campo.
-- **Hoje › Ao vivo** (1ª leva das 9 ideias escolhidas pelo dono depois da comparação com Hevy, Strong, Fitbod, Jefit e MuscleWiki): treino série a série com cronômetro, timer de descanso (som e vibração), sugestão da próxima carga, aviso de recorde e resumo no fim. O timer, sons e vibração das Configurações passaram a funcionar.
-- **2ª leva**: "Como fazer" (passo a passo e erros comuns nos 98 exercícios, nos 3 idiomas), trocar exercício por equivalente (⇄), montar treino tocando no boneco e programas prontos (corpo inteiro 2× e 3×, superior/inferior 4×, push/pull/legs 6×).
-- **3ª leva**: sequência semanal (🔥), 25 conquistas em Progresso › Conquistas e cartão para Stories (semana, ranking, treino e conquistas). "Ver lista" no celular passou a deixar o boneco pequeno no canto para a lista ter espaço.
-- **Upgrade do Ao vivo com base em estudos** (pedido do dono: "estude mais e continue dando upgrade"): descanso 1 min maior nos exercícios compostos (Schoenfeld 2016, Singer 2024), aquecimento sugerido na 1ª série dos compostos pesados (50% × 8, 70% × 4, 85% × 2), anilhas por lado nos exercícios com barra, e o cartão do descanso foi para baixo do exercício. A regra da próxima carga (repetições primeiro, depois peso) foi conferida com Plotkin 2022.
-- **Conquistas novas** (pedido do dono, lista aprovada por ele): sequência agora conta semanas com 3 treinos (1, 2, 3, 4, 5, 10 … 52 semanas), conquistas do mês, de peso do corpo (1×, 1,5×… o próprio peso, metas menores para ♀), extras, uma seção de engraçadas (perna de saracura, braço de T-rex, sofá master…) e todos os 9 níveis do ranking. De 25 para ~90 conquistas.
-- **Silhuetas mais características** (pedido do dono): homem com ombros mais largos e cintura menos fina; mulher com quadril mais largo, ombros um pouco mais estreitos e coxas acompanhando o quadril.
-- **Homem fisiculturista** (pedido do dono, com imagem de referência; escolheu "igual à referência" e mulher mais forte também): trapézio alto, pescoço grosso, ombros e braços grandes, V marcado, coxas com o quadríceps abrindo para fora e panturrilhas grandes. Novo `lwarp()` deixa os membros mais grossos no meio do músculo. O dono perguntou se um criador de imagens ajudaria: não, porque o boneco precisa de cada músculo como peça separada para tocar e pintar.
-- Ajuste do dono: cintura do homem menos fina, pernas dele bem mais finas e coxas/pernas da mulher um pouco mais finas.
-- Ajuste do dono: superiores do homem um pouco menores (ombros, trapézio, pescoço e braços).
-- **"Como fazer" completo** (pedido do dono: "estude, pesquise e coloque como fazer por escrito todos os exercícios"; escolheu completo, com dicas por variação e fechado até tocar): os 98 exercícios ganharam posição inicial, passo a passo, respiração, ritmo e amplitude, onde sentir, dicas, erros comuns e cuidados, mais 272 dicas por variação, nos 3 idiomas. O texto foi para arquivos próprios (o app ficou 58 KB menor). Corrigido: tocar em "Como fazer" fechava o cartão no Atlas.
-- **Correção** (o dono avisou que "Montar treino" não ia): a atualização do "Como fazer" apagou sem querer `openG()`/`gAct`, a janela usada por Montar treino, Trocar exercício, Programas prontos e Cartão para Stories. Restaurado e testado nos quatro.
-- "Montar treino" a partir do músculo selecionado (pedido do dono): o botão continua aparecendo com um músculo escolhido e já começa com ele marcado.
-- **Qual peso anotar** (pergunta do dono): "+" ao lado de "Carga (kg)" no Ao vivo, no Registro e no ranking, com explicação (halter = um halter; barra = total com a barra; polia = número da pilha; máquina de anilhas = só as anilhas; peso do corpo = só o extra) e aviso curto embaixo do campo conforme o exercício. Corrigida uma frase do ranking que aparecia em português no espanhol.
-- **Treinos prontos** (pedido do dono): página nova em Treinos com 44 treinos em 4 divisões (corpo inteiro, superior/inferior, push/pull/legs, um músculo por dia), iniciante e avançado, explicação de cada divisão, semana pronta e filtro por músculo. Substituiu os 4 "Programas prontos".
-- 🔥 da grade de Hoje agora diz "1 semana" (o dono perguntou o que era o fogo e o número) e abre as Conquistas.
-- Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
+- Pedido do dono: um ranking em níveis por grupo muscular. Começou com 7 níveis (Vegetal, Molenga, Frango, Decente, Fortinho, Monstro, Bizarro), virou 9 e depois os nomes atuais: **Ameba, Aprendiz, Frango, Galo, Fortinho, Parrudo, Monstro, Lenda, Bizarro**, com faixas "meio-termo": Ameba <5% · Aprendiz 5–15 · Frango 15–30 · Galo 30–45 · Fortinho 45–60 · Parrudo 60–75 · Monstro 75–88 · Lenda 88–96 · Bizarro top 4%.
+- Escolhas do dono: cargas dos treinos feitos e digitadas; nível do grupo = média de **todos** os exercícios do grupo; usa o ♂/♀ do app; nível por grupo e boneco colorido.
+- Como funciona: padrões do Strength Level; cada série vira força estimada; vale a melhor dos últimos 6 meses ou a digitada; cada exercício conta para todos os grupos-alvo; 66 exercícios-padrão cobrem 1.046 das 1.325 variações; cada exercício mostra quanto falta para o próximo nível.
+- Exercícios com o peso do corpo contam o corpo (barra fixa, mergulho, flexão, remada invertida), aceitando até 30 repetições.
+- Cores estilo videogame escolhidas pelo dono: cinza, verde, azul, roxo, amarelo, laranja, vermelho, rosa e cinza metálico brilhante.
+- O ranking foi para **Progresso › Força**, em cima da evolução das cargas. O título "Muscle Atlas" leva sempre para o Atlas.
+- **Ranking mais fiel** (o dono pediu mais fontes e quis ver antes de mudar): mistura Strength Level + StrengthLog; peso por sexo (expoente 0,9 ♂ e 0,6 ♀); idade a partir dos 40; repetições acima de 12 valem metade; aviso "pouca informação" em grupo com um exercício só. Não escolhido: peso maior para exercícios principais.
 
-## 9. Perguntas que o dono fez (respostas resumidas)
+## 9. Configurações e idiomas
+
+- Engrenagem no canto superior direito abre **Configurações**. O dono pediu tudo o que foi sugerido e mais opções comuns, mesmo sem função por enquanto:
+  - Funcionando: perfil (nome, peso, corpo, idade), tema, cor de destaque, tamanho da letra, reduzir animações, séries × reps padrão, meta semanal, timer de descanso, sons, vibração, backup (saiu da aba Hoje), apagar dados, compartilhar, sugestões, fontes e versão.
+  - "Em breve": libras, lembretes, conta e sincronização.
+  - Correção junto: importar backup não salvava o histórico de treinos.
+- **Inglês** (pedido do dono: "tudo", seguindo o idioma do celular e com troca nas Configurações): interface, ajudas, exercícios, variações, músculos, articulações, ranking (Amoeba, Rookie, Chicken, Rooster, Buff, Beefy, Monster, Legend, Freak).
+- **Espanhol** ("tudo" também): ranking com Ameba, Aprendiz, Pollito, Gallo, Fuertecito, Macizo, Monstruo, Leyenda, Fenómeno.
+- **Zoom só onde precisa** (pedido do dono): a página não dá zoom; o zoom fica nos bonecos (Atlas, Progresso e ranking, com ⤢ para voltar). No celular o boneco do Atlas usa eventos de toque, que funcionam melhor no iPhone.
+
+## 10. Nome e logo
+
+- O app virou **Muscle Atlas** (escolha do dono). O endereço do site e o repositório continuam `atlas-muscular`.
+- Logo: primeiro um "A" de dois músculos na frente de um globo; no mesmo dia trocada por **Atlas carregando o globo** (pedido do dono). O homem estava "gorila" e ficou com proporções clássicas.
+- Pendente: o dono perguntou se dá para mudar o ícone do app; foram oferecidas ideias (só o globo com músculo, letras "MA", Atlas maior, outras cores ou referência dele) e o Claude aguarda a escolha. No iPhone, ícone novo só aparece apagando o app da tela de início e adicionando de novo.
+
+## 11. Recursos novos inspirados em outros apps
+
+O dono pediu para comparar com apps parecidos (Hevy, Strong, Fitbod, Jefit, MuscleWiki) e escolheu 9 ideias, feitas em 3 levas:
+
+1. **Hoje › Ao vivo** (sub-aba dentro de Hoje, pedido do dono): treino série a série com cronômetro, timer de descanso (som e vibração), sugestão da próxima carga, aviso de recorde e resumo no fim. Recordes no resumo viraram bolinha simples (o dono achou os troféus "exagerados").
+2. **"Como fazer"** em cada exercício, **trocar por equivalente (⇄)**, **montar treino tocando no boneco** e **programas prontos**.
+3. **Sequência e conquistas** e **cartão para Stories**.
+
+Depois, a pedido do dono ("estude mais e continue dando upgrade"):
+- **Ao vivo com base em estudos**: descanso 1 min maior nos compostos (Schoenfeld 2016, Singer 2024), aquecimento sugerido (50% × 8, 70% × 4, 85% × 2), anilhas por lado e cartão do descanso abaixo do exercício. A regra da próxima carga (repetições primeiro, depois peso) foi conferida com Plotkin 2022.
+- **Qual peso anotar** (pergunta do dono): "+" ao lado de "Carga (kg)" no Ao vivo, no Registro e no ranking, e aviso curto conforme o exercício (por halter; total com a barra; Smith = anilhas + barra; número da pilha da polia; máquina de anilhas = só as anilhas; peso do corpo = só o extra).
+- **Montar treino a partir do músculo selecionado** (pedido do dono): o botão continua aparecendo com um músculo escolhido e já começa com ele marcado.
+
+## 12. "Como fazer" completo
+
+- Pedido do dono: "estude, pesquise e coloque como fazer por escrito todos os exercícios". Ele escolheu: completo, com dicas por variação, fechado até tocar.
+- Os 98 exercícios ganharam posição inicial, passo a passo, respiração, ritmo e amplitude, onde sentir, dicas, erros comuns e cuidados, mais 272 dicas por variação, em português, inglês e espanhol (arquivos em `how/`, funcionam offline). "O que muda nesta variação" aparece primeiro.
+- Corrigido junto: tocar em "Como fazer" fechava o cartão no Atlas.
+- **Erro e correção**: essa atualização apagou sem querer a janela `openG()`/`gAct`, e Montar treino, Trocar exercício, Programas e Cartão para Stories pararam de abrir. O dono avisou ("Montar treino não está indo"); foi restaurado no mesmo dia e agora há um teste (`tests/janelas.js`) que passa pelos quatro.
+
+## 13. Conquistas
+
+- Primeiro: sequência semanal (🔥), 25 conquistas e cartão para Stories.
+- **Conquistas novas** (lista aprovada pelo dono): semana conta com **3 treinos** de segunda a domingo (1, 2, 3, 4, 5, 10 … 52 semanas seguidas), do mês, de peso do corpo (1×, 1,5×… o próprio peso; metas ~⅔ para ♀; só carga levantada de verdade), extras, **engraçadas** (perna de saracura, braço de T-rex, sofá master, hibernação, segunda é dia de peito, rato de academia, sem feriado, treino relâmpago, treino de praia) e todos os 9 níveis do ranking. De 25 para ~90 conquistas.
+- O 🔥 na grade de Hoje agora diz "🔥 1 semana · 4 treinos feitos" (o dono perguntou o que era o fogo e o número, que parecia "14") e abre as Conquistas.
+
+## 14. Treinos prontos
+
+- Antes: 4 "programas prontos" numa janela.
+- Pedido do dono: mais treinos prontos, por tipo (upper/lower, push/pull/legs, corpo inteiro, um músculo por dia) e por músculo ("se eu apertar em costas, aparece um treino só de costas, um upper, um pull e um full body"). Escolhas: página nova dentro da aba Treinos, as 4 divisões, iniciante e avançado, academia completa.
+- Resultado: **44 treinos**, explicação de cada divisão ("Como funciona"), "Qual escolher?" por dias na semana, semana pronta por nível ("Adicionar a semana toda"), filtro por músculo, "Treinar agora" e "Salvar em Meus treinos". Base: frequência 2× por semana, total de séries semanal, compostos primeiro e recomendações do ACSM ([FONTES.md](FONTES.md), seção 4c).
+
+## 15. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.
+- **Vale no computador?** Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
+- **Porcentagens dos cartões**: são a ativação medida por EMG em relação a um exercício de referência (ex.: supino).
 - **Ranking**: no começo, parte das listas só dizia se o exercício "pega ou não pega" o músculo. Depois tudo virou ordem por estímulo com selos.
+- **Qual peso anotar**: halter = peso de um; barra = total com a barra; Smith = anilhas + barra; polia = número da pilha; máquina de anilhas = só as anilhas; peso do corpo = só o extra. O importante é anotar sempre do mesmo jeito.
+- **O fogo com número**: é a sequência de semanas seguidas com 3 treinos ou mais.
+- **Mandar para amigos** (um com Samsung, outro com iPhone): link https://holmgds-gui.github.io/atlas-muscular/; iPhone instala pelo Safari, Android pelo Chrome ou Samsung Internet; os dados de cada um ficam no próprio celular. Ainda não foi testado num Android de verdade.
 - **Lojas**:
   - Google Play: dá para publicar como Trusted Web Activity (PWABuilder). Custa US$ 25 uma vez, exige teste fechado com 12 pessoas por 14 dias para conta pessoal nova e o `assetlinks.json` na raiz do domínio.
   - Apple: US$ 99/ano, precisa de Mac/Xcode e há risco de rejeição pela regra 4.2 (app que é só um site).
-  - Mandar o link para amigos já funciona: cada um guarda os próprios dados no aparelho.
 - **Escala do Progresso**: a visão Dia usa a escala por treino (até ~11 séries); a visão Semana usa a escala semanal (10–20 ideal).
 - **Claude Code vs app**: uma conversa nova não vê esta conversa. Por isso existe o `CLAUDE.md`. Os limites de uso são compartilhados entre o Claude e o Claude Code.
+
+## 16. Ideias e pendências
+
+- Ícone novo do app (aguardando a escolha do dono).
+- Anotar o esforço de cada série (repetições sobrando, "RIR") para a sugestão de carga ficar mais precisa (sugerido, não pedido ainda).
+- Testar num Android de verdade.
+- Ideias de Progresso oferecidas e não escolhidas: últimas 8 semanas, calendário de treinos, comparações empurrar × puxar / cima × baixo / frente × costas.
+- Configurações "em breve": libras, lembretes, conta e sincronização.

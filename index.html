@@ -4086,7 +4086,7 @@ $("progBody").addEventListener("click",e=>{
     if(k==="save"){const r=parseRef(rForm.ref),st=rStd(r.f,r.sel),S=RSTD[st.k];
       let kg=numKg($("rkKg").value);const rp=parseInt($("rkR").value);
       if(rBody(st)&&!isFinite(kg))kg=0;
-      if(!(rp>0)||!(isFinite(kg))||(!rBody(st)&&!(kg>0))){toast("Preencha a carga e as repetições");return}
+      if(!(rp>0)||!(isFinite(kg))||(!rBody(st)&&!(kg>0))){toast(tx("Preencha a carga e as repetições","Fill in the load and the reps","Completa la carga y las repeticiones"));return}
       rank.man.push({id:Date.now().toString(36),ref:rForm.ref,kg:Math.abs(kg),r:rp,date:isoDate(new Date())});saveRank();
       rOpen=TOB[resolveV(r.f,r.sel).p[0]];rForm=null;renderRank();toast("Carga salva");return}
   }
