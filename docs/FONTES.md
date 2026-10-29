@@ -189,6 +189,17 @@ Texto próprio, escrito em linguagem simples a partir de guias de técnica e de 
 
 Também valem para o "Como fazer" os estudos de descanso e progressão do Ao vivo (Schoenfeld 2016, Singer 2024, Plotkin 2022) e os de hipertrofia já listados na seção 1 (por exemplo, rosca inclinada e cadeira flexora sentada trabalhando o músculo alongado).
 
+## 4c. Treinos prontos (Treinos › Treinos prontos)
+
+| Fonte | Usada para | Link |
+|---|---|---|
+| Schoenfeld, Ogborn & Krieger 2016, *Sports Med* | Treinar cada músculo 2× por semana costuma dar mais crescimento que 1× → corpo inteiro, superior/inferior e push/pull/legs avançado | [PubMed 27102172](https://pubmed.ncbi.nlm.nih.gov/27102172/) |
+| Schoenfeld, Grgic & Krieger 2019, *J Sports Sci* | Com o mesmo total de séries, a frequência pesa pouco → "um músculo por dia" também vale, se o total da semana for bom | [Resumo](https://lida.sport-iat.de/ta/Record/4052540?lng=en) |
+| Simão et al. 2012, *Sports Med* | Ordem: exercícios compostos antes dos isolados | [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC4327372) |
+| ACSM 2009, *Progression Models in Resistance Training* | Iniciante: 1–3 séries de 8–12 repetições, 2–3 dias de corpo inteiro; avançado: divisões de 4–6 dias | [PDF](https://www.sportgeneeskunde.com/wp-content/uploads/ACSM-Position-Stand-Progression-Models-in-Resistance-Training-for-Healthy-Adults.pdf) |
+
+Séries por músculo em cada treino seguem as faixas do Progresso (dia: até ~11 séries). Os exercícios escolhidos estão entre os mais bem colocados nas listas do Atlas.
+
 ## 5. Desenho do boneco
 
 - Imagem de referência para a silhueta (só formato e detalhes, sem cores ou textos): [Toda Matéria](https://static.todamateria.com.br/upload/55/77/55771934478af-musculos-do-corpo-humano.jpg)

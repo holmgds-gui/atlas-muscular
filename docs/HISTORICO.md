@@ -145,6 +145,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 - **Correção** (o dono avisou que "Montar treino" não ia): a atualização do "Como fazer" apagou sem querer `openG()`/`gAct`, a janela usada por Montar treino, Trocar exercício, Programas prontos e Cartão para Stories. Restaurado e testado nos quatro.
 - "Montar treino" a partir do músculo selecionado (pedido do dono): o botão continua aparecendo com um músculo escolhido e já começa com ele marcado.
 - **Qual peso anotar** (pergunta do dono): "+" ao lado de "Carga (kg)" no Ao vivo, no Registro e no ranking, com explicação (halter = um halter; barra = total com a barra; polia = número da pilha; máquina de anilhas = só as anilhas; peso do corpo = só o extra) e aviso curto embaixo do campo conforme o exercício. Corrigida uma frase do ranking que aparecia em português no espanhol.
+- **Treinos prontos** (pedido do dono): página nova em Treinos com 44 treinos em 4 divisões (corpo inteiro, superior/inferior, push/pull/legs, um músculo por dia), iniciante e avançado, explicação de cada divisão, semana pronta e filtro por músculo. Substituiu os 4 "Programas prontos".
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)
