@@ -3037,11 +3037,13 @@ function buildDone(){const items=buildPlan();if(!items.length)return;const names
     <ol class="blist">${items.map(it=>`<li><b>${esc(it.name)}</b><span>${it.sets} × ${esc(it.reps)} · ${esc(muscleLabel(it.name,it.ref))}</span></li>`).join("")}</ol>
     <div class="row"><button class="btn primary" data-g="live">▶ ${tx("Treinar agora","Train now","Entrenar ahora")}</button><button class="btn" data-g="save">${tx("Salvar em Meus treinos","Save to My workouts","Guardar en Mis entrenamientos")}</button></div>`)}
 function buildBar(){const bb=$("buildBar");if(!bb)return;$("buildBtn").textContent="＋ "+tx("Montar treino","Build a workout","Armar entreno");
-  bb.hidden=!build;$("buildBtn").hidden=!!build||model==="art"||!!cur;if(!build)return;$("listBtn").hidden=true;
+  /* also shown with a muscle selected: it then starts the build with that muscle's group already marked (owner's request) */
+  bb.hidden=!build;$("buildBtn").hidden=!!build||model==="art";if(!build)return;$("listBtn").hidden=true;
   head(tx("Montar treino","Build a workout","Armar entreno"),build.size?[...build].map(g=>BASIC[g].n).join(" + "):tx("Toque nos músculos","Tap the muscles","Toca los músculos"),
     build.size?tx("Toque de novo para tirar. Depois toque em Montar.","Tap again to remove. Then tap Build.","Toca otra vez para quitar. Luego toca Armar."):tx("Escolha no boneco os músculos que quer treinar hoje.","Pick on the figure the muscles you want to train today.","Elige en el muñeco los músculos que quieres entrenar hoy."),false);
   bb.innerHTML=`<button class="btn primary" data-bb="go"${build.size?"":" disabled"}>${tx("Montar","Build","Armar")}${build.size?` (${build.size})`:""}</button><button class="btn" data-bb="cancel">${esc(L("Cancelar"))}</button>`}
-$("buildBtn").addEventListener("click",()=>{if(model==="art")setModel("det");cur=null;curEx=null;build=new Set();paint();render()});
+$("buildBtn").addEventListener("click",()=>{if(model==="art")setModel("det");const g=cur?(model==="bas"?cur:TOB[cur]):null;
+  cur=null;curEx=null;listOpen=false;peek=false;build=new Set(g&&BASIC[g]?[g]:[]);paint();render()});
 $("buildBar").addEventListener("click",e=>{const b=e.target.closest("[data-bb]");if(!b)return;if(b.dataset.bb==="cancel"){build=null;paint();render()}else buildDone()});
 
 /* ---- ready-made programs (Meus treinos). Each muscle twice a week, compound lifts first; 2–4 sets per exercise.
