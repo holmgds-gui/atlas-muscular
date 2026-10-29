@@ -2968,6 +2968,12 @@ $("restPill").addEventListener("click",e=>{if(e.target.closest("[data-rp]")){con
   hView="live";LS.set("atlas-hview",hView);setTab("treino")});
 
 /* how-to texts: "id|step;step;step|mistake;mistake" per exercise family */
+/* ---------------------------------------------------------- 2nd batch: how-to, swap, build from the figure, programs
+   gSheet = one generic bottom sheet (#gSheet) used by all of them. */
+function openG(title,html){$("gTitle").textContent=title;$("gBody").innerHTML=html;$("gSheet").hidden=false;$("gBody").scrollTop=0}
+let gAct=null;
+$("gBody").addEventListener("click",e=>{const b=e.target.closest("[data-g]");if(b&&gAct)gAct(b,e)});
+
 /* ---- "Como fazer": full step-by-step guide for each of the 98 families, written from training and physical therapy
    guides (see docs/FONTES.md). One JSON file per language (how/pt.json, how/en.json, how/es.json), loaded once and
    cached by the service worker. Per family: p = starting position, s = steps, r = breathing, a = tempo and range,

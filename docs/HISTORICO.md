@@ -142,6 +142,7 @@ Resumo das conversas com o Claude que construíram o app, em ordem. Datas em out
 - Ajuste do dono: cintura do homem menos fina, pernas dele bem mais finas e coxas/pernas da mulher um pouco mais finas.
 - Ajuste do dono: superiores do homem um pouco menores (ombros, trapézio, pescoço e braços).
 - **"Como fazer" completo** (pedido do dono: "estude, pesquise e coloque como fazer por escrito todos os exercícios"; escolheu completo, com dicas por variação e fechado até tocar): os 98 exercícios ganharam posição inicial, passo a passo, respiração, ritmo e amplitude, onde sentir, dicas, erros comuns e cuidados, mais 272 dicas por variação, nos 3 idiomas. O texto foi para arquivos próprios (o app ficou 58 KB menor). Corrigido: tocar em "Como fazer" fechava o cartão no Atlas.
+- **Correção** (o dono avisou que "Montar treino" não ia): a atualização do "Como fazer" apagou sem querer `openG()`/`gAct`, a janela usada por Montar treino, Trocar exercício, Programas prontos e Cartão para Stories. Restaurado e testado nos quatro.
 - Pergunta do dono: as mudanças valem para o computador também? Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
 
 ## 9. Perguntas que o dono fez (respostas resumidas)
