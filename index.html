@@ -2979,15 +2979,16 @@ function loadHow(){if(howP)return howP;
     document.querySelectorAll("details.how[data-hf]").forEach(d=>{let sel={};try{sel=JSON.parse(d.dataset.hs)}catch(e){}d.querySelector(".how-b").innerHTML=howInner(d.dataset.hf,sel)})})
     .catch(()=>{howP=null;howFail=true;document.querySelectorAll("details.how[data-hf] .how-b").forEach(b=>b.innerHTML=howInner("",{}))});
   return howP}
-const HOWL={p:["Posição inicial","Starting position","Posición inicial"],s:["Execução","How to do it","Ejecución"],v:["Na variação escolhida","For the chosen variation","En la variante elegida"],
+const HOWL={p:["Posição inicial","Starting position","Posición inicial"],s:["Execução","How to do it","Ejecución"],v:["O que muda nesta variação","What changes in this variation","Qué cambia en esta variante"],
   r:["Respiração","Breathing","Respiración"],a:["Ritmo e amplitude","Tempo and range","Ritmo y recorrido"],f:["Onde sentir","Where to feel it","Dónde sentirlo"],
   d:["Dicas","Tips","Consejos"],e:["Erros comuns","Common mistakes","Errores comunes"],c:["Cuidado","Caution","Precaución"]};
 function howInner(fid,sel){const h=HOW&&HOW[fid];
   if(!h)return `<p class="muted-s">${howFail?tx("Sem conexão: abra o app com internet uma vez para baixar as instruções.","No connection: open the app online once to download the instructions.","Sin conexión: abre la app con internet una vez para descargar las instrucciones."):tx("Carregando…","Loading…","Cargando…")}</p>`;
   const f=FAMBY[fid],L=k=>`<b class="how-l">${p3(HOWL[k])}</b>`,li=a=>a.map(x=>`<li>${esc(x)}</li>`).join("");
   const vt=f?f.ax.map(a=>(h.v||{})[a[0]+"."+(sel[a[0]]||f.d[a[0]])]).filter(Boolean):[];
-  return `${L("p")}<p>${esc(h.p)}</p>${L("s")}<ol>${li(h.s)}</ol>
-    ${vt.length?`<div class="how-v">${L("v")}<ul>${li(vt)}</ul></div>`:""}
+  /* the general text describes the default variation, so what changes for the chosen one comes first */
+  return `${vt.length?`<div class="how-v">${L("v")}<ul>${li(vt)}</ul></div>`:""}
+    ${L("p")}<p>${esc(h.p)}</p>${L("s")}<ol>${li(h.s)}</ol>
     ${L("r")}<p>${esc(h.r)}</p>${L("a")}<p>${esc(h.a)}</p>${L("f")}<p>${esc(h.f)}</p>
     ${L("d")}<ul>${li(h.d)}</ul>${L("e")}<ul>${li(h.e)}</ul>
     ${h.c?`<p class="how-c">⚠️ <b>${p3(HOWL.c)}:</b> ${esc(h.c)}</p>`:""}`}
