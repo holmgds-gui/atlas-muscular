@@ -3,7 +3,7 @@ const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=requir
 const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const errs=[];
 for(const sx of ['m','f'])for(const vp of [{width:1440,height:900},{width:390,height:844}]){
- const p=await b.newPage({viewport:vp});p.on('pageerror',e=>errs.push(e.message));
+ const p=await b.newPage({viewport:vp});await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
  await p.goto(BASE);await p.waitForTimeout(300);
  await p.evaluate(s=>{setTab('atlas');setModel('det');setSex(s);setView(innerWidth>900?'both':'front')},sx);await p.waitForTimeout(100);
  const r=await p.evaluate(()=>{const out=[];

@@ -17,10 +17,12 @@ node tests/como-fazer-json.js           # sem navegador: pt/en/es do "Como fazer
 node tests/peso.js
 node tests/treinos-prontos.js
 node tests/sequencia.js
+node tests/apresentacao.js              # carrossel da 1ª vez (iPhone, Android, computador, app instalado)
 node tests/i18n-coleta.js pt && node tests/i18n-coleta.js en && node tests/i18n-coleta.js es && node tests/i18n-sobras.js
 ```
 
 - Outro endereço: `BASE=http://localhost:9000/index.html node tests/clique.js`.
 - Prints e coletas vão para `tests/out/` (fora do Git).
 - Cada teste termina com `errs []` (ou `erros []`) quando a página não teve erros. Erros `ERR_TUNNEL_CONNECTION_FAILED` são só fontes da web bloqueadas no ambiente de teste.
+- Os outros testes marcam `atlas-intro` com `addInitScript`, para o carrossel de boas-vindas não cobrir a tela. Teste novo: faça o mesmo.
 - Os testes apagam o `localStorage` da página de teste e semeiam dados de exemplo; não use contra o seu celular.

@@ -2,7 +2,7 @@
 const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=require("path").join(__dirname,"out");require("fs").mkdirSync(OUT,{recursive:true});
 const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const errs=[];
-const p=await b.newPage({viewport:{width:1280,height:800}});p.on('pageerror',e=>errs.push(e.message));
+const p=await b.newPage({viewport:{width:1280,height:800}});await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
 await p.goto(BASE);await p.waitForTimeout(400);
 const r=await p.evaluate(()=>{const out={checks:0,problems:[]};setView('both');
  for(const model of ['det','bas']){setModel(model);const ids=model==='det'?Object.keys(M):Object.keys(BASIC);

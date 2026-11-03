@@ -135,7 +135,13 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 - Pedido do dono: mais treinos prontos, por tipo (upper/lower, push/pull/legs, corpo inteiro, um músculo por dia) e por músculo ("se eu apertar em costas, aparece um treino só de costas, um upper, um pull e um full body"). Escolhas: página nova dentro da aba Treinos, as 4 divisões, iniciante e avançado, academia completa.
 - Resultado: **44 treinos**, explicação de cada divisão ("Como funciona"), "Qual escolher?" por dias na semana, semana pronta por nível ("Adicionar a semana toda"), filtro por músculo, "Treinar agora" e "Salvar em Meus treinos". Base: frequência 2× por semana, total de séries semanal, compostos primeiro e recomendações do ACSM ([FONTES.md](FONTES.md), seção 4c).
 
-## 15. Perguntas que o dono fez (respostas resumidas)
+## 15. Apresentação da primeira vez (nov/2026)
+
+- Pedido do dono: um carrossel de imagens e instruções que aparece só na primeira vez que a pessoa abre o link. Escolhas: mostrar como instalar, o Atlas, Treinos e Hoje/Ao vivo, Progresso/ranking/conquistas; imagens com **prints do próprio app**; no iPhone mostrar de novo no app instalado, sem a parte de instalar; botão para rever em Configurações.
+- Resultado: 8 telas no navegador (7 no app instalado): boas-vindas, instalar (passos certos para iPhone, Android/Samsung e computador, com "Instalar agora" no Chrome do Android), tocar no músculo, escolher o exercício, treinos prontos, ao vivo, progresso, nível e conquistas. Prints nos 3 idiomas, claro e escuro. Quem já usava o app não vê.
+- Corrigido junto: com "Ampliar boneco" no celular, os botões espremiam o nome do músculo; o botão "Cartão para Stories" no quadro do nível geral quase não aparecia no tema claro.
+
+## 16. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.
 - **Vale no computador?** Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
@@ -150,7 +156,7 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 - **Escala do Progresso**: a visão Dia usa a escala por treino (até ~11 séries); a visão Semana usa a escala semanal (10–20 ideal).
 - **Claude Code vs app**: uma conversa nova não vê esta conversa. Por isso existe o `CLAUDE.md`. Os limites de uso são compartilhados entre o Claude e o Claude Code.
 
-## 16. Ideias e pendências
+## 17. Ideias e pendências
 
 - Ícone novo do app (aguardando a escolha do dono).
 - Anotar o esforço de cada série (repetições sobrando, "RIR") para a sugestão de carga ficar mais precisa (sugerido, não pedido ainda).

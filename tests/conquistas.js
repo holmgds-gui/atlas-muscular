@@ -4,7 +4,7 @@ const {chromium}=require('playwright');const out=OUT;
 (async()=>{const b=await chromium.launch();const errs=[];
 for(const [loc,theme] of [['pt-BR','light'],['es-ES','dark'],['en-US','dark']]){
 const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,timezoneId:'America/Sao_Paulo',colorScheme:theme,locale:loc});
-const p=await ctx.newPage();p.on('pageerror',e=>errs.push(e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
 await p.goto(BASE);await p.waitForTimeout(300);
 await p.evaluate(()=>{localStorage.clear();
   const R=(id,sel={})=>{const f=FAMBY[id];const s={...f.d,...sel};return [vName(f,s),mkRef(f,s)]};

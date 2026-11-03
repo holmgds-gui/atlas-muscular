@@ -37,6 +37,8 @@ App de academia gratuito, em português, inglês e espanhol, que funciona no nav
 - **Conquistas:** ~90 conquistas (semanas seguidas com 3 treinos, mês, peso do corpo, recordes, engraçadas…) e 🔥 da sequência na tela Hoje.
 - **Cartão para Stories** da semana, do ranking, do treino e das conquistas.
 
+**Apresentação:** na primeira vez, um carrossel rápido mostra como instalar e como usar cada parte (dá para rever em Configurações).
+
 **Configurações:** nome, peso, corpo, idioma, tema claro/escuro, cor, tamanho da letra, meta semanal, timer, sons, backup e mais.
 
 ## Seus dados
@@ -53,7 +55,7 @@ As listas de exercícios, as faixas de séries, o ranking de força, o "Como faz
 - [`sw.js`](sw.js) deixa o app funcionar offline. **A cada mudança, suba o número do cache** (`atlas-vNN`), senão os celulares podem continuar com a versão velha.
 - Publicar: commit na `main` e push; o GitHub Pages publica em ~1 minuto.
 - Testes automáticos em [`tests/`](tests/) (Playwright): toque nos músculos, variações, Ao vivo, conquistas, "Como fazer", treinos prontos, traduções e mais.
-- [`tools/`](tools/): fonte das famílias de exercícios e o gerador que monta os dados do `index.html`.
+- [`tools/`](tools/): fonte das famílias de exercícios, o gerador que monta os dados do `index.html` e o script dos prints da apresentação (`intro-shots.js`, que salva em [`intro/`](intro/)).
 
 ## Documentação
 

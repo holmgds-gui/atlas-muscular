@@ -158,7 +158,7 @@ details.how b{font-size:13px;color:var(--muted)}
 .ach-bar{height:4px;border-radius:2px;background:var(--chip);overflow:hidden;margin-top:4px}.ach-bar i{display:block;height:100%;background:var(--target)}
 .streak{color:var(--target);font-weight:700;border:0;background:none;padding:0;font:inherit;font-weight:700;cursor:pointer}
 .card-prev{display:block;width:min(260px,70%);margin:0 auto 10px;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,.3)}
-.rk-share{background:rgba(255,255,255,.12);color:inherit;border-color:rgba(255,255,255,.2)}
+.rk-hero .rk-share{background:rgba(255,255,255,.12);color:inherit;border-color:rgba(255,255,255,.2)}
 /* configurações */
 .cf{gap:0;padding-block:4px}
 .cf-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
@@ -442,8 +442,42 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   #tab-atlas.covered .p-title{font-size:22px}
   #tab-atlas.covered .p-body{grid-area:body;border-top:1px solid var(--line);background:var(--surface)}
   .p-top .clear{flex:none}
+  /* boneco ampliado com músculo escolhido: botões embaixo do nome, sem espremer o título */
+  .p-top:has(#clear:not([hidden])){flex-wrap:wrap;gap:8px}
+  .p-top:has(#clear:not([hidden])) > div{flex-basis:100%}
 }
 @media (min-width:901px){.listbtn{display:none!important}}
+/* ---- apresentação (carrossel da 1ª vez) ---- */
+.intro{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(10,12,15,.55)}
+.in-box{position:relative;display:flex;flex-direction:column;width:100%;height:100%;background:var(--bg);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);box-sizing:border-box;overflow:hidden}
+@media (min-width:600px){.in-box{width:440px;height:min(860px,94vh);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}}
+.in-top{display:flex;align-items:center;gap:10px;padding:12px 14px 4px 18px}
+.in-bars{flex:1;display:flex;gap:4px}.in-bars i{flex:1;height:4px;border-radius:2px;background:var(--line);transition:background .25s}.in-bars i.on{background:var(--target)}
+.in-skip{border:0;background:none;color:var(--muted);font-weight:600;font-size:15px;padding:8px 6px}
+.in-track{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;scroll-behavior:smooth}
+.in-track::-webkit-scrollbar{display:none}
+.in-s{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:6px 24px 10px;box-sizing:border-box;overflow-y:auto;text-align:center}
+.in-s h2{margin:0;font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1.05;letter-spacing:.01em}
+.in-s p{margin:0;max-width:36ch;font-size:15.5px;line-height:1.45;color:var(--muted)}
+.in-s p b{color:var(--ink);font-weight:600}
+.in-ph{flex:none;height:min(50vh,460px);aspect-ratio:390/600;border-radius:22px;overflow:hidden;border:1px solid var(--line);background:var(--surface);box-shadow:0 10px 30px rgba(0,0,0,.14)}
+.in-ph img{display:block;width:100%;height:100%;object-fit:cover;object-position:top}
+.in-duo{position:relative;flex:none;height:min(50vh,460px);width:min(86vw,360px)}
+.in-duo .in-ph{position:absolute;top:0;height:88%}
+.in-duo .in-ph:first-child{left:0;transform:rotate(-5deg);transform-origin:bottom left}
+.in-duo .in-ph:last-child{right:0;top:12%;transform:rotate(4deg);transform-origin:bottom right}
+.in-logo{width:112px;height:112px;border-radius:26px;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.in-word{font-family:var(--f-display);font-weight:700;font-size:40px;letter-spacing:.04em;line-height:1}.in-word b{color:var(--target)}
+.in-hint{font-size:13px!important}
+.in-steps{list-style:none;margin:0;padding:0;display:grid;gap:10px;width:100%;max-width:340px;text-align:left;counter-reset:st}
+.in-steps li{counter-increment:st;display:grid;grid-template-columns:30px 1fr;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;font-size:15px;line-height:1.35}
+.in-steps li::before{content:counter(st);display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--target);color:#fff;font-weight:700;font-size:14px}
+.in-steps svg{width:18px;height:18px;vertical-align:-3px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.in-note{background:var(--chip);border-radius:12px;padding:10px 12px;font-size:13.5px!important;text-align:left}
+.in-bot{display:flex;align-items:center;gap:10px;padding:8px 18px 16px}
+.in-bot .btn{min-height:48px;font-size:16px;border-radius:12px}
+.in-back{flex:none}.in-next{flex:1}
+.in-inst{width:100%;max-width:340px;min-height:46px}
 /* ---- exercise variations ---- */
 .vars{grid-column:2 / span 2;display:grid;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
 .vax{display:grid;gap:4px}
@@ -729,6 +763,13 @@ button.brand:hover{background:var(--chip)}
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gTitle">
     <div class="sheet-h"><h3 id="gTitle"></h3><button class="btn" data-close>Fechar</button></div>
     <div class="helpb" id="gBody"></div>
+  </div>
+</div>
+<div class="intro" id="intro" hidden data-notr>
+  <div class="in-box" role="dialog" aria-modal="true" aria-labelledby="inT0">
+    <div class="in-top"><div class="in-bars" id="inBars" aria-hidden="true"></div><button class="in-skip" id="inSkip"></button></div>
+    <div class="in-track" id="inTrack"></div>
+    <div class="in-bot"><button class="btn in-back" id="inBack"></button><button class="btn primary in-next" id="inNext"></button></div>
   </div>
 </div>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -4167,6 +4208,7 @@ function renderConf(){
 
   <h3 class="section-t">Sobre</h3>
   <div class="card cf">
+    ${cfRow(tx("Apresentação","Welcome tour","Presentación"),tx("As telas de boas-vindas que explicam o app.","The welcome screens that explain the app.","Las pantallas de bienvenida que explican la app."),`<button class="btn" data-cact="intro">${tx("Ver","View","Ver")}</button>`)}
     ${cfRow("Compartilhar o app","Mande o link para os amigos.",`<button class="btn" data-cact="share">Compartilhar</button>`)}
     ${cfRow("Sugestões e avaliação","Abre uma página no GitHub para mandar ideias ou problemas.",`<a class="btn" href="https://github.com/holmgds-gui/atlas-muscular/issues/new" target="_blank" rel="noopener">Enviar</a>`)}
     ${cfRow("Fontes dos estudos","Todos os artigos e links usados no app.",`<a class="btn" href="https://github.com/holmgds-gui/atlas-muscular/blob/main/docs/FONTES.md" target="_blank" rel="noopener">Ver</a>`)}
@@ -4196,6 +4238,7 @@ $("confBody").addEventListener("click",e=>{
   if(k==="delMan!"){rank.man=[];saveRank()}
   if(k==="delAll!"){try{Object.keys(localStorage).filter(x=>x.startsWith("atlas-")).forEach(x=>localStorage.removeItem(x))}catch(_){}location.reload();return}
   if(k.endsWith("!")){cfConfirm=null;toast("Apagado");return renderConf()}
+  if(k==="intro"){openIntro();return}
   if(k==="share"){const url="https://holmgds-gui.github.io/atlas-muscular/";
     if(navigator.share)navigator.share({title:"Muscle Atlas",text:L("App de academia: músculos, treinos e ranking de força"),url}).catch(()=>{});
     else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast("Link copiado")).catch(()=>toast(url));
@@ -4231,7 +4274,91 @@ function setTab(t){
 }
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
 
+/* ------------------------------------------------------------------ apresentação (carrossel da 1ª vez)
+   Aparece só na 1ª vez em cada aparelho/navegador (atlas-intro). No navegador tem a tela "Instale";
+   no app instalado não. No iPhone o app instalado guarda os dados separado do Safari, então mostra de novo
+   (sem "Instale"). Quem já tem dados não vê. Rever: Configurações › Apresentação ou ?intro na URL.
+   Prints em intro/<idioma>-<tema>-<tela>.webp, gerados por tools/intro-shots.js. */
+const STANDALONE=matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+let inPrompt=null,inI=0,inN=0;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();inPrompt=e;const b=$("inInst");if(b)b.hidden=false});
+function introSlides(){
+  const ua=navigator.userAgent,ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),
+    and=/Android/i.test(ua),notSafari=ios&&/CriOS|FxiOS|EdgiOS|OPiOS|GSA|Instagram|FBAN|FBAV|Line|WhatsApp|Snapchat|TikTok/i.test(ua);
+  const dk=CONF.theme==="dark"||(CONF.theme!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
+  const img=k=>`<div class="in-ph"><img src="intro/${LANG}-${dk?"dark":"light"}-${k}.webp" alt="" decoding="async"></div>`;
+  const share=`<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3M8 7l4-4 4 4M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/></svg>`;
+  const S=[];
+  S.push(`<img class="in-logo" src="icon-512.png" alt=""><div class="in-word">MUSCLE <b>ATLAS</b></div>
+    <h2 id="inT0">${tx("Bem-vindo!","Welcome!","¡Bienvenido!")}</h2>
+    <p>${tx("Descubra os melhores exercícios para cada músculo, monte seus treinos e acompanhe sua evolução. Tudo com base em estudos.","Find the best exercises for each muscle, build your workouts and track your progress. All based on research.","Descubre los mejores ejercicios para cada músculo, arma tus entrenos y sigue tu progreso. Todo basado en estudios.")}</p>
+    <p class="in-hint">${tx("Leva 1 minuto. Passe para o lado →","Takes 1 minute. Swipe →","Toma 1 minuto. Desliza →")}</p>`);
+  if(!STANDALONE){
+    const steps=ios?[
+      ...(notSafari?[tx("Abra este link no <b>Safari</b> (em outros navegadores a opção não aparece)","Open this link in <b>Safari</b> (other browsers don't have the option)","Abre este enlace en <b>Safari</b> (en otros navegadores no aparece la opción)")]:[]),
+      tx(`Toque em <b>Compartilhar</b> ${share} na barra do Safari (se não aparecer, toque em <b>•••</b>)`,`Tap <b>Share</b> ${share} in Safari's bar (if you don't see it, tap <b>•••</b>)`,`Toca <b>Compartir</b> ${share} en la barra de Safari (si no aparece, toca <b>•••</b>)`),
+      tx("Escolha <b>Adicionar à Tela de Início</b> (pode estar em <b>Ver mais</b>)","Choose <b>Add to Home Screen</b> (it may be under <b>View more</b>)","Elige <b>Agregar a pantalla de inicio</b> (puede estar en <b>Ver más</b>)"),
+      tx("Abra o Muscle Atlas pelo ícone novo","Open Muscle Atlas from the new icon","Abre Muscle Atlas desde el ícono nuevo")
+    ]:and?[
+      tx("No <b>Chrome</b>, toque no menu <b>⋮</b> (no Samsung Internet, no menu <b>☰</b>)","In <b>Chrome</b>, tap the <b>⋮</b> menu (in Samsung Internet, the <b>☰</b> menu)","En <b>Chrome</b>, toca el menú <b>⋮</b> (en Samsung Internet, el menú <b>☰</b>)"),
+      tx("Escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>","Choose <b>Install app</b> or <b>Add to Home screen</b>","Elige <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>"),
+      tx("Abra o Muscle Atlas pelo ícone novo","Open Muscle Atlas from the new icon","Abre Muscle Atlas desde el ícono nuevo")
+    ]:[
+      tx("No celular: abra este link e adicione à tela de início","On your phone: open this link and add it to the home screen","En el celular: abre este enlace y agrégalo a la pantalla de inicio"),
+      tx("No computador: no Chrome ou Edge, clique no ícone de instalar na barra de endereço, ou use direto aqui","On a computer: in Chrome or Edge, click the install icon in the address bar, or just use it here","En la computadora: en Chrome o Edge, haz clic en el ícono de instalar en la barra de direcciones, o úsalo aquí")
+    ];
+    S.push(`<h2>${tx("Instale no celular","Install it on your phone","Instálalo en tu celular")}</h2>
+      <p>${tx("Fica com ícone na tela de início, abre em tela cheia e funciona sem internet.","It gets a home-screen icon, opens full screen and works offline.","Tendrás un ícono en la pantalla de inicio, se abre en pantalla completa y funciona sin internet.")}</p>
+      <ol class="in-steps">${steps.map(s=>`<li><span>${s}</span></li>`).join("")}</ol>
+      <button class="btn primary in-inst" id="inInst"${inPrompt?"":" hidden"}>${tx("Instalar agora","Install now","Instalar ahora")}</button>
+      <p class="in-note">${ios?tx("No iPhone, o app instalado começa do zero: instale <b>antes</b> de anotar seus treinos. ","On iPhone the installed app starts fresh: install it <b>before</b> logging workouts. ","En iPhone la app instalada empieza de cero: instálala <b>antes</b> de anotar tus entrenos. "):""}${tx("Seus dados ficam só neste aparelho.","Your data stays on this device only.","Tus datos se quedan solo en este dispositivo.")}</p>`);
+  }
+  S.push(`${img("atlas")}<h2>${tx("Toque num músculo","Tap a muscle","Toca un músculo")}</h2>
+    <p>${tx("Ele fica vermelho e aparece a lista de exercícios, do que <b>mais estimula</b> para o que menos, com o tipo de estudo de cada um.","It turns red and you get the list of exercises, from the <b>most stimulating</b> down, with the kind of study behind each one.","Se pone rojo y aparece la lista de ejercicios, del que <b>más estimula</b> al que menos, con el tipo de estudio de cada uno.")}</p>`);
+  S.push(`${img("ex")}<h2>${tx("Escolha o exercício","Pick the exercise","Elige el ejercicio")}</h2>
+    <p>${tx("Os músculos que ajudam ficam <b>laranja</b>. Troque pegada, banco ou equipamento e veja o que muda. Em <b>Como fazer</b> tem o passo a passo.","Helper muscles turn <b>orange</b>. Change grip, bench or equipment and see what changes. <b>How to do it</b> has the step by step.","Los músculos que ayudan se ponen <b>naranjas</b>. Cambia agarre, banco o equipo y mira qué cambia. En <b>Cómo hacerlo</b> está el paso a paso.")}</p>`);
+  S.push(`${img("prontos")}<h2>${tx("Treinos prontos ou do seu jeito","Ready-made or your own","Entrenos listos o a tu manera")}</h2>
+    <p>${tx("Na aba <b>Treinos</b>, pegue um treino pronto (iniciante ou avançado) ou monte o seu. No boneco, <b>Montar treino</b> monta um com os músculos que você tocar.","In <b>Workouts</b>, grab a ready-made plan (beginner or advanced) or build your own. On the figure, <b>Build a workout</b> makes one from the muscles you tap.","En <b>Entrenos</b>, toma un entreno listo (principiante o avanzado) o arma el tuyo. En el muñeco, <b>Armar entreno</b> arma uno con los músculos que toques.")}</p>`);
+  S.push(`${img("live")}<h2>${tx("Treine ao vivo","Train live","Entrena en vivo")}</h2>
+    <p>${tx("Em <b>Hoje › Ao vivo</b>, siga série a série: o app conta o descanso, sugere a próxima carga e avisa quando você bate um recorde. Com pressa? Só <b>Marcar como feito</b>.","In <b>Today › Live</b>, go set by set: the app times your rest, suggests the next load and tells you when you hit a record. In a hurry? Just <b>Mark as done</b>.","En <b>Hoy › En vivo</b>, sigue serie a serie: la app cuenta el descanso, sugiere la próxima carga y avisa cuando logras un récord. ¿Con prisa? Solo <b>Marcar como hecho</b>.")}</p>`);
+  S.push(`${img("prog")}<h2>${tx("Veja o que você treinou","See what you trained","Mira lo que entrenaste")}</h2>
+    <p>${tx("Em <b>Progresso</b>, o mapa mostra quanto cada músculo trabalhou na semana e se está na faixa ideal.","In <b>Progress</b>, the map shows how much each muscle worked this week and whether it's in the ideal range.","En <b>Progreso</b>, el mapa muestra cuánto trabajó cada músculo en la semana y si está en el rango ideal.")}</p>`);
+  S.push(`<div class="in-duo">${img("rank")}${img("ach")}</div><h2>${tx("Seu nível e suas conquistas","Your level and badges","Tu nivel y tus logros")}</h2>
+    <p>${tx("Do <b>Ameba</b> ao <b>Bizarro</b>: compare sua força com quem treina e ganhe conquistas a cada semana com 3 treinos. 🔥","From <b>Amoeba</b> to <b>Freak</b>: compare your strength with other lifters and earn badges every week with 3 workouts. 🔥","De <b>Ameba</b> a <b>Fenómeno</b>: compara tu fuerza con quien entrena y gana logros cada semana con 3 entrenos. 🔥")}</p>
+    <p class="in-hint">${tx("Dúvida em alguma tela? Toque no <b>+</b> ao lado do título.","Unsure about a screen? Tap the <b>+</b> next to its title.","¿Dudas en alguna pantalla? Toca el <b>+</b> junto al título.")}</p>`);
+  return S;
+}
+function openIntro(){
+  closeModals();const S=introSlides();inN=S.length;inI=0;
+  $("inTrack").innerHTML=S.map((h,i)=>`<section class="in-s" aria-roledescription="slide" aria-label="${i+1}/${S.length}">${h}</section>`).join("");
+  $("inBars").innerHTML=S.map(()=>"<i></i>").join("");
+  $("inSkip").textContent=tx("Pular","Skip","Saltar");$("inBack").textContent=tx("Voltar","Back","Atrás");
+  $("intro").hidden=false;$("inTrack").scrollLeft=0;inUpd();if(!matchMedia("(pointer:coarse)").matches)setTimeout(()=>$("inNext").focus({preventScroll:true}),50);
+}
+function inUpd(){
+  [...$("inBars").children].forEach((b,i)=>b.classList.toggle("on",i<=inI));
+  $("inBack").hidden=inI===0;
+  $("inNext").textContent=inI===inN-1?tx("Começar","Get started","Empezar"):tx("Próximo","Next","Siguiente");
+}
+function inGo(i){i=Math.max(0,Math.min(inN-1,i));const t=$("inTrack");t.scrollTo({left:i*t.clientWidth,behavior:CONF.noanim?"auto":"smooth"});inI=i;inUpd()}
+function closeIntro(){LS.set("atlas-intro",1);$("intro").hidden=true}
+$("inTrack").addEventListener("scroll",()=>{const t=$("inTrack"),i=Math.round(t.scrollLeft/Math.max(1,t.clientWidth));if(i!==inI){inI=i;inUpd()}},{passive:true});
+$("inNext").addEventListener("click",()=>inI>=inN-1?closeIntro():inGo(inI+1));
+$("inBack").addEventListener("click",()=>inGo(inI-1));
+$("inSkip").addEventListener("click",closeIntro);
+$("intro").addEventListener("click",e=>{
+  if(e.target.id==="intro")return closeIntro();
+  if(e.target.closest("#inInst")&&inPrompt){inPrompt.prompt();inPrompt.userChoice.finally(()=>{inPrompt=null;const b=$("inInst");if(b)b.hidden=true})}
+});
+addEventListener("keydown",e=>{if($("intro").hidden)return;if(e.key==="ArrowRight")inGo(inI+1);else if(e.key==="ArrowLeft")inGo(inI-1);else if(e.key==="Escape")closeIntro()});
+addEventListener("resize",()=>{if(!$("intro").hidden)$("inTrack").scrollLeft=inI*$("inTrack").clientWidth});
+
 chips();setView(view);setModel(model);setTab(tab);
+if(/[?&]intro\b/.test(location.search))openIntro();
+else if(!LS.get("atlas-intro",0)){
+  let used=false;try{used=!!(workouts.length||plans.length||rank.bw||rank.man.length||localStorage.getItem("atlas-conf"))}catch(_){}
+  if(used)LS.set("atlas-intro",1);else openIntro();
+}
 if(matchMedia("(max-width:900px)").matches)q.placeholder="Buscar";
 matchMedia("(max-width:900px)").addEventListener("change",()=>setView(view));
 </script>
