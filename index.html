@@ -116,7 +116,7 @@ header{position:relative}
 .cbox{display:grid;gap:8px}.cbox .c-big{font-family:var(--f-display);font-size:34px;font-weight:700;line-height:1}.cbox .c-big small{font-size:15px;color:var(--muted);font-weight:600;margin-left:4px}
 .c-charts{display:flex;align-items:flex-end;gap:12px;margin-top:4px}.c-ringbox{flex:none;width:104px;display:grid;justify-items:center;gap:4px;font-size:12px;color:var(--muted);text-align:center;line-height:1.2}
 .c-ring{width:100px;height:100px}.c-rt{font-family:var(--f-display);font-size:26px;font-weight:700;fill:var(--ink)}.c-rs{font-size:11px;fill:var(--muted)}
-.c-barbox{flex:1;min-width:0}.c-bars{width:100%;height:auto;display:block}.c-bv{font-size:10px;font-weight:600;fill:var(--ink)}.c-bd{font-size:10px;fill:var(--muted)}
+.c-barbox{flex:1;min-width:0}.c-day{align-items:center}.c-daysum{flex:1;min-width:0;display:grid;gap:6px}.c-bars{width:100%;height:auto;display:block}.c-bv{font-size:10px;font-weight:600;fill:var(--ink)}.c-bd{font-size:10px;fill:var(--muted)}
 .c-leg{display:flex;gap:10px;justify-content:center;font-size:11px;color:var(--muted);margin-top:2px}.c-leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 .lv-inps label span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
 .kgh.kgb{text-align:center;margin-top:4px}
@@ -4097,18 +4097,25 @@ function renderProg(){
 }
 /* cardio of the week/day (owner: minutes in Progresso). WHO 2020: 150–300 min moderate a week; vigorous minutes
    count double; light is shown but does not count toward the goal. */
+const cRing0=()=>`<svg class="c-ring" viewBox="0 0 110 110" aria-hidden="true"><circle cx="55" cy="55" r="44" fill="none" stroke="var(--chip)" stroke-width="11"/><text x="55" y="53" text-anchor="middle" class="c-rt">0</text><text x="55" y="70" text-anchor="middle" class="c-rs">/ 30 min</text></svg>`;
 function cardioCard(r){const C=cardioIn(r.from,r.to),wk=pMode==="week",who=Math.round(C.who),pct=Math.min(1,C.who/150);
   const head=`<div class="row between"><h3 class="section-t" style="margin:0">🏃 Cardio<button class="help sm" data-help="cardio" aria-label="${tx("Sobre o cardio","About cardio","Sobre el cardio")}">+</button></h3></div>`;
+  if(!C.min&&!wk)return `<div class="card cbox">${head}<div class="c-charts c-day"><div class="c-ringbox">${cRing0()}<span>${tx("Meta do dia","Daily goal","Meta del día")}</span></div><p class="muted" style="margin:0;flex:1">${tx("Nenhum cardio neste dia. Registre em Hoje › + Registrar cardio, ou ponha no seu treino.","No cardio on this day. Log it in Today › + Log cardio, or add it to your workout.","Ningún cardio este día. Regístralo en Hoy › + Registrar cardio, o ponlo en tu entreno.")}</p></div></div>`;
   if(!C.min)return `<div class="card cbox">${head}<p class="muted" style="margin:0">${wk?tx("Nenhum cardio nesta semana.","No cardio this week.","Ningún cardio esta semana."):tx("Nenhum cardio neste dia.","No cardio on this day.","Ningún cardio este día.")} ${tx("Registre em Hoje › + Registrar cardio, ou ponha no seu treino.","Log it in Today › + Log cardio, or add it to your workout.","Regístralo en Hoy › + Registrar cardio, o ponlo en tu entreno.")}</p></div>`;
   const sum=`<div class="c-big">${Math.round(C.min)}<small>min</small></div>
     <span class="muted-s" style="margin:0">${[tx(`${C.n} ${C.n===1?"sessão":"sessões"}`,`${C.n} ${C.n===1?"session":"sessions"}`,`${C.n} ${C.n===1?"sesión":"sesiones"}`),C.km?kmTxt(C.km)+" km":"",`≈ ${C.kcal.toLocaleString(LOC)} kcal`].filter(Boolean).join(" · ")}</span>`;
-  if(!wk)return `<div class="card cbox">${head}${sum}</div>`;
-  /* WHO ring: fills up to 150 min (moderate 1×, hard 2×; light doesn't count) */
-  const R=44,L=2*Math.PI*R,ok=C.who>=150;
-  const ring=`<svg class="c-ring" viewBox="0 0 110 110" role="img" aria-label="${tx(`Meta da OMS: ${who} de 150 minutos`,`WHO goal: ${who} of 150 minutes`,`Meta de la OMS: ${who} de 150 minutos`)}">
+  /* ring that fills up to a goal (moderate 1×, hard 2×; light doesn't count): week = WHO 150 min; day = 30 min
+     (150 spread over 5 days; owner chose the day ring) */
+  const mkRing=(v,goal,lab)=>{const R=44,L=2*Math.PI*R,ok=v>=goal,f=Math.min(1,v/goal);
+    return `<svg class="c-ring" viewBox="0 0 110 110" role="img" aria-label="${esc(lab)}: ${v} / ${goal} min">
     <circle cx="55" cy="55" r="${R}" fill="none" stroke="var(--chip)" stroke-width="11"/>
-    <circle cx="55" cy="55" r="${R}" fill="none" stroke="${ok?"#2E9E5B":"var(--syn)"}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(L*pct).toFixed(1)} ${L.toFixed(1)}" transform="rotate(-90 55 55)"/>
-    <text x="55" y="53" text-anchor="middle" class="c-rt">${who}</text><text x="55" y="70" text-anchor="middle" class="c-rs">/ 150 min</text></svg>`;
+    ${v>0?`<circle cx="55" cy="55" r="${R}" fill="none" stroke="${ok?"#2E9E5B":"var(--syn)"}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(L*f).toFixed(1)} ${L.toFixed(1)}" transform="rotate(-90 55 55)"/>`:""}
+    <text x="55" y="53" text-anchor="middle" class="c-rt">${v}</text><text x="55" y="70" text-anchor="middle" class="c-rs">/ ${goal} min</text></svg>`};
+  if(!wk){const ok=who>=30;
+    return `<div class="card cbox">${head}<div class="c-charts c-day"><div class="c-ringbox">${mkRing(who,30,tx("Meta do dia","Daily goal","Meta del día"))}<span>${ok?tx("Meta do dia batida! 🎉","Daily goal reached! 🎉","¡Meta del día cumplida! 🎉"):tx("Meta do dia","Daily goal","Meta del día")}</span></div>
+      <div class="c-daysum">${sum}</div></div>
+      <span class="muted-s" style="margin:0">${tx("30 min por dia em 5 dias = 150 min, a meta semanal da OMS. Moderado conta 1×, forte 2×; leve não entra.","30 min a day on 5 days = 150 min, the WHO weekly goal. Moderate counts 1×, hard 2×; light doesn't count.","30 min al día en 5 días = 150 min, la meta semanal de la OMS. Moderado cuenta 1×, intenso 2×; suave no cuenta.")}</span></div>`}
+  const ring=mkRing(who,150,tx("Meta da OMS","WHO goal","Meta de la OMS"));const ok=who>=150;
   /* minutes per day (Mon–Sun), stacked by intensity */
   const days=[...Array(7)].map((_,i)=>{const d=fromIso(r.from);d.setDate(d.getDate()+i);const iso=isoDate(d),o={l:0,m:0,f:0};
     for(const w of workouts){if(w.done===false||w.date!==iso)continue;for(const it of w.items||[])if(isC(it))for(const st of it.sets||[]){const m=cMin(it,st,w);if(m)o[st.int||"m"]+=m}}

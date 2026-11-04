@@ -22,5 +22,12 @@ const ring=await p.$eval(".c-ring",e=>e.getAttribute("aria-label")).catch(()=>nu
 const nb=await p.$$eval(".c-bars rect",x=>x.length);if(nb<7)bad.push(loc+": barras "+nb);
 await p.screenshot({path:`${OUT}/cardio-prog-${loc}-1.png`});
 await p.evaluate(()=>document.querySelector(".cbox").scrollIntoView({block:"center"}));await p.waitForTimeout(150);await p.screenshot({path:`${OUT}/cardio-prog-${loc}-2.png`});
+// visão Dia: anel do dia (meta 30 min) — quarta tem bike 90 min forte = 180 equivalentes
+await p.evaluate(()=>{pMode="day";pOff=-3;renderProg()});await p.waitForTimeout(300);
+const dr=await p.$eval(".cbox .c-ring",e=>e.getAttribute("aria-label")).catch(()=>null);console.log(loc,"anel do dia",dr);if(!dr||!/30 min/.test(dr))bad.push(loc+": sem anel do dia");
+await p.evaluate(()=>document.querySelector(".cbox").scrollIntoView({block:"center"}));await p.waitForTimeout(150);await p.screenshot({path:`${OUT}/cardio-prog-${loc}-3-dia.png`});
+await p.evaluate(()=>{pOff=0;renderProg()});await p.waitForTimeout(200);
+if(!await p.$(".cbox .c-ring"))bad.push(loc+": dia sem cardio sem anel vazio");
+await p.evaluate(()=>document.querySelector(".cbox").scrollIntoView({block:"center"}));await p.waitForTimeout(150);await p.screenshot({path:`${OUT}/cardio-prog-${loc}-4-dia-vazio.png`});
 await ctx.close()}
 console.log("problemas",bad);console.log("errs",errs);await b.close()})();
