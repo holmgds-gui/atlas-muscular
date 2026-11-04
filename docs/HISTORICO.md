@@ -143,7 +143,7 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 
 ## 16. Carga nos Meus treinos e cardio (nov/2026)
 
-- **Carga**: o dono achou pouco didático anotar o peso e pediu a opção também na aba Treinos. Escolha: campo de carga + última usada. Cada exercício do treino montado ganhou "Carga (kg)" com o "+" de qual peso anotar, o aviso do equipamento (por halter, total com a barra…) e "Última vez". A carga já vem preenchida ao treinar no Hoje e no Ao vivo.
+- **Carga**: o dono achou pouco didático anotar o peso e pediu a opção também na aba Treinos. Escolha: campo de carga + última usada. Cada exercício do treino montado ganhou "Carga (kg)" com o "+" de qual peso anotar, o aviso do equipamento (por halter, total com a barra…) e "Última vez". A carga já vinha preenchida ao treinar no Hoje e no Ao vivo. No mesmo dia o dono pediu para **tirar** o campo e deixar o peso só onde estava (Hoje e Ao vivo).
 - **Cardio** (o dono disse "card"; confirmado como cardio). Escolhas: nos treinos **e** registro avulso; anotar tempo, distância, intensidade e calorias; minutos no Progresso e conquistas. Resultado: 9 tipos (caminhada, corrida, bicicleta, elíptico, escada, remo, pular corda, natação, HIIT), intensidade pelo teste da fala, calorias estimadas pelo Compendium 2024, "+ Registrar cardio" em Hoje, cartão de cardio no Progresso com a meta da OMS (150 min por semana, forte vale em dobro) e 9 conquistas de cardio.
 - Corrigido junto: séries só com a carga planejada não contam mais como feitas no Ao vivo, e a "Última vez" ignora séries sem repetições.
 

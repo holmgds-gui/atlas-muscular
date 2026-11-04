@@ -353,8 +353,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .title-inp{font-family:var(--f-display);font-weight:700;font-size:22px;padding:6px 10px}
 .fi{display:grid;gap:8px;padding-top:10px;border-top:1px solid var(--line)}
 .fi-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.fi-top .fi-act{flex:none}
-.fi-row{display:grid;grid-template-columns:64px 84px 110px;gap:8px;align-items:end}.fi-row.c{grid-template-columns:90px 150px}.fl-kg span{display:flex;align-items:center;gap:2px}.fl-kg .help.sm{margin:-6px 0}
-.fi-kh{margin-top:-4px}.fi-kc{margin:-2px 0 0}.fi .last{margin:0}
+.fi-row{display:grid;grid-template-columns:64px 84px;gap:8px;align-items:end}.fi-row.c{grid-template-columns:90px 150px}.fi-kc{margin:-2px 0 0}
 .fi-n{font-weight:600;font-size:15px;align-self:center;min-width:0;line-height:1.25}
 .muted-s{display:block;font-weight:400;font-size:12px;color:var(--muted);margin-top:2px}
 .fl{display:grid;gap:4px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
@@ -429,7 +428,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   .btabs button[aria-current="page"]{color:var(--accent,var(--target))}
   .seg.model{width:100%}
   .seg.model button{flex:1;padding:6px 4px;font-size:14px;letter-spacing:.03em}
-  .fi-row{grid-template-columns:62px 80px minmax(0,120px)}
+  .fi-row{grid-template-columns:62px 80px}
   .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 }
 @media (min-width:901px){.modal{align-items:center}.sheet{border-radius:16px}}
@@ -2685,12 +2684,9 @@ HELP.peso=[tx("Qual peso anotar","Which weight to write","Qué peso anotar"),tx(
 <li><b>Peso corporal</b> (dominadas, fondos, flexiones): déjalo vacío o anota solo el <b>peso extra</b> (cinturón, disco). La app suma tu peso de Ajustes.</li>
 <li><b>Kettlebell o disco:</b> el peso de la pieza.</li></ul>
 <p>Lo más importante: anótalo <b>siempre de la misma forma</b>, así la evolución, los récords y la sugerencia de carga tienen sentido.</p>`)];
-HELP.ficha[1]+=tx(`<h4>Carga e cardio</h4><ul><li><b>Carga (kg)</b> em cada exercício é opcional: o peso que você pretende usar. Ele já vem preenchido quando você treina na aba Hoje. O "+" ao lado explica qual peso anotar, e embaixo aparece o que você fez da última vez.</li>
-<li><b>Cardio</b>: em + Adicionar exercício, toque em Cardio (esteira, bicicleta, escada…) e escolha os minutos e a intensidade.</li></ul>`,
-`<h4>Load and cardio</h4><ul><li><b>Load (kg)</b> on each exercise is optional: the weight you plan to use. It comes already filled in when you train in Today. The "+" next to it explains which weight to write, and below you see what you did last time.</li>
-<li><b>Cardio</b>: in + Add exercise, tap Cardio (treadmill, bike, stairs…) and pick the minutes and intensity.</li></ul>`,
-`<h4>Carga y cardio</h4><ul><li><b>Carga (kg)</b> en cada ejercicio es opcional: el peso que piensas usar. Ya viene completado cuando entrenas en Hoy. El "+" al lado explica qué peso anotar, y abajo aparece lo que hiciste la última vez.</li>
-<li><b>Cardio</b>: en + Agregar ejercicio, toca Cardio (cinta, bicicleta, escaladora…) y elige los minutos y la intensidad.</li></ul>`);
+HELP.ficha[1]+=tx(`<h4>Cardio</h4><p>Em + Adicionar exercício, toque em Cardio (esteira, bicicleta, escada…) e escolha os minutos e a intensidade.</p>`,
+`<h4>Cardio</h4><p>In + Add exercise, tap Cardio (treadmill, bike, stairs…) and pick the minutes and intensity.</p>`,
+`<h4>Cardio</h4><p>En + Agregar ejercicio, toca Cardio (cinta, bicicleta, escaladora…) y elige los minutos y la intensidad.</p>`);
 HELP.treino[1]+=tx(`<h4>Cardio</h4><p><b>+ Registrar cardio</b> salva um cardio avulso (tipo, minutos, distância e intensidade) no dia escolhido. Ele conta como treino feito e entra nos minutos de cardio do Progresso.</p>`,
 `<h4>Cardio</h4><p><b>+ Log cardio</b> saves a standalone cardio session (type, minutes, distance and intensity) on the chosen day. It counts as a workout done and goes into the cardio minutes in Progress.</p>`,
 `<h4>Cardio</h4><p><b>+ Registrar cardio</b> guarda un cardio suelto (tipo, minutos, distancia e intensidad) en el día elegido. Cuenta como entreno hecho y suma a los minutos de cardio del Progreso.</p>`);
@@ -2760,11 +2756,10 @@ function newPlan(){const pl={id:uid(),name:"",days:[],items:[]};plans.push(pl);r
 function mkItem(name,sets,reps,ref,min,int){if(cRef(ref))return {name,ref,target:cNum(min)?String(cNum(min)):"",notes:"",sets:[{min:"",km:"",int:int||"m"}]};
   return {name,ref:ref||null,target:reps||"",notes:"",sets:Array.from({length:Math.max(1,Math.min(10,parseInt(sets)||3))},()=>({r:"",kg:""}))}}
 /* new item for Meus treinos: exercises get sets × reps (and an optional planned load); cardio gets minutes and intensity */
-const planItem=(name,ref)=>cRef(ref)?{name,ref,min:20,int:"m"}:{name,ref,sets:CONF.sets,reps:CONF.reps,kg:""};
+const planItem=(name,ref)=>cRef(ref)?{name,ref,min:20,int:"m"}:{name,ref,sets:CONF.sets,reps:CONF.reps};
 function startPlan(pl,date){
-  /* the planned load (Meus treinos › Carga) comes already filled in every set */
   const w={id:uid(),date:date||isoDate(new Date()),title:pl?(pl.name||"Treino"):"Treino personalizado",planId:pl?pl.id:null,done:false,notes:"",
-    items:pl?pl.items.map(it=>{const x=mkItem(it.name,it.sets,it.reps,it.ref,it.min,it.int);const kg=String(it.kg??"").trim();if(kg&&!isC(x))x.sets.forEach(s=>s.kg=kg);return x}):[]};
+    items:pl?pl.items.map(it=>mkItem(it.name,it.sets,it.reps,it.ref,it.min,it.int)):[]};
   workouts.push(w);saveW();return w;
 }
 function lastFor(name,w){
@@ -2781,9 +2776,8 @@ const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
 
 /* ---------------------------------------------------------- meus treinos tab */
 let openPlan=null,askDelPlan=null;
-/* one exercise of a plan: name, then Séries · Reps · Carga (owner: write the load here too, with the "+" of which weight
-   to write and the hint for the equipment), and "Última vez" from the history. Cardio: minutes and intensity. */
-const FAR=new Date(8.64e15);
+/* one exercise of a plan: name with ⇄ ↑ ↓ ✕, then Séries · Reps (the load is written in Hoje / Ao vivo; the owner tried a
+   load field here and preferred it where it was). Cardio: minutes and intensity. */
 function fiHTML(p,it,j){
   const at=`data-pid="${p.id}" data-j="${j}"`,k=cKey(it);
   const acts=`<div class="fi-act">${k?"":`<button class="ib" data-act="swap" ${at} aria-label="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}" title="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}">⇄</button>`}<button class="ib" data-act="up" ${at} aria-label="Subir">↑</button><button class="ib" data-act="down" ${at} aria-label="Descer">↓</button><button class="ib del" data-act="rm" ${at} aria-label="Remover ${esc(dName(it.name,it.ref))}">✕</button></div>`;
@@ -2793,14 +2787,9 @@ function fiHTML(p,it,j){
       <label class="fl">${tx("Minutos","Minutes","Minutos")}<input class="inp" inputmode="numeric" ${at} data-f="min" value="${esc(it.min??"")}" placeholder="20"></label>
       <label class="fl">${tx("Intensidade","Intensity","Intensidad")}<select class="inp" ${at} data-f="int">${["l","m","f"].map(x=>`<option value="${x}"${x===int?" selected":""}>${esc(p3(CINT[x][0]))}</option>`).join("")}</select></label></div>
       <small class="muted-s fi-kc">${esc(p3(CINT[int][1]))}${min?` · ≈ ${kcalOf(k,min,int)} kcal`:""}</small></div>`}
-  const last=lastFor(it.name,{id:null,date:"9999-12-31"}),hint=kgHint(it.name,it.ref);
-  const top=last?Math.max(0,...last.sets.map(s=>numKg(s.kg)).filter(v=>v>0)):0;
   return `<div class="fi"><div class="fi-top">${head}${acts}</div><div class="fi-row">
     <label class="fl">Séries<input class="inp" inputmode="numeric" ${at} data-f="sets" value="${esc(it.sets)}"></label>
-    <label class="fl">Reps<input class="inp" ${at} data-f="reps" value="${esc(it.reps)}"></label>
-    <label class="fl fl-kg"><span>${tx("Carga (kg)","Load (kg)","Carga (kg)")}${kgHelpBtn()}</span><input class="inp" inputmode="decimal" ${at} data-f="kg" value="${esc(it.kg??"")}" placeholder="${top>0?esc(String(fkg(top))):"kg"}" aria-label="${tx("Carga em kg","Load in kg","Carga en kg")}"></label></div>
-    ${hint?`<small class="kgh fi-kh">${esc(tx("Carga: ","Load: ","Carga: ")+hint)}</small>`:""}
-    ${last?`<div class="last">${esc(L(`Última vez (${fmtDate(last.date)}):`))} <b>${last.sets.map(setTxt).join(" · ")}</b></div>`:""}</div>`}
+    <label class="fl">Reps<input class="inp" ${at} data-f="reps" value="${esc(it.reps)}"></label></div></div>`}
 function renderFicha(){
   if(fView==="prontos")return renderProntos();
   const d=todayIdx();
@@ -3016,8 +3005,7 @@ $("treinoBody").addEventListener("click",e=>{
   else if(a==="savePlan"){const x=byW();if(!x||!x.items.length)return;
     const pl={id:uid(),name:x.title&&x.title!=="Treino personalizado"?x.title:"",days:[],
       items:x.items.map(it=>{if(isC(it)){const b=it.sets[0]||{};return {name:it.name,ref:it.ref,min:cNum(b.min)||cNum(it.target)||20,int:b.int||"m"}}
-        const top=Math.max(0,...it.sets.map(st=>numKg(st.kg)).filter(v=>v>0));
-        return {name:it.name,ref:it.ref||null,sets:it.sets.length,reps:it.target||(it.sets.find(st=>(st.r??"")!=="")||{}).r||"8-12",kg:top>0?String(fkg(top)).replace(/\s/g,""):""}})};
+        return {name:it.name,ref:it.ref||null,sets:it.sets.length,reps:it.target||(it.sets.find(st=>(st.r??"")!=="")||{}).r||"8-12"}})};
     plans.push(pl);x.planId=pl.id;savePlans();saveW();openPlan=pl.id;openW=null;toast(pl.name?`${pl.name} salvo em Meus treinos`:"Salvo em Meus treinos. Dê um nome a ele");setTab("ficha");
     const c=document.querySelector(`.plan[data-pid="${pl.id}"]`);if(c){c.scrollIntoView({block:"start"});if(!pl.name){const i=c.querySelector("[data-pf]");if(i)i.focus({preventScroll:true})}}return}
   else if(a==="back"){openW=null;askDel=false}
@@ -3177,7 +3165,7 @@ function liveHTML(){
   return h}
 function liveFinish(w){w.done=true;w.dur=Math.round((Date.now()-(w.start||Date.now()))/1000);
   /* sets never done and left empty are dropped, so they don't count in Progress */
-  /* (a load alone may be the planned one from Meus treinos, so it doesn't keep a set) */
+  /* (a load alone, without reps, doesn't keep a set) */
   w.items.forEach(it=>it.sets=it.sets.filter(s=>s.ok||[s.r,s.min].some(v=>v!=null&&String(v).trim()!=="")));w.items=w.items.filter(it=>it.sets.length);
   const prs=workoutPRs(w);saveW();liveSumW=w.id;checkAch();liveSum={dur:w.dur,sets:w.items.reduce((a,it)=>a+it.sets.length,0),prs};live=null;saveLive();stopRest();
   if(prs.length)beep(2);toast(tx("Treino marcado como feito","Workout marked as done","Entreno marcado como hecho"))}

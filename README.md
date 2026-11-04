@@ -24,7 +24,6 @@ App de academia gratuito, em português, inglês e espanhol, que funciona no nav
 **Treinos**
 - **Meus treinos:** monte treinos com exercícios, séries, repetições e dias da semana.
 - **Treinos prontos:** 44 treinos em 4 divisões (corpo inteiro, superior/inferior, push/pull/legs, um músculo por dia), nível iniciante ou avançado, com explicação de cada divisão, semana pronta e filtro por músculo.
-- **Carga planejada** em cada exercício, com a última carga usada e o aviso de qual peso anotar.
 - **Cardio** (esteira, bicicleta, escada, remo, natação, HIIT…) dentro do treino, com minutos, distância, intensidade e calorias estimadas.
 - **Trocar exercício (⇄)** por um equivalente que treina os mesmos músculos.
 

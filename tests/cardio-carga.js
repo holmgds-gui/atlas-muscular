@@ -1,4 +1,4 @@
-/* Carga nos Meus treinos (campo, aviso do equipamento, "Última vez", carga já preenchida ao treinar) e cardio
+/* Meus treinos sem campo de carga (o dono preferiu anotar só no Hoje/Ao vivo) e cardio
    (no seletor de exercício, no treino montado, Registro, Ao vivo, "+ Registrar cardio", Progresso e Conquistas). */
 const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=require("path").join(__dirname,"out");require("fs").mkdirSync(OUT,{recursive:true});
 const {chromium}=require("playwright");
@@ -17,10 +17,7 @@ for(const [loc,theme] of [["pt-BR","light"],["es-ES","dark"]]){
   await p.evaluate(()=>{fView="meus";setTab("ficha")});await p.click('[data-act="newPlan"]');await p.fill('[data-pf="name"]',"Teste");
   await p.click('[data-act="add"]');await p.fill("#pq","supino reto barra");await p.waitForTimeout(150);
   await p.click("#plist [data-pf]");await p.click("[data-padd]");await p.waitForTimeout(200);
-  const kgIn='.fi [data-f="kg"]';if(!await p.$(kgIn))bad.push(loc+": sem campo de carga");
-  const ficha=await p.evaluate(()=>({hint:(document.querySelector(".fi-kh")||{}).textContent,last:(document.querySelector(".fi .last")||{}).textContent,ph:document.querySelector('.fi [data-f="kg"]').placeholder}));
-  console.log(loc,"ficha",ficha);if(!ficha.last)bad.push(loc+": sem Última vez");if(ficha.ph!=="80")bad.push(loc+": placeholder "+ficha.ph);
-  await p.fill(kgIn,"82,5");
+  if(await p.$('.fi [data-f="kg"]'))bad.push(loc+": campo de carga ainda aparece em Meus treinos");
   // 2. cardio pelo chip
   await p.click('[data-act="add"]');await p.click('[data-pg="cardio"]');await p.waitForTimeout(100);
   const nC=await p.$$eval("#plist [data-pc]",x=>x.length);if(nC!==9)bad.push(loc+": cardios no seletor "+nC);
@@ -33,11 +30,11 @@ for(const [loc,theme] of [["pt-BR","light"],["es-ES","dark"]]){
   await p.evaluate(()=>closeModals());
   await p.evaluate(()=>document.querySelector(".plan .fi").scrollIntoView({block:"center"}));await p.waitForTimeout(100);await shot("1-meus-treinos");
   const pl=await p.evaluate(()=>plans[0].items.map(i=>({kg:i.kg,min:i.min,int:i.int,ref:i.ref})));console.log(loc,"plano",JSON.stringify(pl));
-  if(pl[0].kg!=="82,5"||pl[1].min!=="25"||pl[1].int!=="f")bad.push(loc+": plano não salvou");
+  if(pl[0].kg||pl[1].min!=="25"||pl[1].int!=="f")bad.push(loc+": plano não salvou");
   // 3. Hoje › Anotar séries: carga já preenchida, cartão de cardio
   await p.evaluate(()=>setTab("treino"));await p.click('[data-act="log"]');await p.waitForTimeout(200);
   const pre=await p.evaluate(()=>{const w=workouts.find(x=>x.id===openW);return {kg:w.items[0].sets.map(s=>s.kg),ct:w.items[1].target,cs:w.items[1].sets}});
-  console.log(loc,"registro",JSON.stringify(pre));if(pre.kg.some(k=>k!=="82,5"))bad.push(loc+": carga não veio preenchida");if(pre.ct!=="25")bad.push(loc+": meta do cardio");
+  console.log(loc,"registro",JSON.stringify(pre));if(pre.kg.some(k=>k!==""))bad.push(loc+": carga veio preenchida");if(pre.ct!=="25")bad.push(loc+": meta do cardio");
   await p.evaluate(()=>document.querySelector(".cint").scrollIntoView({block:"center"}));await p.waitForTimeout(100);await shot("2-registro");
   await p.click('[data-act="cInt"][data-v="m"]');await p.fill('[data-sf="min"]',"30");await p.waitForTimeout(50);
   await p.click('[data-act="done"]');await p.waitForTimeout(200);
