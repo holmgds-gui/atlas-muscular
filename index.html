@@ -1516,6 +1516,15 @@ function cardioIn(from,to){const o={n:0,min:0,km:0,kcal:0,who:0,days:new Set()};
         o.min+=m;o.km+=cNum(s.km);o.kcal+=kcalOf(k,m,int);o.who+=int==="f"?2*m:int==="m"?m:0}}
     if(any){o.n++;o.days.add(w.date)}}
   return o}
+/* how much a done workout counts as a "treino" (owner: cardio is not worth a full workout; he chose half, with 20 min+).
+   Strength workouts (anything with a non-cardio exercise) = 1. A cardio-only session = 0.5 when it has ≥20 min (hard
+   minutes count double), else 0; on a day that already has a strength workout it adds nothing. Used by the 🔥 streak,
+   the week count in Hoje and the workout/month badges. */
+const cOnly=w=>!!(w.items&&w.items.length&&w.items.every(isC));
+function wUnits(list){const str=new Set(list.filter(w=>w.done!==false&&w.items&&w.items.length&&!cOnly(w)).map(w=>w.date));
+  return w=>{if(w.done===false||!w.items||!w.items.length)return 0;if(!cOnly(w))return 1;if(str.has(w.date))return 0;
+    let eq=0;for(const it of w.items)for(const st of it.sets||[])eq+=cMin(it,st,w)*((st.int||"m")==="f"?2:1);return eq>=20?.5:0}}
+const nTr=n=>n.toLocaleString(LOC);
 const kmTxt=v=>(Math.round(v*10)/10).toLocaleString(LOC);
 const dName=(name,ref)=>{const k=cRef(ref);if(k)return cName(k);const r=parseRef(ref)||parseRef(refByName(name));return r?vName(r.f,r.sel):name};
 function exInfo(name,ref){const r=parseRef(ref)||parseRef(refByName(name));if(!r)return null;const v=resolveV(r.f,r.sel);return {f:r.f,sel:r.sel,p:v.p,s:v.s}}
@@ -2776,26 +2785,29 @@ HELP.peso=[tx("Qual peso anotar","Which weight to write","Qué peso anotar"),tx(
 HELP.ficha[1]+=tx(`<h4>Cardio</h4><p>Em + Adicionar exercício, toque em Cardio (esteira, bicicleta, escada…) e escolha os minutos e a intensidade.</p>`,
 `<h4>Cardio</h4><p>In + Add exercise, tap Cardio (treadmill, bike, stairs…) and pick the minutes and intensity.</p>`,
 `<h4>Cardio</h4><p>En + Agregar ejercicio, toca Cardio (cinta, bicicleta, escaladora…) y elige los minutos y la intensidad.</p>`);
-HELP.treino[1]+=tx(`<h4>Cardio</h4><p><b>+ Registrar cardio</b> salva um cardio avulso (tipo, minutos, distância e intensidade) no dia escolhido. Ele conta como treino feito e entra nos minutos de cardio do Progresso.</p>`,
-`<h4>Cardio</h4><p><b>+ Log cardio</b> saves a standalone cardio session (type, minutes, distance and intensity) on the chosen day. It counts as a workout done and goes into the cardio minutes in Progress.</p>`,
-`<h4>Cardio</h4><p><b>+ Registrar cardio</b> guarda un cardio suelto (tipo, minutos, distancia e intensidad) en el día elegido. Cuenta como entreno hecho y suma a los minutos de cardio del Progreso.</p>`);
+HELP.treino[1]+=tx(`<h4>Cardio</h4><p><b>+ Registrar cardio</b> salva um cardio avulso (tipo, minutos, distância e intensidade) no dia escolhido. Com 20 min ou mais (o forte conta em dobro) ele vale <b>meio treino</b> na sequência 🔥 e na contagem da semana; no dia que já tem musculação, não soma. Sempre entra nos minutos de cardio do Progresso.</p>`,
+`<h4>Cardio</h4><p><b>+ Log cardio</b> saves a standalone cardio session (type, minutes, distance and intensity) on the chosen day. With 20 min or more (hard counts double) it's worth <b>half a workout</b> for the 🔥 streak and the week count; on a day that already has strength training, it adds nothing. It always goes into the cardio minutes in Progress.</p>`,
+`<h4>Cardio</h4><p><b>+ Registrar cardio</b> guarda un cardio suelto (tipo, minutos, distancia e intensidad) en el día elegido. Con 20 min o más (intenso cuenta doble) vale <b>medio entreno</b> en la racha 🔥 y en la cuenta de la semana; en un día que ya tiene musculación, no suma. Siempre suma a los minutos de cardio del Progreso.</p>`);
 HELP.cardio=["Cardio",tx(
 `<p>Você pode pôr cardio <b>dentro de um treino</b> (+ Adicionar exercício › Cardio, por exemplo 20 min de esteira no fim) ou registrar um <b>cardio avulso</b> em Hoje › + Registrar cardio.</p>
 <h4>Intensidade (teste da fala)</h4><ul><li><b>Leve:</b> dá para cantar. Menos de ~64% da frequência cardíaca máxima.</li>
 <li><b>Moderado:</b> dá para conversar, mas não para cantar. Cerca de 64–76% da máxima.</li>
 <li><b>Forte:</b> só sai pouca palavra por vez. Cerca de 77–95% da máxima.</li></ul>
+<h4>Conta como treino?</h4><p>Cardio sozinho vale <b>meio treino</b> na sequência 🔥 (3 treinos por semana) quando tem 20 min ou mais; o minuto forte conta em dobro. Cardio no mesmo dia da musculação não soma: o dia já conta como 1 treino.</p>
 <h4>Meta da OMS</h4><p>150 a 300 minutos de cardio moderado por semana, ou 75 a 150 de forte. Por isso, no Progresso, o minuto forte conta em dobro. Leve faz bem, mas não entra na meta.</p>
 <h4>Calorias</h4><p>Estimativa pelo tipo de cardio, intensidade, tempo e o seu peso (Configurações), usando os valores do Compendium of Physical Activities 2024. Pode errar uns 20–30% para mais ou para menos; serve para comparar um dia com outro.</p>`,
 `<p>You can put cardio <b>inside a workout</b> (+ Add exercise › Cardio, e.g. 20 min on the treadmill at the end) or log a <b>standalone cardio</b> in Today › + Log cardio.</p>
 <h4>Intensity (talk test)</h4><ul><li><b>Light:</b> you could sing. Below ~64% of max heart rate.</li>
 <li><b>Moderate:</b> you can talk but not sing. About 64–76% of max.</li>
 <li><b>Hard:</b> only a few words at a time. About 77–95% of max.</li></ul>
+<h4>Does it count as a workout?</h4><p>Cardio on its own is worth <b>half a workout</b> for the 🔥 streak (3 workouts a week) when it lasts 20 min or more; hard minutes count double. Cardio on a strength day adds nothing: that day already counts as 1 workout.</p>
 <h4>WHO goal</h4><p>150 to 300 minutes of moderate cardio a week, or 75 to 150 of hard. That's why, in Progress, a hard minute counts double. Light is good for you but doesn't count toward the goal.</p>
 <h4>Calories</h4><p>Estimated from the type of cardio, intensity, time and your body weight (Settings), with values from the 2024 Compendium of Physical Activities. It can be off by 20–30% either way; use it to compare one day with another.</p>`,
 `<p>Puedes poner cardio <b>dentro de un entreno</b> (+ Agregar ejercicio › Cardio, por ejemplo 20 min de cinta al final) o registrar un <b>cardio suelto</b> en Hoy › + Registrar cardio.</p>
 <h4>Intensidad (prueba del habla)</h4><ul><li><b>Suave:</b> puedes cantar. Menos de ~64% de la frecuencia cardíaca máxima.</li>
 <li><b>Moderado:</b> puedes hablar, pero no cantar. Cerca de 64–76% de la máxima.</li>
 <li><b>Intenso:</b> solo salen pocas palabras. Cerca de 77–95% de la máxima.</li></ul>
+<h4>¿Cuenta como entreno?</h4><p>El cardio solo vale <b>medio entreno</b> en la racha 🔥 (3 entrenos por semana) cuando dura 20 min o más; el minuto intenso cuenta doble. El cardio en un día de musculación no suma: ese día ya cuenta como 1 entreno.</p>
 <h4>Meta de la OMS</h4><p>150 a 300 minutos de cardio moderado por semana, o 75 a 150 de intenso. Por eso, en el Progreso, el minuto intenso cuenta doble. Suave hace bien, pero no cuenta para la meta.</p>
 <h4>Calorías</h4><p>Estimación según el tipo de cardio, la intensidad, el tiempo y tu peso (Ajustes), con los valores del Compendium of Physical Activities 2024. Puede fallar un 20–30% hacia arriba o hacia abajo; sirve para comparar un día con otro.</p>`)];
 function openHelp(k){const h=HELP[k];if(!h)return;$("hTitle").textContent=h[0];$("hBody").innerHTML=h[1];$("helpSheet").hidden=false;$("hBody").scrollTop=0}
@@ -2936,7 +2948,7 @@ function cqForm(){const c=CARDIO[cq.k],m=cNum(cq.min);
   <div class="cint" role="group" aria-label="${tx("Intensidade","Intensity","Intensidad")}">${["l","m","f"].map(x=>`<button data-g="ci" data-v="${x}" aria-pressed="${x===cq.int}"><b>${esc(p3(CINT[x][0]))}</b><small>${esc(p3(CINT[x][1]))}</small></button>`).join("")}</div>
   <div class="ckc" id="cqKc">${m?tx(`≈ <b>${kcalOf(cq.k,m,cq.int)} kcal</b> (estimativa para ${fkg(bodyKg())} kg)`,`≈ <b>${kcalOf(cq.k,m,cq.int)} kcal</b> (estimate for ${fkg(bodyKg())} kg)`,`≈ <b>${kcalOf(cq.k,m,cq.int)} kcal</b> (estimación para ${fkg(bodyKg())} kg)`):tx("Coloque os minutos para ver as calorias.","Enter the minutes to see the calories.","Pon los minutos para ver las calorías.")}</div>
   <button class="btn primary wide" data-g="save" style="margin-top:12px">${tx("Salvar cardio","Save cardio","Guardar cardio")}</button>
-  <p class="muted-s" style="margin-top:8px">${tx("Conta como treino feito e entra nos minutos de cardio do Progresso. Para pôr cardio dentro de um treino, use + Adicionar exercício › Cardio.","Counts as a workout done and goes into Progress cardio minutes. To put cardio inside a workout, use + Add exercise › Cardio.","Cuenta como entreno hecho y suma a los minutos de cardio del Progreso. Para poner cardio dentro de un entreno, usa + Agregar ejercicio › Cardio.")}</p>`}
+  <p class="muted-s" style="margin-top:8px">${tx("Com 20 min ou mais (o forte conta em dobro) vale meio treino na sequência 🔥; no dia que já tem musculação, não soma. Sempre entra nos minutos de cardio do Progresso. Para pôr cardio dentro de um treino, use + Adicionar exercício › Cardio.","With 20 min or more (hard counts double) it's worth half a workout for the 🔥 streak; on a day that already has strength training, it adds nothing. It always goes into Progress cardio minutes. To put cardio inside a workout, use + Add exercise › Cardio.","Con 20 min o más (intenso cuenta doble) vale medio entreno en la racha 🔥; en un día que ya tiene musculación, no suma. Siempre suma a los minutos de cardio del Progreso. Para poner cardio dentro de un entreno, usa + Agregar ejercicio › Cardio.")}</p>`}
 function cqRead(){const m=$("cqMin"),k=$("cqKm");if(m)cq.min=m.value.trim();if(k)cq.km=k.value.trim()}
 function openCardio(date){cq.min="";cq.km="";
   openG(tx("Registrar cardio","Log cardio","Registrar cardio")+(date!==isoDate(new Date())?" · "+fmtDate(date):""),cqForm());
@@ -2994,8 +3006,8 @@ function weekDone(){
     return fut?`<div class="${cls}" title="${lab}" aria-disabled="true">${inner}</div>`
       :`<button class="${cls}" data-day="${iso}" aria-pressed="${iso===sel}" aria-label="${lab}${iso===sel?"":". Toque para registrar neste dia"}">${inner}</button>`}).join("");
   const sun=new Date(mon);sun.setDate(mon.getDate()+6);
-  const n=workouts.filter(x=>x.done!==false&&x.date>=isoDate(mon)&&x.date<=isoDate(sun)).length;
-  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">${hWeek===0?"Sua semana":hWeek===-1?"Semana passada":`${dm(mon)} – ${dm(sun)}`}</h3><span class="muted-s" style="margin:0">${(()=>{const k=streakNow();return k?`<button class="streak" data-streak title="${tx("Semanas seguidas com 3 treinos ou mais. Toque para ver as conquistas.","Weeks in a row with 3+ workouts. Tap to see your achievements.","Semanas seguidas con 3 entrenos o más. Toca para ver tus logros.")}">🔥 ${k} ${k===1?tx("semana","week","semana"):tx("semanas","weeks","semanas")}</button> · `:""})()}${CONF.goal?`${n} de ${CONF.goal} treinos${n>=CONF.goal?" · meta batida!":""}`:n?plural(n,"treino")+" feito"+(n===1?"":"s"):"Nenhum treino feito"}</span></div>
+  const u=wUnits(workouts),n=workouts.filter(x=>x.done!==false&&x.date>=isoDate(mon)&&x.date<=isoDate(sun)).reduce((a,x)=>a+u(x),0);
+  return `<div class="card"><div class="row between"><h3 class="section-t" style="margin:0">${hWeek===0?"Sua semana":hWeek===-1?"Semana passada":`${dm(mon)} – ${dm(sun)}`}</h3><span class="muted-s" style="margin:0">${(()=>{const k=streakNow();return k?`<button class="streak" data-streak title="${tx("Semanas seguidas com 3 treinos ou mais. Toque para ver as conquistas.","Weeks in a row with 3+ workouts. Tap to see your achievements.","Semanas seguidas con 3 entrenos o más. Toca para ver tus logros.")}">🔥 ${k} ${k===1?tx("semana","week","semana"):tx("semanas","weeks","semanas")}</button> · `:""})()}${CONF.goal?`${nTr(n)} de ${CONF.goal} treinos${n>=CONF.goal?" · meta batida!":""}`:n?`${nTr(n)} treino${n===1?"":"s"} feito${n===1?"":"s"}`:"Nenhum treino feito"}</span></div>
     <div class="wkrow"><button class="ib" data-act="wkPrev" aria-label="Semana anterior">‹</button><div class="wkgrid">${cells}</div><button class="ib" data-act="wkNext" aria-label="Próxima semana"${hWeek>=0?" disabled":""}>›</button></div>
     <span class="muted-s" style="margin:0">Esqueceu de registrar? Toque num dia que já passou.</span></div>`;
 }
@@ -3569,8 +3581,8 @@ function runBest(keys,step){let best=0,run=0,prev=null;for(const k of keys.slice
 const plus7=k=>{const d=fromIso(k);d.setDate(d.getDate()+7);return isoDate(d)};
 function achStats(){
   const done=workouts.filter(w=>w.done!==false&&w.items&&w.items.length).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
-  const weeks={},days=new Set(),months={};
-  done.forEach(w=>{const k=monOf(w.date);weeks[k]=(weeks[k]||0)+1;days.add(w.date);months[ym(w.date)]=(months[ym(w.date)]||0)+1});
+  const weeks={},days=new Set(),months={},U=wUnits(done);let nU=0;
+  done.forEach(w=>{const v=U(w);nU+=v;days.add(w.date);if(!v)return;const k=monOf(w.date);weeks[k]=(weeks[k]||0)+v;months[ym(w.date)]=(months[ym(w.date)]||0)+v});
   const today=isoDate(new Date()),thisMon=monOf(today);
   /* streak of weeks with 3 workouts; the current week does not break it while it is still going */
   let streak=0;{let m=fromIso(thisMon);if((weeks[thisMon]||0)<ACH_GOAL)m.setDate(m.getDate()-7);
@@ -3613,7 +3625,7 @@ function achStats(){
   if(dl.length)maxOff=Math.max(maxOff,Math.round((fromIso(today)-fromIso(dl[dl.length-1]))/864e5)-1);
   const tg=it=>{const e=exInfo(it.name,it.ref);return e?new Set(e.p.map(id=>TOB[id])):new Set()};
   const monChest=done.some(w=>dayIdxOf(w.date)===0&&w.items.some(it=>tg(it).has("peito")));
-  const perDay={};done.forEach(w=>perDay[w.date]=(perDay[w.date]||0)+1);const rat=Object.values(perDay).some(v=>v>=2);
+  const perDay={};done.forEach(w=>perDay[w.date]=(perDay[w.date]||0)+U(w));const rat=Object.values(perDay).some(v=>v>=2);
   const holiday=done.some(w=>/-(12-25|01-01)$/.test(w.date));
   const flash=live.some(w=>w.dur>0&&w.dur<900);
   const beach=done.some(w=>{if(w.items.length<2)return false;const all=new Set();
@@ -3626,7 +3638,7 @@ function achStats(){
   for(const w of done){let any=false;for(const it of w.items){const k=cKey(it);if(!k)continue;for(const st of it.sets||[]){const m=cMin(it,st,w);if(!m)continue;any=true;const int=st.int||"m";
     cMinT+=m;cKm+=cNum(st.km);cKcal+=kcalOf(k,m,int);const wk=monOf(w.date);cw[wk]=(cw[wk]||0)+(int==="f"?2*m:int==="m"?m:0)}}if(any)cN++}
   const cWho=Math.max(0,...Object.values(cw)),cWhoRun=runBest(Object.keys(cw).filter(k=>cw[k]>=150),plus7);
-  return {cN,cMin:Math.round(cMinT),cKm:Math.round(cKm*10)/10,cKcal:Math.round(cKcal),cWho:Math.round(cWho),cWhoRun,n:done.length,live:live.length,streak,best,thisWeek:weeks[thisMon]||0,mBest,mRun,perfect,prs,sets,fams:fams.size,bw,bwT,pull,pullX,push,
+  return {cN,cMin:Math.round(cMinT),cKm:Math.round(cKm*10)/10,cKcal:Math.round(cKcal),cWho:Math.round(cWho),cWhoRun,n:nU,live:live.length,streak,best,thisWeek:weeks[thisMon]||0,mBest,mRun,perfect,prs,sets,fams:fams.size,bw,bwT,pull,pullX,push,
     full,ideal,bal,leg:runBest(legW,plus7),early,late,weekend,back,marathon:done.some(w=>w.dur>=3600),shared:!!ach.shared,lv:ach.lvMax,weeks,
     noLeg,noUp,maxOff,monChest,rat,holiday,flash,beach}}
 /* badge = {c: section, id, i: icon, n: name ([pt,en,es] or function), d: description (same), v: S → value,
@@ -3716,7 +3728,7 @@ function achHTML(){const S=checkAch(true),got=ACH.filter(a=>achOk(a,S)).length;
     return `<div class="ach${ok?" ok":""}"><span class="ach-i">${a.i}</span><b>${esc(achName(a))}</b>${hideD?"":`<small>${esc(achDesc(a,S))}</small>`}${pr}</div>`};
   return `<div class="card ach-top"><div class="ach-fire">🔥</div><div><b class="ach-n">${S.streak}</b><span>${tx(S.streak===1?"semana seguida":"semanas seguidas",S.streak===1?"week in a row":"weeks in a row",S.streak===1?"semana seguida":"semanas seguidas")}</span>
       <small>${tx(`3 treinos por semana · esta semana: ${Math.min(S.thisWeek,3)} de 3 · melhor sequência: ${S.best}`,`3 workouts a week · this week: ${Math.min(S.thisWeek,3)} of 3 · best streak: ${S.best}`,`3 entrenos por semana · esta semana: ${Math.min(S.thisWeek,3)} de 3 · mejor racha: ${S.best}`)}</small></div></div>
-    <div class="pstat"><div><b>${S.n}</b><span>${tx("Treinos","Workouts","Entrenos")}</span></div><div><b>${S.prs}</b><span>${tx("Recordes","Records","Récords")}</span></div><div><b>${got}/${ACH.length}</b><span>${tx("Conquistas","Achievements","Logros")}</span></div></div>
+    <div class="pstat"><div><b>${nTr(S.n)}</b><span>${tx("Treinos","Workouts","Entrenos")}</span></div><div><b>${S.prs}</b><span>${tx("Recordes","Records","Récords")}</span></div><div><b>${got}/${ACH.length}</b><span>${tx("Conquistas","Achievements","Logros")}</span></div></div>
     <div class="row" style="margin:4px 0 12px"><button class="btn" data-share="ach">📤 ${tx("Compartilhar","Share","Compartir")}</button></div>
     ${ACH_SEC.map(([c,i,n])=>{const L=ACH.filter(a=>a.c===c),k=L.filter(a=>achOk(a,S)).length,D=L.map(a=>achDesc(a,S)),same=D.every(d=>d===D[0]);
       /* when every badge of a section has the same explanation, it is shown once under the title */
@@ -3779,7 +3791,7 @@ async function shareCard(kind){toast(tx("Preparando a imagem…","Preparing the 
     <div class="row"><button class="btn primary" data-g="share">📤 ${tx("Compartilhar","Share","Compartir")}</button><button class="btn" data-g="save">⬇ ${tx("Salvar imagem","Save image","Guardar imagen")}</button></div>`)}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-share]");if(!b)return;e.preventDefault();e.stopPropagation();shareCard(b.dataset.share)},true);
 /* weekly streak for the Hoje week card (cheap version of achStats; 3 workouts a week) */
-function streakNow(){const goal=ACH_GOAL,wk={};workouts.forEach(w=>{if(w.done!==false&&w.items&&w.items.length){const k=monOf(w.date);wk[k]=(wk[k]||0)+1}});
+function streakNow(){const goal=ACH_GOAL,wk={},u=wUnits(workouts);workouts.forEach(w=>{const v=u(w);if(v){const k=monOf(w.date);wk[k]=(wk[k]||0)+v}});
   let n=0,m=fromIso(monOf(isoDate(new Date())));if((wk[isoDate(m)]||0)<goal)m.setDate(m.getDate()-7);while((wk[isoDate(m)]||0)>=goal){n++;m.setDate(m.getDate()-7)}return n}
 function exportBackup(){
   const data=JSON.stringify({app:"atlas-muscular",version:2,exported:new Date().toISOString(),plans,workouts,rank,conf:CONF});
