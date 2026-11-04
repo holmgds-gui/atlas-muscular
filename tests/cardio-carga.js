@@ -20,13 +20,14 @@ for(const [loc,theme] of [["pt-BR","light"],["es-ES","dark"]]){
   if(await p.$('.fi [data-f="kg"]'))bad.push(loc+": campo de carga ainda aparece em Meus treinos");
   // 2. cardio pelo chip
   await p.click('[data-act="add"]');await p.click('[data-pg="cardio"]');await p.waitForTimeout(100);
-  const nC=await p.$$eval("#plist [data-pc]",x=>x.length);if(nC!==9)bad.push(loc+": cardios no seletor "+nC);
+  const nC=await p.$$eval("#plist [data-pc]",x=>x.length);if(nC!==16)bad.push(loc+": cardios no seletor "+nC);
   await p.click('#plist [data-pc="run"]');await p.waitForTimeout(150);
   await p.fill('.fi [data-f="min"]',"25");await p.selectOption('.fi [data-f="int"]',"f");await p.waitForTimeout(100);
   const kc=await p.evaluate(()=>document.querySelector(".fi-kc").textContent);console.log(loc,"kcal plano",kc);if(!/kcal/.test(kc))bad.push(loc+": kcal no plano");
   // busca acha cardio
   await p.click('[data-act="add"]');await p.fill("#pq","esteira");await p.waitForTimeout(100);
   const found=await p.$$eval("#plist [data-pc]",x=>x.map(e=>e.dataset.pc));if(!found.includes("walk")||!found.includes("run"))bad.push(loc+": busca esteira "+found);
+  await p.fill("#pq","mai tai");await p.waitForTimeout(100);if(!(await p.$$eval("#plist [data-pc]",x=>x.map(e=>e.dataset.pc))).includes("muay"))bad.push(loc+": busca mai tai");
   await p.evaluate(()=>closeModals());
   await p.evaluate(()=>document.querySelector(".plan .fi").scrollIntoView({block:"center"}));await p.waitForTimeout(100);await shot("1-meus-treinos");
   const pl=await p.evaluate(()=>plans[0].items.map(i=>({kg:i.kg,min:i.min,int:i.int,ref:i.ref})));console.log(loc,"plano",JSON.stringify(pl));

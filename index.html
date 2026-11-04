@@ -730,7 +730,7 @@ button.brand:hover{background:var(--chip)}
             <p class="p-latin" id="latin">O músculo fica vermelho e a lista mostra os exercícios em ordem.</p>
           </div>
           <button class="clear" id="clear" hidden>Limpar</button>
-          <div class="lbtns"><button class="clear listbtn" id="listBtn" hidden>Ver lista</button><button class="clear cdbtn" id="cdBtn" data-notr>🏃 Cardio</button></div>
+          <div class="lbtns"><button class="clear listbtn" id="listBtn" hidden>Ver lista</button><button class="clear cdbtn" id="cdBtn" data-notr>Cardio</button></div>
           <button class="clear listbtn" id="peekBtn" hidden>Ampliar boneco</button>
           <button class="clear listbtn buildbtn" id="buildBtn" data-notr>＋ Montar treino</button>
           <div class="buildbar" id="buildBar" hidden></div>
@@ -1489,7 +1489,15 @@ const CARDIO={
   row:{i:"🚣",n:["Remo","Rowing machine","Remo"],s:["ergômetro","erg","ergómetro"],met:[4,5,7.5],km:1,a:"remo ergometro rowing row erg"},
   rope:{i:"🪢",n:["Pular corda","Jump rope","Saltar la cuerda"],s:["","",""],met:[9,11,11.8],a:"corda pular rope jump skipping cuerda saltar"},
   swim:{i:"🏊",n:["Natação","Swimming","Natación"],s:["piscina","pool","piscina"],met:[5,5.8,9.8],km:1,a:"natacao nadar piscina swim swimming pool nadar"},
-  hiit:{i:"⚡",n:["HIIT","HIIT","HIIT"],s:["tiros, intervalado","intervals","intervalos"],met:[5,7,11],a:"hiit tiro tiros intervalado tabata intervals intervalos"}
+  hiit:{i:"⚡",n:["HIIT","HIIT","HIIT"],s:["tiros, intervalado","intervals","intervalos"],met:[5,7,11],a:"hiit tiro tiros intervalado tabata intervals intervalos"},
+  /* fights and classes (owner: "tipos de luta, boxe, muay thai, jiu-jitsu, zumba, dança, essas coisas") */
+  box:{i:"🥊",n:["Boxe","Boxing","Boxeo"],s:["saco e manopla","bag and pads","saco y manoplas"],met:[5.8,8.5,10.8],a:"boxe box boxing boxeo luta saco manopla"},
+  muay:{i:"🦵",n:["Muay thai","Muay Thai","Muay thai"],s:["também kickboxing","also kickboxing","también kickboxing"],met:[5.3,7.3,10.3],a:"muay thai mai tai kickboxing kick boxing luta chute"},
+  bjj:{i:"🥋",n:["Jiu-jitsu","Jiu-jitsu","Jiu-jitsu"],s:["também judô","also judo","también judo"],met:[5.3,7.8,10.3],a:"jiu jitsu jiujitsu bjj judo judô luta grappling"},
+  zumba:{i:"🎶",n:["Zumba","Zumba","Zumba"],s:["aula","class","clase"],met:[5.5,6.5,8],a:"zumba aula danca aerobica"},
+  dance:{i:"💃",n:["Dança","Dancing","Baile"],s:["salsa, forró, samba, hip hop…","salsa, samba, hip hop…","salsa, bachata, hip hop…"],met:[4.5,6,9.8],a:"danca dance dancing baile forro samba salsa hip hop ballet bachata"},
+  step:{i:"👟",n:["Step","Step","Step"],s:["aeróbica","aerobics","aeróbic"],met:[5.5,7.3,9],a:"step aerobica aerobics aerobic jump"},
+  func:{i:"🏋️",n:["Funcional","Functional training","Funcional"],s:["circuito, crossfit","circuit, CrossFit","circuito, crossfit"],met:[3.5,5,7.5],a:"funcional circuito crossfit cross functional circuit treino"}
 };
 const CINT={l:[["Leve","Light","Suave"],["dá para cantar","you could sing","puedes cantar"]],m:[["Moderado","Moderate","Moderado"],["conversa, mas não canta","you can talk, not sing","hablas, pero no cantas"]],
   f:[["Forte","Hard","Intenso"],["só poucas palavras","only a few words","solo pocas palabras"]]};
@@ -2506,7 +2514,14 @@ const CD_MUS={ /* [main, helpers] */
   row:[["dorsal_superior","dorsal_inferior",...LEG,"gluteo_maximo"],["romboides","trapezio_medio","ombro_posterior","biceps_longa","biceps_curta",...HAM,"lombar_eretores","antebraco_flexores"]],
   rope:[[...CALF],[...LEG,"gluteo_maximo","ombro_lateral","antebraco_flexores","abdomen_supra"]],
   swim:[["dorsal_superior","dorsal_inferior","peito_medial","ombro_frontal","ombro_lateral"],["triceps_longa","triceps_lateral","redondo_maior","infraespinhal","abdomen_supra","obliquos","quad_reto_femoral","gluteo_maximo"]],
-  hiit:[[...LEG,"gluteo_maximo"],[...HAM,...CALF,"abdomen_supra","peito_medial","ombro_frontal","triceps_lateral"]]
+  hiit:[[...LEG,"gluteo_maximo"],[...HAM,...CALF,"abdomen_supra","peito_medial","ombro_frontal","triceps_lateral"]],
+  box:[["ombro_frontal","ombro_lateral","triceps_lateral","serratil","obliquos"],["peito_medial","triceps_longa","abdomen_supra",...CALF,...LEG,"gluteo_maximo","antebraco_flexores"]],
+  muay:[["obliquos",...LEG,"gluteo_maximo","gluteo_medio"],["ombro_frontal","triceps_lateral",...HAM,...CALF,"adutores","abdomen_supra","peito_medial"]],
+  bjj:[["antebraco_flexores","dorsal_superior","dorsal_inferior","adutores","abdomen_supra"],["biceps_longa","biceps_curta","trapezio_superior","lombar_eretores","gluteo_maximo",...HAM,"obliquos","peito_medial"]],
+  zumba:[[...LEG,"gluteo_maximo","panturrilha_gastro","obliquos"],[...HAM,"gluteo_medio","abdomen_supra","ombro_lateral","adutores","abdutores","panturrilha_soleo"]],
+  dance:[[...CALF,...LEG,"gluteo_maximo"],["obliquos","abdomen_supra","gluteo_medio","adutores",...HAM,"ombro_lateral"]],
+  step:[[...LEG,"gluteo_maximo"],[...HAM,...CALF,"gluteo_medio"]],
+  func:[[...LEG,"gluteo_maximo","peito_medial","abdomen_supra"],["ombro_frontal","triceps_lateral",...HAM,"dorsal_inferior","obliquos",...CALF]]
 };
 const CD_NOTE={
   walk:["O mais fácil de manter e de fazer todo dia. Na esteira, subir a inclinação gasta bem mais sem precisar correr.","The easiest to keep up and do every day. On a treadmill, raising the incline burns a lot more without running.","El más fácil de mantener y de hacer a diario. En la cinta, subir la inclinación gasta mucho más sin correr."],
@@ -2517,6 +2532,13 @@ const CD_NOTE={
   row:["Trabalha quase o corpo todo: cerca de 60% da força vem das pernas. Empurre com as pernas primeiro, depois puxe com os braços.","Works almost the whole body: about 60% of the power comes from the legs. Drive with the legs first, then pull with the arms.","Trabaja casi todo el cuerpo: cerca del 60% de la fuerza viene de las piernas. Empuja con las piernas primero, luego tira con los brazos."],
   rope:["Gasta muito por minuto, mas é difícil manter por muito tempo. Faça em blocos (1 min pulando, 30 s parado).","Burns a lot per minute but is hard to keep up for long. Do it in blocks (1 min on, 30 s off).","Gasta mucho por minuto, pero cuesta mantenerlo mucho tiempo. Hazlo en bloques (1 min saltando, 30 s parado)."],
   swim:["Sem impacto e trabalha a parte de cima mais que os outros. O gasto depende muito da técnica.","No impact, works the upper body more than the others. The burn depends a lot on technique.","Sin impacto, trabaja la parte de arriba más que los demás. El gasto depende mucho de la técnica."],
+  box:["Gasta mais quanto mais rápido você bate: no saco, de 60 para 180 golpes por minuto o gasto quase dobra. O soco começa no pé e no quadril, não só no braço.","The faster you punch, the more you burn: on the bag, going from 60 to 180 punches a minute almost doubles it. The punch starts at the feet and hips, not just the arm.","Gasta más cuanto más rápido golpeas: en el saco, de 60 a 180 golpes por minuto el gasto casi se duplica. El golpe empieza en los pies y la cadera, no solo en el brazo."],
+  muay:["Chutes, joelhadas e cotoveladas trabalham pernas, quadril e o tronco girando. Aulas com rounds de 3 min e pausa curta ficam perto de um HIIT.","Kicks, knees and elbows work the legs, hips and a rotating trunk. Classes with 3-minute rounds and short breaks are close to HIIT.","Patadas, rodillazos y codazos trabajan piernas, cadera y el tronco girando. Las clases con rounds de 3 min y pausa corta se parecen a un HIIT."],
+  bjj:["Muita força de pegada, costas e adutores (fazer guarda). O gasto varia muito: o treino técnico é leve, o rola é forte.","Lots of grip, back and adductor work (playing guard). The burn varies a lot: drilling is light, rolling is hard.","Mucha fuerza de agarre, espalda y aductores (hacer guardia). El gasto varía mucho: la técnica es suave, el combate es intenso."],
+  zumba:["Aula animada que gasta parecido com uma corrida leve. Pular e agachar mais nas músicas aumenta o gasto.","A fun class that burns about as much as an easy jog. Jumping and squatting more in the songs raises the burn.","Clase animada que gasta parecido a un trote suave. Saltar y agacharse más en las canciones aumenta el gasto."],
+  dance:["Dança de salão lenta gasta pouco; forró, samba, hip hop e dança de balada rápida gastam bem mais. O melhor é a que você não quer parar.","Slow ballroom burns little; fast salsa, samba, hip hop and club dancing burn a lot more. The best one is the one you don't want to stop.","El baile de salón lento gasta poco; salsa, bachata, hip hop o baile de discoteca rápidos gastan mucho más. El mejor es el que no quieres dejar."],
+  step:["A altura do step muda tudo: do mais baixo para o mais alto o gasto sobe uns 60%. Desça devagar para poupar o joelho.","Step height changes everything: from the lowest to the highest the burn rises about 60%. Step down slowly to spare your knees.","La altura del step lo cambia todo: del más bajo al más alto el gasto sube un 60%. Baja despacio para cuidar la rodilla."],
+  func:["Circuito com pouco descanso junta força e cardio. Com kettlebell e sem pausa vira forte; com pausas longas, fica leve.","A circuit with little rest mixes strength and cardio. With kettlebells and no breaks it's hard; with long breaks it's light.","Un circuito con poco descanso mezcla fuerza y cardio. Con kettlebell y sin pausas es intenso; con pausas largas, suave."],
   hiit:["Tiros curtos e fortes com pausa. Rende o mesmo resultado em menos tempo, mas normalmente a sessão tem só 10–20 min.","Short hard bursts with rests. Gets similar results in less time, but sessions are usually only 10–20 minutes.","Tiros cortos e intensos con pausas. Da resultados parecidos en menos tiempo, pero la sesión suele durar solo 10–20 min."]
 };
 function openCardioList(){if(model==="art")setModel("det");cdOn=true;cdSel=null;cur=null;curEx=null;build=null;listOpen=false;paint();render();$("body").scrollTop=0}

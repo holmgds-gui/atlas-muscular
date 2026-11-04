@@ -13,7 +13,7 @@ for(const [loc,theme,vp] of [["pt-BR","light",{width:390,height:844}],["en-US","
   await shot("0-inicio");
   await p.click("#cdBtn");await p.waitForTimeout(300);
   const order=await p.$$eval("[data-cd]",x=>x.map(e=>e.dataset.cd));console.log(loc,"moderado 30 min",order.join(" "));
-  if(order.length!==9)bad.push(loc+": lista "+order.length);
+  if(order.length!==16)bad.push(loc+": lista "+order.length);
   await shot("1-lista");
   await p.click('[data-cdi="l"]');await p.waitForTimeout(100);const o2=await p.$$eval("[data-cd]",x=>x.map(e=>e.dataset.cd));console.log(loc,"leve",o2.join(" "));
   const kc30=await p.$eval('[data-cd] .cd-bar b',e=>e.textContent);await p.click('[data-cdm="60"]');await p.waitForTimeout(100);const kc60=await p.$eval('[data-cd] .cd-bar b',e=>e.textContent);

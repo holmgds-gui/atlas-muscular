@@ -207,6 +207,8 @@ Séries por músculo em cada treino seguem as faixas do Progresso (dia: até ~11
   - Bicicleta ergométrica 4,0 / 6,0 / 10,3 (01214, 01220, 01232) · Elíptico 3,5* / 5,0 / 9,0 (02048, 02049)
   - Escada 6,5* / 9,3 / 11,0* (02065) · Remo 4,0* / 5,0 / 7,5 (02071, 02072) · Pular corda 9,0 / 11,0 / 11,8 (02069, 02068, 15551)
   - Natação 5,0* / 5,8 / 9,8 (18292, 18230) · HIIT 5,0 / 7,0 / 11,0 (02035, 02210, 02214)
+  - Lutas e aulas (pedido do dono): Boxe 5,8 / 8,5 / 10,8 (saco: 15110, 15115 a 120 golpes/min, 15118 a 180) · Muay thai/kickboxing 5,3 / 7,3 / 10,3 (15425, 15450, 15430) · Jiu-jitsu/judô 5,3 / 7,8* / 10,3 (15425, 15430; o Compendium não tem jiu-jitsu brasileiro à parte)
+  - Zumba 5,5 / 6,5 / 8,0 (02315, 02310, 02006) · Dança 4,5 / 6,0 / 9,8 (03025, 03042, 03031) · Step 5,5 / 7,3 / 9,0 (02001, 02002, 02003, pela altura do step) · Funcional/circuito 3,5 / 5,0 / 7,5 (02034, 02035, 02040)
   - \* estimativa do app, porque o Compendium não tem essa faixa.
   - O app avisa que a conta pode errar uns 20–30%: serve para comparar dias.
 - **Intensidade pelo teste da fala** e faixas de frequência cardíaca (moderado ≈ 64–76% e forte ≈ 77–95% da máxima): ACSM's Guidelines for Exercise Testing and Prescription (11ª ed.).
