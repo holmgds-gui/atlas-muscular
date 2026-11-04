@@ -141,7 +141,13 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 - Resultado: 8 telas no navegador (7 no app instalado): boas-vindas, instalar (passos certos para iPhone, Android/Samsung e computador, com "Instalar agora" no Chrome do Android), tocar no músculo, escolher o exercício, treinos prontos, ao vivo, progresso, nível e conquistas. Prints nos 3 idiomas, claro e escuro. Quem já usava o app não vê.
 - Corrigido junto: com "Ampliar boneco" no celular, os botões espremiam o nome do músculo; o botão "Cartão para Stories" no quadro do nível geral quase não aparecia no tema claro.
 
-## 16. Perguntas que o dono fez (respostas resumidas)
+## 16. Carga nos Meus treinos e cardio (nov/2026)
+
+- **Carga**: o dono achou pouco didático anotar o peso e pediu a opção também na aba Treinos. Escolha: campo de carga + última usada. Cada exercício do treino montado ganhou "Carga (kg)" com o "+" de qual peso anotar, o aviso do equipamento (por halter, total com a barra…) e "Última vez". A carga já vem preenchida ao treinar no Hoje e no Ao vivo.
+- **Cardio** (o dono disse "card"; confirmado como cardio). Escolhas: nos treinos **e** registro avulso; anotar tempo, distância, intensidade e calorias; minutos no Progresso e conquistas. Resultado: 9 tipos (caminhada, corrida, bicicleta, elíptico, escada, remo, pular corda, natação, HIIT), intensidade pelo teste da fala, calorias estimadas pelo Compendium 2024, "+ Registrar cardio" em Hoje, cartão de cardio no Progresso com a meta da OMS (150 min por semana, forte vale em dobro) e 9 conquistas de cardio.
+- Corrigido junto: séries só com a carga planejada não contam mais como feitas no Ao vivo, e a "Última vez" ignora séries sem repetições.
+
+## 17. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.
 - **Vale no computador?** Sim, é o mesmo app; o layout muda sozinho conforme a largura da tela.
@@ -156,7 +162,7 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 - **Escala do Progresso**: a visão Dia usa a escala por treino (até ~11 séries); a visão Semana usa a escala semanal (10–20 ideal).
 - **Claude Code vs app**: uma conversa nova não vê esta conversa. Por isso existe o `CLAUDE.md`. Os limites de uso são compartilhados entre o Claude e o Claude Code.
 
-## 17. Ideias e pendências
+## 18. Ideias e pendências
 
 - Ícone novo do app (aguardando a escolha do dono).
 - Anotar o esforço de cada série (repetições sobrando, "RIR") para a sugestão de carga ficar mais precisa (sugerido, não pedido ainda).

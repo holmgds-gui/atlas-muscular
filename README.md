@@ -24,15 +24,17 @@ App de academia gratuito, em português, inglês e espanhol, que funciona no nav
 **Treinos**
 - **Meus treinos:** monte treinos com exercícios, séries, repetições e dias da semana.
 - **Treinos prontos:** 44 treinos em 4 divisões (corpo inteiro, superior/inferior, push/pull/legs, um músculo por dia), nível iniciante ou avançado, com explicação de cada divisão, semana pronta e filtro por músculo.
+- **Carga planejada** em cada exercício, com a última carga usada e o aviso de qual peso anotar.
+- **Cardio** (esteira, bicicleta, escada, remo, natação, HIIT…) dentro do treino, com minutos, distância, intensidade e calorias estimadas.
 - **Trocar exercício (⇄)** por um equivalente que treina os mesmos músculos.
 
 **Hoje**
-- **Registro:** grade da semana, "Marcar como feito", anotar séries, registrar em dias que já passaram.
+- **Registro:** grade da semana, "Marcar como feito", anotar séries, registrar em dias que já passaram e **+ Registrar cardio** avulso.
 - **Ao vivo:** treino série a série com cronômetro, timer de descanso (maior nos exercícios compostos), aquecimento sugerido, anilhas por lado, sugestão da próxima carga, aviso de recorde e resumo no fim.
 - Aviso de **qual peso anotar** (por halter, total com a barra, número da polia, só o peso extra…).
 
 **Progresso**
-- **Músculos:** mapa de calor dos músculos treinados na semana ou no dia, com faixas baseadas em pesquisa, e radar de equilíbrio.
+- **Músculos:** mapa de calor dos músculos treinados na semana ou no dia, com faixas baseadas em pesquisa, radar de equilíbrio e minutos de cardio da semana com a meta da OMS.
 - **Força:** ranking de força por grupo muscular em 9 níveis (de Ameba a Bizarro), ajustado ao seu peso, sexo e idade, e a evolução da carga de cada exercício.
 - **Conquistas:** ~90 conquistas (semanas seguidas com 3 treinos, mês, peso do corpo, recordes, engraçadas…) e 🔥 da sequência na tela Hoje.
 - **Cartão para Stories** da semana, do ranking, do treino e das conquistas.

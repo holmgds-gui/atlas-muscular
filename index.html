@@ -104,7 +104,17 @@ header{position:relative}
 .rt-wh>span:first-child{display:grid;gap:2px}.rt-wh .muted-s{margin:0}.rt-wh .chev{font-size:16px;color:var(--muted);flex:none}
 .rt-list{margin:0;padding:0 12px 4px 32px;display:grid;gap:6px;font-size:14px}.rt-list li span{margin-right:6px}.rt-list li b{white-space:nowrap;color:var(--muted);font-weight:600}
 .rt-w .row{padding:6px 12px 12px;flex-wrap:wrap}
-.lv-inps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
+.lv-inps{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}.lv-inps.one{grid-template-columns:minmax(0,calc(50% - 5px))}
+.cint{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.cint button{display:grid;gap:2px;align-content:start;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:10px;padding:8px 4px;text-align:center;font:inherit}
+.cint button b{font-size:14px;font-weight:600}.cint button small{font-size:11px;line-height:1.2;color:var(--muted)}
+.cint button[aria-pressed="true"]{border-color:var(--accent,var(--target));box-shadow:inset 0 0 0 1px var(--accent,var(--target))}
+.ckc{font-size:13px;color:var(--muted);margin-top:8px}.ckc b{color:var(--ink)}
+.cq-types{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+.cq-types button{display:grid;justify-items:center;gap:2px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:8px 4px;font:inherit;font-size:12.5px;font-weight:600;line-height:1.2}
+.cq-types button span{font-size:22px}.cq-types button[aria-pressed="true"]{border-color:var(--accent,var(--target));box-shadow:inset 0 0 0 1px var(--accent,var(--target))}
+.cbox{display:grid;gap:8px}.cbox .c-big{font-family:var(--f-display);font-size:34px;font-weight:700;line-height:1}.cbox .c-big small{font-size:15px;color:var(--muted);font-weight:600;margin-left:4px}
+.c-meta{display:grid;gap:4px;font-size:13px;color:var(--muted)}.c-meta .lv-bar{margin:0}
 .lv-inps label span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
 .kgh.kgb{text-align:center;margin-top:4px}
 .lv-inps label>span,.rk-inps label>span{display:flex;align-items:center;height:18px}
@@ -341,7 +351,10 @@ details.about p{margin:8px 0 0;line-height:1.45}
 textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-height:1.4}
 .day-t{flex:1;min-width:150px}
 .title-inp{font-family:var(--f-display);font-weight:700;font-size:22px;padding:6px 10px}
-.fi{display:grid;grid-template-columns:minmax(0,1fr) 62px 76px auto;gap:8px;align-items:end;padding-top:10px;border-top:1px solid var(--line)}
+.fi{display:grid;gap:8px;padding-top:10px;border-top:1px solid var(--line)}
+.fi-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}.fi-top .fi-act{flex:none}
+.fi-row{display:grid;grid-template-columns:64px 84px 110px;gap:8px;align-items:end}.fi-row.c{grid-template-columns:90px 150px}.fl-kg span{display:flex;align-items:center;gap:2px}.fl-kg .help.sm{margin:-6px 0}
+.fi-kh{margin-top:-4px}.fi-kc{margin:-2px 0 0}.fi .last{margin:0}
 .fi-n{font-weight:600;font-size:15px;align-self:center;min-width:0;line-height:1.25}
 .muted-s{display:block;font-weight:400;font-size:12px;color:var(--muted);margin-top:2px}
 .fl{display:grid;gap:4px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
@@ -416,8 +429,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   .btabs button[aria-current="page"]{color:var(--accent,var(--target))}
   .seg.model{width:100%}
   .seg.model button{flex:1;padding:6px 4px;font-size:14px;letter-spacing:.03em}
-  .fi{grid-template-columns:minmax(0,1fr) 58px 70px}
-  .fi-act{grid-column:1 / -1;justify-content:flex-end}
+  .fi-row{grid-template-columns:62px 80px minmax(0,120px)}
   .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 }
 @media (min-width:901px){.modal{align-items:center}.sheet{border-radius:16px}}
@@ -1456,7 +1468,41 @@ function refByName(name){if(!name)return null;if(LEGACY[name])return LEGACY[name
       for(const o of f.ax[i][3])rec(i+1,{...sel,[f.ax[i][0]]:o.k})};rec(0,{})}}
   return NAMEIDX.get(norm(name))||null}
 /* name to show for a saved item: rebuilt from its variation, so it follows the language (old names too) */
-const dName=(name,ref)=>{const r=parseRef(ref)||parseRef(refByName(name));return r?vName(r.f,r.sel):name};
+/* ---- cardio (owner: in workouts and as a quick log in Hoje; minutes, km, intensity, kcal; minutes in Progresso and badges)
+   A workout/plan item is cardio when ref = "cardio:<key>". Its one "set" is a block {min, km, int:"l"|"m"|"f", ok?};
+   it.target = planned minutes (plans keep {min, int}). kcal ≈ MET × body kg × hours, METs from the 2024 Adult Compendium
+   of Physical Activities (Herrmann et al.); where it has no light/hard entry the value is an estimate (docs/FONTES.md 4d).
+   Intensity by the talk test (ACSM). WHO 2020: 150 min/week moderate, vigorous minutes count double. */
+const CARDIO={
+  walk:{i:"🚶",n:["Caminhada","Walking","Caminata"],s:["esteira ou rua","treadmill or outdoors","cinta o calle"],met:[3,4.8,5.5],km:1,a:"esteira caminhar andar andando walk walking treadmill cinta"},
+  run:{i:"🏃",n:["Corrida","Running","Carrera"],s:["esteira ou rua","treadmill or outdoors","cinta o calle"],met:[7.5,9.3,11],km:1,a:"correr esteira trote run running jog jogging treadmill cinta trotar"},
+  bike:{i:"🚴",n:["Bicicleta","Cycling","Bicicleta"],s:["ergométrica, spinning ou rua","stationary, spin or road","estática, spinning o calle"],met:[4,6,10.3],km:1,a:"bike bicicleta ergometrica spinning pedalar bicycle cycling estatica"},
+  ell:{i:"♾️",n:["Elíptico","Elliptical","Elíptica"],s:["transport","cross trainer","bicicleta elíptica"],met:[3.5,5,9],km:1,a:"eliptico transport elliptical cross trainer eliptica"},
+  stair:{i:"🪜",n:["Escada","Stair climber","Escaladora"],s:["simulador de escada","stair machine","simulador de escaleras"],met:[6.5,9.3,11],a:"escada degrau stair stepper climber escalera"},
+  row:{i:"🚣",n:["Remo","Rowing machine","Remo"],s:["ergômetro","erg","ergómetro"],met:[4,5,7.5],km:1,a:"remo ergometro rowing row erg"},
+  rope:{i:"🪢",n:["Pular corda","Jump rope","Saltar la cuerda"],s:["","",""],met:[9,11,11.8],a:"corda pular rope jump skipping cuerda saltar"},
+  swim:{i:"🏊",n:["Natação","Swimming","Natación"],s:["piscina","pool","piscina"],met:[5,5.8,9.8],km:1,a:"natacao nadar piscina swim swimming pool nadar"},
+  hiit:{i:"⚡",n:["HIIT","HIIT","HIIT"],s:["tiros, intervalado","intervals","intervalos"],met:[5,7,11],a:"hiit tiro tiros intervalado tabata intervals intervalos"}
+};
+const CINT={l:[["Leve","Light","Suave"],["dá para cantar","you could sing","puedes cantar"]],m:[["Moderado","Moderate","Moderado"],["conversa, mas não canta","you can talk, not sing","hablas, pero no cantas"]],
+  f:[["Forte","Hard","Intenso"],["só poucas palavras","only a few words","solo pocas palabras"]]};
+const cRef=ref=>typeof ref==="string"&&ref.startsWith("cardio:")&&CARDIO[ref.slice(7)]?ref.slice(7):null;
+const cKey=it=>it?cRef(it.ref):null,isC=it=>!!cKey(it);
+const cName=k=>p3(CARDIO[k].n),cSub=k=>p3(CARDIO[k].s);
+const cNum=v=>{const n=parseFloat(String(v??"").replace(",","."));return isFinite(n)&&n>0?n:0};
+const bodyKg=()=>rank.bw>0?rank.bw:RSW[sex];
+const kcalOf=(k,min,int)=>CARDIO[k]?Math.round(CARDIO[k].met[{l:0,m:1,f:2}[int]??1]*bodyKg()*min/60):0;
+/* minutes of a block: what was written, or the planned minutes when the workout was marked as done without writing */
+const cMin=(it,s,w)=>cNum(s.min)||(w&&w.done===true?cNum(it.target):0);
+function cardioIn(from,to){const o={n:0,min:0,km:0,kcal:0,who:0,days:new Set()};
+  for(const w of workouts){if(w.done===false||w.date<from||w.date>to)continue;let any=false;
+    for(const it of w.items||[]){const k=cKey(it);if(!k)continue;
+      for(const s of it.sets||[]){const m=cMin(it,s,w);if(!m)continue;any=true;const int=s.int||"m";
+        o.min+=m;o.km+=cNum(s.km);o.kcal+=kcalOf(k,m,int);o.who+=int==="f"?2*m:int==="m"?m:0}}
+    if(any){o.n++;o.days.add(w.date)}}
+  return o}
+const kmTxt=v=>(Math.round(v*10)/10).toLocaleString(LOC);
+const dName=(name,ref)=>{const k=cRef(ref);if(k)return cName(k);const r=parseRef(ref)||parseRef(refByName(name));return r?vName(r.f,r.sel):name};
 function exInfo(name,ref){const r=parseRef(ref)||parseRef(refByName(name));if(!r)return null;const v=resolveV(r.f,r.sel);return {f:r.f,sel:r.sel,p:v.p,s:v.s}}
 /* search: every word must appear in the family's name, gym names or option labels; words that match an option select it */
 const OSYN={un:"unilateral",al:"alternado alternada",bi:"bilateral"};
@@ -2472,7 +2518,7 @@ q.addEventListener("keydown",e=>{if(e.key==="Escape")closeSearch();if(e.key==="E
 
 /* ---------------------------------------------------------- exercise catalog (one item per family; pick a variation inside) */
 const famGroups=f=>{const v=resolveV(f,f.d);return [...new Set(v.p.map(m=>TOB[m]))]};
-function muscleLabel(name,ref){const e=exInfo(name,ref);if(!e)return "Exercício próprio";return [...new Set(e.p.map(m=>BASIC[TOB[m]].n))].join(", ")}
+function muscleLabel(name,ref){const k=cRef(ref);if(k)return "Cardio"+(cSub(k)?" · "+cSub(k):"");const e=exInfo(name,ref);if(!e)return "Exercício próprio";return [...new Set(e.p.map(m=>BASIC[TOB[m]].n))].join(", ")}
 
 /* picker */
 let pickCb=null,pickG="all",pickOpen=null,pickSel=null;
@@ -2482,20 +2528,25 @@ function openPicker(title,cb){
   if(!matchMedia("(max-width:900px)").matches)setTimeout(()=>$("pq").focus(),30);
 }
 function renderPChips(){
-  const all=[["all","Todos"],...Object.entries(BASIC).map(([g,o])=>[g,o.n])];
+  const all=[["all","Todos"],["cardio","🏃 Cardio"],...Object.entries(BASIC).map(([g,o])=>[g,o.n])];
   $("pchips").innerHTML=all.map(([k,v])=>`<button data-pg="${k}" aria-pressed="${pickG===k}">${v}</button>`).join("");
 }
 function renderPList(){
   const raw=$("pq").value.trim(),t=norm(raw);
-  let items=raw?famSearch(raw):FAMS.map(f=>({f,sel:{...f.d}}));
+  let items=pickG==="cardio"?[]:raw?famSearch(raw):FAMS.map(f=>({f,sel:{...f.d}}));
   if(pickG!=="all")items=items.filter(({f})=>famGroups(f).includes(pickG));
-  let h="";
+  /* cardio: its own chip, and found by name ("esteira", "bike", "corda"…) */
+  const toks=t.split(/\s+/).filter(x=>x&&!["de","da","do","na","no","com"].includes(x));
+  const cks=pickG!=="all"&&pickG!=="cardio"?[]:Object.keys(CARDIO).filter(k=>!toks.length?pickG==="cardio"||!raw:(()=>{const c=CARDIO[k],hay=norm([...c.n,...c.s,c.a,"cardio aerobico"].join(" "));return toks.every(x=>hay.includes(x))})());
+  const cHTML=cks.map(k=>`<div class="pfam"><button data-pc="${k}"><span class="pn">${CARDIO[k].i} ${esc(cName(k))}</span><span class="ps">Cardio${cSub(k)?" · "+esc(cSub(k)):""}</span></button></div>`).join("");
+  let h=raw&&cks.length?cHTML:"";
   const custom=raw?`<button class="custom" data-pick="${esc(raw)}"><span class="pn">Adicionar "${esc(raw)}"</span><span class="ps">Exercício próprio, fora da lista</span></button>`:"";
   if(!items.length)h+=custom;
   h+=items.slice(0,150).map(({f,sel})=>{const open=pickOpen===f.id,ss=open?pickSel:sel,v=resolveV(f,ss);
     return `<div class="pfam${open?" open":""}"><button data-pf="${f.id}" data-ref="${esc(mkRef(f,sel))}"><span class="pn">${esc(open?vName(f,ss):f.n)}</span><span class="ps">${[...new Set(v.p.map(m=>BASIC[TOB[m]].n))].join(", ")}${f.ax.some(a=>a[3].length>1)?" · tem variações":""}</span></button>
     ${open?`<div class="vars">${f.ax.filter(a=>a[3].length>1).map(([k,lab,,opts])=>`<div class="vax"><span class="vlab">${lab}</span><div class="vopts">${opts.map(o=>`<button data-pax="${k}" data-o="${o.k}" aria-pressed="${ss[k]===o.k}">${esc(o.n)}</button>`).join("")}</div></div>`).join("")}</div>
       <div class="pfoot"><span class="muted-s" style="margin:0">Alvo: ${v.p.map(m=>M[m].n).join(", ")}${v.s.length?" · Sinergistas: "+v.s.map(m=>M[m].n).join(", "):""}</span><button class="btn primary" data-padd="1">Adicionar</button></div>`:""}</div>`}).join("");
+  if(!raw&&cks.length)h+=(pickG==="all"?`<h3 class="section-t">🏃 Cardio</h3>`:"")+cHTML;
   if(items.length)h+=custom;
   if(!h)h=`<p class="muted">Nenhum exercício encontrado.</p>`;
   $("plist").innerHTML=h;
@@ -2504,6 +2555,7 @@ $("pq").addEventListener("input",()=>{pickOpen=null;renderPList();$("plist").scr
 $("pchips").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(!b)return;pickG=b.dataset.pg;pickOpen=null;renderPChips();renderPList();$("plist").scrollTop=0});
 $("plist").addEventListener("click",e=>{
   const c=e.target.closest("[data-pick]");if(c){const cb=pickCb;closeModals();if(cb)cb(c.dataset.pick,null);return}
+  const pc=e.target.closest("[data-pc]");if(pc){const k=pc.dataset.pc,cb=pickCb;closeModals();if(cb)cb(CARDIO[k].n[0],"cardio:"+k);return}
   const pf=e.target.closest("[data-pf]");if(pf){if(pickOpen===pf.dataset.pf){pickOpen=null}else{const r=parseRef(pf.dataset.ref);pickOpen=r.f.id;pickSel={...r.sel}}const y=$("plist").scrollTop;renderPList();$("plist").scrollTop=y;return}
   const ax=e.target.closest("[data-pax]");if(ax){pickSel[ax.dataset.pax]=ax.dataset.o;const y=$("plist").scrollTop;renderPList();$("plist").scrollTop=y;return}
   if(e.target.closest("[data-padd]")){const f=FAMBY[pickOpen];const cb=pickCb;closeModals();if(cb)cb(vName(f,pickSel),mkRef(f,pickSel))}
@@ -2633,6 +2685,34 @@ HELP.peso=[tx("Qual peso anotar","Which weight to write","Qué peso anotar"),tx(
 <li><b>Peso corporal</b> (dominadas, fondos, flexiones): déjalo vacío o anota solo el <b>peso extra</b> (cinturón, disco). La app suma tu peso de Ajustes.</li>
 <li><b>Kettlebell o disco:</b> el peso de la pieza.</li></ul>
 <p>Lo más importante: anótalo <b>siempre de la misma forma</b>, así la evolución, los récords y la sugerencia de carga tienen sentido.</p>`)];
+HELP.ficha[1]+=tx(`<h4>Carga e cardio</h4><ul><li><b>Carga (kg)</b> em cada exercício é opcional: o peso que você pretende usar. Ele já vem preenchido quando você treina na aba Hoje. O "+" ao lado explica qual peso anotar, e embaixo aparece o que você fez da última vez.</li>
+<li><b>Cardio</b>: em + Adicionar exercício, toque em Cardio (esteira, bicicleta, escada…) e escolha os minutos e a intensidade.</li></ul>`,
+`<h4>Load and cardio</h4><ul><li><b>Load (kg)</b> on each exercise is optional: the weight you plan to use. It comes already filled in when you train in Today. The "+" next to it explains which weight to write, and below you see what you did last time.</li>
+<li><b>Cardio</b>: in + Add exercise, tap Cardio (treadmill, bike, stairs…) and pick the minutes and intensity.</li></ul>`,
+`<h4>Carga y cardio</h4><ul><li><b>Carga (kg)</b> en cada ejercicio es opcional: el peso que piensas usar. Ya viene completado cuando entrenas en Hoy. El "+" al lado explica qué peso anotar, y abajo aparece lo que hiciste la última vez.</li>
+<li><b>Cardio</b>: en + Agregar ejercicio, toca Cardio (cinta, bicicleta, escaladora…) y elige los minutos y la intensidad.</li></ul>`);
+HELP.treino[1]+=tx(`<h4>Cardio</h4><p><b>+ Registrar cardio</b> salva um cardio avulso (tipo, minutos, distância e intensidade) no dia escolhido. Ele conta como treino feito e entra nos minutos de cardio do Progresso.</p>`,
+`<h4>Cardio</h4><p><b>+ Log cardio</b> saves a standalone cardio session (type, minutes, distance and intensity) on the chosen day. It counts as a workout done and goes into the cardio minutes in Progress.</p>`,
+`<h4>Cardio</h4><p><b>+ Registrar cardio</b> guarda un cardio suelto (tipo, minutos, distancia e intensidad) en el día elegido. Cuenta como entreno hecho y suma a los minutos de cardio del Progreso.</p>`);
+HELP.cardio=["Cardio",tx(
+`<p>Você pode pôr cardio <b>dentro de um treino</b> (+ Adicionar exercício › Cardio, por exemplo 20 min de esteira no fim) ou registrar um <b>cardio avulso</b> em Hoje › + Registrar cardio.</p>
+<h4>Intensidade (teste da fala)</h4><ul><li><b>Leve:</b> dá para cantar. Menos de ~64% da frequência cardíaca máxima.</li>
+<li><b>Moderado:</b> dá para conversar, mas não para cantar. Cerca de 64–76% da máxima.</li>
+<li><b>Forte:</b> só sai pouca palavra por vez. Cerca de 77–95% da máxima.</li></ul>
+<h4>Meta da OMS</h4><p>150 a 300 minutos de cardio moderado por semana, ou 75 a 150 de forte. Por isso, no Progresso, o minuto forte conta em dobro. Leve faz bem, mas não entra na meta.</p>
+<h4>Calorias</h4><p>Estimativa pelo tipo de cardio, intensidade, tempo e o seu peso (Configurações), usando os valores do Compendium of Physical Activities 2024. Pode errar uns 20–30% para mais ou para menos; serve para comparar um dia com outro.</p>`,
+`<p>You can put cardio <b>inside a workout</b> (+ Add exercise › Cardio, e.g. 20 min on the treadmill at the end) or log a <b>standalone cardio</b> in Today › + Log cardio.</p>
+<h4>Intensity (talk test)</h4><ul><li><b>Light:</b> you could sing. Below ~64% of max heart rate.</li>
+<li><b>Moderate:</b> you can talk but not sing. About 64–76% of max.</li>
+<li><b>Hard:</b> only a few words at a time. About 77–95% of max.</li></ul>
+<h4>WHO goal</h4><p>150 to 300 minutes of moderate cardio a week, or 75 to 150 of hard. That's why, in Progress, a hard minute counts double. Light is good for you but doesn't count toward the goal.</p>
+<h4>Calories</h4><p>Estimated from the type of cardio, intensity, time and your body weight (Settings), with values from the 2024 Compendium of Physical Activities. It can be off by 20–30% either way; use it to compare one day with another.</p>`,
+`<p>Puedes poner cardio <b>dentro de un entreno</b> (+ Agregar ejercicio › Cardio, por ejemplo 20 min de cinta al final) o registrar un <b>cardio suelto</b> en Hoy › + Registrar cardio.</p>
+<h4>Intensidad (prueba del habla)</h4><ul><li><b>Suave:</b> puedes cantar. Menos de ~64% de la frecuencia cardíaca máxima.</li>
+<li><b>Moderado:</b> puedes hablar, pero no cantar. Cerca de 64–76% de la máxima.</li>
+<li><b>Intenso:</b> solo salen pocas palabras. Cerca de 77–95% de la máxima.</li></ul>
+<h4>Meta de la OMS</h4><p>150 a 300 minutos de cardio moderado por semana, o 75 a 150 de intenso. Por eso, en el Progreso, el minuto intenso cuenta doble. Suave hace bien, pero no cuenta para la meta.</p>
+<h4>Calorías</h4><p>Estimación según el tipo de cardio, la intensidad, el tiempo y tu peso (Ajustes), con los valores del Compendium of Physical Activities 2024. Puede fallar un 20–30% hacia arriba o hacia abajo; sirve para comparar un día con otro.</p>`)];
 function openHelp(k){const h=HELP[k];if(!h)return;$("hTitle").textContent=h[0];$("hBody").innerHTML=h[1];$("helpSheet").hidden=false;$("hBody").scrollTop=0}
 document.addEventListener("click",e=>{const b=e.target.closest("[data-help]");if(!b)return;e.preventDefault();e.stopPropagation();openHelp(b.dataset.help)},true);
 document.querySelectorAll(".modal").forEach(m=>m.addEventListener("click",e=>{if(e.target===m||e.target.closest("[data-close]"))closeModals()}));
@@ -2654,8 +2734,8 @@ function openAddSheet(name,ref){
 }
 $("aList").addEventListener("click",e=>{
   const b=e.target.closest("[data-to]");if(!b)return;const name=addName,ref=addRef,to=b.dataset.to;closeModals();
-  if(to==="new"){const pl=newPlan();pl.items.push({name,ref,sets:CONF.sets,reps:CONF.reps});savePlans();openPlan=pl.id;setTab("ficha");toast("Treino criado. Dê um nome e escolha os dias");return}
-  if(to.startsWith("p:")){const pl=plans.find(x=>x.id===to.slice(2));if(pl){pl.items.push({name,ref,sets:CONF.sets,reps:CONF.reps});savePlans();toast(`Adicionado a ${pl.name||"treino"}`);if(tab==="ficha")renderFicha()}}
+  if(to==="new"){const pl=newPlan();pl.items.push(planItem(name,ref));savePlans();openPlan=pl.id;setTab("ficha");toast("Treino criado. Dê um nome e escolha os dias");return}
+  if(to.startsWith("p:")){const pl=plans.find(x=>x.id===to.slice(2));if(pl){pl.items.push(planItem(name,ref));savePlans();toast(`Adicionado a ${pl.name||"treino"}`);if(tab==="ficha")renderFicha()}}
   if(to.startsWith("w:")){const w=workouts.find(x=>x.id===to.slice(2));if(w){w.items.push(mkItem(name,CONF.sets,CONF.reps,ref));saveW();toast("Adicionado ao treino de hoje");if(tab==="treino")renderTreino()}}
 });
 
@@ -2677,16 +2757,20 @@ if(!Array.isArray(plans)){plans=planFromFicha(LS.get("atlas-ficha",null));LS.set
 function savePlans(){if(!LS.set("atlas-plans",plans))toast("Não foi possível salvar neste aparelho")}
 function saveW(){if(!LS.set("atlas-workouts",workouts))toast("Não foi possível salvar neste aparelho")}
 function newPlan(){const pl={id:uid(),name:"",days:[],items:[]};plans.push(pl);return pl}
-function mkItem(name,sets,reps,ref){return {name,ref:ref||null,target:reps||"",notes:"",sets:Array.from({length:Math.max(1,Math.min(10,parseInt(sets)||3))},()=>({r:"",kg:""}))}}
+function mkItem(name,sets,reps,ref,min,int){if(cRef(ref))return {name,ref,target:cNum(min)?String(cNum(min)):"",notes:"",sets:[{min:"",km:"",int:int||"m"}]};
+  return {name,ref:ref||null,target:reps||"",notes:"",sets:Array.from({length:Math.max(1,Math.min(10,parseInt(sets)||3))},()=>({r:"",kg:""}))}}
+/* new item for Meus treinos: exercises get sets × reps (and an optional planned load); cardio gets minutes and intensity */
+const planItem=(name,ref)=>cRef(ref)?{name,ref,min:20,int:"m"}:{name,ref,sets:CONF.sets,reps:CONF.reps,kg:""};
 function startPlan(pl,date){
+  /* the planned load (Meus treinos › Carga) comes already filled in every set */
   const w={id:uid(),date:date||isoDate(new Date()),title:pl?(pl.name||"Treino"):"Treino personalizado",planId:pl?pl.id:null,done:false,notes:"",
-    items:pl?pl.items.map(it=>mkItem(it.name,it.sets,it.reps,it.ref)):[]};
+    items:pl?pl.items.map(it=>{const x=mkItem(it.name,it.sets,it.reps,it.ref,it.min,it.int);const kg=String(it.kg??"").trim();if(kg&&!isC(x))x.sets.forEach(s=>s.kg=kg);return x}):[]};
   workouts.push(w);saveW();return w;
 }
 function lastFor(name,w){
   const prev=workouts.filter(x=>x.id!==w.id&&x.date<=w.date).sort((a,b)=>a.date<b.date?1:-1);
-  for(const p of prev){const it=p.items.find(i=>i.name===name);if(!it)continue;
-    const done=it.sets.filter(s=>s.r!==""||s.kg!=="");if(done.length)return {date:p.date,sets:done}}
+  for(const p of prev){const it=p.items.find(i=>i.name===name&&!isC(i));if(!it)continue;
+    const done=it.sets.filter(s=>String(s.r??"").trim()!=="");if(done.length)return {date:p.date,sets:done}}
   return null;
 }
 const setTxt=s=>`${s.r||"–"}${s.kg!==""?` × ${s.kg} kg`:""}`;
@@ -2697,6 +2781,26 @@ const cap=t=>t.charAt(0).toUpperCase()+t.slice(1);
 
 /* ---------------------------------------------------------- meus treinos tab */
 let openPlan=null,askDelPlan=null;
+/* one exercise of a plan: name, then Séries · Reps · Carga (owner: write the load here too, with the "+" of which weight
+   to write and the hint for the equipment), and "Última vez" from the history. Cardio: minutes and intensity. */
+const FAR=new Date(8.64e15);
+function fiHTML(p,it,j){
+  const at=`data-pid="${p.id}" data-j="${j}"`,k=cKey(it);
+  const acts=`<div class="fi-act">${k?"":`<button class="ib" data-act="swap" ${at} aria-label="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}" title="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}">⇄</button>`}<button class="ib" data-act="up" ${at} aria-label="Subir">↑</button><button class="ib" data-act="down" ${at} aria-label="Descer">↓</button><button class="ib del" data-act="rm" ${at} aria-label="Remover ${esc(dName(it.name,it.ref))}">✕</button></div>`;
+  const head=`<div class="fi-n">${k?CARDIO[k].i+" ":""}${esc(dName(it.name,it.ref))}<span class="muted-s">${esc(muscleLabel(it.name,it.ref))}</span></div>`;
+  if(k){const int=it.int||"m",min=cNum(it.min);
+    return `<div class="fi"><div class="fi-top">${head}${acts}</div><div class="fi-row c">
+      <label class="fl">${tx("Minutos","Minutes","Minutos")}<input class="inp" inputmode="numeric" ${at} data-f="min" value="${esc(it.min??"")}" placeholder="20"></label>
+      <label class="fl">${tx("Intensidade","Intensity","Intensidad")}<select class="inp" ${at} data-f="int">${["l","m","f"].map(x=>`<option value="${x}"${x===int?" selected":""}>${esc(p3(CINT[x][0]))}</option>`).join("")}</select></label></div>
+      <small class="muted-s fi-kc">${esc(p3(CINT[int][1]))}${min?` · ≈ ${kcalOf(k,min,int)} kcal`:""}</small></div>`}
+  const last=lastFor(it.name,{id:null,date:"9999-12-31"}),hint=kgHint(it.name,it.ref);
+  const top=last?Math.max(0,...last.sets.map(s=>numKg(s.kg)).filter(v=>v>0)):0;
+  return `<div class="fi"><div class="fi-top">${head}${acts}</div><div class="fi-row">
+    <label class="fl">Séries<input class="inp" inputmode="numeric" ${at} data-f="sets" value="${esc(it.sets)}"></label>
+    <label class="fl">Reps<input class="inp" ${at} data-f="reps" value="${esc(it.reps)}"></label>
+    <label class="fl fl-kg"><span>${tx("Carga (kg)","Load (kg)","Carga (kg)")}${kgHelpBtn()}</span><input class="inp" inputmode="decimal" ${at} data-f="kg" value="${esc(it.kg??"")}" placeholder="${top>0?esc(String(fkg(top))):"kg"}" aria-label="${tx("Carga em kg","Load in kg","Carga en kg")}"></label></div>
+    ${hint?`<small class="kgh fi-kh">${esc(tx("Carga: ","Load: ","Carga: ")+hint)}</small>`:""}
+    ${last?`<div class="last">${esc(L(`Última vez (${fmtDate(last.date)}):`))} <b>${last.sets.map(setTxt).join(" · ")}</b></div>`:""}</div>`}
 function renderFicha(){
   if(fView==="prontos")return renderProntos();
   const d=todayIdx();
@@ -2706,12 +2810,7 @@ function renderFicha(){
       <button class="plan-h" data-act="toggle" data-pid="${p.id}" aria-expanded="${open}"><span><span class="wx-n">${esc(p.name||"Treino sem nome")}</span><span class="muted-s">${daysTxt(p)} · ${plural(p.items.length,"exercício")}</span></span><span class="chev" aria-hidden="true">${open?"Fechar":"Editar"}</span></button>
       ${open?`<input class="inp title-inp" data-pf="name" data-pid="${p.id}" value="${esc(p.name)}" placeholder="Nome, ex.: Peito e tríceps" aria-label="Nome do treino">
       <div><div class="fl" style="margin-bottom:6px">Dias da semana (opcional)</div><div class="dpick" role="group" aria-label="Dias da semana">${DSH.map((n,i)=>`<button data-act="day" data-pid="${p.id}" data-day="${i}" aria-pressed="${p.days.includes(i)}" aria-label="${DAYS[i]}">${n}</button>`).join("")}</div><span class="muted-s">Nos dias marcados, este treino aparece primeiro na aba Hoje.</span></div>
-      ${p.items.length?p.items.map((it,j)=>`<div class="fi">
-        <div class="fi-n">${esc(dName(it.name,it.ref))}<span class="muted-s">${esc(muscleLabel(it.name,it.ref))}</span></div>
-        <label class="fl">Séries<input class="inp" inputmode="numeric" data-pid="${p.id}" data-j="${j}" data-f="sets" value="${esc(it.sets)}"></label>
-        <label class="fl">Reps<input class="inp" data-pid="${p.id}" data-j="${j}" data-f="reps" value="${esc(it.reps)}"></label>
-        <div class="fi-act"><button class="ib" data-act="swap" data-pid="${p.id}" data-j="${j}" aria-label="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}" title="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}">⇄</button><button class="ib" data-act="up" data-pid="${p.id}" data-j="${j}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-pid="${p.id}" data-j="${j}" aria-label="Descer">↓</button><button class="ib del" data-act="rm" data-pid="${p.id}" data-j="${j}" aria-label="Remover ${esc(dName(it.name,it.ref))}">✕</button></div>
-      </div>`).join(""):`<p class="muted">Nenhum exercício ainda.</p>`}
+      ${p.items.length?p.items.map((it,j)=>fiHTML(p,it,j)).join(""):`<p class="muted">Nenhum exercício ainda.</p>`}
       <div class="row"><button class="btn" data-act="add" data-pid="${p.id}">+ Adicionar exercício</button></div>
       <div class="confirm">${askDelPlan===p.id?`<span>Excluir este treino? O que você já fez continua no histórico.</span><button class="btn danger" data-act="delPlan" data-pid="${p.id}">Excluir</button><button class="btn" data-act="noDelPlan">Cancelar</button>`:`<button class="btn danger" data-act="askDelPlan" data-pid="${p.id}">Excluir treino</button>`}</div>`:""}
     </section>`}).join("");
@@ -2725,7 +2824,8 @@ const planOf=el=>plans.find(x=>x.id===el.dataset.pid);
 $("fichaBody").addEventListener("input",e=>{
   const t=e.target,pl=planOf(t);if(!pl)return;
   if(t.dataset.pf==="name"){pl.name=t.value;const n=t.closest(".plan").querySelector(".plan-h .wx-n");if(n)n.textContent=t.value||"Treino sem nome"}
-  else if(t.dataset.f)pl.items[+t.dataset.j][t.dataset.f]=t.value;
+  else if(t.dataset.f){const it=pl.items[+t.dataset.j];it[t.dataset.f]=t.value;
+    const k=cKey(it),kc=k&&t.closest(".fi").querySelector(".fi-kc");if(kc){const int=it.int||"m",min=cNum(it.min);kc.textContent=p3(CINT[int][1])+(min?` · ≈ ${kcalOf(k,min,int)} kcal`:"")}}
   else return;
   savePlans();
 });
@@ -2739,7 +2839,7 @@ $("fichaBody").addEventListener("click",e=>{
   if(!pl)return;
   if(a==="toggle"){openPlan=openPlan===pl.id?null:pl.id;askDelPlan=null}
   else if(a==="day"){const d=+b.dataset.day;pl.days=pl.days.includes(d)?pl.days.filter(x=>x!==d):[...pl.days,d]}
-  else if(a==="add")return openPicker(`Adicionar a ${pl.name||"treino"}`,(name,ref)=>{pl.items.push({name,ref,sets:CONF.sets,reps:CONF.reps});savePlans();renderFicha()});
+  else if(a==="add")return openPicker(`Adicionar a ${pl.name||"treino"}`,(name,ref)=>{pl.items.push(planItem(name,ref));savePlans();renderFicha()});
   else if(a==="rm")pl.items.splice(j,1);
   else if(a==="swap")return openSwap(pl.items[j],(name,ref)=>{pl.items[j].name=name;pl.items[j].ref=ref;savePlans();renderFicha()});
   else if(a==="up"&&j>0)[pl.items[j-1],pl.items[j]]=[pl.items[j],pl.items[j-1]];
@@ -2749,10 +2849,55 @@ $("fichaBody").addEventListener("click",e=>{
   savePlans();renderFicha();
 });
 
+/* ---- "+ Registrar cardio" in Hoje: a quick cardio session on the chosen day (counts as done right away) */
+let cq={k:"walk",int:"m",min:"",km:""};
+function cqForm(){const c=CARDIO[cq.k],m=cNum(cq.min);
+  return `<div class="cq-types">${Object.keys(CARDIO).map(k=>`<button data-g="ck" data-k="${k}" aria-pressed="${k===cq.k}"><span>${CARDIO[k].i}</span>${esc(cName(k))}</button>`).join("")}</div>
+  <div class="lv-inps${c.km?"":" one"}"><label><span>${tx("Minutos","Minutes","Minutos")}</span><input class="inp" id="cqMin" inputmode="numeric" value="${esc(cq.min)}" placeholder="30"></label>
+    ${c.km?`<label><span>${tx("Distância (km)","Distance (km)","Distancia (km)")}</span><input class="inp" id="cqKm" inputmode="decimal" value="${esc(cq.km)}" placeholder="—"></label>`:""}</div>
+  <div class="cint" role="group" aria-label="${tx("Intensidade","Intensity","Intensidad")}">${["l","m","f"].map(x=>`<button data-g="ci" data-v="${x}" aria-pressed="${x===cq.int}"><b>${esc(p3(CINT[x][0]))}</b><small>${esc(p3(CINT[x][1]))}</small></button>`).join("")}</div>
+  <div class="ckc" id="cqKc">${m?tx(`≈ <b>${kcalOf(cq.k,m,cq.int)} kcal</b> (estimativa para ${fkg(bodyKg())} kg)`,`≈ <b>${kcalOf(cq.k,m,cq.int)} kcal</b> (estimate for ${fkg(bodyKg())} kg)`,`≈ <b>${kcalOf(cq.k,m,cq.int)} kcal</b> (estimación para ${fkg(bodyKg())} kg)`):tx("Coloque os minutos para ver as calorias.","Enter the minutes to see the calories.","Pon los minutos para ver las calorías.")}</div>
+  <button class="btn primary wide" data-g="save" style="margin-top:12px">${tx("Salvar cardio","Save cardio","Guardar cardio")}</button>
+  <p class="muted-s" style="margin-top:8px">${tx("Conta como treino feito e entra nos minutos de cardio do Progresso. Para pôr cardio dentro de um treino, use + Adicionar exercício › Cardio.","Counts as a workout done and goes into Progress cardio minutes. To put cardio inside a workout, use + Add exercise › Cardio.","Cuenta como entreno hecho y suma a los minutos de cardio del Progreso. Para poner cardio dentro de un entreno, usa + Agregar ejercicio › Cardio.")}</p>`}
+function cqRead(){const m=$("cqMin"),k=$("cqKm");if(m)cq.min=m.value.trim();if(k)cq.km=k.value.trim()}
+function openCardio(date){cq.min="";cq.km="";
+  openG(tx("Registrar cardio","Log cardio","Registrar cardio")+(date!==isoDate(new Date())?" · "+fmtDate(date):""),cqForm());
+  gAct=(b)=>{const g=b.dataset.g;cqRead();
+    if(g==="ck"){cq.k=b.dataset.k;if(!CARDIO[cq.k].km)cq.km=""}
+    else if(g==="ci")cq.int=b.dataset.v;
+    else if(g==="save"){const m=cNum(cq.min);if(!m){toast(tx("Coloque os minutos","Enter the minutes","Pon los minutos"));$("cqMin").focus();return}
+      const c=CARDIO[cq.k];workouts.push({id:uid(),date,title:cName(cq.k),planId:null,done:true,notes:"",
+        items:[{name:c.n[0],ref:"cardio:"+cq.k,target:"",notes:"",sets:[{min:String(m),km:c.km&&cNum(cq.km)?String(cNum(cq.km)):"",int:cq.int,ok:true}]}]});
+      saveW();closeModals();toast(tx(`${cName(cq.k)}: ${m} min salvos`,`${cName(cq.k)}: ${m} min saved`,`${cName(cq.k)}: ${m} min guardados`));setTimeout(()=>checkAch(),0);renderTreino();return}
+    const y=$("gBody").scrollTop;$("gBody").innerHTML=cqForm();$("gBody").scrollTop=y};
+}
+$("gBody").addEventListener("input",e=>{if(e.target.id!=="cqMin"&&e.target.id!=="cqKm")return;cqRead();const m=cNum(cq.min),el=$("cqKc");if(!el)return;
+  el.innerHTML=m?tx(`≈ <b>${kcalOf(cq.k,m,cq.int)} kcal</b> (estimativa para ${fkg(bodyKg())} kg)`,`≈ <b>${kcalOf(cq.k,m,cq.int)} kcal</b> (estimate for ${fkg(bodyKg())} kg)`,`≈ <b>${kcalOf(cq.k,m,cq.int)} kcal</b> (estimación para ${fkg(bodyKg())} kg)`):tx("Coloque os minutos para ver as calorias.","Enter the minutes to see the calories.","Pon los minutos para ver las calorías.")});
+/* ---- cardio cards (Registro and Ao vivo): minutes, km (when it makes sense), intensity by the talk test, kcal estimate */
+const cKcTxt=(it,s,w)=>{const k=cKey(it),m=cNum(s.min)||cNum(it.target);if(!m)return tx("Coloque os minutos para ver as calorias.","Enter the minutes to see the calories.","Pon los minutos para ver las calorías.");
+  return tx(`≈ <b>${kcalOf(k,m,s.int||"m")} kcal</b> (estimativa para ${fkg(bodyKg())} kg)`,`≈ <b>${kcalOf(k,m,s.int||"m")} kcal</b> (estimate for ${fkg(bodyKg())} kg)`,`≈ <b>${kcalOf(k,m,s.int||"m")} kcal</b> (estimación para ${fkg(bodyKg())} kg)`)};
+function cBlock(it,w,mode,i){const k=cKey(it);if(!it.sets[0])it.sets[0]={min:"",km:"",int:"m"};const s=it.sets[0],int=s.int||"m";
+  const at=f=>mode==="live"?`id="lv${f==="min"?"Min":"Km"}"`:`data-i="${i}" data-s="0" data-sf="${f}"`;
+  const act=mode==="live"?`data-lv="cInt"`:`data-act="cInt" data-i="${i}"`;
+  return `<div class="lv-inps${CARDIO[k].km?"":" one"}"><label><span>${tx("Minutos","Minutes","Minutos")}</span><input class="inp" inputmode="numeric" ${at("min")} value="${esc(s.min??"")}" placeholder="${cNum(it.target)||30}"></label>
+    ${CARDIO[k].km?`<label><span>${tx("Distância (km)","Distance (km)","Distancia (km)")}</span><input class="inp" inputmode="decimal" ${at("km")} value="${esc(s.km??"")}" placeholder="—"></label>`:""}</div>
+    <div class="cint" role="group" aria-label="${tx("Intensidade","Intensity","Intensidad")}">${["l","m","f"].map(x=>`<button ${act} data-v="${x}" aria-pressed="${x===int}"><b>${esc(p3(CINT[x][0]))}</b><small>${esc(p3(CINT[x][1]))}</small></button>`).join("")}</div>
+    <div class="ckc" data-kc>${cKcTxt(it,s,w)}</div>`}
+const cHead=(it)=>{const k=cKey(it);return `<div class="wx-n">${CARDIO[k].i} ${esc(cName(k))}</div><span class="muted-s">${esc(muscleLabel(it.name,it.ref))}${cNum(it.target)?tx(` · meta ${cNum(it.target)} min`,` · target ${cNum(it.target)} min`,` · meta ${cNum(it.target)} min`):""}</span>`};
+function cRegCard(it,i,w){return `<div class="card">
+  <div class="wx-h"><div>${cHead(it)}</div><div class="fi-act"><button class="ib" data-act="up" data-i="${i}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-i="${i}" aria-label="Descer">↓</button><button class="ib del" data-act="rmItem" data-i="${i}" aria-label="Remover ${esc(cName(cKey(it)))}">✕</button></div></div>
+  ${cBlock(it,w,"reg",i)}
+  <textarea class="inp" data-i="${i}" data-if="notes" placeholder="Anotações deste exercício" aria-label="Anotações de ${esc(cName(cKey(it)))}">${esc(it.notes)}</textarea></div>`}
+function cLiveCard(it,w){const s=it.sets[0]||{};return `<div class="card lv-ex"><div class="row between"><div class="eyebrow">${tx(`Exercício ${live.i+1} de ${w.items.length}`,`Exercise ${live.i+1} of ${w.items.length}`,`Ejercicio ${live.i+1} de ${w.items.length}`)}</div>
+    <div class="row" style="gap:4px"><button class="ib" data-lv="prevEx" aria-label="${tx("Exercício anterior","Previous exercise","Ejercicio anterior")}"${live.i?"":" disabled"}>‹</button><button class="ib" data-lv="nextEx" aria-label="${tx("Próximo exercício","Next exercise","Siguiente ejercicio")}"${live.i<w.items.length-1?"":" disabled"}>›</button></div></div>
+  <div class="lv-name">${cHead(it)}</div>
+  ${cBlock(it,w,"live")}
+  <button class="btn primary wide lv-done" data-lv="cDone">✓ ${s.ok?tx("Salvar cardio","Save cardio","Guardar cardio"):tx("Cardio feito","Cardio done","Cardio hecho")}</button></div>`}
+function cSaveLive(s){const m=$("lvMin"),k=$("lvKm");if(m)s.min=m.value.trim();if(k)s.km=k.value.trim()}
 /* ---------------------------------------------------------- hoje tab */
 let openW=null,askDel=false,pendingImport=null;
-function wCard(x){return `<div class="card tcard"><div class="row between"><div><div class="wx-n">${esc(x.title||"Treino")}</div><span class="muted-s">${x.items.length?x.items.map(it=>esc(it.name)).join(" · "):"Sem exercícios"}</span></div>${statusPill(x)}</div>
-  <div class="row">${x.done===false?`<button class="btn primary" data-act="markDone" data-wid="${x.id}">Marcar como feito</button><button class="btn" data-open="${x.id}">Continuar</button>`:`<button class="btn" data-open="${x.id}">Ver séries</button><button class="btn" data-act="undo" data-wid="${x.id}">Desfazer</button>`}${isCustom(x)?saveBtn(x):""}</div></div>`}
+function wCard(x){const onlyC=x.items.length&&x.items.every(isC);return `<div class="card tcard"><div class="row between"><div><div class="wx-n">${esc(x.title||"Treino")}</div><span class="muted-s">${x.items.length?x.items.map(it=>esc(dName(it.name,it.ref))+(isC(it)&&cMin(it,it.sets[0]||{},x)?` ${cMin(it,it.sets[0]||{},x)} min`:"")).join(" · "):"Sem exercícios"}</span></div>${statusPill(x)}</div>
+  <div class="row">${x.done===false?`<button class="btn primary" data-act="markDone" data-wid="${x.id}">Marcar como feito</button><button class="btn" data-open="${x.id}">Continuar</button>`:`<button class="btn" data-open="${x.id}">${onlyC?tx("Ver","View","Ver"):"Ver séries"}</button><button class="btn" data-act="undo" data-wid="${x.id}">Desfazer</button>`}${isCustom(x)&&!onlyC?saveBtn(x):""}</div></div>`}
 /* this week (Mon–Sun) with what was actually done each day */
 /* day being logged in Hoje: null = today. Only today or the past can be picked, never the future. */
 let hDate=null,hWeek=0;
@@ -2802,7 +2947,8 @@ function renderTreino(){
       :`<div class="card"><p class="muted">Você ainda não tem treinos montados.</p><div class="row"><button class="btn primary" data-act="goPlans">Montar um treino</button></div></div>`;
     const free=tw.filter(x=>!x.planId||!plans.some(p=>p.id===x.planId));
     h+=`<h3 class="section-t">Treino personalizado ${isT?"de hoje":"de "+esc(dayName)}</h3>`+free.map(wCard).join("")+
-      `<button class="btn wide" data-act="startFree">+ Montar um treino só para ${isT?"hoje":"este dia"}</button>`;
+      `<button class="btn wide" data-act="startFree">+ Montar um treino só para ${isT?"hoje":"este dia"}</button>
+      <button class="btn wide" data-act="cardio">🏃 ${tx("+ Registrar cardio","+ Log cardio","+ Registrar cardio")}</button>`;
     const past=workouts.filter(x=>x.date!==sel).sort((a,b)=>a.date<b.date?1:a.date>b.date?-1:0);
     h+=`<h3 class="section-t">Histórico</h3>`+(past.length?`<div class="hist">${past.slice(0,80).map(x=>`<button data-open="${x.id}"><b>${fmtDate(x.date)}</b><span>${esc(x.title||"Treino")} · ${x.done===false?"não feito":plural(x.items.length,"exercício")}</span></button>`).join("")}</div>`:`<p class="muted">Os treinos que você fizer aparecem aqui.</p>`);
     h+=`<p class="muted" style="font-size:13px">Backup, apagar dados e outros ajustes ficam em Configurações (engrenagem lá em cima).</p>`;
@@ -2812,7 +2958,7 @@ function renderTreino(){
       <div class="card"><div class="row between"><div class="eyebrow">${isToday?"Treino de hoje":"Treino de "+fmtDate(w.date)}</div>${statusPill(w)}</div>
       <input class="inp title-inp" data-wf="title" value="${esc(w.title)}" placeholder="Nome do treino" aria-label="Nome do treino">
       ${isCustom(w)?`<div class="row">${saveBtn(w)}<span class="muted-s" style="margin:0">Vira um treino fixo na aba Treinos.</span></div>`:""}</div>`;
-    h+=w.items.map((it,i)=>{const last=lastFor(it.name,w);return `<div class="card">
+    h+=w.items.map((it,i)=>{if(isC(it))return cRegCard(it,i,w);const last=lastFor(it.name,w);return `<div class="card">
       <div class="wx-h"><div><div class="wx-n">${esc(dName(it.name,it.ref))}</div><span class="muted-s">${esc(muscleLabel(it.name,it.ref))}${it.target?` · meta ${esc(it.target)} reps`:""}</span></div>
         <div class="fi-act"><button class="ib" data-act="swapItem" data-i="${i}" aria-label="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}" title="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}">⇄</button><button class="ib" data-act="up" data-i="${i}" aria-label="Subir">↑</button><button class="ib" data-act="down" data-i="${i}" aria-label="Descer">↓</button><button class="ib del" data-act="rmItem" data-i="${i}" aria-label="Remover ${esc(dName(it.name,it.ref))}">✕</button></div></div>
       ${last?`<div class="last">Última vez (${fmtDate(last.date)}): <b>${last.sets.map(setTxt).join(" · ")}</b></div>`:""}
@@ -2841,7 +2987,8 @@ const curW=()=>workouts.find(x=>x.id===openW);
 $("treinoBody").addEventListener("input",e=>{
   const t=e.target,w=curW();if(!w)return;
   if(t.dataset.wf)w[t.dataset.wf]=t.value;
-  else if(t.dataset.sf)w.items[+t.dataset.i].sets[+t.dataset.s][t.dataset.sf]=t.value;
+  else if(t.dataset.sf){const it=w.items[+t.dataset.i];it.sets[+t.dataset.s][t.dataset.sf]=t.value;
+    const kc=isC(it)&&t.closest(".card").querySelector("[data-kc]");if(kc)kc.innerHTML=cKcTxt(it,it.sets[0],w)}
   else if(t.dataset.if)w.items[+t.dataset.i][t.dataset.if]=t.value;
   else return;
   saveW();
@@ -2862,12 +3009,15 @@ $("treinoBody").addEventListener("click",e=>{
   else if(a==="quickDone"){const pl=byP();if(!pl)return;const nw=startPlan(pl,selDate());nw.done=true;setTimeout(()=>checkAch(),0);toast(`${pl.name||"Treino"} marcado como feito${hDate?" em "+fmtDate(nw.date):""}`)}
   else if(a==="markDone"){const x=byW();if(x){x.done=true;toast(`${x.title||"Treino"} marcado como feito`);celebrate(x);if(live&&live.wid===x.id){live=null;saveLive()}}}
   else if(a==="undo"){const x=byW();if(!x)return;
-    const touched=x.notes||x.items.some(it=>it.notes||it.sets.some(st=>st.r!==""||st.kg!==""));
+    const touched=x.notes||x.items.some(it=>it.notes||it.sets.some(st=>(st.r??"")!==""||(st.kg??"")!==""||(st.min??"")!==""));
     if(touched||!x.planId)x.done=false;else workouts=workouts.filter(y=>y.id!==x.id);toast("Desfeito: saiu do Progresso")}
   else if(a==="goPlans"){setTab("ficha");return}
+  else if(a==="cardio")return openCardio(selDate());
   else if(a==="savePlan"){const x=byW();if(!x||!x.items.length)return;
     const pl={id:uid(),name:x.title&&x.title!=="Treino personalizado"?x.title:"",days:[],
-      items:x.items.map(it=>({name:it.name,sets:it.sets.length,reps:it.target||(it.sets.find(st=>st.r!=="")||{}).r||"8-12"}))};
+      items:x.items.map(it=>{if(isC(it)){const b=it.sets[0]||{};return {name:it.name,ref:it.ref,min:cNum(b.min)||cNum(it.target)||20,int:b.int||"m"}}
+        const top=Math.max(0,...it.sets.map(st=>numKg(st.kg)).filter(v=>v>0));
+        return {name:it.name,ref:it.ref||null,sets:it.sets.length,reps:it.target||(it.sets.find(st=>(st.r??"")!=="")||{}).r||"8-12",kg:top>0?String(fkg(top)).replace(/\s/g,""):""}})};
     plans.push(pl);x.planId=pl.id;savePlans();saveW();openPlan=pl.id;openW=null;toast(pl.name?`${pl.name} salvo em Meus treinos`:"Salvo em Meus treinos. Dê um nome a ele");setTab("ficha");
     const c=document.querySelector(`.plan[data-pid="${pl.id}"]`);if(c){c.scrollIntoView({block:"start"});if(!pl.name){const i=c.querySelector("[data-pf]");if(i)i.focus({preventScroll:true})}}return}
   else if(a==="back"){openW=null;askDel=false}
@@ -2877,6 +3027,7 @@ $("treinoBody").addEventListener("click",e=>{
   else if(a==="noImport")pendingImport=null;
   else if(!w)return;
   else if(a==="addEx")return openPicker("Adicionar ao treino",(name,ref)=>{w.items.push(mkItem(name,CONF.sets,CONF.reps,ref));saveW();renderTreino()});
+  else if(a==="cInt"){const it=w.items[i];(it.sets[0]||(it.sets[0]={min:"",km:""})).int=b.dataset.v}
   else if(a==="addSet"){const s=w.items[i].sets,l=s[s.length-1];s.push({r:"",kg:l?l.kg:""})}
   else if(a==="rmSet"){w.items[i].sets.splice(+b.dataset.s,1);if(!w.items[i].sets.length)w.items[i].sets.push({r:"",kg:""})}
   else if(a==="rmItem")w.items.splice(i,1);
@@ -3000,8 +3151,8 @@ function liveHTML(){
       <small class="muted-s lv-rnote">${tx(`Exercícios compostos (supino, agachamento, remada…) descansam 1 min a mais: ${mmss(CONF.rest+60)}. Descansos maiores dão um pouco mais de crescimento.`,`Compound lifts (bench, squat, rows…) rest 1 min longer: ${mmss(CONF.rest+60)}. Longer rests give a bit more growth.`,`Los ejercicios compuestos (press, sentadilla, remo…) descansan 1 min más: ${mmss(CONF.rest+60)}. Descansos más largos dan un poco más de crecimiento.`)}</small></div>`;
   if(!it){h+=restCard+`<div class="card"><p class="muted">${esc(L("Nenhum exercício ainda."))}</p><button class="btn primary" data-lv="addEx">+ ${esc(L("Adicionar exercício"))}</button></div>`}
   else{const s=it.sets[live.j],last=lastFor(it.name,w),g=suggest(it,w),allOk=w.items.every(x=>x.sets.every(y=>y.ok));
-    const how=howHTML(it,howOpen);
-    h+=`<div class="card lv-ex"><div class="row between"><div class="eyebrow">${tx(`Exercício ${live.i+1} de ${w.items.length}`,`Exercise ${live.i+1} of ${w.items.length}`,`Ejercicio ${live.i+1} de ${w.items.length}`)}</div>
+    const how=isC(it)?"":howHTML(it,howOpen);
+    if(isC(it))h+=cLiveCard(it,w);else h+=`<div class="card lv-ex"><div class="row between"><div class="eyebrow">${tx(`Exercício ${live.i+1} de ${w.items.length}`,`Exercise ${live.i+1} of ${w.items.length}`,`Ejercicio ${live.i+1} de ${w.items.length}`)}</div>
         <div class="row" style="gap:4px"><button class="ib" data-lv="prevEx" aria-label="${tx("Exercício anterior","Previous exercise","Ejercicio anterior")}"${live.i?"":" disabled"}>‹</button><button class="ib" data-lv="nextEx" aria-label="${tx("Próximo exercício","Next exercise","Siguiente ejercicio")}"${live.i<w.items.length-1?"":" disabled"}>›</button></div></div>
       <div class="wx-n lv-name">${esc(dName(it.name,it.ref))}</div><span class="muted-s">${esc(muscleLabel(it.name,it.ref))}</span>
       ${last?`<div class="last">${esc(L(`Última vez (${fmtDate(last.date)}):`))} <b>${last.sets.map(setTxt).join(" · ")}</b></div>`:""}
@@ -3016,7 +3167,7 @@ function liveHTML(){
       <div class="lv-sets">${it.sets.map((x,j)=>`<button data-lv="pickSet" data-j="${j}" class="${j===live.j?"cur":""}${x.ok?" ok":""}" aria-pressed="${j===live.j}">${j+1}<small>${x.ok?`${x.kg!==""?esc(x.kg)+"×":""}${esc(x.r)}`:"—"}</small></button>`).join("")}<button data-lv="addSet" aria-label="${esc(L("+ Série"))}">+</button></div>
       <div class="row lv-tools">${typeof swapOpts==="function"?`<button class="btn" data-lv="swap">⇄ ${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}</button>`:""}</div>
       ${how}</div>`;
-    h+=restCard;
+    if(!isC(it))h+=restCard;
     h+=`<div class="card"><h3 class="section-t" style="margin:0">${tx("Exercícios","Exercises","Ejercicios")}</h3><div class="lv-list">${w.items.map((x,i)=>{const n=x.sets.filter(y=>y.ok).length;
       return `<button data-lv="pickEx" data-i="${i}" class="${i===live.i?"cur":""}${n===x.sets.length?" ok":""}"><span>${esc(dName(x.name,x.ref))}</span><b>${n}/${x.sets.length}</b></button>`}).join("")}</div>
       <button class="btn" data-lv="addEx">+ ${esc(L("Adicionar exercício"))}</button></div>`;
@@ -3026,7 +3177,8 @@ function liveHTML(){
   return h}
 function liveFinish(w){w.done=true;w.dur=Math.round((Date.now()-(w.start||Date.now()))/1000);
   /* sets never done and left empty are dropped, so they don't count in Progress */
-  w.items.forEach(it=>it.sets=it.sets.filter(s=>s.ok||s.r!==""||s.kg!==""));w.items=w.items.filter(it=>it.sets.length);
+  /* (a load alone may be the planned one from Meus treinos, so it doesn't keep a set) */
+  w.items.forEach(it=>it.sets=it.sets.filter(s=>s.ok||[s.r,s.min].some(v=>v!=null&&String(v).trim()!=="")));w.items=w.items.filter(it=>it.sets.length);
   const prs=workoutPRs(w);saveW();liveSumW=w.id;checkAch();liveSum={dur:w.dur,sets:w.items.reduce((a,it)=>a+it.sets.length,0),prs};live=null;saveLive();stopRest();
   if(prs.length)beep(2);toast(tx("Treino marcado como feito","Workout marked as done","Entreno marcado como hecho"))}
 $("treinoBody").addEventListener("click",e=>{
@@ -3048,6 +3200,10 @@ $("treinoBody").addEventListener("click",e=>{
     s.kg=kg;s.r=r;const first=!s.ok;s.ok=true;const p=setPR(it,s,w);
     if(p){toast(tx(`🏆 Recorde! ${fkg(p.kg)} kg × ${p.r}`,`🏆 Record! ${fkg(p.kg)} kg × ${p.r}`,`🏆 ¡Récord! ${fkg(p.kg)} kg × ${p.r}`));beep(2)}
     saveW();if(first){liveNext(w);if(!w.items.every(x=>x.sets.every(y=>y.ok)))startRest(restFor(it))}}
+  else if(a==="cInt"){const s=w.items[live.i].sets[0];cSaveLive(s);s.int=b.dataset.v;saveW()}
+  else if(a==="cDone"){const it=w.items[live.i],s=it.sets[0];cSaveLive(s);
+    if(!cNum(s.min)){if(cNum(it.target))s.min=String(cNum(it.target));else{toast(tx("Coloque os minutos","Enter the minutes","Pon los minutos"));$("lvMin").focus();return}}
+    const first=!s.ok;s.ok=true;saveW();if(first)liveNext(w)}
   else if(a==="pickSet")live.j=+b.dataset.j;
   else if(a==="pickEx"){live.i=+b.dataset.i;const j=w.items[live.i].sets.findIndex(s=>!s.ok);live.j=j<0?0:j}
   else if(a==="prevEx"||a==="nextEx"){live.i+=a==="nextEx"?1:-1;liveFix(w);const j=w.items[live.i].sets.findIndex(s=>!s.ok);live.j=j<0?0:j}
@@ -3352,7 +3508,7 @@ function achStats(){
     if(mons.length&&mons.every(m=>(weeks[m]||0)>=ACH_GOAL)){perfect=true;break}}
   /* records, sets, exercises tried, bodyweight lifts */
   let prs=0,sets=0;const bestE={},fams=new Set(),bw={},bwT=achBW();let pull=0,pullX=0,push=0;const pxR=sx(BWP.pux)[0];
-  for(const w of done)for(const it of w.items){const key=exKey(it);let top=0;const R=parseRef(it.ref||refByName(it.name));
+  for(const w of done)for(const it of w.items){if(isC(it))continue;const key=exKey(it);let top=0;const R=parseRef(it.ref||refByName(it.name));
     fams.add(R?R.f.id:it.name);
     for(const s of it.sets||[]){const kg=numKg(s.kg),r=parseInt(s.r)||0;if(w.done===true||r>0)sets++;
       if(kg>0&&r>0)top=Math.max(top,e1rm(kg,r));
@@ -3388,7 +3544,12 @@ function achStats(){
     return all.has("peito")&&all.has("biceps")});
   let lv=-1;try{const D=rankData();if(D.all!=null)lv=rLv(D.all)}catch(e){}
   if(lv>ach.lvMax){ach.lvMax=lv;saveAch()}
-  return {n:done.length,live:live.length,streak,best,thisWeek:weeks[thisMon]||0,mBest,mRun,perfect,prs,sets,fams:fams.size,bw,bwT,pull,pullX,push,
+  /* cardio: sessions, total minutes/km/kcal, best WHO week and weeks in a row on the WHO goal */
+  const cw={};let cN=0,cMinT=0,cKm=0,cKcal=0;
+  for(const w of done){let any=false;for(const it of w.items){const k=cKey(it);if(!k)continue;for(const st of it.sets||[]){const m=cMin(it,st,w);if(!m)continue;any=true;const int=st.int||"m";
+    cMinT+=m;cKm+=cNum(st.km);cKcal+=kcalOf(k,m,int);const wk=monOf(w.date);cw[wk]=(cw[wk]||0)+(int==="f"?2*m:int==="m"?m:0)}}if(any)cN++}
+  const cWho=Math.max(0,...Object.values(cw)),cWhoRun=runBest(Object.keys(cw).filter(k=>cw[k]>=150),plus7);
+  return {cN,cMin:Math.round(cMinT),cKm:Math.round(cKm*10)/10,cKcal:Math.round(cKcal),cWho:Math.round(cWho),cWhoRun,n:done.length,live:live.length,streak,best,thisWeek:weeks[thisMon]||0,mBest,mRun,perfect,prs,sets,fams:fams.size,bw,bwT,pull,pullX,push,
     full,ideal,bal,leg:runBest(legW,plus7),early,late,weekend,back,marathon:done.some(w=>w.dur>=3600),shared:!!ach.shared,lv:ach.lvMax,weeks,
     noLeg,noUp,maxOff,monChest,rat,holiday,flash,beach}}
 /* badge = {c: section, id, i: icon, n: name ([pt,en,es] or function), d: description (same), v: S → value,
@@ -3438,6 +3599,14 @@ const ACH=[];{const A=(c,id,i,n,d,v,t=1,u)=>ACH.push({c,id,i,n,d,v,t,u});
   A("ext","mara","⏳",["Maratona","Marathon","Maratón"],["Treino ao vivo de 1 hora ou mais.","Live workout of 1 hour or more.","Entreno en vivo de 1 hora o más."],S=>S.marathon?1:0);
   A("ext","share","📸",["Influencer","Influencer","Influencer"],["Compartilhou ou salvou um cartão para Stories.","Shared or saved a Story card.","Compartió o guardó una tarjeta para Stories."],S=>S.shared?1:0);
   /* funny ones (owner's idea) */
+  A("car","c1","🏃",["Primeiro cardio","First cardio","Primer cardio"],["Um cardio feito, no treino ou avulso.","One cardio session, in a workout or on its own.","Un cardio hecho, en el entreno o suelto."],S=>S.cN,1);
+  [10,50].forEach(k=>A("car","cn"+k,"🏃",()=>tx(`${k} cardios`,`${k} cardio sessions`,`${k} cardios`),["Sessões de cardio feitas.","Cardio sessions done.","Sesiones de cardio hechas."],S=>S.cN,k));
+  A("car","cwho","❤️",["Meta da OMS","WHO goal","Meta de la OMS"],["Uma semana com 150 min de cardio (forte conta em dobro).","A week with 150 min of cardio (hard counts double).","Una semana con 150 min de cardio (intenso cuenta doble)."],S=>S.cWho,150);
+  A("car","cwho4","💓",["4 semanas na meta","4 weeks on target","4 semanas en la meta"],["4 semanas seguidas com 150 min de cardio.","4 weeks in a row with 150 min of cardio.","4 semanas seguidas con 150 min de cardio."],S=>S.cWhoRun,4);
+  A("car","ch10","⏳",["10 horas de cardio","10 hours of cardio","10 horas de cardio"],["600 minutos somados.","600 minutes in total.","600 minutos en total."],S=>S.cMin,600);
+  A("car","ck21","🥈",["Meia maratona somada","Half marathon, added up","Media maratón sumada"],["21,1 km somando todos os cardios com distância.","21.1 km adding up every cardio with distance.","21,1 km sumando todos los cardios con distancia."],S=>S.cKm,21.1);
+  A("car","ck42","🥇",["Maratona somada","Marathon, added up","Maratón sumada"],["42,2 km somando todos os cardios com distância.","42.2 km adding up every cardio with distance.","42,2 km sumando todos los cardios con distancia."],S=>S.cKm,42.2);
+  A("car","ckcal","🔥",["5.000 kcal no cardio","5,000 cardio kcal","5.000 kcal de cardio"],["Calorias estimadas somadas.","Estimated calories in total.","Calorías estimadas en total."],S=>S.cKcal,5000);
   A("fun","noleg","🐦",["Perna de saracura","Chicken legs","Piernas de alambre"],["Treinou a semana inteira sem fazer perna.","Trained all week without a single leg exercise.","Entrenó toda la semana sin hacer pierna."],S=>S.noLeg?1:0);
   A("fun","noup","🦖",["Braço de T-rex","T-rex arms","Brazos de T-rex"],["Treinou a semana inteira sem fazer nada de superior.","Trained all week without any upper body.","Entrenó toda la semana sin nada de tren superior."],S=>S.noUp?1:0);
   A("fun","sofa","🛋️",["Sofá master","Couch master","Maestro del sofá"],["Ficou 3 dias seguidos sem treinar.","Went 3 days in a row without training.","Pasó 3 días seguidos sin entrenar."],S=>S.maxOff,3);
@@ -3451,7 +3620,7 @@ const ACH=[];{const A=(c,id,i,n,d,v,t=1,u)=>ACH.push({c,id,i,n,d,v,t,u});
     ["Nível geral do ranking de força.","Overall strength ranking level.","Nivel general de la clasificación de fuerza."],S=>S.lv>=i?1:0))}
 const ACH_SEC=[["seq","🔥",["Semanas de 3 treinos","Weeks of 3 workouts","Semanas de 3 entrenos"]],["mes","📅",["Do mês","Monthly","Del mes"]],
   ["tre","💪",["Treinos","Workouts","Entrenos"]],["pc","⚖️",["Peso do corpo","Bodyweight","Peso corporal"]],["rec","🏆",["Recordes","Records","Récords"]],
-  ["vol","🎯",["Volume e equilíbrio","Volume and balance","Volumen y equilibrio"]],["ext","✨",["Extras","Extras","Extras"]],["fun","😂",["Engraçadas","Just for fun","Divertidos"]],["rk","🎖️",["Ranking de força","Strength ranking","Clasificación de fuerza"]]];
+  ["vol","🎯",["Volume e equilíbrio","Volume and balance","Volumen y equilibrio"]],["car","🏃",["Cardio","Cardio","Cardio"]],["ext","✨",["Extras","Extras","Extras"]],["fun","😂",["Engraçadas","Just for fun","Divertidos"]],["rk","🎖️",["Ranking de força","Strength ranking","Clasificación de fuerza"]]];
 const achTxt=(x,S)=>typeof x==="function"?x(S):p3(x);
 const achName=a=>achTxt(a.n);
 const achDesc=(a,S)=>achTxt(a.d,S);
@@ -3571,7 +3740,7 @@ const doneSets=it=>(it.sets||[]).filter(x=>String(x.r??"").trim()!==""||String(x
 function tally(r){
   const mus={},grp={},unk=new Map(),days=new Set();let sets=0;
   for(const w of workouts){if(w.date<r.from||w.date>r.to||w.done===false)continue;
-    for(const it of w.items||[]){const n=w.done===true?(it.sets||[]).length:doneSets(it);if(!n)continue;days.add(w.date);sets+=n;
+    for(const it of w.items||[]){if(isC(it))continue;const n=w.done===true?(it.sets||[]).length:doneSets(it);if(!n)continue;days.add(w.date);sets+=n;
       const e=exInfo(it.name,it.ref);if(!e){unk.set(it.name,(unk.get(it.name)||0)+n);continue}
       e.p.forEach(id=>mus[id]=(mus[id]||0)+n);e.s.forEach(id=>mus[id]=(mus[id]||0)+n/2);
       const g={};e.s.forEach(id=>g[TOB[id]]=.5);e.p.forEach(id=>g[TOB[id]]=1);
@@ -3794,6 +3963,7 @@ function renderProg(){
   </div>
   ${over.length?`<div class="warnbox"><b>Muitas séries no mesmo treino</b>${over.map(([g,v])=>`${BASIC[g].n} (${nf(v)})`).join(", ")} ${over.length>1?"passaram":"passou"} de ~11 séries ${pOff===0?"hoje":"neste dia"}. Os estudos não mostram ganho extra a partir daí; vale dividir em outro dia da semana.</div>`:""}
   ${T.sets?radarCard(T,B):""}
+  ${cardioCard(r)}
   ${T.sets?`<div class="card"><h3 class="section-t" style="margin:0">Séries por músculo ${pMode==="week"?"na semana":"no treino"}</h3><div>${done.map(([g,v])=>{
       const parts=BASIC[g].m.map(id=>[id,T.mus[id]||0]).sort((a,b)=>b[1]-a[1]);const bi=bandOf(v,B),c=heat(v,B);
       return `<details class="pg"><summary><span class="pg-n">${BASIC[g].n}<small class="pg-b"><i style="background:${c}"></i>${B.names[bi]}</small></span><span class="pg-bar"><i style="width:${Math.max(4,Math.round(Math.min(v,top)/top*100))}%;background:${c}"></i></span><b>${nf(v)}</b></summary>
@@ -3804,6 +3974,16 @@ function renderProg(){
   ${bandsInfo()}`;
   $("pfigBox").appendChild(progFig(T.mus,B));applyRadSel();
 }
+/* cardio of the week/day (owner: minutes in Progresso). WHO 2020: 150–300 min moderate a week; vigorous minutes
+   count double; light is shown but does not count toward the goal. */
+function cardioCard(r){const C=cardioIn(r.from,r.to),wk=pMode==="week",pct=Math.min(100,C.who/150*100);
+  const head=`<div class="row between"><h3 class="section-t" style="margin:0">🏃 Cardio<button class="help sm" data-help="cardio" aria-label="${tx("Sobre o cardio","About cardio","Sobre el cardio")}">+</button></h3></div>`;
+  if(!C.min)return `<div class="card cbox">${head}<p class="muted" style="margin:0">${wk?tx("Nenhum cardio nesta semana.","No cardio this week.","Ningún cardio esta semana."):tx("Nenhum cardio neste dia.","No cardio on this day.","Ningún cardio este día.")} ${tx("Registre em Hoje › + Registrar cardio, ou ponha no seu treino.","Log it in Today › + Log cardio, or add it to your workout.","Regístralo en Hoy › + Registrar cardio, o ponlo en tu entreno.")}</p></div>`;
+  return `<div class="card cbox">${head}
+    <div class="c-big">${Math.round(C.min)}<small>min</small></div>
+    <span class="muted-s" style="margin:0">${[tx(`${C.n} ${C.n===1?"sessão":"sessões"}`,`${C.n} ${C.n===1?"session":"sessions"}`,`${C.n} ${C.n===1?"sesión":"sesiones"}`),C.km?kmTxt(C.km)+" km":"",`≈ ${C.kcal.toLocaleString(LOC)} kcal`].filter(Boolean).join(" · ")}</span>
+    ${wk?`<div class="c-meta"><div class="row between"><span>${tx("Meta da OMS","WHO goal","Meta de la OMS")}</span><b>${Math.round(C.who)} / 150 min</b></div><div class="lv-bar"><i style="width:${pct.toFixed(0)}%;transition:none${C.who>=150?";background:#2E9E5B":""}"></i></div>
+      <span>${C.who>=150?tx("Meta da semana batida! 🎉","Weekly goal reached! 🎉","¡Meta de la semana cumplida! 🎉"):tx("Moderado conta 1×, forte conta 2×. Leve não entra na meta.","Moderate counts 1×, hard counts 2×. Light doesn't count toward the goal.","Moderado cuenta 1×, intenso cuenta 2×. Suave no cuenta para la meta.")}</span></div>`:""}</div>`}
 $("progBody").addEventListener("click",e=>{
   const pv=e.target.closest("[data-pv]");if(pv){pView=pv.dataset.pv;LS.set("atlas-pview",pView);return renderProg()}
   const kx=e.target.closest("[data-kx]");if(kx){const nm=kgList[+kx.dataset.kx][0];kgOpen=kgOpen===nm?null:nm;renderKg();

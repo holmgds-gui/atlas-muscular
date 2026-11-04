@@ -17,6 +17,7 @@ node tests/como-fazer-json.js           # sem navegador: pt/en/es do "Como fazer
 node tests/peso.js
 node tests/treinos-prontos.js
 node tests/sequencia.js
+node tests/cardio-carga.js              # carga nos Meus treinos e cardio (seletor, Registro, Ao vivo, avulso, Progresso, conquistas)
 node tests/apresentacao.js              # carrossel da 1ª vez (iPhone, Android, computador, app instalado)
 node tests/i18n-coleta.js pt && node tests/i18n-coleta.js en && node tests/i18n-coleta.js es && node tests/i18n-sobras.js
 ```

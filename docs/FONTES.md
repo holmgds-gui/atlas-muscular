@@ -200,6 +200,18 @@ Também valem para o "Como fazer" os estudos de descanso e progressão do Ao viv
 
 Séries por músculo em cada treino seguem as faixas do Progresso (dia: até ~11 séries). Os exercícios escolhidos estão entre os mais bem colocados nas listas do Atlas.
 
+## 4d. Cardio (minutos, intensidade e calorias)
+
+- **Calorias** = MET × peso corporal (kg) × horas. METs do [2024 Adult Compendium of Physical Activities](https://pubmed.ncbi.nlm.nih.gov/38242596/) (Herrmann et al., *Journal of Sport and Health Science*, 2024; tabela em [pacompendium.com](https://pacompendium.com/wp-content/uploads/2024/01/2024-adult-compendium_1_2024.pdf)). Valores usados (leve / moderado / forte):
+  - Caminhada 3,0 / 4,8 / 5,5 (17170, 17200, 17220) · Corrida 7,5 / 9,3 / 11,0 (12020, 12050, 12070)
+  - Bicicleta ergométrica 4,0 / 6,0 / 10,3 (01214, 01220, 01232) · Elíptico 3,5* / 5,0 / 9,0 (02048, 02049)
+  - Escada 6,5* / 9,3 / 11,0* (02065) · Remo 4,0* / 5,0 / 7,5 (02071, 02072) · Pular corda 9,0 / 11,0 / 11,8 (02069, 02068, 15551)
+  - Natação 5,0* / 5,8 / 9,8 (18292, 18230) · HIIT 5,0 / 7,0 / 11,0 (02035, 02210, 02214)
+  - \* estimativa do app, porque o Compendium não tem essa faixa.
+  - O app avisa que a conta pode errar uns 20–30%: serve para comparar dias.
+- **Intensidade pelo teste da fala** e faixas de frequência cardíaca (moderado ≈ 64–76% e forte ≈ 77–95% da máxima): ACSM's Guidelines for Exercise Testing and Prescription (11ª ed.).
+- **Meta semanal**: OMS 2020 (Bull et al., *Br J Sports Med*, [doi:10.1136/bjsports-2020-102955](https://bjsm.bmj.com/content/54/24/1451)): 150–300 min de atividade moderada ou 75–150 min de vigorosa por semana, ou combinação equivalente (por isso o minuto forte conta em dobro; leve não entra na meta).
+
 ## 5. Desenho do boneco
 
 - Imagem de referência para a silhueta (só formato e detalhes, sem cores ou textos): [Toda Matéria](https://static.todamateria.com.br/upload/55/77/55771934478af-musculos-do-corpo-humano.jpg)
