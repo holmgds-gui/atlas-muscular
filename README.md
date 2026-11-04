@@ -36,7 +36,7 @@ App de academia gratuito, em português, inglês e espanhol, que funciona no nav
 **Progresso**
 - **Músculos:** mapa de calor dos músculos treinados na semana ou no dia, com faixas baseadas em pesquisa, radar de equilíbrio e minutos de cardio da semana com a meta da OMS.
 - **Força:** ranking de força por grupo muscular em 9 níveis (de Ameba a Bizarro), ajustado ao seu peso, sexo e idade, e a evolução da carga de cada exercício.
-- **Conquistas:** ~90 conquistas (semanas seguidas com 3 treinos, mês, peso do corpo, recordes, engraçadas…) e 🔥 da sequência na tela Hoje.
+- **Conquistas** (no troféu ao lado do nome): ~95 conquistas (semanas seguidas com 3 treinos, mês, peso do corpo, recordes, engraçadas…) e 🔥 da sequência na tela Hoje.
 - **Cartão para Stories** da semana, do ranking, do treino e das conquistas.
 
 **Apresentação:** na primeira vez, um carrossel rápido mostra como instalar e como usar cada parte (dá para rever em Configurações).

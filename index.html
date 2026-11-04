@@ -639,6 +639,7 @@ button.wk{border:0;font:inherit;color:inherit;cursor:pointer;width:100%}
 :root{--lv0:#8E959E;--lv1:#2E9E5B;--lv2:#1688C9;--lv3:#9640CF;--lv4:#E0B800;--lv5:#EC6F12;--lv6:#B8182A;--lv7:#EE62BE;--lv8:#4B5058;--lv8a:#2E3238;--lv8b:#B9C0C8;--lv8g:linear-gradient(135deg,#2E3238 0%,#5A616B 38%,#C3CAD2 50%,#5A616B 62%,#3A3F46 100%)}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--lv0:#8A919B;--lv1:#3DBE70;--lv2:#3AA6E8;--lv3:#B266F0;--lv4:#F5D040;--lv5:#FF8A2E;--lv6:#E02A40;--lv7:#FF8AD2;--lv8:#A3ABB5;--lv8a:#6E7680;--lv8b:#EEF1F4;--lv8g:linear-gradient(135deg,#6E7680 0%,#A3ABB5 38%,#F2F4F6 50%,#A3ABB5 62%,#7A828C 100%)}}
 :root[data-theme="dark"]{--lv0:#8A919B;--lv1:#3DBE70;--lv2:#3AA6E8;--lv3:#B266F0;--lv4:#F5D040;--lv5:#FF8A2E;--lv6:#E02A40;--lv7:#FF8AD2;--lv8:#A3ABB5;--lv8a:#6E7680;--lv8b:#EEF1F4;--lv8g:linear-gradient(135deg,#6E7680 0%,#A3ABB5 38%,#F2F4F6 50%,#A3ABB5 62%,#7A828C 100%)}
+.trophy-btn{margin-left:10px;margin-right:auto}.trophy-btn svg{stroke:var(--accent,var(--target))!important}.trophy-btn[aria-current="page"]{background:var(--chip)}
 button.brand{border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:8px;color:inherit;text-align:left;align-items:center;gap:6px}
 button.brand:hover{background:var(--chip)}
 .rk-sec{margin:6px 0 -4px;display:flex;align-items:center;gap:8px}
@@ -683,6 +684,7 @@ button.brand:hover{background:var(--chip)}
 <div class="app" id="app">
   <header>
     <button class="brand" id="brandBtn" aria-label="Muscle Atlas: ir para o início" title="Início"><svg class="logo" viewBox="0 0 512 512" aria-hidden="true"><defs><linearGradient id="lgR" gradientUnits="userSpaceOnUse" x1="0" y1="150" x2="0" y2="500"><stop offset="0" stop-color="#F45A60"/><stop offset="1" stop-color="#B3161E"/></linearGradient><radialGradient id="lgBG" cx=".5" cy=".4" r=".75"><stop offset="0" stop-color="#2A323C"/><stop offset="1" stop-color="#12161B"/></radialGradient></defs><g fill="none" stroke="#8A94A1" stroke-width="7.5" stroke-linecap="round"> <circle cx="256" cy="116" r="94" fill="#1E252D" stroke-width="9"/> <ellipse cx="256" cy="116" rx="47" ry="94"/><path d="M256,22 L256,210"/> <path d="M162,116 L350,116"/> <path d="M174.2,69.0 Q256,82.2 337.8,69.0"/> <path d="M174.2,163.0 Q256,176.2 337.8,163.0"/></g><g fill="#11151A" stroke="#11151A" stroke-width="10" stroke-linejoin="round"><path d="M221.8,344.8 C213.7,370.5 205.6,392.1 201.4,419.3 L226.6,428.7 C241.3,405.5 249.4,383.9 260.2,359.2Z"/><path d="M201.7,422.0 C198.7,443.8 195.7,462.4 196.6,484.8 L211.4,487.2 C219.3,466.2 222.3,447.6 226.3,426.0Z"/><path d="M196,481 C189,488 186,496 194,499 L216,499 C220,495 215,487 210,483 Z"/><path d="M223.8,252.7 C208.1,233.4 194.9,216.6 177.0,198.9 L159.0,213.1 C171.9,234.6 185.1,251.4 200.2,271.3Z"/><path d="M179.5,206.7 C180.2,182.8 181.4,162.4 180.5,138.5 L163.5,137.5 C159.8,161.2 158.6,181.6 156.5,205.3Z"/><path d="M199,268 C195,253 205,243 219,245 C229,248 231,259 225,268 C218,276 204,278 199,268 Z"/><path d="M201.5,424 a12.5,12.5 0 1 0 25,0 a12.5,12.5 0 1 0 -25,0Z"/><path d="M156.5,206 a11.5,11.5 0 1 0 23,0 a11.5,11.5 0 1 0 -23,0Z"/><path d="M161.5,136 a10.5,10.5 0 1 0 21,0 a10.5,10.5 0 1 0 -21,0Z"/><path d="M196.5,486 a7.5,7.5 0 1 0 15,0 a7.5,7.5 0 1 0 -15,0Z"/><g transform="matrix(-1,0,0,1,512,0)"><path d="M221.8,344.8 C213.7,370.5 205.6,392.1 201.4,419.3 L226.6,428.7 C241.3,405.5 249.4,383.9 260.2,359.2Z"/><path d="M201.7,422.0 C198.7,443.8 195.7,462.4 196.6,484.8 L211.4,487.2 C219.3,466.2 222.3,447.6 226.3,426.0Z"/><path d="M196,481 C189,488 186,496 194,499 L216,499 C220,495 215,487 210,483 Z"/><path d="M223.8,252.7 C208.1,233.4 194.9,216.6 177.0,198.9 L159.0,213.1 C171.9,234.6 185.1,251.4 200.2,271.3Z"/><path d="M179.5,206.7 C180.2,182.8 181.4,162.4 180.5,138.5 L163.5,137.5 C159.8,161.2 158.6,181.6 156.5,205.3Z"/><path d="M199,268 C195,253 205,243 219,245 C229,248 231,259 225,268 C218,276 204,278 199,268 Z"/><path d="M201.5,424 a12.5,12.5 0 1 0 25,0 a12.5,12.5 0 1 0 -25,0Z"/><path d="M156.5,206 a11.5,11.5 0 1 0 23,0 a11.5,11.5 0 1 0 -23,0Z"/><path d="M161.5,136 a10.5,10.5 0 1 0 21,0 a10.5,10.5 0 1 0 -21,0Z"/><path d="M196.5,486 a7.5,7.5 0 1 0 15,0 a7.5,7.5 0 1 0 -15,0Z"/></g><path d="M256,246 C240,246 226,248 214,254 C206,268 207,286 214,298 C219,312 226,324 231,336 C233,346 236,354 242,358 L256,362 L270,358 C276,354 279,346 281,336 C286,324 293,312 298,298 C305,286 306,268 298,254 C286,248 272,246 256,246 Z"/><path d="M245,248 C247,238 251,234 256,234 C261,234 265,238 267,248 Z"/><path d="M256,196 C245,196 238,205 238,217 C238,230 246,240 256,240 C266,240 274,230 274,217 C274,205 267,196 256,196 Z"/></g><g fill="url(#lgR)"><path d="M221.8,344.8 C213.7,370.5 205.6,392.1 201.4,419.3 L226.6,428.7 C241.3,405.5 249.4,383.9 260.2,359.2Z"/><path d="M201.7,422.0 C198.7,443.8 195.7,462.4 196.6,484.8 L211.4,487.2 C219.3,466.2 222.3,447.6 226.3,426.0Z"/><path d="M196,481 C189,488 186,496 194,499 L216,499 C220,495 215,487 210,483 Z"/><path d="M223.8,252.7 C208.1,233.4 194.9,216.6 177.0,198.9 L159.0,213.1 C171.9,234.6 185.1,251.4 200.2,271.3Z"/><path d="M179.5,206.7 C180.2,182.8 181.4,162.4 180.5,138.5 L163.5,137.5 C159.8,161.2 158.6,181.6 156.5,205.3Z"/><path d="M199,268 C195,253 205,243 219,245 C229,248 231,259 225,268 C218,276 204,278 199,268 Z"/><path d="M201.5,424 a12.5,12.5 0 1 0 25,0 a12.5,12.5 0 1 0 -25,0Z"/><path d="M156.5,206 a11.5,11.5 0 1 0 23,0 a11.5,11.5 0 1 0 -23,0Z"/><path d="M161.5,136 a10.5,10.5 0 1 0 21,0 a10.5,10.5 0 1 0 -21,0Z"/><path d="M196.5,486 a7.5,7.5 0 1 0 15,0 a7.5,7.5 0 1 0 -15,0Z"/><g transform="matrix(-1,0,0,1,512,0)"><path d="M221.8,344.8 C213.7,370.5 205.6,392.1 201.4,419.3 L226.6,428.7 C241.3,405.5 249.4,383.9 260.2,359.2Z"/><path d="M201.7,422.0 C198.7,443.8 195.7,462.4 196.6,484.8 L211.4,487.2 C219.3,466.2 222.3,447.6 226.3,426.0Z"/><path d="M196,481 C189,488 186,496 194,499 L216,499 C220,495 215,487 210,483 Z"/><path d="M223.8,252.7 C208.1,233.4 194.9,216.6 177.0,198.9 L159.0,213.1 C171.9,234.6 185.1,251.4 200.2,271.3Z"/><path d="M179.5,206.7 C180.2,182.8 181.4,162.4 180.5,138.5 L163.5,137.5 C159.8,161.2 158.6,181.6 156.5,205.3Z"/><path d="M199,268 C195,253 205,243 219,245 C229,248 231,259 225,268 C218,276 204,278 199,268 Z"/><path d="M201.5,424 a12.5,12.5 0 1 0 25,0 a12.5,12.5 0 1 0 -25,0Z"/><path d="M156.5,206 a11.5,11.5 0 1 0 23,0 a11.5,11.5 0 1 0 -23,0Z"/><path d="M161.5,136 a10.5,10.5 0 1 0 21,0 a10.5,10.5 0 1 0 -21,0Z"/><path d="M196.5,486 a7.5,7.5 0 1 0 15,0 a7.5,7.5 0 1 0 -15,0Z"/></g><path d="M256,246 C240,246 226,248 214,254 C206,268 207,286 214,298 C219,312 226,324 231,336 C233,346 236,354 242,358 L256,362 L270,358 C276,354 279,346 281,336 C286,324 293,312 298,298 C305,286 306,268 298,254 C286,248 272,246 256,246 Z"/><path d="M245,248 C247,238 251,234 256,234 C261,234 265,238 267,248 Z"/><path d="M256,196 C245,196 238,205 238,217 C238,230 246,240 256,240 C266,240 274,230 274,217 C274,205 267,196 256,196 Z"/></g><g fill="none" stroke="rgba(70,0,8,.6)" stroke-width="2.8" stroke-linecap="round"><path d="M256,258 L256,352 M216,278 C228,290 244,292 254,286 M243,304 C250,306 262,306 269,304 M244,320 C251,322 261,322 268,320 M246,336 C252,338 260,338 266,336 M238,300 C235,318 236,334 242,350 M202,272 C210,266 218,264 224,266 M231,372 C229,390 224,404 216,414 M246,368 C245,384 241,398 233,410 M210,434 C207,450 205,464 204,474"/><path d="M256,258 L256,352 M216,278 C228,290 244,292 254,286 M243,304 C250,306 262,306 269,304 M244,320 C251,322 261,322 268,320 M246,336 C252,338 260,338 266,336 M238,300 C235,318 236,334 242,350 M202,272 C210,266 218,264 224,266 M231,372 C229,390 224,404 216,414 M246,368 C245,384 241,398 233,410 M210,434 C207,450 205,464 204,474" transform="matrix(-1,0,0,1,512,0)"/></g></svg><h1>Muscle <b>Atlas</b></h1></button>
+    <button class="gear trophy-btn" id="achBtn" aria-label="Conquistas" title="Conquistas"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4h8v5a4 4 0 0 1-8 0V4ZM8 6H4.5v1.5A3.5 3.5 0 0 0 8 11M16 6h3.5v1.5A3.5 3.5 0 0 1 16 11M12 13v4M8.5 20h7M10 17h4v3h-4z"/></svg></button>
     <nav class="htabs" aria-label="Seções">
       <button data-tab="atlas">Atlas</button>
       <button data-tab="ficha">Meus treinos</button>
@@ -748,6 +750,7 @@ button.brand:hover{background:var(--chip)}
   <section id="tab-treino" class="view page" hidden><div class="wrap" id="treinoBody"></div></section>
   <section id="tab-prog" class="view page" hidden><div class="wrap" id="progBody"></div></section>
   <section id="tab-conf" class="view page" hidden><div class="wrap" id="confBody"></div></section>
+  <section id="tab-ach" class="view page" hidden><div class="wrap" id="achBody"></div></section>
 
   <nav class="btabs" aria-label="Seções">
     <button data-tab="atlas"><svg viewBox="0 0 24 24"><circle cx="12" cy="4.5" r="2.2"/><path d="M5 8.5l7 1.5 7-1.5M12 10v5M12 15l-3 6M12 15l3 6"/></svg>Atlas</button>
@@ -2791,6 +2794,25 @@ HELP.ficha[1]+=tx(`<h4>Cardio</h4><p>Em + Adicionar exercício, toque em Cardio 
 HELP.treino[1]+=tx(`<h4>Cardio</h4><p><b>+ Registrar cardio</b> salva um cardio avulso (tipo, minutos, distância e intensidade) no dia escolhido. Com 20 min ou mais (o forte conta em dobro) ele vale <b>meio treino</b> na sequência 🔥 e na contagem da semana; no dia que já tem musculação, não soma. Sempre entra nos minutos de cardio do Progresso.</p>`,
 `<h4>Cardio</h4><p><b>+ Log cardio</b> saves a standalone cardio session (type, minutes, distance and intensity) on the chosen day. With 20 min or more (hard counts double) it's worth <b>half a workout</b> for the 🔥 streak and the week count; on a day that already has strength training, it adds nothing. It always goes into the cardio minutes in Progress.</p>`,
 `<h4>Cardio</h4><p><b>+ Registrar cardio</b> guarda un cardio suelto (tipo, minutos, distancia e intensidad) en el día elegido. Con 20 min o más (intenso cuenta doble) vale <b>medio entreno</b> en la racha 🔥 y en la cuenta de la semana; en un día que ya tiene musculación, no suma. Siempre suma a los minutos de cardio del Progreso.</p>`);
+HELP.ach=[tx("Conquistas","Achievements","Logros"),tx(
+`<p>Medalhas que você ganha treinando. Abra pelo <b>troféu</b> ao lado do nome Muscle Atlas, ou tocando no 🔥 da aba Hoje.</p>
+<ul><li><b>🔥 Semanas de 3 treinos:</b> semanas seguidas (segunda a domingo) com 3 treinos ou mais. A semana atual não quebra a sequência enquanto não acaba. Cardio sozinho com 20 min ou mais vale meio treino.</li>
+<li><b>Do mês, treinos, peso do corpo, recordes, volume:</b> constância e força.</li>
+<li><b>Cardio:</b> minutos, meta da OMS, distância e calorias.</li>
+<li><b>Engraçadas</b> e <b>ranking de força</b> (de Ameba a Bizarro).</li></ul>
+<p>Uma conquista nova aparece num aviso quando você marca um treino como feito. O botão Compartilhar faz um cartão para Stories.</p>`,
+`<p>Badges you earn by training. Open them from the <b>trophy</b> next to the Muscle Atlas name, or by tapping the 🔥 in Today.</p>
+<ul><li><b>🔥 Weeks of 3 workouts:</b> weeks in a row (Monday to Sunday) with 3 or more workouts. The current week doesn't break the streak until it ends. Cardio on its own with 20 min or more counts as half a workout.</li>
+<li><b>Monthly, workouts, bodyweight, records, volume:</b> consistency and strength.</li>
+<li><b>Cardio:</b> minutes, WHO goal, distance and calories.</li>
+<li><b>Just for fun</b> and <b>strength ranking</b> (from Amoeba to Freak).</li></ul>
+<p>A new badge shows up in a notice when you mark a workout as done. The Share button makes a Story card.</p>`,
+`<p>Medallas que ganas entrenando. Ábrelas con el <b>trofeo</b> junto al nombre Muscle Atlas, o tocando el 🔥 en Hoy.</p>
+<ul><li><b>🔥 Semanas de 3 entrenos:</b> semanas seguidas (lunes a domingo) con 3 entrenos o más. La semana actual no rompe la racha hasta que termina. El cardio solo con 20 min o más vale medio entreno.</li>
+<li><b>Del mes, entrenos, peso corporal, récords, volumen:</b> constancia y fuerza.</li>
+<li><b>Cardio:</b> minutos, meta de la OMS, distancia y calorías.</li>
+<li><b>Divertidos</b> y <b>clasificación de fuerza</b> (de Ameba a Fenómeno).</li></ul>
+<p>Un logro nuevo aparece en un aviso cuando marcas un entreno como hecho. El botón Compartir crea una tarjeta para Stories.</p>`)];
 HELP.cardio=["Cardio",tx(
 `<p>Você pode pôr cardio <b>dentro de um treino</b> (+ Adicionar exercício › Cardio, por exemplo 20 min de esteira no fim) ou registrar um <b>cardio avulso</b> em Hoje › + Registrar cardio.</p>
 <h4>Intensidade (teste da fala)</h4><ul><li><b>Leve:</b> dá para cantar. Menos de ~64% da frequência cardíaca máxima.</li>
@@ -3087,8 +3109,8 @@ $("treinoBody").addEventListener("input",e=>{
   saveW();
 });
 $("treinoBody").addEventListener("click",e=>{
-  /* 🔥 = weeks in a row with 3+ workouts; tapping it opens Progresso › Conquistas */
-  if(e.target.closest("[data-streak]")){pView="ach";setTab("prog");return}
+  /* 🔥 = weeks in a row with 3+ workouts; tapping it opens Conquistas (the trophy page) */
+  if(e.target.closest("[data-streak]")){setTab("ach");return}
   const o=e.target.closest("[data-open]");if(o){openW=o.dataset.open;askDel=false;renderTreino();$("tab-treino").scrollTop=0;return}
   const dy=e.target.closest("[data-day]");
   if(dy){const iso=dy.dataset.day;if(iso>isoDate(new Date()))return;hDate=iso===isoDate(new Date())?null:iso;renderTreino();return}
@@ -3814,7 +3836,7 @@ $("importFile").addEventListener("change",async e=>{
 });
 
 /* ---------------------------------------------------------- tabs + init */
-let tab=LS.get("atlas-tab","atlas");if(tab==="rank"){tab="prog";LS.set("atlas-pview","kg")}if(!["atlas","ficha","treino","prog","conf"].includes(tab))tab="atlas";
+let tab=LS.get("atlas-tab","atlas");if(tab==="rank"){tab="prog";LS.set("atlas-pview","kg")}if(!["atlas","ficha","treino","prog","conf","ach"].includes(tab))tab="atlas";
 /* ---------------------------------------------------------- progress
    Sets done in the period, per muscle: 1 for each target muscle of the
    exercise (the lists it appears in) and 1/2 for each synergist. */
@@ -3918,10 +3940,10 @@ function bandsInfo(){return `<details class="about"><summary>Como as faixas fora
 /* ---------------------------------------------------------- cargas (load progress)
    Per exercise and per day: the heaviest set (kg × reps) and the estimated
    1-rep max, Epley: kg × (1 + reps/30). Only workouts marked as done count. */
-let pView=LS.get("atlas-pview","mus");if(!["mus","kg","ach"].includes(pView))pView="mus";
+let pView=LS.get("atlas-pview","mus");if(!["mus","kg"].includes(pView))pView="mus";
 let kgRange=LS.get("atlas-kgrange","3m");if(!["1m","3m","all"].includes(kgRange))kgRange="3m";
 let kgOpen=null,kgList=[];
-const pvSeg=()=>`<div class="seg pview" role="tablist" aria-label="Tipo de progresso"><button role="tab" data-pv="mus" aria-pressed="${pView==="mus"}">Músculos</button><button role="tab" data-pv="kg" aria-pressed="${pView==="kg"}">Força</button><button role="tab" data-pv="ach" aria-pressed="${pView==="ach"}">${tx("Conquistas","Badges","Logros")}</button></div>`;
+const pvSeg=()=>`<div class="seg pview" role="tablist" aria-label="Tipo de progresso"><button role="tab" data-pv="mus" aria-pressed="${pView==="mus"}">Músculos</button><button role="tab" data-pv="kg" aria-pressed="${pView==="kg"}">Força</button></div>`;
 const numKg=v=>{const n=parseFloat(String(v??"").replace(",","."));return isFinite(n)?n:NaN};
 const e1rm=(kg,r)=>r<=1?kg:kg*(1+r/30);
 const fkg=v=>(Math.round(v*10)/10).toLocaleString(LOC);
@@ -4043,7 +4065,7 @@ function applyRadSel(){
 }
 function renderProg(){
   if(pView==="kg")return renderKg();
-  if(pView==="ach"){$("progBody").innerHTML=`<div class="page-h"><h2>Progresso<button class="help" data-help="prog" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2></div>${pvSeg()}`+achHTML();return}
+  if(pView==="ach"){pView="mus";return setTab("ach")}
   const r=pRange(),T=tally(r,true),body=$("progBody"),B=BANDS[pMode];
   const gs=Object.keys(BASIC).map(g=>[g,T.grp[g]||0]);const done=gs.filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]),none=gs.filter(x=>!x[1]);
   const top=Math.max(B.bar,...done.map(x=>x[1]));
@@ -4559,14 +4581,18 @@ $("brandBtn").addEventListener("click",()=>setTab("atlas"));
 
 function setTab(t){
   tab=t;LS.set("atlas-tab",t);
-  ["atlas","ficha","treino","prog","conf"].forEach(x=>$("tab-"+x).hidden=(x!==t));
-  $("gearBtn").setAttribute("aria-current",t==="conf"?"page":"false");
+  ["atlas","ficha","treino","prog","conf","ach"].forEach(x=>$("tab-"+x).hidden=(x!==t));
+  $("gearBtn").setAttribute("aria-current",t==="conf"?"page":"false");$("achBtn").setAttribute("aria-current",t==="ach"?"page":"false");
   document.querySelectorAll("[data-tab]").forEach(b=>b.setAttribute("aria-current",b.dataset.tab===t?"page":"false"));
   if(t==="ficha")renderFicha();
   if(t==="treino"){openW=null;askDel=false;hDate=null;hWeek=0;renderTreino()}
   if(t==="prog"){pOff=0;renderProg()}
   if(t==="conf")renderConf();
+  if(t==="ach")renderAch();
 }
+/* Conquistas: its own page, opened by the trophy next to the title (owner: the trophy is the button for achievements) */
+function renderAch(){$("achBody").innerHTML=`<div class="page-h"><h2>${tx("Conquistas","Achievements","Logros")}<button class="help" data-help="ach" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2><p class="lead">${tx("Medalhas por constância, força, cardio e algumas engraçadas. Tudo conta pelos treinos marcados como feitos.","Badges for consistency, strength, cardio and a few funny ones. Everything counts from workouts marked as done.","Medallas por constancia, fuerza, cardio y algunas divertidas. Todo cuenta según los entrenos marcados como hechos.")}</p></div>`+achHTML()}
+$("achBtn").addEventListener("click",()=>setTab("ach"));
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
 
 /* ------------------------------------------------------------------ apresentação (carrossel da 1ª vez)
@@ -4612,14 +4638,16 @@ function introSlides(){
     <p>${tx("Ele fica vermelho e aparece a lista de exercícios, do que <b>mais estimula</b> para o que menos, com o tipo de estudo de cada um.","It turns red and you get the list of exercises, from the <b>most stimulating</b> down, with the kind of study behind each one.","Se pone rojo y aparece la lista de ejercicios, del que <b>más estimula</b> al que menos, con el tipo de estudio de cada uno.")}</p>`);
   S.push(`${img("ex")}<h2>${tx("Escolha o exercício","Pick the exercise","Elige el ejercicio")}</h2>
     <p>${tx("Os músculos que ajudam ficam <b>laranja</b>. Troque pegada, banco ou equipamento e veja o que muda. Em <b>Como fazer</b> tem o passo a passo.","Helper muscles turn <b>orange</b>. Change grip, bench or equipment and see what changes. <b>How to do it</b> has the step by step.","Los músculos que ayudan se ponen <b>naranjas</b>. Cambia agarre, banco o equipo y mira qué cambia. En <b>Cómo hacerlo</b> está el paso a paso.")}</p>`);
+  S.push(`${img("cardio")}<h2>${tx("Cardio também","Cardio too","Cardio también")}</h2>
+    <p>${tx("No botão <b>Cardio</b> do Atlas: corrida, bike, boxe, dança e mais, do que mais gasta para o que menos, com os músculos de cada um. Registre em <b>Hoje › + Registrar cardio</b> ou ponha no treino.","In the Atlas <b>Cardio</b> button: running, cycling, boxing, dancing and more, from the biggest burner down, with the muscles each one works. Log it in <b>Today › + Log cardio</b> or add it to a workout.","En el botón <b>Cardio</b> del Atlas: carrera, bici, boxeo, baile y más, del que más gasta al que menos, con los músculos de cada uno. Regístralo en <b>Hoy › + Registrar cardio</b> o ponlo en el entreno.")}</p>`);
   S.push(`${img("prontos")}<h2>${tx("Treinos prontos ou do seu jeito","Ready-made or your own","Entrenos listos o a tu manera")}</h2>
     <p>${tx("Na aba <b>Treinos</b>, pegue um treino pronto (iniciante ou avançado) ou monte o seu. No boneco, <b>Montar treino</b> monta um com os músculos que você tocar.","In <b>Workouts</b>, grab a ready-made plan (beginner or advanced) or build your own. On the figure, <b>Build a workout</b> makes one from the muscles you tap.","En <b>Entrenos</b>, toma un entreno listo (principiante o avanzado) o arma el tuyo. En el muñeco, <b>Armar entreno</b> arma uno con los músculos que toques.")}</p>`);
   S.push(`${img("live")}<h2>${tx("Treine ao vivo","Train live","Entrena en vivo")}</h2>
     <p>${tx("Em <b>Hoje › Ao vivo</b>, siga série a série: o app conta o descanso, sugere a próxima carga e avisa quando você bate um recorde. Com pressa? Só <b>Marcar como feito</b>.","In <b>Today › Live</b>, go set by set: the app times your rest, suggests the next load and tells you when you hit a record. In a hurry? Just <b>Mark as done</b>.","En <b>Hoy › En vivo</b>, sigue serie a serie: la app cuenta el descanso, sugiere la próxima carga y avisa cuando logras un récord. ¿Con prisa? Solo <b>Marcar como hecho</b>.")}</p>`);
-  S.push(`${img("prog")}<h2>${tx("Veja o que você treinou","See what you trained","Mira lo que entrenaste")}</h2>
-    <p>${tx("Em <b>Progresso</b>, o mapa mostra quanto cada músculo trabalhou na semana e se está na faixa ideal.","In <b>Progress</b>, the map shows how much each muscle worked this week and whether it's in the ideal range.","En <b>Progreso</b>, el mapa muestra cuánto trabajó cada músculo en la semana y si está en el rango ideal.")}</p>`);
+  S.push(`<div class="in-duo">${img("prog")}${img("cprog")}</div><h2>${tx("Veja o que você treinou","See what you trained","Mira lo que entrenaste")}</h2>
+    <p>${tx("Em <b>Progresso</b>, o mapa mostra quanto cada músculo trabalhou na semana e se está na faixa ideal. Embaixo, os minutos de cardio e a meta da OMS.","In <b>Progress</b>, the map shows how much each muscle worked this week and whether it's in the ideal range. Below, your cardio minutes and the WHO goal.","En <b>Progreso</b>, el mapa muestra cuánto trabajó cada músculo en la semana y si está en el rango ideal. Abajo, los minutos de cardio y la meta de la OMS.")}</p>`);
   S.push(`<div class="in-duo">${img("rank")}${img("ach")}</div><h2>${tx("Seu nível e suas conquistas","Your level and badges","Tu nivel y tus logros")}</h2>
-    <p>${tx("Do <b>Ameba</b> ao <b>Bizarro</b>: compare sua força com quem treina e ganhe conquistas a cada semana com 3 treinos. 🔥","From <b>Amoeba</b> to <b>Freak</b>: compare your strength with other lifters and earn badges every week with 3 workouts. 🔥","De <b>Ameba</b> a <b>Fenómeno</b>: compara tu fuerza con quien entrena y gana logros cada semana con 3 entrenos. 🔥")}</p>
+    <p>${tx("Do <b>Ameba</b> ao <b>Bizarro</b>: compare sua força em Progresso › Força. As <b>conquistas</b> ficam no troféu 🏆 ao lado do nome; faça 3 treinos por semana para manter o 🔥.","From <b>Amoeba</b> to <b>Freak</b>: compare your strength in Progress › Strength. <b>Badges</b> live in the 🏆 trophy next to the name; do 3 workouts a week to keep the 🔥 going.","De <b>Ameba</b> a <b>Fenómeno</b>: compara tu fuerza en Progreso › Fuerza. Los <b>logros</b> están en el trofeo 🏆 junto al nombre; haz 3 entrenos por semana para mantener el 🔥.")}</p>
     <p class="in-hint">${tx("Dúvida em alguma tela? Toque no <b>+</b> ao lado do título.","Unsure about a screen? Tap the <b>+</b> next to its title.","¿Dudas en alguna pantalla? Toca el <b>+</b> junto al título.")}</p>`);
   return S;
 }

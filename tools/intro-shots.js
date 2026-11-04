@@ -27,6 +27,9 @@ const seed=()=>{
     for(const [o,t,fn] of [[5,"Superior A",A],[4,"Inferior A",B],[2,"Superior B",C],[1,"Inferior B",D]])
       W.push({id:"w"+(id++),date:day(o+wk*7),title:t,planId:"p"+t,done:true,notes:"",items:fn(f)});
   }
+  // cardio nesta semana: corrida (qua, 30 min moderado) e bike (sáb, 40 min forte)
+  const car=(o,k,min,int)=>({id:"c"+(id++),date:day(o),title:"Cardio",planId:null,done:true,notes:"",items:[{name:k,ref:"cardio:"+k,target:"",notes:"",sets:[{min:String(min),km:"",int,ok:true}]}]});
+  W.push(car(3,"run",30,"m"),car(0,"bike",40,"f"));
   localStorage.setItem("atlas-workouts",JSON.stringify(W));
   const P=[["Superior A",[pl("supino",4,"6-10"),pl("remcurv",4,"6-10"),pl("desenv",3,"8-12"),pl("puxada",3,"8-12"),pl("rosca",3,"10-15"),pl("pushdown",3,"10-15")]],
     ["Inferior A",[pl("agach",4,"6-10"),pl("stiff",3,"8-12"),pl("legpress",3,"10-15"),pl("flexora",3,"10-15"),pl("pant",4,"12-20")]]];
@@ -53,6 +56,9 @@ for(const lang of (process.env.LANGS||"pt,en,es").split(","))for(const theme of 
   // 2. exercício aberto (sinergistas e variações)
   await p.evaluate(()=>{selectExercise(0)});await p.waitForTimeout(400);
   await p.evaluate(()=>{peek=false;render()});await p.waitForTimeout(300);await shot("ex");
+  // 2b. Atlas › Cardio: lista e um cardio aberto (músculos no boneco)
+  await p.evaluate(()=>{curEx=null;openCardioList();cdInt="m";cdMin=30;cdSel="run";paint();render()});await p.waitForTimeout(500);await shot("cardio");
+  await p.evaluate(()=>{cdOn=false;cdSel=null;peek=false;render()});
   // 3. Treinos prontos
   await p.evaluate(()=>{fView="prontos";rtMus=null;rtOpen=null;rtOpen=RT.find(w=>w.lv==="b").id;setTab("ficha")});await p.waitForTimeout(300);await top(".rt-w.open");await shot("prontos");
   // 4. Ao vivo: começa o Superior A e faz uma série
@@ -65,10 +71,11 @@ for(const lang of (process.env.LANGS||"pt,en,es").split(","))for(const theme of 
   await p.click('[data-rp="stop"]').catch(()=>{});
   // 5. Progresso › Músculos
   await p.evaluate(()=>{pView="mus";setTab("prog")});await p.waitForTimeout(500);await top("#tab-prog .pview");await shot("prog");
+  await top("#tab-prog .cbox");await shot("cprog");
   // 6. Progresso › Força (ranking)
   await p.evaluate(()=>{pView="kg";setTab("prog")});await p.waitForTimeout(600);await top("#tab-prog .rk-hero");await shot("rank");
   // 7. Conquistas
-  await p.evaluate(()=>{pView="ach";setTab("prog")});await p.waitForTimeout(400);await top("#tab-prog .pview");await shot("ach");
+  await p.evaluate(()=>setTab("ach"));await p.waitForTimeout(400);await top("#tab-ach .ach-top");await shot("ach");
   await ctx.close();console.log(lang,theme,"ok");
 }
 console.log("errs",errs.filter(e=>!/TUNNEL/.test(e)));await b.close()})();

@@ -64,7 +64,7 @@ for(const [loc,theme] of [["pt-BR","light"],["es-ES","dark"]]){
   if(C.min!==92||C.who!==74||C.n!==3)bad.push(loc+": soma do cardio "+C.min+"/"+C.who+"/"+C.n);
   await p.evaluate(()=>document.querySelector(".cbox").scrollIntoView({block:"center"}));await p.waitForTimeout(150);await shot("6-progresso");
   const T=await p.evaluate(()=>{const r=pRange();return tally(r).unk.size});if(T)bad.push(loc+": cardio caiu em 'exercício desconhecido'");
-  await p.evaluate(()=>{pView="ach";setTab("prog")});await p.waitForTimeout(300);
+  await p.evaluate(()=>setTab("ach"));await p.waitForTimeout(300);
   const A=await p.evaluate(()=>{const S=achStats();return {c1:achOk(ACH.find(a=>a.id==="c1"),S),cN:S.cN,cMin:S.cMin,sets:S.sets}});console.log(loc,"conquistas",JSON.stringify(A));
   if(!A.c1)bad.push(loc+": conquista primeiro cardio");
   await p.evaluate(()=>{const h=[...document.querySelectorAll(".ach-sec")].find(x=>/Cardio/.test(x.textContent));if(h)h.scrollIntoView({block:"start"})});await p.waitForTimeout(150);await shot("7-conquistas");
