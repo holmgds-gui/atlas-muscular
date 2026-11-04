@@ -212,6 +212,11 @@ Séries por músculo em cada treino seguem as faixas do Progresso (dia: até ~11
 - **Intensidade pelo teste da fala** e faixas de frequência cardíaca (moderado ≈ 64–76% e forte ≈ 77–95% da máxima): ACSM's Guidelines for Exercise Testing and Prescription (11ª ed.).
 - **Meta semanal**: OMS 2020 (Bull et al., *Br J Sports Med*, [doi:10.1136/bjsports-2020-102955](https://bjsm.bmj.com/content/54/24/1451)): 150–300 min de atividade moderada ou 75–150 min de vigorosa por semana, ou combinação equivalente (por isso o minuto forte conta em dobro; leve não entra na meta).
 
+- **Atlas › Cardio (qual gasta mais)**: a ordem é pelas calorias estimadas acima (muda com intensidade e tempo). Texto sobre gordura:
+  - Wewege et al. 2017, *Obesity Reviews* ([doi:10.1111/obr.12532](https://doi.org/10.1111/obr.12532)): HIIT e cardio contínuo moderado reduziram a gordura de forma parecida; o HIIT levou ~40% menos tempo.
+  - Viana et al. 2019, *Br J Sports Med* ([doi:10.1136/bjsports-2018-099928](https://doi.org/10.1136/bjsports-2018-099928)): treino intervalado deu perda de gordura total um pouco maior (~28%) que o contínuo.
+  - Músculos de cada cardio: biomecânica geral do movimento (remo: ~60% da força vem das pernas, segundo guias de técnica de remo indoor).
+
 ## 5. Desenho do boneco
 
 - Imagem de referência para a silhueta (só formato e detalhes, sem cores ou textos): [Toda Matéria](https://static.todamateria.com.br/upload/55/77/55771934478af-musculos-do-corpo-humano.jpg)

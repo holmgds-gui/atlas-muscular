@@ -438,7 +438,9 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   #tab-atlas{display:flex;flex-direction:column;align-self:stretch;height:100%}
   #tab-atlas .stage{flex:0 0 56%;min-height:0;transition:flex-basis .35s ease}
   #tab-atlas .panel{flex:1 1 0;min-height:0}
-  #tab-atlas.idle .stage{flex-basis:calc(100% - 84px)}
+  #tab-atlas.idle .stage{flex-basis:calc(100% - 140px)}
+  /* idle: title on its own line, then "Ver lista" with "🏃 Cardio" under it (owner) and "Montar treino" beside */
+  #tab-atlas.idle .p-top{flex-wrap:wrap;gap:6px 8px}#tab-atlas.idle .p-top > div:first-child{flex-basis:100%}
   #tab-atlas.idle .p-latin,#tab-atlas.idle .chips,#tab-atlas.idle .p-body{display:none}
   #tab-atlas.idle .p-head{border-bottom:0;padding-block:10px}
   #tab-atlas.idle .p-title{font-size:20px}
@@ -458,6 +460,12 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   .p-top:has(#clear:not([hidden])) > div{flex-basis:100%}
 }
 @media (min-width:901px){.listbtn{display:none!important}}
+.lbtns{display:flex;flex-direction:column;gap:6px;flex:none}.lbtns .clear{white-space:nowrap}.lbtns:not(:has(button:not([hidden]))){display:none}
+.cd-ctl{display:grid;gap:8px;margin-bottom:12px}.cd-ctl .seg{width:100%}.cd-ctl .seg button{flex:1}
+.ex.cd .ex-n{display:flex;align-items:center;gap:6px}.ex.cd .cd-i{font-size:20px}
+.cd-bar{grid-column:2 / -1;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}.cd-bar span{flex:1;height:6px;border-radius:3px;background:var(--chip);overflow:hidden}.cd-bar i{display:block;height:100%;background:var(--syn)}.cd-bar b{color:var(--ink);white-space:nowrap}
+.cd-note{grid-column:2 / -1;margin:2px 0 0;font-size:13px;line-height:1.45;color:var(--muted)}
+.cd-info{font-size:13.5px;line-height:1.5;color:var(--muted)}.cd-info h4{margin:0 0 6px;color:var(--ink);font-size:15px}.cd-info p{margin:0 0 8px}
 /* ---- apresentação (carrossel da 1ª vez) ---- */
 .intro{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(10,12,15,.55)}
 .in-box{position:relative;display:flex;flex-direction:column;width:100%;height:100%;background:var(--bg);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);box-sizing:border-box;overflow:hidden}
@@ -722,7 +730,7 @@ button.brand:hover{background:var(--chip)}
             <p class="p-latin" id="latin">O músculo fica vermelho e a lista mostra os exercícios em ordem.</p>
           </div>
           <button class="clear" id="clear" hidden>Limpar</button>
-          <button class="clear listbtn" id="listBtn" hidden>Ver lista</button>
+          <div class="lbtns"><button class="clear listbtn" id="listBtn" hidden>Ver lista</button><button class="clear cdbtn" id="cdBtn" data-notr>🏃 Cardio</button></div>
           <button class="clear listbtn" id="peekBtn" hidden>Ampliar boneco</button>
           <button class="clear listbtn buildbtn" id="buildBtn" data-notr>＋ Montar treino</button>
           <div class="buildbar" id="buildBar" hidden></div>
@@ -2299,7 +2307,7 @@ buildFigure();
 let model=LS.get("atlas-model","det");if(!["det","bas","art"].includes(model))model="det";
 let cur=null,curEx=null,curJ=null,eq="all";
 function setModel(m){if(m==="art")build=null;
-  model=m;LS.set("atlas-model",m);cur=null;curEx=null;curJ=null;listOpen=false;
+  model=m;LS.set("atlas-model",m);cur=null;curEx=null;curJ=null;listOpen=false;if(m==="art")cdOn=false;
   svg.classList.toggle("mode-bas",m==="bas");svg.classList.toggle("mode-art",m==="art");
   document.querySelectorAll("[data-model]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.model===m));
   $("hint").textContent=m==="art"?"Toque numa articulação · pinça para zoom · arraste para mover":"Toque num músculo · pinça para zoom · arraste para mover";
@@ -2328,18 +2336,18 @@ function onFigTap(t){
   selectMuscle(t.dataset.m,true);
 }
 function selectMuscle(id,fromFig){
-  if(!M[id])return;build=null;
+  if(!M[id])return;build=null;cdOn=false;
   if(model==="art")setModel("det");
   if(model==="bas")return selectGroup(TOB[id],fromFig);
   cur=id;curEx=null;if(!fromFig)ensureVisible(viewsOf([id]));
   paint();render();$("body").scrollTop=0;
 }
 function selectGroup(g,fromFig){
-  cur=g;curEx=null;if(!fromFig)ensureVisible(viewsOf(BASIC[g].m));
+  cdOn=false;cur=g;curEx=null;if(!fromFig)ensureVisible(viewsOf(BASIC[g].m));
   paint();render();$("body").scrollTop=0;
 }
 function selectJoint(j,fromFig){
-  curJ=j;if(!fromFig)ensureVisible(new Set(JOINTS[j].v));
+  cdOn=false;curJ=j;if(!fromFig)ensureVisible(new Set(JOINTS[j].v));
   paint();render();$("body").scrollTop=0;
 }
 function selectExercise(i){curEx=(curEx===i)?null:i;paint();render()}
@@ -2351,6 +2359,7 @@ const filtered=()=>baseList().filter(x=>{if(eq==="all"||x[2]===eq)return true;co
 function paint(){
   document.querySelectorAll("[data-m].on,[data-m].syn,.jt.on").forEach(g=>g.classList.remove("on","syn"));
   if(model==="art"){if(curJ)document.querySelectorAll(`.jt[data-j="${curJ}"]`).forEach(g=>g.classList.add("on"));return}
+  if(cdOn){const c=cdSel&&CD_MUS[cdSel];if(c){c[1].forEach(m=>document.querySelectorAll(`[data-m="${m}"]`).forEach(g=>g.classList.add("syn")));c[0].forEach(m=>document.querySelectorAll(`[data-m="${m}"]`).forEach(g=>g.classList.add("on")))}return}
   if(build){build.forEach(g=>BASIC[g].m.forEach(m=>document.querySelectorAll(`[data-m="${m}"]`).forEach(x=>x.classList.add("on"))));return}
   if(!cur)return;
   const members=model==="bas"?BASIC[cur].m:[cur];
@@ -2399,20 +2408,21 @@ function head(cat,title,latin,clear){$("cat").textContent=cat;$("title").textCon
 let listOpen=false;
 let peek=false,lastSel=null;
 function updateIdle(){
-  const sel=model==="art"?curJ:cur;if(sel)listOpen=false;
+  const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null);if(sel)listOpen=false;
   if(sel!==lastSel){peek=false;lastSel=sel}
   $("tab-atlas").classList.toggle("idle",!sel&&!listOpen);
   /* the open list (Ver lista) also gets the small figure in the corner, so the list has room (owner: 2–3 items visible) */
   const cov=(!!sel||listOpen)&&!peek;
   if(cov&&!$("tab-atlas").classList.contains("covered")&&matchMedia("(max-width:900px)").matches){vb=[...BOX[view]];applyVB()}
   $("tab-atlas").classList.toggle("covered",cov);
-  const lb=$("listBtn");lb.hidden=!!sel;lb.textContent=listOpen?"Fechar lista":"Ver lista";
+  $("cdBtn").hidden=!!sel;const lb=$("listBtn");lb.hidden=!!sel;lb.textContent=listOpen?"Fechar lista":"Ver lista";
   const pb=$("peekBtn");pb.hidden=!sel;pb.textContent=peek?"Diminuir boneco":"Ampliar boneco";
 }
 function render(){renderPanel();updateIdle();buildBar()}
 function renderPanel(){
   const body=$("body");
-  $("chips").hidden=(model==="art");$("legend").hidden=(model==="art");
+  $("chips").hidden=(model==="art"||cdOn);$("legend").hidden=(model==="art");
+  if(cdOn)return renderCardio(body);
   if(model==="art")return renderJoint(body);
   if(!cur){
     if(model==="bas"){
@@ -2481,7 +2491,64 @@ function about(){return `<details class="about"><summary>Como o ranking funciona
   <p><b>Variações</b>: cada cartão é um exercício (ex.: Puxada alta). Ao tocar nele aparecem botões de pegada, largura, equipamento, banco, posição e lado. Cada escolha muda o alvo e os sinergistas no boneco e explica a diferença. A posição na lista e o selo valem para a variação que o estudo usou (aparece no cartão quando você muda).</p>
   <p><b>Sinergistas</b> (laranja): músculos que ajudam a fazer o movimento, do mais para o menos importante. Cada exercício tem uma lista única de músculos, então ele mostra os mesmos sinergistas em qualquer músculo em que aparece. Estabilizadores só entram quando o exercício os treina de propósito (prancha, caminhada do fazendeiro, pegada pesada). Alguns músculos pequenos, como o supraespinhal e o peitoral menor, não estão no boneco. Exercícios de isolamento, como rosca de punho, aparecem como "Isolado".</p>
   <ul>${Object.values(SRC).map(s=>`<li>${s}</li>`).join("")}</ul></details>`}
-$("clear").onclick=()=>{cur=null;curEx=null;curJ=null;paint();render()};
+$("clear").onclick=()=>{cur=null;curEx=null;curJ=null;cdOn=false;cdSel=null;paint();render()};
+/* ---- Atlas › 🏃 Cardio (owner: a button under "Ver lista" with a cardio list, the ones that burn the most first,
+   by intensity and time, and which muscles each one works). Ranking = estimated kcal (kcalOf: MET × body kg × time),
+   so it changes with the chosen intensity and minutes. Tapping a cardio paints its muscles: main ones red, helpers orange. */
+let cdOn=false,cdSel=null,cdInt=LS.get("atlas-cdint","m"),cdMin=LS.get("atlas-cdmin",30);
+const LEG=["quad_reto_femoral","quad_vasto_lateral","quad_vasto_medial"],HAM=["isquio_biceps_femoral","isquio_semitendineo"],CALF=["panturrilha_gastro","panturrilha_soleo"];
+const CD_MUS={ /* [main, helpers] */
+  walk:[["gluteo_maximo",...CALF],[...LEG,...HAM,"gluteo_medio"]],
+  run:[[...LEG,"gluteo_maximo",...HAM,...CALF],["gluteo_medio","adutores","abdomen_supra","obliquos"]],
+  bike:[[...LEG,"gluteo_maximo"],[...HAM,...CALF]],
+  ell:[[...LEG,"gluteo_maximo"],[...HAM,...CALF,"dorsal_inferior","peito_medial","biceps_longa","triceps_lateral"]],
+  stair:[[...LEG,"gluteo_maximo","panturrilha_gastro"],[...HAM,"panturrilha_soleo","gluteo_medio"]],
+  row:[["dorsal_superior","dorsal_inferior",...LEG,"gluteo_maximo"],["romboides","trapezio_medio","ombro_posterior","biceps_longa","biceps_curta",...HAM,"lombar_eretores","antebraco_flexores"]],
+  rope:[[...CALF],[...LEG,"gluteo_maximo","ombro_lateral","antebraco_flexores","abdomen_supra"]],
+  swim:[["dorsal_superior","dorsal_inferior","peito_medial","ombro_frontal","ombro_lateral"],["triceps_longa","triceps_lateral","redondo_maior","infraespinhal","abdomen_supra","obliquos","quad_reto_femoral","gluteo_maximo"]],
+  hiit:[[...LEG,"gluteo_maximo"],[...HAM,...CALF,"abdomen_supra","peito_medial","ombro_frontal","triceps_lateral"]]
+};
+const CD_NOTE={
+  walk:["O mais fácil de manter e de fazer todo dia. Na esteira, subir a inclinação gasta bem mais sem precisar correr.","The easiest to keep up and do every day. On a treadmill, raising the incline burns a lot more without running.","El más fácil de mantener y de hacer a diario. En la cinta, subir la inclinación gasta mucho más sin correr."],
+  run:["Um dos que mais gastam por minuto. Comece alternando caminhada e corrida se ainda não aguenta 20 min seguidos.","One of the biggest burners per minute. Start by mixing walking and running if you can't do 20 minutes straight yet.","Uno de los que más gasta por minuto. Empieza alternando caminata y carrera si aún no aguantas 20 min seguidos."],
+  bike:["Gasta bem e pega leve nas articulações. Bom para quem tem dor no joelho ao correr.","Burns well and is easy on the joints. Good if running hurts your knees.","Gasta bien y cuida las articulaciones. Bueno si te duelen las rodillas al correr."],
+  ell:["Sem impacto e trabalha braços e pernas juntos. Use os braços para gastar mais.","No impact, works arms and legs together. Push and pull with the arms to burn more.","Sin impacto, trabaja brazos y piernas juntos. Usa los brazos para gastar más."],
+  stair:["Gasta muito e pega forte nos glúteos. Não se apoie no corrimão: isso tira boa parte do esforço.","Burns a lot and hits the glutes hard. Don't lean on the rails: that removes much of the effort.","Gasta mucho y trabaja fuerte los glúteos. No te apoyes en las barandas: eso quita gran parte del esfuerzo."],
+  row:["Trabalha quase o corpo todo: cerca de 60% da força vem das pernas. Empurre com as pernas primeiro, depois puxe com os braços.","Works almost the whole body: about 60% of the power comes from the legs. Drive with the legs first, then pull with the arms.","Trabaja casi todo el cuerpo: cerca del 60% de la fuerza viene de las piernas. Empuja con las piernas primero, luego tira con los brazos."],
+  rope:["Gasta muito por minuto, mas é difícil manter por muito tempo. Faça em blocos (1 min pulando, 30 s parado).","Burns a lot per minute but is hard to keep up for long. Do it in blocks (1 min on, 30 s off).","Gasta mucho por minuto, pero cuesta mantenerlo mucho tiempo. Hazlo en bloques (1 min saltando, 30 s parado)."],
+  swim:["Sem impacto e trabalha a parte de cima mais que os outros. O gasto depende muito da técnica.","No impact, works the upper body more than the others. The burn depends a lot on technique.","Sin impacto, trabaja la parte de arriba más que los demás. El gasto depende mucho de la técnica."],
+  hiit:["Tiros curtos e fortes com pausa. Rende o mesmo resultado em menos tempo, mas normalmente a sessão tem só 10–20 min.","Short hard bursts with rests. Gets similar results in less time, but sessions are usually only 10–20 minutes.","Tiros cortos e intensos con pausas. Da resultados parecidos en menos tiempo, pero la sesión suele durar solo 10–20 min."]
+};
+function openCardioList(){if(model==="art")setModel("det");cdOn=true;cdSel=null;cur=null;curEx=null;build=null;listOpen=false;paint();render();$("body").scrollTop=0}
+$("cdBtn").onclick=openCardioList;
+function renderCardio(body){
+  head("Cardio",tx("Cardio que mais gasta","Cardio that burns the most","Cardio que más gasta"),tx("Do que mais gasta para o que menos. Toque num para ver os músculos.","From the biggest burner down. Tap one to see its muscles.","Del que más gasta al que menos. Toca uno para ver los músculos."),true);
+  const L=Object.keys(CARDIO).map(k=>[k,kcalOf(k,cdMin,cdInt)]).sort((a,b)=>b[1]-a[1]),top=L[0][1];
+  const mn=ids=>[...new Set(ids.map(id=>M[id].n))];
+  body.innerHTML=`<div class="cd-ctl">
+    <div class="seg" role="group" aria-label="${tx("Intensidade","Intensity","Intensidad")}">${["l","m","f"].map(x=>`<button data-cdi="${x}" aria-pressed="${x===cdInt}">${esc(p3(CINT[x][0]))}</button>`).join("")}</div>
+    <div class="seg" role="group" aria-label="${tx("Tempo","Time","Tiempo")}">${[15,30,45,60].map(m=>`<button data-cdm="${m}" aria-pressed="${m===cdMin}">${m} min</button>`).join("")}</div>
+    <span class="muted-s" style="margin:0">${esc(p3(CINT[cdInt][0]))}: ${esc(p3(CINT[cdInt][1]))} · ${tx("calorias estimadas para","calories estimated for","calorías estimadas para")} ${fkg(bodyKg())} kg${rank.bw>0?"":tx(" (coloque seu peso em Configurações)"," (enter your weight in Settings)"," (pon tu peso en Ajustes)")}</span></div>
+    <div class="list">${L.map(([k,kc],i)=>{const c=CARDIO[k],open=cdSel===k,[P,S]=CD_MUS[k];
+      return `<div class="ex cd${open?" sel":""}" role="button" tabindex="0" data-cd="${k}" aria-pressed="${open}">
+        <span class="rank">${i+1}</span>
+        <span class="ex-n"><span class="cd-i" aria-hidden="true">${c.i}</span>${esc(cName(k))}</span>
+        <button class="addx" data-cdadd="${k}" aria-label="${tx("Adicionar","Add","Agregar")} ${esc(cName(k))} ${tx("a um treino","to a workout","a un entreno")}">+</button>
+        <span class="ex-en">${esc(cSub(k)||"Cardio")}</span>
+        <span class="cd-bar"><span><i style="width:${Math.round(kc/top*100)}%"></i></span><b>≈ ${kc} kcal</b></span>
+        ${open?`<p class="cd-note">${esc(p3(CD_NOTE[k]))}</p>`:""}
+        <span class="syns"><em>${tx("Mais trabalham","Main muscles","Más trabajan")}</em>${mn(P).map(n=>`<span class="tg">${esc(n)}</span>`).join("")}${open?`<em>${tx("Ajudam","Helpers","Ayudan")}</em>${mn(S).map(n=>`<span>${esc(n)}</span>`).join("")}`:""}</span>
+      </div>`}).join("")}</div>
+    <div class="card cd-info"><h4>${tx("Qual queima mais gordura?","Which one burns the most fat?","¿Cuál quema más grasa?")}</h4>
+      <p>${tx("Para perder gordura, o que mais conta é o <b>gasto total</b> (e a alimentação), não a \"zona de queima\". No leve o corpo usa uma parte maior de gordura, mas no forte gasta mais no total no mesmo tempo.","For fat loss, what counts most is the <b>total burn</b> (and your diet), not a \"fat-burning zone\". At light effort a bigger share comes from fat, but hard effort burns more in total in the same time.","Para perder grasa, lo que más cuenta es el <b>gasto total</b> (y la alimentación), no la \"zona de quema\". En suave el cuerpo usa una parte mayor de grasa, pero en intenso gasta más en total en el mismo tiempo.")}</p>
+      <p>${tx("Estudos que compararam HIIT com cardio contínuo moderado acharam perda de gordura parecida ou um pouco maior no HIIT, e em menos tempo. O melhor é o que você consegue fazer toda semana: a OMS indica 150 min moderados (ou 75 fortes).","Studies comparing HIIT with steady moderate cardio found similar or slightly greater fat loss with HIIT, in less time. The best one is the one you can keep doing every week: the WHO suggests 150 moderate minutes (or 75 hard).","Los estudios que compararon HIIT con cardio continuo moderado encontraron una pérdida de grasa parecida o un poco mayor con HIIT, y en menos tiempo. El mejor es el que puedes hacer cada semana: la OMS indica 150 min moderados (o 75 intensos).")}</p>
+      <p>${tx("Calorias: estimativa do Compendium of Physical Activities 2024; pode errar uns 20–30%.","Calories: estimate from the 2024 Compendium of Physical Activities; it can be off by 20–30%.","Calorías: estimación del Compendium of Physical Activities 2024; puede fallar un 20–30%.")}</p></div>`;
+  body.querySelectorAll("[data-cdi]").forEach(b=>b.onclick=()=>{cdInt=b.dataset.cdi;LS.set("atlas-cdint",cdInt);render()});
+  body.querySelectorAll("[data-cdm]").forEach(b=>b.onclick=()=>{cdMin=+b.dataset.cdm;LS.set("atlas-cdmin",cdMin);render()});
+  body.querySelectorAll("[data-cd]").forEach(c=>c.onclick=e=>{if(e.target.closest(".addx"))return;const k=c.dataset.cd;cdSel=cdSel===k?null:k;
+    if(cdSel)ensureVisible(viewsOf([...CD_MUS[k][0],...CD_MUS[k][1]]));paint();const y=body.scrollTop;render();body.scrollTop=y});
+  body.querySelectorAll("[data-cdadd]").forEach(b=>b.onclick=e=>{e.stopPropagation();const k=b.dataset.cdadd;openAddSheet(cName(k),"cardio:"+k)});
+}
 $("listBtn").onclick=()=>{listOpen=!listOpen;updateIdle()};
 $("peekBtn").onclick=()=>{peek=!peek;render()};
 
@@ -3280,7 +3347,7 @@ function buildDone(){const items=buildPlan();if(!items.length)return;const names
     <div class="row"><button class="btn primary" data-g="live">▶ ${tx("Treinar agora","Train now","Entrenar ahora")}</button><button class="btn" data-g="save">${tx("Salvar em Meus treinos","Save to My workouts","Guardar en Mis entrenamientos")}</button></div>`)}
 function buildBar(){const bb=$("buildBar");if(!bb)return;$("buildBtn").textContent="＋ "+tx("Montar treino","Build a workout","Armar entreno");
   /* also shown with a muscle selected: it then starts the build with that muscle's group already marked (owner's request) */
-  bb.hidden=!build;$("buildBtn").hidden=!!build||model==="art";if(!build)return;$("listBtn").hidden=true;
+  bb.hidden=!build;$("buildBtn").hidden=!!build||model==="art"||cdOn;if(!build)return;$("listBtn").hidden=true;
   head(tx("Montar treino","Build a workout","Armar entreno"),build.size?[...build].map(g=>BASIC[g].n).join(" + "):tx("Toque nos músculos","Tap the muscles","Toca los músculos"),
     build.size?tx("Toque de novo para tirar. Depois toque em Montar.","Tap again to remove. Then tap Build.","Toca otra vez para quitar. Luego toca Armar."):tx("Escolha no boneco os músculos que quer treinar hoje.","Pick on the figure the muscles you want to train today.","Elige en el muñeco los músculos que quieres entrenar hoy."),false);
   bb.innerHTML=`<button class="btn primary" data-bb="go"${build.size?"":" disabled"}>${tx("Montar","Build","Armar")}${build.size?` (${build.size})`:""}</button><button class="btn" data-bb="cancel">${esc(L("Cancelar"))}</button>`}

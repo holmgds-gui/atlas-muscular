@@ -19,6 +19,7 @@ App de academia gratuito, em português, inglês e espanhol, que funciona no nav
 - Toque num exercício: os sinergistas ficam laranja e aparecem botões de **variação** (pegada, largura, equipamento, banco, posição, lado). São 98 exercícios e 1.325 variações.
 - **Como fazer** completo em cada exercício: posição inicial, passo a passo, respiração, ritmo e amplitude, onde sentir, dicas, erros comuns, cuidados e o que muda na variação escolhida.
 - Modelos Detalhado, Básico (grupos inteiros) e Articulações (aquecimento, mobilidade e alongamento).
+- **🏃 Cardio:** os cardios em ordem de quanto gastam (por intensidade e tempo) e os músculos que cada um trabalha no boneco.
 - **Montar treino pelo boneco:** toque nos músculos e o app monta um treino com os exercícios mais bem colocados.
 
 **Treinos**
