@@ -28,7 +28,7 @@ img{max-width:100%}
   --bg:#E9ECEF; --surface:#F7F8F9; --ink:#1A1F26; --muted:#5B6470; --line:#CDD2D8;
   --skin:#D6DADF; --fig-skin:#CDD3DA; --fig-art:#DCE0E5; --fig-art2:#C9D0D7; --m:#AEB6C0; --m-hi:#C3CAD2; --m-lo:#97A0AB; --m-edge:#E9ECEF; --fiber:rgba(26,31,38,.13);
   --target:#D3222A; --target-hi:#F04A50; --target-lo:#A0141B;
-  --syn:#F08A24; --syn-soft:rgba(240,138,36,.55);
+  --syn:#F08A24; --syn-soft:rgba(240,138,36,.55); --c-l:#EFCB5A; --c-m:#F08A24; --c-f:#D3222A;
   --chip:#E1E5E9; --focus:#1A1F26; --tend:#E4E7EB; --k1:#D3222A; --k2:#2F6DB5; --band:rgba(26,31,38,.08); --hair:#6B737E; --hair-l:rgba(255,255,255,.22); --breast:rgba(255,255,255,.2); --fold:rgba(26,31,38,.16);
   --f-display:"Barlow Condensed","Arial Narrow","Roboto Condensed",system-ui,sans-serif;
   --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -37,13 +37,13 @@ img{max-width:100%}
   --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
   --skin:#1E242C; --fig-skin:#5E6976; --fig-art:#2F3741; --fig-art2:#3A444F; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
-  --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
+  --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5); --c-l:#D9B85A; --c-m:#F59A3C; --c-f:#E8343B;
   --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --k1:#F0474D; --k2:#5B8FDB; --band:rgba(255,255,255,.09); --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
   --skin:#1E242C; --fig-skin:#5E6976; --fig-art:#2F3741; --fig-art2:#3A444F; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
-  --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5);
+  --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5); --c-l:#D9B85A; --c-m:#F59A3C; --c-f:#E8343B;
   --chip:#1F262E; --focus:#E7EAEE; --tend:#7A8592; --k1:#F0474D; --k2:#5B8FDB; --band:rgba(255,255,255,.09); --hair:#262D35; --hair-l:rgba(255,255,255,.08); --breast:rgba(255,255,255,.06); --fold:rgba(0,0,0,.35); color-scheme:dark}
 
 html{height:100%;touch-action:pan-x pan-y}body{height:100%;touch-action:pan-x pan-y}
@@ -114,7 +114,10 @@ header{position:relative}
 .cq-types button{display:grid;justify-items:center;gap:2px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:8px 4px;font:inherit;font-size:12.5px;font-weight:600;line-height:1.2}
 .cq-types button span{font-size:22px}.cq-types button[aria-pressed="true"]{border-color:var(--accent,var(--target));box-shadow:inset 0 0 0 1px var(--accent,var(--target))}
 .cbox{display:grid;gap:8px}.cbox .c-big{font-family:var(--f-display);font-size:34px;font-weight:700;line-height:1}.cbox .c-big small{font-size:15px;color:var(--muted);font-weight:600;margin-left:4px}
-.c-meta{display:grid;gap:4px;font-size:13px;color:var(--muted)}.c-meta .lv-bar{margin:0}
+.c-charts{display:flex;align-items:flex-end;gap:12px;margin-top:4px}.c-ringbox{flex:none;width:104px;display:grid;justify-items:center;gap:4px;font-size:12px;color:var(--muted);text-align:center;line-height:1.2}
+.c-ring{width:100px;height:100px}.c-rt{font-family:var(--f-display);font-size:26px;font-weight:700;fill:var(--ink)}.c-rs{font-size:11px;fill:var(--muted)}
+.c-barbox{flex:1;min-width:0}.c-bars{width:100%;height:auto;display:block}.c-bv{font-size:10px;font-weight:600;fill:var(--ink)}.c-bd{font-size:10px;fill:var(--muted)}
+.c-leg{display:flex;gap:10px;justify-content:center;font-size:11px;color:var(--muted);margin-top:2px}.c-leg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 .lv-inps label span{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
 .kgh.kgb{text-align:center;margin-top:4px}
 .lv-inps label>span,.rk-inps label>span{display:flex;align-items:center;height:18px}
@@ -3754,7 +3757,7 @@ async function makeCard(kind){
   try{const lg=document.querySelector(".brand .logo").cloneNode(true);const {img}=await figImg(lg);g.drawImage(img,70,70,120,120)}catch(e){}
   text("MUSCLE",210,160,F(700,72),"#E7EAEE");g.font=F(700,72);text("ATLAS",210+g.measureText("MUSCLE ").width,160,F(700,72),"#FF4A5C");
   let title="",sub="",fig=null,stats=[],lines=[],accent="#FF4A5C";
-  if(kind==="week"){const r=pRange(),T=tally(r),B=BANDS[pMode];title=pMode==="week"?tx("Minha semana","My week","Mi semana"):tx("Meu treino do dia","My workout of the day","Mi entreno del día");sub=r.label;
+  if(kind==="week"){const r=pRange(),T=tally(r,true),B=BANDS[pMode];title=pMode==="week"?tx("Minha semana","My week","Mi semana"):tx("Meu treino do dia","My workout of the day","Mi entreno del día");sub=r.label;
     fig=progFig(T.mus,B).querySelector("svg");const gs=Object.keys(BASIC).filter(x=>(T.grp[x]||0)>0).length;
     stats=[[T.days,tx("treinos","workouts","entrenos")],[T.sets,tx("séries","sets","series")],[gs,tx("grupos","groups","grupos")]]}
   else if(kind==="rank"){const D=rankData();const lv=D.all!=null?rLv(D.all):0;title=tx("Ranking de força","Strength ranking","Clasificación de fuerza");
@@ -3826,15 +3829,22 @@ function pRange(){
   return {from:isoDate(mon),to:isoDate(sun),label:`${dm(mon)} – ${dm(sun)}`,sub:pOff===0?"Esta semana":pOff===-1?"Semana passada":""};
 }
 const doneSets=it=>(it.sets||[]).filter(x=>String(x.r??"").trim()!==""||String(x.kg??"").trim()!=="").length;
-function tally(r){
-  const mus={},grp={},unk=new Map(),days=new Set();let sets=0;
+/* withC (Progresso and the week Stories card only, owner's choice): cardio paints its muscles lightly — 1 "set" per
+   30 min (up to 2 per session) for the main muscles of that cardio (CD_MUS) and half for the helpers. Achievements
+   call tally() without it, so cardio doesn't count as strength volume there. */
+function tally(r,withC){
+  const mus={},grp={},unk=new Map(),days=new Set();let sets=0,cs=0;
   for(const w of workouts){if(w.date<r.from||w.date>r.to||w.done===false)continue;
-    for(const it of w.items||[]){if(isC(it))continue;const n=w.done===true?(it.sets||[]).length:doneSets(it);if(!n)continue;days.add(w.date);sets+=n;
+    for(const it of w.items||[]){if(isC(it)){if(!withC)continue;const k=cKey(it),C=CD_MUS[k];if(!C)continue;
+        for(const st of it.sets||[]){const n=Math.min(2,cMin(it,st,w)/30);if(!(n>0))continue;cs+=n;
+          C[0].forEach(id=>mus[id]=(mus[id]||0)+n);C[1].forEach(id=>mus[id]=(mus[id]||0)+n/2);
+          const g={};C[1].forEach(id=>g[TOB[id]]=.5);C[0].forEach(id=>g[TOB[id]]=1);for(const x in g)grp[x]=(grp[x]||0)+n*g[x]}
+        continue}const n=w.done===true?(it.sets||[]).length:doneSets(it);if(!n)continue;days.add(w.date);sets+=n;
       const e=exInfo(it.name,it.ref);if(!e){unk.set(it.name,(unk.get(it.name)||0)+n);continue}
       e.p.forEach(id=>mus[id]=(mus[id]||0)+n);e.s.forEach(id=>mus[id]=(mus[id]||0)+n/2);
       const g={};e.s.forEach(id=>g[TOB[id]]=.5);e.p.forEach(id=>g[TOB[id]]=1);
       for(const k in g)grp[k]=(grp[k]||0)+n*g[k];}}
-  return {mus,grp,unk,sets,days:days.size};
+  return {mus,grp,unk,sets,cs,days:days.size};
 }
 /* Bands from the research summary in "Como as faixas foram definidas".
    Week: 4 sets = minimum effective dose, 10+ to maximise, 12–20 likely optimum, >20 diminishing returns.
@@ -4034,7 +4044,7 @@ function applyRadSel(){
 function renderProg(){
   if(pView==="kg")return renderKg();
   if(pView==="ach"){$("progBody").innerHTML=`<div class="page-h"><h2>Progresso<button class="help" data-help="prog" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2></div>${pvSeg()}`+achHTML();return}
-  const r=pRange(),T=tally(r),body=$("progBody"),B=BANDS[pMode];
+  const r=pRange(),T=tally(r,true),body=$("progBody"),B=BANDS[pMode];
   const gs=Object.keys(BASIC).map(g=>[g,T.grp[g]||0]);const done=gs.filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]),none=gs.filter(x=>!x[1]);
   const top=Math.max(B.bar,...done.map(x=>x[1]));
   const over=pMode==="day"?done.filter(([,v])=>v>B.t[2]):[];
@@ -4048,12 +4058,12 @@ function renderProg(){
     <div id="pfigBox"></div>
     ${bandLegend(B)}
     <div class="pstat"><div><b>${T.days}</b><span>${T.days===1?"Treino":"Treinos"}</span></div><div><b>${T.sets}</b><span>Séries feitas</span></div><div><b>${done.length}</b><span>Grupos treinados</span></div></div>
-    ${T.sets?`<div class="row"><button class="btn" data-share="week">📤 ${tx("Cartão para Stories","Story card","Tarjeta para Stories")}</button></div>`:""}
+    ${T.sets||T.cs?`<div class="row"><button class="btn" data-share="week">📤 ${tx("Cartão para Stories","Story card","Tarjeta para Stories")}</button></div>`:""}
   </div>
   ${over.length?`<div class="warnbox"><b>Muitas séries no mesmo treino</b>${over.map(([g,v])=>`${BASIC[g].n} (${nf(v)})`).join(", ")} ${over.length>1?"passaram":"passou"} de ~11 séries ${pOff===0?"hoje":"neste dia"}. Os estudos não mostram ganho extra a partir daí; vale dividir em outro dia da semana.</div>`:""}
-  ${T.sets?radarCard(T,B):""}
+  ${T.sets||T.cs?radarCard(T,B):""}
   ${cardioCard(r)}
-  ${T.sets?`<div class="card"><h3 class="section-t" style="margin:0">Séries por músculo ${pMode==="week"?"na semana":"no treino"}</h3><div>${done.map(([g,v])=>{
+  ${T.sets||T.cs?`<div class="card"><h3 class="section-t" style="margin:0">Séries por músculo ${pMode==="week"?"na semana":"no treino"}</h3>${T.cs?`<span class="muted-s" style="margin:0">${tx("Inclui o cardio: 1 série a cada 30 min nos músculos que ele mais trabalha (até 2 por cardio) e meia nos que ajudam.","Includes cardio: 1 set per 30 min for the muscles it works most (up to 2 per session) and half for the helpers.","Incluye el cardio: 1 serie cada 30 min en los músculos que más trabaja (hasta 2 por sesión) y media en los que ayudan.")}</span>`:""}<div>${done.map(([g,v])=>{
       const parts=BASIC[g].m.map(id=>[id,T.mus[id]||0]).sort((a,b)=>b[1]-a[1]);const bi=bandOf(v,B),c=heat(v,B);
       return `<details class="pg"><summary><span class="pg-n">${BASIC[g].n}<small class="pg-b"><i style="background:${c}"></i>${B.names[bi]}</small></span><span class="pg-bar"><i style="width:${Math.max(4,Math.round(Math.min(v,top)/top*100))}%;background:${c}"></i></span><b>${nf(v)}</b></summary>
         <div class="pg-parts">${parts.map(([id,x])=>`<div><span>${M[id].n}</span><b>${x?nf(x):"—"}</b></div>`).join("")}</div></details>`}).join("")}</div>
@@ -4065,14 +4075,30 @@ function renderProg(){
 }
 /* cardio of the week/day (owner: minutes in Progresso). WHO 2020: 150–300 min moderate a week; vigorous minutes
    count double; light is shown but does not count toward the goal. */
-function cardioCard(r){const C=cardioIn(r.from,r.to),wk=pMode==="week",pct=Math.min(100,C.who/150*100);
+function cardioCard(r){const C=cardioIn(r.from,r.to),wk=pMode==="week",who=Math.round(C.who),pct=Math.min(1,C.who/150);
   const head=`<div class="row between"><h3 class="section-t" style="margin:0">🏃 Cardio<button class="help sm" data-help="cardio" aria-label="${tx("Sobre o cardio","About cardio","Sobre el cardio")}">+</button></h3></div>`;
   if(!C.min)return `<div class="card cbox">${head}<p class="muted" style="margin:0">${wk?tx("Nenhum cardio nesta semana.","No cardio this week.","Ningún cardio esta semana."):tx("Nenhum cardio neste dia.","No cardio on this day.","Ningún cardio este día.")} ${tx("Registre em Hoje › + Registrar cardio, ou ponha no seu treino.","Log it in Today › + Log cardio, or add it to your workout.","Regístralo en Hoy › + Registrar cardio, o ponlo en tu entreno.")}</p></div>`;
-  return `<div class="card cbox">${head}
-    <div class="c-big">${Math.round(C.min)}<small>min</small></div>
-    <span class="muted-s" style="margin:0">${[tx(`${C.n} ${C.n===1?"sessão":"sessões"}`,`${C.n} ${C.n===1?"session":"sessions"}`,`${C.n} ${C.n===1?"sesión":"sesiones"}`),C.km?kmTxt(C.km)+" km":"",`≈ ${C.kcal.toLocaleString(LOC)} kcal`].filter(Boolean).join(" · ")}</span>
-    ${wk?`<div class="c-meta"><div class="row between"><span>${tx("Meta da OMS","WHO goal","Meta de la OMS")}</span><b>${Math.round(C.who)} / 150 min</b></div><div class="lv-bar"><i style="width:${pct.toFixed(0)}%;transition:none${C.who>=150?";background:#2E9E5B":""}"></i></div>
-      <span>${C.who>=150?tx("Meta da semana batida! 🎉","Weekly goal reached! 🎉","¡Meta de la semana cumplida! 🎉"):tx("Moderado conta 1×, forte conta 2×. Leve não entra na meta.","Moderate counts 1×, hard counts 2×. Light doesn't count toward the goal.","Moderado cuenta 1×, intenso cuenta 2×. Suave no cuenta para la meta.")}</span></div>`:""}</div>`}
+  const sum=`<div class="c-big">${Math.round(C.min)}<small>min</small></div>
+    <span class="muted-s" style="margin:0">${[tx(`${C.n} ${C.n===1?"sessão":"sessões"}`,`${C.n} ${C.n===1?"session":"sessions"}`,`${C.n} ${C.n===1?"sesión":"sesiones"}`),C.km?kmTxt(C.km)+" km":"",`≈ ${C.kcal.toLocaleString(LOC)} kcal`].filter(Boolean).join(" · ")}</span>`;
+  if(!wk)return `<div class="card cbox">${head}${sum}</div>`;
+  /* WHO ring: fills up to 150 min (moderate 1×, hard 2×; light doesn't count) */
+  const R=44,L=2*Math.PI*R,ok=C.who>=150;
+  const ring=`<svg class="c-ring" viewBox="0 0 110 110" role="img" aria-label="${tx(`Meta da OMS: ${who} de 150 minutos`,`WHO goal: ${who} of 150 minutes`,`Meta de la OMS: ${who} de 150 minutos`)}">
+    <circle cx="55" cy="55" r="${R}" fill="none" stroke="var(--chip)" stroke-width="11"/>
+    <circle cx="55" cy="55" r="${R}" fill="none" stroke="${ok?"#2E9E5B":"var(--syn)"}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${(L*pct).toFixed(1)} ${L.toFixed(1)}" transform="rotate(-90 55 55)"/>
+    <text x="55" y="53" text-anchor="middle" class="c-rt">${who}</text><text x="55" y="70" text-anchor="middle" class="c-rs">/ 150 min</text></svg>`;
+  /* minutes per day (Mon–Sun), stacked by intensity */
+  const days=[...Array(7)].map((_,i)=>{const d=fromIso(r.from);d.setDate(d.getDate()+i);const iso=isoDate(d),o={l:0,m:0,f:0};
+    for(const w of workouts){if(w.done===false||w.date!==iso)continue;for(const it of w.items||[])if(isC(it))for(const st of it.sets||[]){const m=cMin(it,st,w);if(m)o[st.int||"m"]+=m}}
+    return o});
+  const top=Math.max(30,...days.map(o=>o.l+o.m+o.f)),H=78,B0=98,bw=22,gap=(240-7*bw)/7,col={l:"var(--c-l)",m:"var(--c-m)",f:"var(--c-f)"};
+  const bars=`<svg class="c-bars" viewBox="0 0 240 118" role="img" aria-label="${tx("Minutos de cardio por dia","Cardio minutes per day","Minutos de cardio por día")}">${days.map((o,i)=>{const x=gap/2+i*(bw+gap),tot=o.l+o.m+o.f;let y=B0,segs="";
+      for(const k of ["l","m","f"]){if(!o[k])continue;const h=Math.max(2,o[k]/top*H);y-=h;segs+=`<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw}" height="${h.toFixed(1)}" rx="3" fill="${col[k]}"><title>${esc(p3(CINT[k][0]))}: ${Math.round(o[k])} min</title></rect>`}
+      return `${segs||`<rect x="${x.toFixed(1)}" y="${B0-2}" width="${bw}" height="2" rx="1" fill="var(--line)"/>`}${tot?`<text x="${(x+bw/2).toFixed(1)}" y="${(y-4).toFixed(1)}" text-anchor="middle" class="c-bv">${Math.round(tot)}</text>`:""}<text x="${(x+bw/2).toFixed(1)}" y="${B0+15}" text-anchor="middle" class="c-bd">${esc(DSH[i].slice(0,LANG==="en"?2:3))}</text>`}).join("")}</svg>`;
+  const leg=`<div class="c-leg">${["l","m","f"].map(k=>`<span><i style="background:${col[k]}"></i>${esc(p3(CINT[k][0]))}</span>`).join("")}</div>`;
+  return `<div class="card cbox">${head}${sum}
+    <div class="c-charts"><div class="c-ringbox">${ring}<span>${ok?tx("Meta da OMS batida! 🎉","WHO goal reached! 🎉","¡Meta de la OMS cumplida! 🎉"):tx("Meta da OMS","WHO goal","Meta de la OMS")}</span></div><div class="c-barbox">${bars}${leg}</div></div>
+    <span class="muted-s" style="margin:0">${tx("Na meta, moderado conta 1× e forte 2×; leve não entra.","For the goal, moderate counts 1× and hard 2×; light doesn't count.","En la meta, moderado cuenta 1× e intenso 2×; suave no cuenta.")}</span></div>`}
 $("progBody").addEventListener("click",e=>{
   const pv=e.target.closest("[data-pv]");if(pv){pView=pv.dataset.pv;LS.set("atlas-pview",pView);return renderProg()}
   const kx=e.target.closest("[data-kx]");if(kx){const nm=kgList[+kx.dataset.kx][0];kgOpen=kgOpen===nm?null:nm;renderKg();
