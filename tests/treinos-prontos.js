@@ -8,7 +8,7 @@ const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem(
 await p.goto(BASE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(500);
 await p.evaluate(()=>setTab('ficha'));await p.waitForTimeout(200);
 await p.screenshot({path:`${OUT}/${loc}-0-meus.png`});
-await p.tap('[data-fv="prontos"]');await p.waitForTimeout(200);
+await p.tap('[data-fv="prontos"]');await p.waitForTimeout(200);await p.tap('[data-rtsrc="app"]');await p.waitForTimeout(100);
 await p.screenshot({path:`${OUT}/${loc}-1-prontos.png`});
 // filter costas
 await p.tap('[data-rtm="costas"]');await p.waitForTimeout(200);

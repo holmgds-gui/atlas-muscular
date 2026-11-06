@@ -99,6 +99,9 @@ header{position:relative}
 .rt-how{padding:12px 16px}.rt-how summary,.rt-more summary{cursor:pointer;font-weight:600}.rt-how ul,.rt-more ul{margin:8px 0 0;padding-left:20px;display:grid;gap:4px;line-height:1.4;font-size:14px}
 .rt-sp{display:grid;gap:8px}.rt-sp .section-t{margin:0}.rt-d{margin:0;font-size:14px;line-height:1.45;color:var(--muted)}
 .rt-more{font-size:14px}.rt-week{font-size:13px;line-height:1.5;background:var(--chip);border-radius:12px;padding:10px 12px;display:grid;gap:8px}.rt-week .btn{justify-self:start}
+.rt-pg{position:relative}.rt-pg>.section-t{padding-right:44%}
+.rt-wm{position:absolute;top:12px;right:14px;max-width:42%;text-align:right;font-family:var(--f-display);font-size:12px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;line-height:1.2;color:var(--muted);opacity:.55;pointer-events:none}
+.rt-fh{font-family:var(--f-display);font-size:18px;letter-spacing:.04em;text-transform:uppercase;margin:22px 2px 2px}.rt-fn{margin:0 2px 12px}.rt-est{margin:0;font-style:italic}
 .rt-w{border:1px solid var(--line);border-radius:12px;background:var(--bg)}.rt-w.open{border-color:var(--ink)}
 .rt-wh{display:flex;width:100%;align-items:center;justify-content:space-between;gap:10px;text-align:left;border:0;background:none;padding:10px 12px;color:var(--ink);font:inherit}
 .rt-wh>span:first-child{display:grid;gap:2px}.rt-wh .muted-s{margin:0}.rt-wh .chev{font-size:16px;color:var(--muted);flex:none}
@@ -3440,6 +3443,9 @@ const RT_SP=[
      ["Muscles that work together are on the same day, so they help each other and rest together.","For advanced, workouts A and B rotate exercises: Push A, Pull A, Legs A, Push B, Pull B, Legs B.","Good if you like training many days and already have experience."],
      ["Los músculos que trabajan juntos van el mismo día, así se ayudan y descansan juntos.","En avanzado, los entrenos A y B cambian los ejercicios: Empuje A, Tirón A, Piernas A, Empuje B, Tirón B, Piernas B.","Bueno para quien le gusta entrenar muchos días y ya tiene experiencia."]],
   w:{b:[["ppl_b_push",0],["ppl_b_pull",2],["ppl_b_legs",4]],a:[["ppl_a_pusha",0],["ppl_a_pulla",1],["ppl_a_legsa",2],["ppl_a_pushb",3],["ppl_a_pullb",4],["ppl_a_legsb",5]]}},
+ {k:"spl",n:["Divisão por grupos","Body-part split","División por grupos"],
+  d:["A divisão clássica dos fisiculturistas: 2 ou 3 grupos por dia, cada grupo 1 ou 2 vezes por semana, com muito volume em cada treino.","The classic bodybuilder split: 2 or 3 groups per day, each group once or twice a week, with lots of volume per workout.","La división clásica de los culturistas: 2 o 3 grupos por día, cada grupo 1 o 2 veces por semana, con mucho volumen en cada entreno."],
+  x:[[],[],[]],w:{b:[],a:[]}},
  {k:"iso",n:["Um músculo por dia","One muscle per day","Un músculo por día"],
   d:["Cada treino foca um músculo, com bastante volume nele. Cada músculo é treinado 1 vez por semana. Também serve para reforçar um músculo atrasado.","Each workout focuses on one muscle, with plenty of volume for it. Each muscle is trained once a week. Also useful to bring up a lagging muscle.","Cada entreno se centra en un músculo, con bastante volumen. Cada músculo se entrena 1 vez por semana. También sirve para reforzar un músculo atrasado."],
   x:[["Os estudos mostram que treinar 2× por semana costuma ser um pouco melhor, mas o que mais pesa é o total de séries da semana (10–20 por músculo).","Para não passar de ~11 séries no mesmo dia, cada treino tem de 6 a 12 séries do músculo principal.","Use um treino avulso (ex.: só glúteos) junto de outra divisão, ou a semana pronta de 5–6 dias."],
@@ -3499,15 +3505,179 @@ const RT=[
  {id:"iso_a_pant",sp:"iso",lv:"a",g:"panturrilha",n:T3("Panturrilha","Calves","Pantorrillas"),it:[["pant",{},4,"8-12"],["pant",{p:"se"},3,"12-15"],["pant",{p:"lp"},2,"15-20"]]},
  {id:"iso_a_abs",sp:"iso",lv:"a",g:"abdomen",n:T3("Abdômen","Abs","Abdomen"),it:[["crunch",{e:"po"},3,"10-15"],["elevpernas",{},3,"8-12"],["roda",{},3,"8-12"],["pallof",{},2,"10-12"]]}];
 const p3=a=>LANG==="en"?a[1]:LANG==="es"?a[2]:a[0];
+/* ---- Treinos dos famosos (owner: "bastante", de livros, YouTube, Mr. Olympia, atletas mulheres; nível + tipo + fonte;
+   só o nome no canto). Each program: k, src (name shown in the corner), n, d (short text), est (the source didn't give
+   sets/reps, so the app suggests them), w: [[sp, lv, name, items]] with items = [family, variation, sets, reps].
+   Sources and links: docs/FONTES.md 4e. Adapted to the app's exercises (e.g. power clean → deadlift). */
+const MX=tx("máx","max","máx");
+const TA=x=>T3("Treino "+x,"Workout "+x,"Entreno "+x),DY=x=>T3("Dia "+x,"Day "+x,"Día "+x);
+const RF_P=[
+ {k:"sl",dy:[[0,4],[2]],src:"Mehdi · StrongLifts",n:T3("StrongLifts 5×5","StrongLifts 5×5","StrongLifts 5×5"),
+  d:T3("3 dias por semana alternando A e B. Sobe 2,5 kg por treino enquanto conseguir fazer 5×5.","3 days a week alternating A and B. Add 2.5 kg each session while you can do 5×5.","3 días por semana alternando A y B. Sube 2,5 kg por entreno mientras logres 5×5."),
+  w:[["fb","b",TA("A"),[["agach",{},5,"5"],["supino",{},5,"5"],["remcurv",{},5,"5"]]],
+     ["fb","b",TA("B"),[["agach",{},5,"5"],["desenv",{e:"ba",p:"pe"},5,"5"],["terra",{},1,"5"]]]]},
+ {k:"ss",dy:[[0,4],[2]],src:"Mark Rippetoe",n:T3("Starting Strength","Starting Strength","Starting Strength"),
+  d:T3("Do livro Starting Strength. 3 dias por semana, A e B alternados, subindo a carga todo treino.","From the book Starting Strength. 3 days a week, A and B alternating, adding weight every session.","Del libro Starting Strength. 3 días por semana, A y B alternados, subiendo la carga en cada entreno."),
+  w:[["fb","b",TA("A"),[["agach",{},3,"5"],["desenv",{e:"ba",p:"pe"},3,"5"],["terra",{},1,"5"]]],
+     ["fb","b",TA("B"),[["agach",{},3,"5"],["supino",{},3,"5"],["barrafixa",{g:"su"},3,MX]]]]},
+ {k:"gs",dy:[[0,4],[2]],src:"John Sheaffer",n:T3("Greyskull LP","Greyskull LP","Greyskull LP"),
+  d:T3("3 dias por semana. A última série é o máximo de repetições (5+); se passar de 10, sobe mais a carga.","3 days a week. The last set is as many reps as possible (5+); if you pass 10, add more weight.","3 días por semana. La última serie es el máximo de repeticiones (5+); si pasas de 10, sube más la carga."),
+  w:[["fb","b",TA("A"),[["supino",{},3,"5, 5, 5+"],["agach",{},3,"5, 5, 5+"],["rosca",{},2,"10-15"],["barrafixa",{g:"su"},2,MX]]],
+     ["fb","b",TA("B"),[["desenv",{e:"ba",p:"pe"},3,"5, 5, 5+"],["terra",{},1,"5+"],["barrafixa",{g:"su"},2,"6-8"]]]]},
+ {k:"gz",src:"Cody Lefever",n:T3("GZCLP","GZCLP","GZCLP"),
+  d:T3("4 dias. Cada dia tem um exercício pesado (T1), um médio (T2) e um leve (T3). O \"+\" é a última série no máximo.","4 days. Each day has a heavy lift (T1), a medium one (T2) and a light one (T3). The \"+\" is a last set to the max.","4 días. Cada día tiene un ejercicio pesado (T1), uno medio (T2) y uno ligero (T3). El \"+\" es la última serie al máximo."),
+  w:[["fb","b",DY(1),[["agach",{},5,"3+"],["supino",{},3,"10"],["puxada",{},3,"15+"]]],
+     ["fb","b",DY(2),[["desenv",{e:"ba",p:"pe"},5,"3+"],["terra",{},3,"10"],["serrote",{},3,"15+"]]],
+     ["fb","b",DY(3),[["supino",{},5,"3+"],["agach",{},3,"10"],["puxada",{},3,"15+"]]],
+     ["fb","b",DY(4),[["terra",{},5,"3+"],["desenv",{e:"ba",p:"pe"},3,"10"],["serrote",{},3,"15+"]]]]},
+ {k:"rp",src:"r/Fitness · Metallicadpa",n:T3("PPL do Reddit","Reddit PPL","PPL de Reddit"),
+  d:T3("O push/pull/legs mais famoso para iniciantes. 6 dias: Pull, Push, Legs, Pull, Push, Legs, trocando A e B.","The most famous beginner push/pull/legs. 6 days: Pull, Push, Legs, Pull, Push, Legs, switching A and B.","El push/pull/legs más famoso para principiantes. 6 días: Pull, Push, Legs, Pull, Push, Legs, alternando A y B."),
+  w:[["ppl","b",T3("Pull A","Pull A","Tirón A"),[["terra",{},1,"5+"],["puxada",{},3,"8-12"],["rembaixa",{},3,"8-12"],["facepull",{},5,"15-20"],["rosca",{g:"ne",e:"ha"},4,"8-12"],["rosca",{e:"ha"},4,"8-12"]]],
+     ["ppl","b",T3("Push A","Push A","Empuje A"),[["supino",{},5,"5 (5+)"],["desenv",{},3,"8-12"],["supino",{b:"in",e:"ha"},3,"8-12"],["pushdown",{},3,"8-12"],["elevlat",{},6,"15-20"],["frances",{},3,"8-12"]]],
+     ["ppl","b",T3("Legs","Legs","Piernas"),[["agach",{},3,"5, 5, 5+"],["stiff",{},3,"8-12"],["legpress",{},3,"8-12"],["flexora",{p:"de"},3,"8-12"],["pant",{},5,"8-12"]]],
+     ["ppl","b",T3("Pull B","Pull B","Tirón B"),[["remcurv",{},5,"5 (5+)"],["barrafixa",{},3,"8-12"],["rembaixa",{},3,"8-12"],["facepull",{},5,"15-20"],["rosca",{g:"ne",e:"ha"},4,"8-12"],["rosca",{e:"ha"},4,"8-12"]]],
+     ["ppl","b",T3("Push B","Push B","Empuje B"),[["desenv",{e:"ba",p:"pe"},5,"5 (5+)"],["supino",{},3,"8-12"],["supino",{b:"in",e:"ha"},3,"8-12"],["pushdown",{},3,"8-12"],["elevlat",{},6,"15-20"],["frances",{},3,"8-12"]]]]},
+ {k:"g6",dy:[[0,2,4]],src:"Arnold Schwarzenegger",n:T3("Golden Six","Golden Six","Golden Six"),
+  d:T3("O treino de corpo inteiro que Arnold recomendava para começar: 6 exercícios, 3 vezes por semana.","The full-body routine Arnold recommended to start with: 6 exercises, 3 times a week.","La rutina de cuerpo completo que Arnold recomendaba para empezar: 6 ejercicios, 3 veces por semana."),
+  w:[["fb","b",T3("Golden Six","Golden Six","Golden Six"),[["agach",{},4,"10"],["supino",{w:"ab"},3,"10"],["barrafixa",{},3,MX],["desenv",{e:"ba"},4,"10"],["rosca",{},3,"10"],["crunch",{},4,MX]]]]},
+ {k:"rg",dy:[[0,4],[2]],src:"Reg Park",n:T3("Reg Park 5×5","Reg Park 5×5","Reg Park 5×5"),
+  d:T3("O 5×5 dos anos 1960 que inspirou o Arnold. 3 dias por semana alternando A e B; as 2 primeiras séries são aquecimento.","The 1960s 5×5 that inspired Arnold. 3 days a week alternating A and B; the first 2 sets are warm-ups.","El 5×5 de los años 60 que inspiró a Arnold. 3 días por semana alternando A y B; las 2 primeras series son calentamiento."),
+  w:[["fb","b",TA("A"),[["agach",{},5,"5"],["barrafixa",{},5,"5"],["mergulho",{},5,"5"],["rosca",{},2,"10"],["punho",{},2,"10"],["pant",{},2,"15-20"]]],
+     ["fb","b",TA("B"),[["agach",{e:"bf"},5,"5"],["remcurv",{},5,"5"],["desenv",{e:"ba",p:"pe"},5,"5"],["terra",{},3,"5"],["punho",{},2,"10"],["pant",{},2,"15-20"]]]]},
+ {k:"sr",dy:[[0,2,4]],src:"Steve Reeves",n:T3("Corpo inteiro clássico","Classic full body","Cuerpo completo clásico"),
+  d:T3("Do livro Building the Classic Physique. Corpo inteiro 3 vezes por semana, em dias alternados.","From the book Building the Classic Physique. Full body 3 times a week, on alternate days.","Del libro Building the Classic Physique. Cuerpo completo 3 veces por semana, en días alternos."),
+  w:[["fb","b",T3("Corpo inteiro","Full body","Cuerpo completo"),[["remalta",{},3,"8-12"],["serrote",{},3,"8-12"],["elevlat",{},3,"8-12"],["supino",{b:"in"},3,"8-12"],["pushdown",{},3,"8-12"],["rosca",{},3,"8-12"],["rosca",{e:"ha"},3,"8-12"],["agach",{},3,"8-12"],["pullover",{e:"ha"},3,"8-12"],["terra",{},2,"8-12"],["bomdia",{},2,"8-12"]]]]},
+ {k:"fz",dy:[[0,3]],src:"Frank Zane",n:T3("Rotina para começar","Beginning routine","Rutina para empezar"),
+  d:T3("Um exercício por músculo, 2 vezes por semana. Nas 2 primeiras semanas, 1 série de 10; depois, 2 séries (12 e 10).","One exercise per muscle, twice a week. First 2 weeks, 1 set of 10; then 2 sets (12 and 10).","Un ejercicio por músculo, 2 veces por semana. Las 2 primeras semanas, 1 serie de 10; después, 2 series (12 y 10)."),
+  w:[["fb","b",T3("Corpo inteiro","Full body","Cuerpo completo"),[["supino",{b:"in",e:"ha"},2,"12, 10"],["pullover",{e:"ha"},2,"12, 10"],["serrote",{},2,"12, 10"],["elevlat",{},2,"12, 10"],["rosca",{e:"ha"},2,"12, 10"],["frances",{e:"ha",l:"un"},2,"12, 10"],["rosca",{g:"pr"},2,"12, 10"],["elevpernas",{e:"ch"},2,"12, 10"],["twist",{e:"co"},2,"12, 10"],["extensora",{},2,"12, 10"],["flexora",{},2,"12, 10"],["pant",{},2,"12, 10"]]]]},
+ {k:"sc",src:"Bret Contreras",n:T3("Strong Curves (começo)","Strong Curves (beginnings)","Strong Curves (inicio)"),
+  d:T3("Do livro Strong Curves, focado em glúteos. 3 dias por semana: A, B e C.","From the book Strong Curves, glute-focused. 3 days a week: A, B and C.","Del libro Strong Curves, enfocado en glúteos. 3 días por semana: A, B y C."),
+  w:[["fb","b",TA("A"),[["hipthrust",{ap:"ch"},3,"10-20"],["serrote",{},3,"8-12"],["agach",{},3,"10-20"],["supino",{},3,"8-12"],["stiff",{e:"ha"},3,"10-20"],["abducao",{e:"co"},1,"15-30"],["prancha",{},1,"20-120 s"],["pranchalat",{},1,"20-60 s"]]],
+     ["fb","b",TA("B"),[["hipthrust",{ap:"ch",e:"co",l:"un"},3,"10-20"],["puxada",{},3,"8-12"],["stepup",{},3,"10-20"],["desenv",{p:"pe"},3,"8-12"],["extlombar",{},3,"10-20"],["ostra",{},1,"15-30"],["prancha",{},1,"20-120 s"],["pranchalat",{},1,"20-60 s"]]],
+     ["fb","b",TA("C"),[["hipthrust",{ap:"ch",e:"co"},3,"60 s"],["rembaixa",{},3,"8-12"],["agach",{e:"ha"},3,"10-20"],["supino",{b:"in",e:"ha"},3,"8-12"],["stiff",{e:"ha",l:"un"},2,"10-20"],["lateralwalk",{},1,"20"],["prancha",{},1,"20-120 s"],["lenhador",{},1,"10"]]]]},
+ {k:"jnm",src:"Jeff Nippard",n:T3("Minimalista (menos de 45 min)","Minimalist (under 45 min)","Minimalista (menos de 45 min)"),
+  d:T3("Do vídeo do Jeff Nippard: 2 treinos de corpo inteiro por semana, poucas séries bem pesadas.","From Jeff Nippard's video: 2 full-body workouts a week, few hard sets.","Del video de Jeff Nippard: 2 entrenos de cuerpo completo por semana, pocas series muy duras."),
+  w:[["fb","b",DY(1),[["supino",{e:"ha"},2,"4-6, 8-10"],["stiff",{e:"ha"},2,"8-10"],["puxada",{},2,"10-12"],["stepup",{},1,"8-10"],["frances",{},1,"12-15"],["elevlat",{e:"ma"},1,"12-15"],["pant",{p:"lp"},1,"12-15"]]],
+     ["fb","b",DY(2),[["hack",{},2,"4-6, 8-10"],["supino",{b:"in",e:"sm"},2,"8-12"],["remcurv",{e:"tb"},2,"10-12"],["flexora",{},1,"10-12"],["rosca",{e:"bw"},1,"12-15"],["crunch",{e:"po"},1,"12-15"]]]]},
+ /* ---- avançados ---- */
+ {k:"phul",src:"Brandon Campbell",n:T3("PHUL","PHUL","PHUL"),
+  d:T3("Força e hipertrofia em superior/inferior: 2 dias pesados e 2 dias de volume por semana.","Power and hypertrophy upper/lower: 2 heavy days and 2 volume days a week.","Fuerza e hipertrofia superior/inferior: 2 días pesados y 2 de volumen por semana."),
+  w:[["ul","a",T3("Superior força","Upper power","Superior fuerza"),[["supino",{},4,"3-5"],["supino",{b:"in",e:"ha"},4,"5-8"],["remcurv",{},4,"5-8"],["puxada",{},4,"6-10"],["desenv",{e:"ba",p:"pe"},3,"5-8"],["rosca",{},3,"6-10"],["testa",{e:"ba"},3,"6-10"]]],
+     ["ul","a",T3("Inferior força","Lower power","Inferior fuerza"),[["agach",{},4,"3-5"],["terra",{},4,"3-5"],["legpress",{},4,"6-10"],["flexora",{p:"de"},3,"10-15"],["pant",{p:"se"},3,"6-10"]]],
+     ["ul","a",T3("Superior hipertrofia","Upper hypertrophy","Superior hipertrofia"),[["supino",{b:"in"},4,"8-12"],["serrote",{},4,"8-12"],["crucifixo",{e:"ha"},4,"12-15"],["rembaixa",{},4,"10-12"],["elevlat",{},4,"12-15"],["rinclinada",{},4,"12-15"],["pushdown",{},4,"12-15"]]],
+     ["ul","a",T3("Inferior hipertrofia","Lower hypertrophy","Inferior hipertrofia"),[["agach",{e:"bf"},4,"8-12"],["afundo",{e:"ba"},4,"8-12"],["flexora",{},4,"10-12"],["extensora",{},4,"12-15"],["pant",{},4,"12-15"]]]]},
+ {k:"phat",src:"Layne Norton",n:T3("PHAT","PHAT","PHAT"),
+  d:T3("5 dias: 2 de força (superior e inferior) e 3 de hipertrofia por grupo. Nos de hipertrofia, use ~85% da carga dos dias de força.","5 days: 2 power days (upper and lower) and 3 hypertrophy days by muscle group. On hypertrophy days use ~85% of the power-day loads.","5 días: 2 de fuerza (superior e inferior) y 3 de hipertrofia por grupo. En los de hipertrofia, usa ~85% de la carga de los de fuerza."),
+  w:[["spl","a",T3("Superior força","Upper power","Superior fuerza"),[["remcurv",{},3,"3-5"],["barrafixa",{},2,"6-10"],["puxada",{},2,"6-10"],["supino",{e:"ha"},3,"3-5"],["mergulho",{},2,"6-10"],["desenv",{},3,"6-10"],["rosca",{e:"bw"},3,"6-10"],["testa",{e:"ba"},3,"6-10"]]],
+     ["spl","a",T3("Inferior força","Lower power","Inferior fuerza"),[["agach",{},3,"3-5"],["hack",{},2,"6-10"],["extensora",{},2,"6-10"],["stiff",{},3,"5-8"],["flexora",{p:"de"},2,"6-10"],["pant",{},3,"6-10"],["pant",{p:"se"},2,"6-10"]]],
+     ["spl","a",T3("Costas e ombros","Back & shoulders","Espalda y hombros"),[["remcurv",{},4,"8-10"],["puxada",{},3,"8-12"],["rembaixa",{},3,"8-12"],["serrote",{},2,"12-15"],["puxada",{w:"fe"},2,"15-20"],["desenv",{},3,"8-12"],["remalta",{},2,"12-15"],["elevlat",{},3,"12-20"]]],
+     ["spl","a",T3("Pernas hipertrofia","Legs hypertrophy","Piernas hipertrofia"),[["agach",{},4,"8-10"],["hack",{},3,"8-12"],["legpress",{},2,"12-15"],["extensora",{},3,"15-20"],["stiff",{},3,"8-12"],["flexora",{p:"de"},2,"12-15"],["flexora",{},2,"15-20"],["pant",{p:"bu"},4,"10-15"],["pant",{p:"se"},3,"15-20"]]],
+     ["spl","a",T3("Peito e braços","Chest & arms","Pecho y brazos"),[["supino",{e:"ha"},4,"8-10"],["supino",{b:"in",e:"ha"},3,"8-12"],["supino",{e:"ma"},3,"12-15"],["crucifixo",{b:"in",e:"po"},2,"15-20"],["scott",{},3,"8-12"],["concentrada",{},2,"12-15"],["spider",{},2,"15-20"],["frances",{e:"bw"},3,"8-12"],["pushdown",{},2,"12-15"],["coice",{},2,"15-20"]]]]},
+ {k:"bbb",src:"Jim Wendler",n:T3("5/3/1 Boring But Big","5/3/1 Boring But Big","5/3/1 Boring But Big"),
+  d:T3("4 dias. O primeiro exercício segue o 5/3/1 (semanas de 5, 3 e 5/3/1 repetições); depois 5×10 com ~50% da carga.","4 days. The first lift follows 5/3/1 (weeks of 5, 3 and 5/3/1 reps); then 5×10 at ~50% of the load.","4 días. El primer ejercicio sigue el 5/3/1 (semanas de 5, 3 y 5/3/1 repeticiones); luego 5×10 con ~50% de la carga."),
+  w:[["ul","a",T3("Desenvolvimento","Press","Press militar"),[["desenv",{e:"ba",p:"pe"},3,"5/3/1"],["desenv",{e:"ba",p:"pe"},5,"10"],["puxada",{},5,"10"]]],
+     ["ul","a",T3("Terra","Deadlift","Peso muerto"),[["terra",{},3,"5/3/1"],["terra",{},5,"10"],["elevpernas",{},5,"10-15"]]],
+     ["ul","a",T3("Supino","Bench","Press de banca"),[["supino",{},3,"5/3/1"],["supino",{},5,"10"],["barrafixa",{},5,"10"]]],
+     ["ul","a",T3("Agachamento","Squat","Sentadilla"),[["agach",{},3,"5/3/1"],["agach",{},5,"10"],["crunch",{},5,"10-15"]]]]},
+ {k:"tm",src:"Glenn Pendlay",n:T3("Texas Method","Texas Method","Texas Method"),
+  d:T3("3 dias: volume na segunda, leve na quarta e recorde na sexta. Para quem já não sobe carga todo treino.","3 days: volume Monday, light Wednesday, record Friday. For lifters who can no longer add weight every session.","3 días: volumen el lunes, ligero el miércoles y récord el viernes. Para quien ya no sube carga en cada entreno."),
+  w:[["fb","a",T3("Volume","Volume","Volumen"),[["agach",{},5,"5"],["supino",{},5,"5"],["terra",{},1,"5"]]],
+     ["fb","a",T3("Leve","Light","Ligero"),[["agach",{},2,"5"],["desenv",{e:"ba",p:"pe"},3,"5"],["barrafixa",{},3,MX],["extlombar",{},3,"10"]]],
+     ["fb","a",T3("Intensidade","Intensity","Intensidad"),[["agach",{},1,"5"],["supino",{},1,"5"],["terra",{},5,"3"]]]]},
+ {k:"mc",src:"Bill Starr · Madcow",n:T3("5×5 intermediário","Intermediate 5×5","5×5 intermedio"),
+  d:T3("3 dias: pesado, leve e médio. As séries sobem até a mais pesada; sexta tem um recorde de 3 e uma série de 8.","3 days: heavy, light and medium. Sets ramp up to the heaviest; Friday has a triple PR and a set of 8.","3 días: pesado, ligero y medio. Las series suben hasta la más pesada; el viernes hay un récord de 3 y una serie de 8."),
+  w:[["fb","a",T3("Pesado","Heavy","Pesado"),[["agach",{},5,"5"],["supino",{},5,"5"],["remcurv",{},5,"5"]]],
+     ["fb","a",T3("Leve","Light","Ligero"),[["agach",{},4,"5"],["desenv",{e:"ba",p:"pe"},4,"5"],["terra",{},4,"5"]]],
+     ["fb","a",T3("Médio","Medium","Medio"),[["agach",{},6,"5, 5, 5, 5, 3, 8"],["supino",{},6,"5, 5, 5, 5, 3, 8"],["remcurv",{},6,"5, 5, 5, 5, 3, 8"]]]]},
+ {k:"gbr",src:"Lyle McDonald",n:T3("Rotina genérica de ganho","Generic bulking routine","Rutina genérica de volumen"),
+  d:T3("Superior/inferior 4 dias: compostos pesados (6-8) e auxiliares mais leves (10-12).","Upper/lower, 4 days: heavy compounds (6-8) and lighter assistance (10-12).","Superior/inferior 4 días: compuestos pesados (6-8) y auxiliares más ligeros (10-12)."),
+  w:[["ul","a",T3("Inferior A","Lower A","Inferior A"),[["agach",{},4,"6-8"],["stiff",{},4,"6-8"],["legpress",{},3,"10-12"],["flexora",{},3,"10-12"],["pant",{},4,"6-8"],["pant",{p:"se"},3,"10-12"]]],
+     ["ul","a",T3("Superior A","Upper A","Superior A"),[["supino",{},4,"6-8"],["remcurv",{},4,"6-8"],["supino",{b:"in"},3,"10-12"],["puxada",{},3,"10-12"],["pushdown",{},2,"12-15"],["rosca",{},2,"12-15"]]],
+     ["ul","a",T3("Inferior B","Lower B","Inferior B"),[["terra",{},4,"6-8"],["legpress",{},4,"6-8"],["flexora",{p:"de"},3,"10-12"],["pant",{},4,"6-8"],["pant",{p:"se"},3,"10-12"]]],
+     ["ul","a",T3("Superior B","Upper B","Superior B"),[["supino",{b:"in"},4,"6-8"],["puxada",{},4,"6-8"],["desenv",{},3,"10-12"],["rembaixa",{},3,"10-12"],["frances",{},2,"12-15"],["rosca",{g:"ne",e:"ha"},2,"12-15"]]]]},
+ {k:"ab1",dy:[[0,3],[1,4],[2,5]],src:"Arnold Schwarzenegger",n:T3("Divisão de Arnold (livro)","Arnold's split (book)","División de Arnold (libro)"),
+  d:T3("Programa básico nº 1 da Enciclopédia do Fisiculturismo: 3 treinos, cada um 2 vezes por semana, abdômen todo dia.","Basic program #1 from the Encyclopedia of Modern Bodybuilding: 3 workouts, each twice a week, abs every day.","Programa básico nº 1 de la Enciclopedia del Culturismo: 3 entrenos, cada uno 2 veces por semana, abdomen todos los días."),
+  w:[["spl","a",T3("Peito e costas","Chest & back","Pecho y espalda"),[["supino",{},4,"15, 12, 10, 6"],["supino",{b:"in"},4,"15, 12, 10, 6"],["pullover",{e:"ha"},4,"15, 12, 10, 6"],["barrafixa",{},5,tx("até somar 50","to total 50","hasta sumar 50")],["remcurv",{},5,"15, 12, 10, 6, 8"],["terra",{},3,"10, 6, 4"],["crunch",{},5,"25"]]],
+     ["spl","a",T3("Ombros e braços","Shoulders & arms","Hombros y brazos"),[["desenv",{e:"ba",p:"pe"},4,"15, 12, 10, 6"],["elevlat",{},4,"15, 12, 10, 6"],["remalta",{},3,"10, 6, 4"],["rosca",{},4,"15, 12, 10, 6"],["rosca",{e:"ha"},4,"15, 12, 10, 6"],["frances",{e:"bw"},4,"15, 12, 10, 6"],["punho",{},4,"15, 12, 10, 6"],["punho",{g:"pr"},4,"15, 12, 10, 6"],["reverso",{},5,"25"]]],
+     ["spl","a",T3("Pernas e lombar","Legs & lower back","Piernas y lumbar"),[["agach",{},4,"15, 12, 10, 6"],["afundo",{e:"ba"},4,"15, 12, 10, 6"],["flexora",{},4,"15, 12, 10, 6"],["pant",{},5,"15"],["stiff",{},3,"10, 6, 4"],["bomdia",{},3,"10, 6, 4"],["crunch",{},5,"25"]]]]},
+ {k:"dy",src:"Dorian Yates",n:T3("Blood & Guts","Blood & Guts","Blood & Guts"),
+  d:T3("4 dias, pouco volume e muita intensidade: depois do aquecimento, poucas séries levadas até a falha.","4 days, low volume and high intensity: after warming up, few sets taken to failure.","4 días, poco volumen y mucha intensidad: tras calentar, pocas series llevadas al fallo."),
+  w:[["spl","a",T3("Ombros e tríceps","Delts & triceps","Hombros y tríceps"),[["desenv",{},3,"12, 10, 8-10"],["elevlat",{},2,"10, 6-8"],["elevlat",{e:"po",l:"un"},2,"10, 6-8"],["encolh",{e:"ha"},2,"10, 6-8"],["pushdown",{g:"ba"},3,"12, 10, 6-8"],["testa",{e:"ba"},2,"10, 6-8"],["pushdown",{l:"un"},1,"6-8"],["crunch",{},1,"20"],["reverso",{},1,"10"]]],
+     ["spl","a",T3("Costas","Back","Espalda"),[["puxada",{w:"fe"},3,"12, 10, 6-8"],["remcurv",{},2,"10, 6-8"],["serrote",{},2,"10, 6-8"],["rembaixa",{},1,"6-8"],["crucinv",{e:"ha"},2,"6-8"],["extlombar",{e:"an"},1,"6-8"],["terra",{},2,"8, 6-8"]]],
+     ["spl","a",T3("Peito e bíceps","Chest & biceps","Pecho y bíceps"),[["supino",{b:"in"},4,"12, 10, 6-8, 6"],["supino",{e:"ma"},2,"10, 6-8"],["crucifixo",{b:"in",e:"ha"},2,"10, 8"],["crucifixo",{e:"po"},1,"8-10"],["rinclinada",{},2,"10, 6-8"],["rosca",{},2,"10, 6-8"],["scott",{e:"ha"},1,"6-8"],["crunch",{},1,"20"],["reverso",{},1,"10"]]],
+     ["spl","a",T3("Pernas","Legs","Piernas"),[["extensora",{},3,"15, 12, 10-12"],["legpress",{},3,"12, 12, 10-12"],["hack",{},2,"12, 8-10"],["flexora",{p:"de"},2,"8-10"],["stiff",{},1,"10"],["flexora",{l:"un"},1,"8-10"],["pant",{},2,"10-12"],["pant",{p:"se"},1,"10-12"]]]]},
+ {k:"mm",dy:[[0],[3],[],[]],src:"Mike Mentzer",n:T3("Heavy Duty","Heavy Duty","Heavy Duty"),
+  d:T3("Alta intensidade: 1 ou 2 séries de 6-8 até a falha total, com bastante descanso entre os treinos.","High intensity: 1 or 2 sets of 6-8 to total failure, with plenty of rest between workouts.","Alta intensidad: 1 o 2 series de 6-8 hasta el fallo total, con mucho descanso entre entrenos."),
+  w:[["spl","a",T3("Pernas, peito e tríceps","Legs, chest & triceps","Piernas, pecho y tríceps"),[["extensora",{},1,"6-8"],["legpress",{},1,"6-8"],["agach",{},1,"6-8"],["flexora",{},2,"6-8"],["pant",{},2,"6-8"],["pant",{p:"lp"},1,"6-8"],["crucifixo",{},2,"6-8"],["supino",{b:"in"},2,"6-8"],["mergulho",{},2,"6-8"],["pushdown",{},1,"6-8"],["testa",{e:"ba"},2,"6-8"]]],
+     ["spl","a",T3("Costas, ombros e bíceps","Back, shoulders & biceps","Espalda, hombros y bíceps"),[["pullover",{e:"ma"},2,"6-8"],["puxada",{w:"fe"},2,"6-8"],["remcurv",{},2,"6-8"],["encolh",{e:"ma"},2,"6-8"],["remalta",{},2,"6-8"],["elevlat",{e:"ma"},2,"6-8"],["desenv",{e:"ma"},2,"6-8"],["remapoiada",{c:"ab"},2,"6-8"],["rosca",{},1,"6-8"],["concentrada",{},2,"6-8"]]],
+     ["fb","a",T3("Consolidado A","Consolidated A","Consolidado A"),[["agach",{},1,"8-15"],["puxada",{},1,"6-10"]]],
+     ["fb","a",T3("Consolidado B","Consolidated B","Consolidado B"),[["terra",{},1,"5-8"],["mergulho",{},1,"6-10"]]]]},
+ {k:"rc",src:"Ronnie Coleman",n:T3("Divisão de 6 dias","6-day split","División de 6 días"),
+  d:T3("Muito volume, 6 dias por semana: cada grupo 2 vezes, com o domingo de descanso.","High volume, 6 days a week: each group twice, with Sunday off.","Mucho volumen, 6 días por semana: cada grupo 2 veces, con el domingo libre."),
+  w:[["spl","a",T3("Costas, bíceps e ombros A","Back, biceps & shoulders A","Espalda, bíceps y hombros A"),[["terra",{},3,"8-10"],["remcurv",{},3,"8-12"],["remcurv",{e:"tb"},3,"8-12"],["rosca",{},4,"8-10"],["scott",{},4,"8-10"],["rosca",{e:"po"},4,"10-12"],["desenv",{e:"ba"},3,"8-10"],["desenv",{},3,"8-10"],["elevfront",{},3,"8-10"]]],
+     ["spl","a",T3("Pernas A","Legs A","Piernas A"),[["agach",{},5,"5-8"],["legpress",{},5,"5-8"],["flexora",{},3,"8-12"],["stiff",{},3,"8-12"],["afundo",{dir:"an"},3,"10"]]],
+     ["spl","a",T3("Peito e tríceps A","Chest & triceps A","Pecho y tríceps A"),[["supino",{},5,"5-8"],["supino",{b:"in"},3,"8-12"],["crucifixo",{e:"ha"},4,"8-10"],["supino",{w:"fe"},3,"8-12"],["frances",{e:"ha",p:"se"},4,"8-12"],["frances",{e:"bw",p:"se"},4,"8-12"]]],
+     ["spl","a",T3("Costas, bíceps e ombros B","Back, biceps & shoulders B","Espalda, bíceps y hombros B"),[["remcurv",{},4,"8-12"],["rembaixa",{},4,"12-15"],["spider",{},4,"10-12"],["scott",{e:"ma"},4,"10-12"],["rosca",{e:"po"},3,"12-15"],["desenv",{},4,"8-10"],["elevfront",{},3,"10-12"],["elevlat",{e:"ma"},3,"8-10"]]],
+     ["spl","a",T3("Pernas B","Legs B","Piernas B"),[["agach",{e:"bf"},5,"8-12"],["extensora",{},4,"12-15"],["flexora",{p:"pe"},4,"12-15"],["hack",{},3,"10-12"],["flexora",{p:"de"},3,"10-12"]]],
+     ["spl","a",T3("Peito e tríceps B","Chest & triceps B","Pecho y tríceps B"),[["supino",{b:"in",e:"ha"},4,"8-12"],["crucifixo",{b:"in",e:"ha"},4,"8-12"],["supino",{b:"de"},4,"8-12"],["supino",{b:"de",e:"ha"},4,"8-12"],["testa",{},4,"8-10"],["mergulho",{e:"ma"},4,"8-10"],["frances",{p:"se"},3,"8-12"],["pant",{p:"se"},3,"10-12"],["pant",{p:"bu"},3,"10-12"],["crunch",{},3,MX]]]]},
+ {k:"jc",src:"Jay Cutler",n:T3("Um grupo por dia","One group per day","Un grupo por día"),
+  d:T3("5 dias, um grupo grande por dia, 3-4 séries de 8-12 em tudo. Abdômen 2-3 vezes por semana.","5 days, one big group per day, 3-4 sets of 8-12 for everything. Abs 2-3 times a week.","5 días, un grupo grande por día, 3-4 series de 8-12 en todo. Abdomen 2-3 veces por semana."),
+  w:[["iso","a",T3("Peito","Chest","Pecho"),[["supino",{b:"in"},4,"8-12"],["supino",{b:"in",e:"ha"},4,"8-12"],["crucifixo",{},3,"8-12"],["crucifixo",{e:"ha"},3,"8-12"],["supino",{},3,"8-12"],["crucifixo",{e:"po"},3,"8-12"],["pullover",{e:"ha"},3,"8-12"]]],
+     ["iso","a",T3("Costas","Back","Espalda"),[["pullover",{e:"ma"},3,"8-12"],["puxada",{w:"ab"},4,"8-12"],["remapoiada",{},3,"8-12"],["puxada",{g:"su"},3,"8-12"],["remcurv",{},4,"8-12"],["rembaixa",{},3,"8-12"],["rembaixa",{g:"pr"},3,"8-12"],["extlombar",{},3,"8-12"]]],
+     ["iso","a",T3("Braços","Arms","Brazos"),[["pushdown",{},3,"8-12"],["supino",{w:"fe"},3,"8-12"],["pushdown",{g:"ba"},3,"8-12"],["frances",{e:"ha"},3,"8-12"],["pushdown",{g:"su",l:"un"},3,"8-12"],["rosca",{},3,"8-12"],["rosca",{g:"ne",e:"ha",l:"al"},3,"8-12"],["scott",{e:"ma",l:"un"},3,"8-12"],["rosca",{e:"ha",l:"al"},3,"8-12"],["rosca",{g:"pr"},3,"8-12"]]],
+     ["iso","a",T3("Ombros e panturrilha","Shoulders & calves","Hombros y pantorrilla"),[["elevlat",{p:"se"},4,"8-12"],["desenv",{},4,"8-12"],["elevlat",{e:"po"},3,"8-12"],["elevfront",{l:"al"},3,"8-12"],["crucinv",{},3,"8-12"],["crucinv",{e:"ha",p:"pe"},3,"8-12"],["pant",{},4,"8-12"],["pant",{p:"bu"},3,"8-12"],["pant",{p:"se"},3,"8-12"]]],
+     ["iso","a",T3("Pernas","Legs","Piernas"),[["extensora",{},4,"8-12"],["legpress",{},4,"8-12"],["hack",{},3,"8-12"],["afundo",{e:"ba"},3,"8-12"],["agach",{e:"sm"},3,"8-12"],["flexora",{},3,"8-12"],["flexora",{p:"de"},3,"8-12"],["stiff",{},3,"8-12"]]]]},
+ {k:"cb",src:"Chris Bumstead",n:T3("Push/pull/legs do Cbum","Cbum's push/pull/legs","Push/pull/legs de Cbum"),
+  d:T3("O PPL que ele mostrou no YouTube depois do título de 2019: 6 dias, A e B.","The PPL he showed on YouTube after his 2019 title: 6 days, A and B.","El PPL que mostró en YouTube tras su título de 2019: 6 días, A y B."),
+  w:[["ppl","a",T3("Push A","Push A","Empuje A"),[["supino",{b:"in"},3,"5-8, 5-8, 10-12"],["desenv",{l:"al"},3,"10-12"],["crucifixo",{e:"ha"},3,"10-12"],["frances",{},4,"7-10"],["elevlat",{},4,"10-12"],["mergulho",{},3,MX]]],
+     ["ppl","a",T3("Pull A","Pull A","Tirón A"),[["puxada",{},3,"8-10"],["remcurv",{},3,"6-8, 6-8, 10-12"],["rinclinada",{},4,"10-12"],["barrafixa",{},3,MX],["rosca",{e:"bw"},2,"8-10"]]],
+     ["ppl","a",T3("Legs A","Legs A","Piernas A"),[["afundo",{},3,"12-15"],["stiff",{},3,"10-12"],["hipthrust",{},3,"10-12"],["pant",{p:"se"},6,"10-12"],["flexora",{},2,"8-10"]]],
+     ["ppl","a",T3("Push B","Push B","Empuje B"),[["supino",{w:"fe"},3,"8-10"],["desenv",{e:"ba",p:"pe"},3,"10-12"],["crucifixo",{},3,"8-10"],["frances",{},3,"10-12"],["elevlat",{},4,"10-12"],["flexao",{},3,MX]]],
+     ["ppl","a",T3("Pull B","Pull B","Tirón B"),[["rackpull",{},2,"8-10"],["rosca",{g:"ne",e:"ha"},3,"10-12"],["remcurv",{g:"su"},3,"10-12"],["rosca",{e:"po"},3,"10-12"],["rembaixa",{},2,"20"],["rosca",{e:"ha"},1,MX]]],
+     ["ppl","a",T3("Legs B","Legs B","Piernas B"),[["agach",{},4,"8-10, 8-10, 8-10, 4-6"],["legpress",{},2,"40 s"],["pant",{p:"lp"},2,MX],["aducao",{},4,"10-12"],["pant",{},4,"10-12"],["extensora",{},2,"10-12"]]]]},
+ {k:"jnf",src:"Jeff Nippard",n:T3("Corpo inteiro com foco","Focused full body","Cuerpo completo con foco"),
+  d:T3("Dos vídeos do Jeff Nippard: três treinos de corpo inteiro, cada um com foco num grupo. Pare 1-3 repetições antes da falha.","From Jeff Nippard's videos: three full-body workouts, each focused on one group. Stop 1-3 reps short of failure.","De los videos de Jeff Nippard: tres entrenos de cuerpo completo, cada uno con foco en un grupo. Para 1-3 repeticiones antes del fallo."),
+  w:[["fb","a",T3("Foco no peito","Chest focus","Foco en pecho"),[["supino",{},3,"3-5"],["crucifixo",{e:"po"},3,"15"],["stiff",{},3,"12"],["remapoiada",{},3,"15"],["desenv",{g:"ar",p:"pe"},3,"12"],["pushdown",{},3,"15"],["encolh",{e:"sm"},3,"12"]]],
+     ["fb","a",T3("Foco nas costas","Back focus","Foco en espalda"),[["barrafixa",{e:"lt"},3,"6"],["remapoiada",{e:"ha"},3,"10"],["legpress",{},3,"15"],["pant",{},4,"8"],["remalta",{e:"po"},3,"10"],["rosca",{g:"ne",e:"ha"},3,"10"]]],
+     ["fb","a",T3("Foco nos ombros","Shoulder focus","Foco en hombros"),[["desenv",{e:"ba",p:"pe"},3,"6"],["elevlat",{},3,"15"],["rembaixa",{},3,"12"],["flexora",{p:"de"},3,"12"],["concentrada",{},3,"12"],["crunch",{e:"po"},4,"15"],["pant",{p:"se"},4,"15"],["flexao",{},2,MX]]]]},
+ {k:"jnu",src:"Jeff Nippard",n:T3("Superior/inferior científico","Science-based upper/lower","Superior/inferior científico"),
+  d:T3("Dos vídeos de 2019 do Jeff Nippard: um dia de peito e costas e um de pernas, 2 vezes por semana cada.","From Jeff Nippard's 2019 videos: a chest-and-back day and a leg day, twice a week each.","De los videos de 2019 de Jeff Nippard: un día de pecho y espalda y uno de piernas, 2 veces por semana cada uno."),
+  w:[["ul","a",T3("Superior","Upper","Superior"),[["supino",{},3,"6-8"],["barrafixa",{w:"ab",e:"lt"},3,"8"],["supino",{w:"fe"},2,"8-10"],["rembaixa",{l:"un"},3,"12"],["desenv",{g:"ar"},2,"12"],["crucinv",{},2,"10 + 10"],["pushdown",{},3,"21"],["scott",{},2,"15-20"]]],
+     ["ul","a",T3("Inferior","Lower","Inferior"),[["agach",{},3,"4-6"],["stiff",{},3,"10"],["afundo",{dir:"an"},3,"8 + 8"],["extensora",{l:"un"},3,"10"],["flexora",{p:"de"},4,"8-12"],["pant",{},3,"15"],["crunch",{e:"po"},3,"15"]]]]},
+ /* ---- mulheres ---- */
+ {k:"dlb",src:"Dana Linn Bailey",n:T3("Treinos da DLB","DLB's workouts","Entrenos de DLB"),
+  d:T3("Treinos que a campeã do Women's Physique Olympia 2012 mostrou nos vídeos dela: push, costas, posterior/glúteos e quadríceps.","Workouts the 2012 Women's Physique Olympia champion showed in her videos: push, back, hamstrings/glutes and quads.","Entrenos que la campeona del Women's Physique Olympia 2012 mostró en sus videos: empuje, espalda, isquios/glúteos y cuádriceps."),
+  w:[["ppl","a",T3("Push","Push","Empuje"),[["flexao",{},1,"50"],["supino",{},4,"6"],["crucifixo",{e:"po"},4,"10-12"],["desenv",{p:"pe"},4,"6"],["elevlat",{},1,MX],["testa",{e:"ha"},4,"12, 10, 8, 8"],["supino",{e:"ha",w:"fe"},4,"12, 10, 8, 8"],["pushdown",{},3,"12-15"]]],
+     ["iso","a",T3("Costas","Back","Espalda"),[["barrafixa",{w:"ab"},3,"6-8"],["crucinv",{e:"po"},5,"10-12"],["facepull",{p:"se"},5,"10-12"],["puxada",{l:"un"},4,"8-10"],["puxada",{w:"fe"},4,"8-10"],["serrote",{},4,"12, 10, 8, 6"],["rembaixa",{},4,"12, 10, 8, 8"]]],
+     ["iso","a",T3("Posterior e glúteos","Hamstrings & glutes","Isquios y glúteos"),[["terra",{st:"su"},4,"12, 10, 8, 8"],["hipthrust",{e:"ma"},4,"10-12"],["abducao",{},4,"20"],["stiff",{e:"ha"},4,"12"],["agach",{pe:"su"},4,"12"],["extlombar",{},3,MX]]],
+     ["iso","a",T3("Quadríceps","Quads","Cuádriceps"),[["agach",{},5,"5"],["extensora",{},3,"12-15"],["afundo",{dir:"an",e:"ba"},3,"12-15"],["legpress",{},4,"20, 15, 12, 10"],["agach",{e:"ha"},3,"20"],["stepup",{},4,"20"]]]]},
+ {k:"cg",src:"Cydney Gillon",n:T3("Pernas e glúteos","Legs & glutes","Piernas y glúteos"),est:1,
+  d:T3("Exercícios que a 7 vezes campeã do Figure Olympia mostrou: ela escolhe 3 para quadríceps e 3 para posterior quando treina pernas 1 vez por semana.","Exercises the 7-time Figure Olympia champion showed: she picks 3 for quads and 3 for hamstrings when training legs once a week.","Ejercicios que la 7 veces campeona del Figure Olympia mostró: elige 3 para cuádriceps y 3 para isquios cuando entrena piernas 1 vez por semana."),
+  w:[["iso","a",T3("Pernas","Legs","Piernas"),[["legpress",{},3,"10-12"],["afundo",{dir:"an"},3,"10-12"],["afundo",{dir:"tr"},3,"10-12"],["afundo",{dir:"bu"},3,"10-12"],["flexora",{p:"de"},3,"10-12"],["stiff",{},3,"10-12"],["hack",{},3,"10-12"],["extensora",{},3,"12-15"]]],
+     ["iso","a",T3("Glúteos","Glutes","Glúteos"),[["hipthrust",{},4,"10-12"],["coicegl",{e:"ma"},3,"12-15"],["lateralwalk",{},3,"20"],["extlombar",{},3,"12-15"],["coicegl",{},3,"12-15"]]]]},
+ {k:"fm",src:"Francielle Mattos",n:T3("Inferiores de preparação","Prep lower body","Tren inferior de preparación"),est:1,
+  d:T3("Treino de pernas e glúteos que a brasileira campeã do Wellness mostrou no início da preparação para o Olympia 2022.","Leg and glute workout the Brazilian Wellness champion showed early in her 2022 Olympia prep.","Entreno de piernas y glúteos que la brasileña campeona de Wellness mostró al inicio de su preparación para el Olympia 2022."),
+  w:[["iso","a",T3("Pernas e glúteos","Legs & glutes","Piernas y glúteos"),[["agach",{pe:"su"},4,"10-12"],["stiff",{},4,"10-12"],["afundo",{dir:"bu"},3,"10-12"],["hipthrust",{},4,"10-12"],["abducao",{e:"co"},3,"15-20"],["coicegl",{},3,"12-15"]]]]},
+ /* ---- um grupo só (lendas) ---- */
+ {k:"tp",src:"Tom Platz",n:T3("Pernas do Tom Platz","Tom Platz's legs","Piernas de Tom Platz"),
+  d:T3("O dia de pernas do \"Quadfather\": muito agachamento e volume alto. Ele variava conforme o dia.","The \"Quadfather\" leg day: lots of squats and high volume. He varied it day to day.","El día de piernas del \"Quadfather\": mucha sentadilla y volumen alto. Lo variaba según el día."),
+  w:[["iso","a",T3("Pernas","Legs","Piernas"),[["agach",{},8,"5-20"],["hack",{},5,"10-15"],["extensora",{},6,"10-15"],["flexora",{p:"de"},8,"10-15"],["pant",{},4,"10-15"],["pant",{p:"se"},4,"10-15"],["pant",{p:"lp"},4,"10-15"]]]]},
+ {k:"ph",src:"Phil Heath",n:T3("Braços do Phil Heath","Phil Heath's arms","Brazos de Phil Heath"),
+  d:T3("Um dia de braços com os exercícios favoritos do 7 vezes Mr. Olympia: 4 séries de 10-12 em cada.","An arm day with the 7-time Mr. Olympia's favorite exercises: 4 sets of 10-12 on each.","Un día de brazos con los ejercicios favoritos del 7 veces Mr. Olympia: 4 series de 10-12 en cada uno."),
+  w:[["iso","a",T3("Braços","Arms","Brazos"),[["rosca",{e:"ha",l:"al"},4,"10-12"],["scott",{e:"ha",l:"un"},4,"10-12"],["rosca",{e:"bw"},4,"10-12"],["scott",{e:"ma"},4,"10-12"],["pushdown",{g:"su"},4,"10-12"],["pushdown",{g:"ba"},4,"10-12"],["frances",{},4,"10-12"],["tmaq",{},4,"10-12"]]]]}
+];
+const RF_DAYS={1:[0],2:[0,3],3:[0,2,4],4:[0,1,3,4],5:[0,1,2,4,5],6:[0,1,2,3,4,5],7:[0,1,2,3,4,5,6],8:[0,1,2,3,4,5,6]};
+RF_P.forEach(p=>p.w.forEach(([sp,lv,n,it],i)=>RT.push({id:"f_"+p.k+"_"+i,sp,lv,n,it,pg:p.k,src:p.src})));
+const RF_BY=Object.fromEntries(RF_P.map(p=>[p.k,p]));
 const rtItems=w=>w.it.map(([id,ov,sets,reps])=>{const f=FAMBY[id],s={...f.d,...ov};return {name:vName(f,s),ref:mkRef(f,s),sets,reps}});
-const rtTitle=w=>`${p3(w.n)} · ${p3(RT_LV[w.lv])}`;
+const rtTitle=w=>{if(!w.pg)return `${p3(w.n)} · ${p3(RT_LV[w.lv])}`;const p=RF_BY[w.pg],a=p3(p.n),b=p3(w.n);return `${p.w.length>1&&a!==b?a+" – "+b:a} (${p.src})`};
 /* direct sets per BASIC group (target muscles only), used for the muscle filter and the card summary */
 const rtG={};
 function rtGroups(w){if(rtG[w.id])return rtG[w.id];const o={};
   for(const it of rtItems(w)){const e=exInfo(it.name,it.ref);if(!e)continue;new Set(e.p.map(m=>TOB[m])).forEach(g=>{if(g)o[g]=(o[g]||0)+it.sets})}
   return rtG[w.id]=o}
 const rtTrains=(w,g)=>w.g?w.g.split(" ").includes(g):(rtGroups(w)[g]||0)>=2;
-let fView=LS.get("atlas-fview","meus"),rtLv=LS.get("atlas-rtlv","b"),rtMus=null,rtOpen=null;
+let fView=LS.get("atlas-fview","meus"),rtLv=LS.get("atlas-rtlv","b"),rtMus=null,rtOpen=null,rtTp=LS.get("atlas-rttp",""),rtSrc=LS.get("atlas-rtsrc","");
 const fvSeg=()=>`<div class="seg pview fview" role="tablist" aria-label="${tx("Treinos","Workouts","Entrenos")}"><button role="tab" data-fv="meus" aria-pressed="${fView==="meus"}">${tx("Meus treinos","My workouts","Mis entrenos")}</button><button role="tab" data-fv="prontos" aria-pressed="${fView==="prontos"}">${tx("Treinos prontos","Ready-made","Entrenos listos")}</button></div>`;
 const RT_GORD=["peito","costas","ombro","biceps","triceps","quadriceps","posterior","gluteo","panturrilha","abdomen","trapezio","lombar","adutores","antebraco"];
 function renderProntos(){
@@ -3515,7 +3685,7 @@ function renderProntos(){
     a:tx("Mais exercícios livres, 3–4 séries, compostos com 6–10 repetições. Para quem já treina há mais de 6 meses com boa técnica.","More free-weight exercises, 3–4 sets, compound lifts at 6–10 reps. For people training 6+ months with good form.","Más ejercicios libres, 3–4 series, compuestos con 6–10 repeticiones. Para quien entrena hace más de 6 meses con buena técnica.")};
   const gs=RT_GORD.filter(g=>BASIC[g]&&RT.some(w=>w.lv===rtLv&&rtTrains(w,g)));
   let h=`<div class="page-h"><h2>${tx("Treinos","Workouts","Entrenos")}<button class="help" data-help="prontos" aria-label="${tx("Sobre esta página","About this page","Sobre esta página")}" title="${tx("Sobre esta página","About this page","Sobre esta página")}">+</button></h2>${fvSeg()}</div>
-  <p class="lead">${tx("Treinos montados com base nos estudos. Toque num treino para ver os exercícios, treinar agora ou salvar em Meus treinos.","Workouts built from the research. Tap one to see the exercises, train now or save it to My workouts.","Entrenos armados según los estudios. Toca uno para ver los ejercicios, entrenar ahora o guardarlo en Mis entrenos.")}</p>
+  <p class="lead">${tx("Treinos montados com base nos estudos e treinos de atletas, treinadores e livros famosos. Toque num treino para ver os exercícios, treinar agora ou salvar em Meus treinos.","Workouts built from the research plus workouts from famous athletes, coaches and books. Tap one to see the exercises, train now or save it to My workouts.","Entrenos armados según los estudios y entrenos de atletas, entrenadores y libros famosos. Toca uno para ver los ejercicios, entrenar ahora o guardarlo en Mis entrenos.")}</p>
   <details class="card rt-how"><summary>${tx("Qual escolher?","Which one to pick?","¿Cuál elegir?")}</summary><ul>
     <li>${tx("<b>2–3 dias</b> por semana → Corpo inteiro","<b>2–3 days</b> a week → Full body","<b>2–3 días</b> por semana → Cuerpo completo")}</li>
     <li>${tx("<b>4 dias</b> → Superior / inferior","<b>4 days</b> → Upper / lower","<b>4 días</b> → Superior / inferior")}</li>
@@ -3524,20 +3694,33 @@ function renderProntos(){
     <li>${tx("Em todos: os exercícios compostos vêm primeiro; use uma carga que deixe 1–3 repetições sobrando; o total de 10–20 séries por músculo na semana é o que mais conta.","In all of them: compound lifts come first; use a load that leaves 1–3 reps in the tank; 10–20 weekly sets per muscle matters most.","En todos: los compuestos van primero; usa una carga que deje 1–3 repeticiones de reserva; lo que más cuenta son 10–20 series por músculo a la semana.")}</li></ul></details>
   <div class="seg rt-lv" role="group" aria-label="${tx("Nível","Level","Nivel")}">${["b","a"].map(k=>`<button data-rtlv="${k}" aria-pressed="${rtLv===k}">${p3(RT_LV[k])}</button>`).join("")}</div>
   <p class="muted-s rt-lvt">${lvTxt[rtLv]}</p>
+  <div class="eyebrow rt-fl">${tx("Tipo","Type","Tipo")}</div>
+  <div class="chips rt-chips" role="group" aria-label="${tx("Tipo","Type","Tipo")}"><button data-rttp="" aria-pressed="${!rtTp}">${tx("Todos","All","Todos")}</button>${RT_SP.map(x=>`<button data-rttp="${x.k}" aria-pressed="${rtTp===x.k}">${esc(p3(x.n))}</button>`).join("")}</div>
+  <div class="eyebrow rt-fl">${tx("Fonte","Source","Fuente")}</div>
+  <div class="seg rt-lv rt-src" role="group" aria-label="${tx("Fonte","Source","Fuente")}">${[["",tx("Todos","All","Todos")],["app",tx("Do app","From the app","De la app")],["fam",tx("Dos famosos","From the famous","De los famosos")]].map(([k,t])=>`<button data-rtsrc="${k}" aria-pressed="${rtSrc===k}">${t}</button>`).join("")}</div>
   <div class="eyebrow rt-fl">${tx("Filtrar por músculo","Filter by muscle","Filtrar por músculo")}</div>
   <div class="chips rt-chips" role="group" aria-label="${tx("Músculo","Muscle","Músculo")}"><button data-rtm="" aria-pressed="${!rtMus}">${tx("Todos","All","Todos")}</button>${gs.map(g=>`<button data-rtm="${g}" aria-pressed="${rtMus===g}">${esc(BASIC[g].n)}</button>`).join("")}</div>`;
   let any=false;
-  for(const sp of RT_SP){const W=RT.filter(w=>w.sp===sp.k&&w.lv===rtLv&&(!rtMus||rtTrains(w,rtMus)));if(!W.length)continue;any=true;
+  const wOk=w=>w.lv===rtLv&&(!rtTp||w.sp===rtTp)&&(!rtMus||rtTrains(w,rtMus));
+  const wHTML=w=>{const it=rtItems(w),G=rtGroups(w),gl=Object.keys(G).sort((a,b)=>G[b]-G[a]).slice(0,4).map(g=>BASIC[g].n),open=rtOpen===w.id,tot=it.reduce((a,x)=>a+x.sets,0),tp=w.pg?esc(p3(RT_SP.find(x=>x.k===w.sp).n))+" · ":"";
+        return `<div class="rt-w${open?" open":""}"><button class="rt-wh" data-rt="open" data-id="${w.id}" aria-expanded="${open}"><span><b>${esc(p3(w.n))}</b><span class="muted-s">${tp}${it.length} ${tx("exercícios","exercises","ejercicios")} · ${tot} ${tx("séries","sets","series")}${rtMus&&G[rtMus]?` (${esc(BASIC[rtMus].n)}: ${G[rtMus]})`:""} · ${esc(gl.join(", "))}</span></span><span class="chev" aria-hidden="true">${open?"▴":"▾"}</span></button>
+          ${open?`<ol class="rt-list">${it.map(x=>`<li><span>${esc(dName(x.name,x.ref))}</span><b>${x.sets} × ${esc(x.reps)}</b></li>`).join("")}</ol>
+          <div class="row"><button class="btn primary" data-rt="live" data-id="${w.id}">▶ ${tx("Treinar agora","Train now","Entrenar ahora")}</button><button class="btn" data-rt="save" data-id="${w.id}">${tx("Salvar em Meus treinos","Save to My workouts","Guardar en Mis entrenos")}</button></div>`:""}</div>`};
+  if(rtSrc!=="fam")for(const sp of RT_SP){const W=RT.filter(w=>!w.pg&&w.sp===sp.k&&wOk(w));if(!W.length)continue;any=true;
     const wk=sp.w[rtLv];
     h+=`<section class="card rt-sp"><h3 class="section-t">${esc(p3(sp.n))}</h3><p class="rt-d">${esc(p3(sp.d))}</p>
       <details class="rt-more"><summary>${tx("Como funciona","How it works","Cómo funciona")}</summary><ul>${p3(sp.x).map(t=>`<li>${esc(t)}</li>`).join("")}</ul></details>
       ${rtMus?"":`<div class="rt-week"><b>${tx("Semana pronta","Ready-made week","Semana lista")}:</b> ${wk.map(([id,d])=>`${DSH[d]} ${esc(p3(RT.find(w=>w.id===id).n))}`).join(" · ")}
         <button class="btn" data-rt="week" data-sp="${sp.k}">${tx("Adicionar a semana toda","Add the whole week","Agregar la semana entera")}</button></div>`}
-      ${W.map(w=>{const it=rtItems(w),G=rtGroups(w),gl=Object.keys(G).sort((a,b)=>G[b]-G[a]).slice(0,4).map(g=>BASIC[g].n),open=rtOpen===w.id,tot=it.reduce((a,x)=>a+x.sets,0);
-        return `<div class="rt-w${open?" open":""}"><button class="rt-wh" data-rt="open" data-id="${w.id}" aria-expanded="${open}"><span><b>${esc(p3(w.n))}</b><span class="muted-s">${it.length} ${tx("exercícios","exercises","ejercicios")} · ${tot} ${tx("séries","sets","series")}${rtMus&&G[rtMus]?` (${esc(BASIC[rtMus].n)}: ${G[rtMus]})`:""} · ${esc(gl.join(", "))}</span></span><span class="chev" aria-hidden="true">${open?"▴":"▾"}</span></button>
-          ${open?`<ol class="rt-list">${it.map(x=>`<li><span>${esc(dName(x.name,x.ref))}</span><b>${x.sets} × ${esc(x.reps)}</b></li>`).join("")}</ol>
-          <div class="row"><button class="btn primary" data-rt="live" data-id="${w.id}">▶ ${tx("Treinar agora","Train now","Entrenar ahora")}</button><button class="btn" data-rt="save" data-id="${w.id}">${tx("Salvar em Meus treinos","Save to My workouts","Guardar en Mis entrenos")}</button></div>`:""}</div>`}).join("")}
+      ${W.map(wHTML).join("")}
     </section>`}
+  if(rtSrc!=="app"){const P=RF_P.map(p=>({p,W:p.w.map((x,i)=>RT.find(w=>w.id==="f_"+p.k+"_"+i)).filter(wOk)})).filter(o=>o.W.length);
+    if(P.length){any=true;h+=`<h3 class="rt-fh">${tx("Treinos dos famosos","Workouts from the famous","Entrenos de los famosos")}</h3>
+      <p class="muted-s rt-fn">${tx("Baseados no que cada atleta, treinador ou autor publicou em livros, sites e vídeos, adaptados aos exercícios do app. O nome no canto diz de quem é. Fontes em Configurações › Fontes.","Based on what each athlete, coach or author published in books, websites and videos, adapted to the app's exercises. The name in the corner says whose it is. Sources in Settings › Sources.","Basados en lo que cada atleta, entrenador o autor publicó en libros, webs y videos, adaptados a los ejercicios de la app. El nombre en la esquina dice de quién es. Fuentes en Ajustes › Fuentes.")}</p>`;
+      for(const {p,W} of P){h+=`<section class="card rt-sp rt-pg"><span class="rt-wm" data-notr>${esc(p.src)}</span><h3 class="section-t">${esc(p3(p.n))}</h3><p class="rt-d">${esc(p3(p.d))}</p>
+        ${p.est?`<p class="muted-s rt-est">${tx("A fonte mostrou só os exercícios; séries e repetições são sugestão do app.","The source only showed the exercises; sets and reps are the app's suggestion.","La fuente solo mostró los ejercicios; series y repeticiones son sugerencia de la app.")}</p>`:""}
+        ${W.map(wHTML).join("")}
+        ${p.w.length>1&&W.length===p.w.length?`<div class="row"><button class="btn" data-rt="prog" data-pg="${p.k}">${tx("Adicionar o programa todo","Add the whole program","Agregar el programa entero")}</button></div>`:""}</section>`}}}
   if(!any)h+=`<div class="card"><p class="muted">${tx("Nenhum treino pronto para esse músculo neste nível.","No ready-made workout for this muscle at this level.","No hay entrenos listos para ese músculo en este nivel.")}</p></div>`;
   $("fichaBody").innerHTML=h}
 function openPrograms(){fView="prontos";LS.set("atlas-fview",fView);if(tab!=="ficha")setTab("ficha");else renderFicha();$("tab-ficha").scrollTop=0}
@@ -3545,15 +3728,21 @@ $("fichaBody").addEventListener("click",e=>{
   const v=e.target.closest("[data-fv]");if(v){fView=v.dataset.fv;LS.set("atlas-fview",fView);renderFicha();return}
   const l=e.target.closest("[data-rtlv]");if(l){rtLv=l.dataset.rtlv;LS.set("atlas-rtlv",rtLv);rtOpen=null;renderFicha();return}
   const m=e.target.closest("[data-rtm]");if(m){rtMus=m.dataset.rtm||null;rtOpen=null;renderFicha();return}
+  const tp=e.target.closest("[data-rttp]");if(tp){rtTp=tp.dataset.rttp;LS.set("atlas-rttp",rtTp);rtOpen=null;renderFicha();return}
+  const sr=e.target.closest("[data-rtsrc]");if(sr){rtSrc=sr.dataset.rtsrc;LS.set("atlas-rtsrc",rtSrc);rtOpen=null;renderFicha();return}
   const b=e.target.closest("[data-rt]");if(!b)return;const w=RT.find(x=>x.id===b.dataset.id);
   if(b.dataset.rt==="open"){rtOpen=rtOpen===w.id?null:w.id;renderFicha();const c=document.querySelector(`.rt-w.open`);if(c)c.scrollIntoView({block:"nearest",behavior:"smooth"});return}
   if(b.dataset.rt==="live"){const pl={name:rtTitle(w),items:rtItems(w)};const wk=startPlan(pl);wk.start=Date.now();live={wid:wk.id,i:0,j:0};saveW();saveLive();hView="live";LS.set("atlas-hview",hView);setTab("treino");return}
   if(b.dataset.rt==="save"){plans.push({id:uid(),name:rtTitle(w),days:[],items:rtItems(w)});savePlans();toast(tx("Salvo em Meus treinos","Saved to My workouts","Guardado en Mis entrenos"));return}
+  if(b.dataset.rt==="prog"){const p=RF_BY[b.dataset.pg],n=p.w.length;
+    p.w.forEach((x,i)=>{const w=RT.find(y=>y.id==="f_"+p.k+"_"+i);plans.push({id:uid(),name:rtTitle(w),days:p.dy?p.dy[i]:[RF_DAYS[n][i]],items:rtItems(w)})});savePlans();
+    toast(tx(`${n} treinos adicionados em Meus treinos`,`${n} workouts added to My workouts`,`${n} entrenos agregados a Mis entrenos`));return}
   if(b.dataset.rt==="week"){const sp=RT_SP.find(x=>x.k===b.dataset.sp);const wk=sp.w[rtLv];
     wk.forEach(([id,d])=>{const x=RT.find(y=>y.id===id);plans.push({id:uid(),name:rtTitle(x),days:[d],items:rtItems(x)})});savePlans();
     toast(tx(`${wk.length} treinos adicionados em Meus treinos`,`${wk.length} workouts added to My workouts`,`${wk.length} entrenos agregados a Mis entrenos`))}});
 HELP.prontos=[tx("Treinos prontos","Ready-made workouts","Entrenos listos"),tx(
-`<p>Treinos montados com base nos estudos, em 4 tipos de divisão e 2 níveis.</p><ul>
+`<p>Treinos montados com base nos estudos e cerca de 90 treinos de atletas, treinadores e livros famosos (StrongLifts, Arnold, Dorian Yates, Jeff Nippard, Dana Linn Bailey e outros), em 5 tipos de divisão e 2 níveis.</p><ul>
+<li><b>Tipo</b> e <b>Fonte</b>: escolha a divisão e se quer os treinos do app, os dos famosos ou todos. O nome no canto de cada programa diz de quem é; "Adicionar o programa todo" coloca todos os dias dele em Meus treinos.</li>
 <li><b>Nível:</b> Iniciante (menos volume, mais máquinas) ou Avançado (mais volume e pesos livres).</li>
 <li><b>Filtrar por músculo:</b> toque, por exemplo, em Costas para ver só os treinos que trabalham costas: o treino só de costas, os dias de superior, o pull e os de corpo inteiro.</li>
 <li><b>Treinar agora</b> abre o treino em Hoje › Ao vivo. <b>Salvar</b> coloca em Meus treinos, onde você pode mudar tudo.</li>
@@ -3561,7 +3750,8 @@ HELP.prontos=[tx("Treinos prontos","Ready-made workouts","Entrenos listos"),tx(
 <h4>De onde vêm</h4><ul><li>Cada músculo 2 vezes por semana costuma ser um pouco melhor que 1, mas o total de séries da semana é o que mais pesa.</li>
 <li>Exercícios compostos primeiro, isolados depois.</li><li>Iniciante: 2–3 séries de 10–15 repetições; avançado: 3–4 séries, compostos com 6–10.</li>
 <li>Os exercícios escolhidos estão entre os mais bem colocados nas listas do Atlas.</li></ul>`,
-`<p>Workouts built from the research, in 4 split types and 2 levels.</p><ul>
+`<p>Workouts built from the research plus about 90 workouts from famous athletes, coaches and books (StrongLifts, Arnold, Dorian Yates, Jeff Nippard, Dana Linn Bailey and more), in 5 split types and 2 levels.</p><ul>
+<li><b>Type</b> and <b>Source</b>: pick the split and whether you want the app's workouts, the famous ones or all. The name in the corner of each program says whose it is; "Add the whole program" puts all its days in My workouts.</li>
 <li><b>Level:</b> Beginner (less volume, more machines) or Advanced (more volume and free weights).</li>
 <li><b>Filter by muscle:</b> tap, for example, Back to see only the workouts that train the back: the back-only workout, the upper days, pull and full body.</li>
 <li><b>Train now</b> opens the workout in Today › Live. <b>Save</b> puts it in My workouts, where you can change everything.</li>
@@ -3569,7 +3759,8 @@ HELP.prontos=[tx("Treinos prontos","Ready-made workouts","Entrenos listos"),tx(
 <h4>Where they come from</h4><ul><li>Training each muscle twice a week tends to be slightly better than once, but total weekly sets matter most.</li>
 <li>Compound lifts first, isolation after.</li><li>Beginner: 2–3 sets of 10–15 reps; advanced: 3–4 sets, compounds at 6–10.</li>
 <li>The exercises chosen are among the best ranked in the Atlas lists.</li></ul>`,
-`<p>Entrenos armados según los estudios, en 4 tipos de división y 2 niveles.</p><ul>
+`<p>Entrenos armados según los estudios y unos 90 entrenos de atletas, entrenadores y libros famosos (StrongLifts, Arnold, Dorian Yates, Jeff Nippard, Dana Linn Bailey y otros), en 5 tipos de división y 2 niveles.</p><ul>
+<li><b>Tipo</b> y <b>Fuente</b>: elige la división y si quieres los entrenos de la app, los de los famosos o todos. El nombre en la esquina de cada programa dice de quién es; "Agregar el programa entero" pone todos sus días en Mis entrenos.</li>
 <li><b>Nivel:</b> Principiante (menos volumen, más máquinas) o Avanzado (más volumen y pesos libres).</li>
 <li><b>Filtrar por músculo:</b> toca, por ejemplo, Espalda para ver solo los entrenos que trabajan la espalda: el de solo espalda, los días de superior, el tirón y los de cuerpo completo.</li>
 <li><b>Entrenar ahora</b> abre el entreno en Hoy › En vivo. <b>Guardar</b> lo pone en Mis entrenos, donde puedes cambiarlo todo.</li>

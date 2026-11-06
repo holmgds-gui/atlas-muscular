@@ -219,6 +219,42 @@ Séries por músculo em cada treino seguem as faixas do Progresso (dia: até ~11
   - Viana et al. 2019, *Br J Sports Med* ([doi:10.1136/bjsports-2018-099928](https://doi.org/10.1136/bjsports-2018-099928)): treino intervalado deu perda de gordura total um pouco maior (~28%) que o contínuo.
   - Músculos de cada cardio: biomecânica geral do movimento (remo: ~60% da força vem das pernas, segundo guias de técnica de remo indoor).
 
+## 4e. Treinos dos famosos (Treinos › Treinos prontos › Fonte: Dos famosos)
+
+Pedido do dono: muitos treinos de livros, sites, YouTube, Mr. Olympia e atletas mulheres, com o nome no canto. São 30 programas (90 treinos: 25 iniciante, 65 avançado). Tudo foi adaptado aos exercícios do app (ex.: power clean e kroc row viraram terra e serrote); onde a fonte só listou os exercícios, as séries e repetições são sugestão do app e o cartão avisa (`est`).
+
+| Nome no canto | Programa | Onde foi conferido |
+|---|---|---|
+| Mehdi · StrongLifts | StrongLifts 5×5 | [stronglifts.com/5x5](https://stronglifts.com/5x5/) |
+| Mark Rippetoe | Starting Strength (livro, 3ª ed.) | [startingstrength.com](https://startingstrength.com/) |
+| John Sheaffer | Greyskull LP | livro *The Greyskull LP* (2012); resumo em [thefitness.wiki](https://thefitness.wiki/) |
+| Cody Lefever | GZCLP | resumos em liftvault.com e thefitness.wiki |
+| r/Fitness · Metallicadpa | PPL do Reddit | post original no r/Fitness; resumo em liftvault.com |
+| Arnold Schwarzenegger | Golden Six; Programa básico nº 1 | *Enciclopédia do Fisiculturismo Moderno* (1985/1998); resumos em barbend.com e fitnessvolt.com |
+| Reg Park | 5×5 | *Strength and Bulk Training for Weight Lifters and Body Builders* (1960); resumo em fitnessvolt.com |
+| Steve Reeves | Corpo inteiro | livro *Building the Classic Physique* (1995) |
+| Frank Zane | Rotina para começar | [frankzane.com](https://frankzane.com/) |
+| Bret Contreras | Strong Curves – Bootyful Beginnings | livro *Strong Curves* (2013) |
+| Jeff Nippard | Minimalista; corpo inteiro com foco; superior/inferior | vídeos no YouTube (transcrições em rosetta.to) |
+| Brandon Campbell | PHUL | resumos em liftvault.com e jefit.com |
+| Layne Norton | PHAT | resumo em strengthlog.com |
+| Jim Wendler | 5/3/1 Boring But Big | [jimwendler.com](https://www.jimwendler.com/) |
+| Glenn Pendlay | Texas Method | resumos em startingstrength.com e liftvault.com |
+| Bill Starr · Madcow | 5×5 intermediário | resumo em liftvault.com |
+| Lyle McDonald | Rotina genérica de ganho | bodyrecomposition.com (resumo em jcdfitness.com) |
+| Dorian Yates | Blood & Guts (4 dias) | boostcamp.app |
+| Mike Mentzer | Heavy Duty; rotina consolidada | ironmanmagazine.com |
+| Ronnie Coleman | Divisão de 6 dias | fitnessvolt.com / hevyapp.com |
+| Jay Cutler | Um grupo por dia | fitnessvolt.com / hevyapp.com |
+| Chris Bumstead | Push/pull/legs | vídeos no YouTube (resumo em liftosaur.com) |
+| Dana Linn Bailey | Push, costas, posterior/glúteos, quadríceps | vídeos e resumos em fitnessvolt.com / barbend.com |
+| Cydney Gillon | Pernas e glúteos (séries sugeridas) | entrevistas e vídeos resumidos em barbend.com |
+| Francielle Mattos | Inferiores de preparação (séries sugeridas) | vídeo de preparação para o Olympia 2022, resumido em barbend.com |
+| Tom Platz | Pernas | entrevistas resumidas em fitnessvolt.com |
+| Phil Heath | Braços | fitnessvolt.com |
+
+Não entraram (não achei lista de exercícios confiável): Iris Kyle, Lee Haney, Andrea Shaw, e os brasileiros Renato Cariani e Leandro Twin.
+
 ## 5. Desenho do boneco
 
 - Imagem de referência para a silhueta (só formato e detalhes, sem cores ou textos): [Toda Matéria](https://static.todamateria.com.br/upload/55/77/55771934478af-musculos-do-corpo-humano.jpg)
