@@ -8,6 +8,7 @@ python3 -m http.server 8765 &          # serve o app
 npm i -g playwright && npx playwright install chromium   # só se ainda não tiver
 node tests/clique.js                    # toque nos músculos e juntas
 node tests/variacoes.js                 # sinergistas e variações (1.325 combinações)
+node tests/grupos.js                     # Atlas › Grupos: 6 cores, lista que abre, destaque sem abrir exercícios, idiomas
 node tests/treinos-famosos.js           # Treinos dos famosos: exercícios/variações válidos, filtros, programa todo, idiomas
 node tests/janelas.js                   # Montar treino, Trocar, Treinos prontos, Cartão para Stories
 node tests/aovivo.js
