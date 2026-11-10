@@ -15,6 +15,16 @@ import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 
+/* the parsed bodies are kept here and shared by every viewer (Atlas, Progresso, Força, Stories): one download, one
+   parse, the geometry is shared between copies (owner 0.18: 3D in the whole app) */
+const SCN={};
+function getScene(file,onProg){
+  if(!SCN[file])SCN[file]=(async()=>{const r=await fetch(new URL(file,import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||4000000;let buf;
+    if(r.body&&r.body.getReader){const rd=r.body.getReader(),ch=[];let got=0;
+      for(;;){const {done,value}=await rd.read();if(done)break;ch.push(value);got+=value.length;onProg&&onProg(Math.min(1,got/tot))}
+      buf=await new Blob(ch).arrayBuffer()}else buf=await r.arrayBuffer();
+    return new Promise((ok,no)=>new GLTFLoader().parse(buf,"",g=>ok(g.scene),no))})().catch(e=>{delete SCN[file];throw e});
+  return SCN[file]}
 export function mount(box, api){
   const canvas=document.createElement("canvas");canvas.className="v3c";box.prepend(canvas);
   const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
@@ -175,17 +185,12 @@ export function mount(box, api){
 
   const FILES={m:["./corpo-6.glb","./juntas-2.json"],f:["./corpo-f-3.glb","./juntas-f-2.json"]};let loadN=0;
   async function load(sx){sx=sx==="f"?"f":"m";if(sx===curSex)return;curSex=sx;const my=++loadN,live=()=>alive&&my===loadN;
-    let buf;
     fetch(new URL(FILES[sx][1],import.meta.url)).then(r=>r.json()).then(j=>{if(live()){clearJoints();addJoints(j)}}).catch(()=>{});
-    try{const r=await fetch(new URL(FILES[sx][0],import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||3800000;
-      if(r.body&&r.body.getReader){const rd=r.body.getReader(),ch=[];let got=0;
-        for(;;){const {done,value}=await rd.read();if(done)break;ch.push(value);got+=value.length;api.progress(Math.min(1,got/tot))}
-        buf=await new Blob(ch).arrayBuffer()}else buf=await r.arrayBuffer()}
-    catch(e){if(live())api.fail();return}
+    let base;try{base=await getScene(FILES[sx][0],api.progress)}catch(e){if(live())api.fail();return}
     if(!live())return;
-    new GLTFLoader().parse(buf,"",g=>{if(!live())return;
+    {const g={scene:base.clone(true)};
       /* swapping ♂/♀: the old body goes away only when the new one is ready */
-      if(root){scene.remove(root);root.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose();o.userData.idm&&o.userData.idm.dispose()}})}
+      if(root){scene.remove(root);root.traverse(o=>{if(o.isMesh){o.material.dispose();o.userData.idm&&o.userData.idm.dispose()}})}   /* geometry is shared: kept */
       for(const k in parts)delete parts[k];pickables.length=0;meshes.length=0;ghosts.length=0;root=g.scene;
       const ms=[];g.scene.traverse(o=>{if(o.isMesh)ms.push(o)});
       ms.forEach(o=>{const k=(o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"deco").replace(/_\d+$/,"");
@@ -200,7 +205,8 @@ export function mount(box, api){
       {const P=[];g.scene.updateMatrixWorld(true);const v=new THREE.Vector3();
         for(const o of ms){const a=o.geometry.attributes.position,st=Math.max(1,Math.floor(a.count/260));for(let i=0;i<a.count;i+=st){v.fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);P.push(v.x,v.y,v.z)}}
         CLOUD=new Float32Array(P)}
-      const first=!ready;ready=true;if(first){resize();view(curV,false)}else{controls.maxDistance=fitD()*1.3;need=true}paint();api.ready()},()=>{if(live())api.fail()})}
+      const first=!ready;ready=true;if(first){resize();view(curV,false)}else{controls.maxDistance=fitD()*1.3;need=true}paint();readyRes&&readyRes();api.ready()}}
+  let readyRes=null;const readyP=new Promise(r=>readyRes=r);
   load(api.sex?api.sex():"m");
 
   renderer.setAnimationLoop(()=>{if(!box.offsetParent)return;   /* hidden (2D or another tab): no drawing */
@@ -219,6 +225,14 @@ export function mount(box, api){
     sync(s){state=s||{};paint()},
     view(v){view(v==="back"?"back":"front")},
     sex(s){return load(s)},
+    whenReady(){return readyP},
+    /* a picture of the body (front and back side by side) with these colours, for the Stories cards */
+    shot(st,w=560,h=980){const sv={st:state,cp:camera.position.clone(),ct:controls.target.clone(),pr:renderer.getPixelRatio(),asp:camera.aspect};
+      state=st||{};paint();renderer.setPixelRatio(1);renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
+      const out=document.createElement("canvas");out.width=w*2;out.height=h;const g2=out.getContext("2d");
+      for(const [i,a] of [[0,0],[1,Math.PI]]){const d=fitD()*1.02;controls.target.set(0,CY,0);camera.position.set(Math.sin(a)*d,CY+0.03,Math.cos(a)*d);camera.lookAt(controls.target);camera.updateMatrixWorld();
+        draw();g2.drawImage(canvas,i*w,0,w,h)}
+      state=sv.st;renderer.setPixelRatio(sv.pr);camera.position.copy(sv.cp);controls.target.copy(sv.ct);lastSz=null;resize();paint();return out},
     sexNow(){return curSex},
     refit(){resize();view(curV,true)},
     keys(){return Object.keys(parts)},

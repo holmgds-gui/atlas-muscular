@@ -290,6 +290,12 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .v3load .v3bar{width:180px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}.v3load .v3bar i{display:block;height:100%;width:0;background:var(--target);transition:width .2s}
 .v3cred{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:8px;font-size:10px;color:var(--muted);opacity:.8;text-decoration:none}
 .v3hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:12px;color:var(--muted);pointer-events:none;white-space:nowrap}
+/* 3D in Progresso/Força (0.18) */
+.p3{position:relative;height:min(64vh,540px);margin:2px 0 6px}
+.p3bar{position:absolute;right:8px;bottom:8px;z-index:3;display:flex;gap:6px}
+.p3btn,.p3sw{height:34px;min-width:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:13px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;cursor:pointer}
+.p3tip{position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:3;max-width:86%;overflow:hidden;text-overflow:ellipsis;background:var(--ink);color:var(--bg);font-size:13px;font-weight:600;padding:5px 10px;border-radius:8px;white-space:nowrap;pointer-events:none}
+.p3w{position:relative}.p3w>.p3sw{position:absolute;right:6px;top:6px;z-index:3}
 .v3tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;font-weight:600;padding:4px 8px;border-radius:6px;transform:translate(-50%,-140%);white-space:nowrap}
 #tab-atlas.is3d #hint,#tab-atlas.is3d .zoom{display:none}#tab-atlas.is3d #fig{visibility:hidden}
 @media (max-width:900px){#tab-atlas.covered .v3cred,#tab-atlas.covered .v3hint{display:none}
@@ -2486,7 +2492,7 @@ function sexTgl(){const b=document.getElementById("sexTgl");if(!b)return;b.inner
 function setSex(x){
   sex=x;try{localStorage.setItem("atlas-sex",x)}catch(e){}
   document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===x));sexTgl();
-  buildFigure();setView(view,true);paint();if(typeof v3ui==="function"){v3ui();if(v3on)v3sex()}
+  buildFigure();setView(view,true);paint();if(typeof v3ui==="function"){v3ui();if(v3on)v3sex()}if(window.P3)P3.sex(x)
 }
 document.getElementById("sexTgl").addEventListener("click",()=>setSex(sex==="m"?"f":"m"));sexTgl();
 document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===sex));
@@ -2582,6 +2588,43 @@ async function set3D(on,quiet){v3on=on;v3ui();if(!on)return;if(!quiet)buzz();
 $("b3d").addEventListener("click",()=>set3D(!v3on));
 function applyFig(start){if(CONF.fig==="2d"){if(v3on)set3D(false);else v3ui()}else if(!v3on&&(start||CONF.fig==="3d"||!V3))set3D(true,true);else v3ui()}
 setTimeout(()=>applyFig(true),0);
+/* ---- 3D also in Progresso › Músculos, Força and the Stories cards (owner 0.18: "modelo 3D em todo app"; escolhas:
+   girável como no Atlas com botão Frente/Costas, a opção Boneco do Atlas vale para tudo, Stories com foto do 3D).
+   One viewer (P3) moves to whichever figure is on screen (only one is visible at a time); the body is parsed once and
+   shared with the Atlas viewer. Tap on a muscle = its name and number on top. */
+var P3=null,P3busy=false,P3bad=false,p3On=true,p3V="front",P3st={},P3info=null;
+const P3EL=document.createElement("div");P3EL.className="p3";
+P3EL.innerHTML=`<div class="v3 p3box" data-notr data-noswipe><div class="v3load" hidden></div><a class="v3cred" href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" target="_blank" rel="noopener">BodyParts3D · CC BY-SA</a></div><div class="p3tip" hidden></div><div class="p3bar"><button type="button" class="p3btn" data-p3="view"></button><button type="button" class="p3btn" data-p3="2d" hidden>2D</button></div>`;
+const p3use=()=>CONF.fig!=="2d"&&!P3bad&&(CONF.fig==="3d"||p3On);
+const p3color=c=>c&&c.startsWith("var(")?getComputedStyle(document.documentElement).getPropertyValue(c.slice(4,-1)).trim():c;
+function p3ui(){const v=P3EL.querySelector('[data-p3="view"]');v.textContent=p3V==="back"?tx("Costas","Back","Espalda"):tx("Frente","Front","Frente");
+  v.title=v.ariaLabel=tx("Virar o boneco","Turn the figure","Girar el muñeco");P3EL.querySelector('[data-p3="2d"]').hidden=CONF.fig!=="both"}
+function p3tip(k){const t=P3EL.querySelector(".p3tip"),x=k&&P3info?P3info(k):"";t.hidden=!x;t.textContent=x||""}
+P3EL.addEventListener("click",e=>{const b=e.target.closest("[data-p3]");if(!b)return;e.stopPropagation();
+  if(b.dataset.p3==="view"){p3V=p3V==="back"?"front":"back";if(P3)P3.view(p3V);p3ui();buzz()}
+  else{p3On=false;p3rerender()}});
+function p3rerender(){if(tab==="prog"){const y=$("tab-prog").scrollTop;renderProg();$("tab-prog").scrollTop=y}}
+function p3mount(){if(P3||P3busy)return;P3busy=true;const L=P3EL.querySelector(".v3load");L.hidden=false;
+  L.innerHTML=`<span>${tx("Carregando o corpo 3D…","Loading the 3D body…","Cargando el cuerpo 3D…")}</span>`;
+  import("./3d/v3.js").then(mod=>{P3=mod.mount(P3EL.querySelector(".p3box"),{covered:()=>false,sex:()=>sex,name:k=>P3info?P3info(k):"",jname:()=>"",joint:()=>{},
+    tap:k=>p3tip(k),progress:()=>{},ready:()=>{L.hidden=true;P3busy=false;P3.sync(P3st);P3.view(p3V)},fail:()=>{P3bad=true;P3busy=false;if(P3){P3.dispose();P3=null}p3rerender()}})})
+    .catch(()=>{P3bad=true;P3busy=false;p3rerender()})}
+/* puts the 3D (or the 2D figure, by the setting) in host. st = {muscle key: {c: colour, dim}}, info(k) = text for a tap */
+function fig3(host,st,info,flat){host.innerHTML="";
+  if(!p3use()){const w=document.createElement("div");w.className="p3w";w.appendChild(flat());
+    if(CONF.fig==="both"&&!P3bad){const b=document.createElement("button");b.type="button";b.className="p3sw";b.textContent="3D";b.onclick=e=>{e.stopPropagation();p3On=true;p3rerender()};w.appendChild(b)}
+    host.appendChild(w);return}
+  P3st=st;P3info=info;host.appendChild(P3EL);p3ui();p3tip(null);if(P3)P3.sync(st);else p3mount()}
+const p3Prog=(mus,B)=>{const s={};for(const k in M){const v=mus[k];if(v)s[k]={c:heat(v,B)}}return s};
+const p3ProgInfo=mus=>k=>M[k]?`${M[k].n}: ${mus[k]?tx(`${nf(mus[k])} séries`,`${nf(mus[k])} sets`,`${nf(mus[k])} series`):tx("não treinado","not trained","no entrenado")}`:"";
+const p3Rank=gs=>{const by={};gs.forEach(x=>by[x.g]=x);const s={};for(const k in M){const x=by[TOB[k]];if(x)s[k]={c:p3color(`var(--lv${rLv(x.s)})`)}}return s};
+const p3RankInfo=gs=>{const by={};gs.forEach(x=>by[x.g]=x);return k=>{const g=TOB[k],x=by[g];return BASIC[g]?`${BASIC[g].n}: ${x?RLV[rLv(x.s)][0]:tx("sem dados","no data","sin datos")}`:""}};
+/* Stories: a picture of the 3D body with these colours (front and back), or null → the card uses the 2D drawing */
+async function p3shot(st){if(CONF.fig==="2d"||P3bad)return null;
+  try{if(!P3){if(!P3EL.isConnected){const h=document.createElement("div");h.style.cssText="position:fixed;left:-10000px;top:0;width:360px;height:560px";document.body.appendChild(h);h.appendChild(P3EL)}p3mount()}
+    const t=new Promise((_,no)=>setTimeout(()=>no(0),20000));
+    await Promise.race([(async()=>{while(!P3){if(P3bad)throw 0;await new Promise(r=>setTimeout(r,100))}await P3.whenReady();if(P3.sexNow()!==sex)await P3.sex(sex)})(),t]);
+    const c=P3.shot(st);P3.sync(P3st);return c}catch(e){return null}}
 $("v3").addEventListener("pointerdown",()=>{$("v3hint").hidden=true});   /* the hint goes away once the body is touched */
 
 function chips(){
@@ -4270,16 +4313,16 @@ async function makeCard(kind){
   /* header: logo + name */
   try{const lg=document.querySelector(".brand .logo").cloneNode(true);const {img}=await figImg(lg);g.drawImage(img,70,70,120,120)}catch(e){}
   text("MUSCLE",210,160,F(700,72),"#E7EAEE");g.font=F(700,72);text("ATLAS",210+g.measureText("MUSCLE ").width,160,F(700,72),"#FF4A5C");
-  let title="",sub="",fig=null,stats=[],lines=[],accent="#FF4A5C";
+  let title="",sub="",fig=null,st3=null,stats=[],lines=[],accent="#FF4A5C";
   if(kind==="week"){const r=pRange(),T=tally(r,true),B=BANDS[pMode];title=pMode==="week"?tx("Minha semana","My week","Mi semana"):tx("Meu treino do dia","My workout of the day","Mi entreno del día");sub=r.label;
-    fig=progFig(T.mus,B).querySelector("svg");const gs=Object.keys(BASIC).filter(x=>(T.grp[x]||0)>0).length;
+    fig=progFig(T.mus,B).querySelector("svg");st3=p3Prog(T.mus,B);const gs=Object.keys(BASIC).filter(x=>(T.grp[x]||0)>0).length;
     stats=[[T.days,tx("treinos","workouts","entrenos")],[T.sets,tx("séries","sets","series")],[gs,tx("grupos","groups","grupos")]]}
   else if(kind==="rank"){const D=rankData();const lv=D.all!=null?rLv(D.all):0;title=tx("Ranking de força","Strength ranking","Clasificación de fuerza");
     sub=D.all!=null?tx(`Mais forte que ~${rPct(D.all)}% de quem treina`,`Stronger than ~${rPct(D.all)}% of lifters`,`Más fuerte que ~${rPct(D.all)}% de quienes entrenan`):"";
-    fig=rankFig(D.gs).querySelector("svg");accent=lv===RLV.length-1?"#C9CFD6":RHERO[lv];
+    fig=rankFig(D.gs).querySelector("svg");st3=p3Rank(D.gs);accent=lv===RLV.length-1?"#C9CFD6":RHERO[lv];
     lines=[[RLV[lv][0].toUpperCase(),accent,F(700,150)],...D.gs.slice().sort((a,b)=>b.s-a.s).slice(0,3).map(x=>[`${BASIC[x.g].n}: ${RLV[rLv(x.s)][0]}`,"#C9CFD6",F(600,52)])]}
   else if(kind==="workout"){const w=workouts.find(x=>x.id===liveSumW)||workouts.filter(x=>x.done!==false&&x.items&&x.items.length).sort((a,b)=>a.date<b.date?1:-1)[0];if(!w)return null;const m=musOf(w),prs=workoutPRs(w);
-    title=w.title||tx("Treino","Workout","Entreno");sub=fmtLong(fromIso(w.date));fig=progFig(m.mus,BANDS.day).querySelector("svg");
+    title=w.title||tx("Treino","Workout","Entreno");sub=fmtLong(fromIso(w.date));fig=progFig(m.mus,BANDS.day).querySelector("svg");st3=p3Prog(m.mus,BANDS.day);
     stats=[[w.dur?mmss(w.dur):"—",tx("duração","duration","duración")],[m.sets,tx("séries","sets","series")],[prs.length,tx("recordes","records","récords")]];
     lines=prs.slice(0,3).map(p=>[`• ${p.name}: ${fkg(p.kg)} kg × ${p.r}`,"#E7EAEE",FB(600,40)])}
   else if(kind==="ach"){const S=achStats();title=tx("Minhas conquistas","My achievements","Mis logros");sub=tx(`${S.streak} semanas seguidas 🔥`,`${S.streak} weeks in a row 🔥`,`${S.streak} semanas seguidas 🔥`);
@@ -4287,7 +4330,7 @@ async function makeCard(kind){
     lines=got.slice(-6).reverse().map(a=>[`${a.i} ${achName(a)}`,"#E7EAEE",FB(600,46)])}
   text(title.toUpperCase(),W/2,330,F(700,96),"#FFFFFF","center");if(sub)text(sub,W/2,400,FB(500,44),"#AEB6C0","center");
   let y=460;
-  if(fig){const {img,ar}=await figImg(fig);const fw=kind==="rank"?860:980,fh=fw*ar;g.drawImage(img,(W-fw)/2,y,fw,fh);y+=fh+40}
+  if(fig){const c3=st3?await p3shot(st3):null;const {img,ar}=c3?{img:c3,ar:c3.height/c3.width}:await figImg(fig);const fw=kind==="rank"?860:980,fh=fw*ar;g.drawImage(img,(W-fw)/2,y,fw,fh);y+=fh+40}
   else y+=80;
   if(lines.length&&kind==="rank"){const [t,col,font]=lines[0];text(t,W/2,y+120,font,col,"center");y+=170;lines=lines.slice(1)}
   if(stats.length){const cw=W/stats.length;stats.forEach(([v,l],i)=>{text(String(v),cw*i+cw/2,y+90,F(700,110),"#FFFFFF","center");text(l.toUpperCase(),cw*i+cw/2,y+145,F(600,40),"#8C95A1","center")});y+=210}
@@ -4552,6 +4595,8 @@ function radarCard(T,B){
     <p class="muted" style="font-size:12px;margin:0">Cada ponta mostra a média de séries por músculo do grupo (ex.: Pernas = média de quadríceps, posterior, glúteos, adutores e panturrilha).</p></div>`;
 }
 function applyRadSel(){
+  if(P3EL.isConnected&&$("pfigBox")&&$("pfigBox").contains(P3EL)){const r=RAD.find(x=>x.k===radSel),st={};   /* 3D: the other groups are dimmed */
+    for(const k in M){const b=P3st[k]||{},dim=!!r&&!r.g.includes(TOB[k]);if(b.c||dim)st[k]={c:b.c||p3color("var(--m)"),dim}}if(P3)P3.sync(st);else P3st=st;return}
   const f=document.querySelector(".pfig");if(!f)return;const r=RAD.find(x=>x.k===radSel);
   f.classList.toggle("focus",!!r);f.querySelectorAll("[data-m]").forEach(g=>g.classList.toggle("hl",!!r&&r.g.includes(TOB[g.dataset.m])));
 }
@@ -4585,7 +4630,7 @@ function renderProg(){
     :`<div class="card"><p class="muted">Nenhum treino feito ${pMode==="week"?"nesta semana":"neste dia"}. Na aba Hoje, abra o treino e toque em Marcar como feito.</p><button class="btn primary" data-goto="treino">Ir para Hoje</button></div>`}
   ${T.unk.size?`<p class="muted">Não entram no boneco porque o app não conhece o exercício: ${[...T.unk].map(([n,c])=>`${esc(n)} (${c})`).join(", ")}.</p>`:""}
   ${bandsInfo()}`;
-  $("pfigBox").appendChild(progFig(T.mus,B));applyRadSel();
+  fig3($("pfigBox"),p3Prog(T.mus,B),p3ProgInfo(T.mus),()=>progFig(T.mus,B));applyRadSel();
 }
 /* cardio of the week/day (owner: minutes in Progresso). WHO 2020: 150–300 min moderate a week; vigorous minutes
    count double; light is shown but does not count toward the goal. */
@@ -4896,7 +4941,7 @@ function rankAbout(){return `<details class="about"><summary>Como o ranking func
   <ul><li>Strength Level: padrões de força por exercício, sexo e peso corporal (strengthlevel.com)</li><li>StrengthLog: padrões de força em kg para agachamento, terra, supino e desenvolvimento (strengthlog.com)</li><li>van den Hoek e colegas (2024, Journal of Science and Medicine in Sport): percentis de força em 810 mil participações de powerlifting com antidoping</li><li>Fatores de idade do Strength Level e de estudos de powerlifting master</li><li>Epley (1985): fórmula da força estimada</li></ul></details>`}
 /* the ranking lives at the top of Progresso › Força; renderRank re-renders that view keeping the scroll */
 function renderRank(){const sc=$("tab-prog"),y=sc.scrollTop;renderKg();sc.scrollTop=y}
-function rankAfter(D){const b=$("rkFigBox");if(b)b.appendChild(rankFig(D.gs))}
+function rankAfter(D){const b=$("rkFigBox");if(b)fig3(b,p3Rank(D.gs),p3RankInfo(D.gs),()=>rankFig(D.gs))}
 function rankHTML(D){
   const has=D.list.length>0,lv=has?rLv(D.all):-1;
   const hero=has?`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big" style="${lv===RLV.length-1?`background-image:${RHERO[lv]};color:transparent`:`color:${RHERO[lv]}`}">${RLV[lv][0]}</b>

@@ -78,10 +78,11 @@ for(const lang of (process.env.LANGS||"pt,en,es").split(","))for(const theme of 
   await p.evaluate(()=>{const w=liveW();w.start-=(23*60+41)*1000;saveW();renderTreino();document.getElementById("tab-treino").scrollTop=0});await p.waitForTimeout(300);await top(".hview");await shot("live");
   await p.click('[data-rp="stop"]').catch(()=>{});
   // 5. Progresso › Músculos
-  await p.evaluate(()=>{pView="mus";setTab("prog")});await p.waitForTimeout(500);await top("#tab-prog .pview");await shot("prog");
+  await p.evaluate(()=>{pView="mus";setTab("prog")});await p.waitForTimeout(500);
+  await p.waitForFunction(()=>!window.P3||!P3busy,null,{timeout:120000});await p.waitForTimeout(1200);await top("#tab-prog .pview");await shot("prog");
   await top("#tab-prog .cbox");await shot("cprog");
   // 6. Progresso › Força (ranking)
-  await p.evaluate(()=>{pView="kg";setTab("prog")});await p.waitForTimeout(600);await top("#tab-prog .rk-hero");await shot("rank");
+  await p.evaluate(()=>{pView="kg";setTab("prog")});await p.waitForTimeout(1500);await top("#tab-prog .rk-hero");await shot("rank");
   // 7. Conquistas
   await p.evaluate(()=>setTab("ach"));await p.waitForTimeout(400);await top("#tab-ach .ach-top");await shot("ach");
   await ctx.close();console.log(lang,theme,"ok");
