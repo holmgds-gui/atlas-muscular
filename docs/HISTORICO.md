@@ -158,6 +158,8 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 - **Arrastar em vez de botão** (nov/2026, pedido do dono): no celular o painel do Atlas se arrasta (para cima abre a lista, para baixo mostra o boneco grande), no lugar de "Ver lista" e "Ampliar/Diminuir boneco"; vale em todos os modos. As janelas de baixo fecham arrastando para baixo.
 - **Arrastar de página em página** (nov/2026, v79, pedido do dono): no celular, arrastar para o lado passa para a página vizinha: Atlas → Meus treinos → Treinos prontos → Registro → Ao vivo → Músculos → Força. Os botões continuam iguais. Não vale no boneco, nos gráficos nem nos campos.
 - **Boneco na tela toda** (nov/2026, v80, pedido do dono): no Atlas, arrastar a folha para baixo mais uma vez (ou de uma vez até o fim) faz ela sumir e o boneco ocupar a tela toda; fica só a alça embaixo para puxar de volta.
+- **Versão 0.8** (nov/2026, pedido do dono): a versão do app passou a se chamar 0.8 em vez de 80 (Configurações › Versão; cache `atlas-v0.8`).
+- **Barras de abas que deslizam** (nov/2026, versão 0.8, pedido do dono): nas barras de cima (Registro/Ao vivo, Meus treinos/Treinos prontos, Músculos/Força, Semana/Dia e as outras) a pílula da opção escolhida desliza ao tocar e dá para arrastar com o dedo.
 - Corrigido junto: séries só com a carga planejada não contam mais como feitas no Ao vivo, e a "Última vez" ignora séries sem repetições.
 
 ## 17. Perguntas que o dono fez (respostas resumidas)

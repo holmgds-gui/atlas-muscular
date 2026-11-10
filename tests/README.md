@@ -11,6 +11,7 @@ node tests/variacoes.js                 # sinergistas e variações (1.325 combi
 node tests/arrastar.js                   # painel do Atlas e janelas que se arrastam (simula o dedo)
 node tests/modos.js                      # Atlas › seletor de modos: arrastar, setas, ordem, acompanha o modo
 node tests/paginas.js                    # arrastar para o lado passa de página em página (e não no boneco/campos)
+node tests/abas.js                       # barras de abas: a pílula desliza ao tocar e segue o dedo ao arrastar
 node tests/grupos.js                     # Atlas › Grupos: 6 cores, lista que abre, destaque sem abrir exercícios, idiomas
 node tests/treinos-famosos.js           # Treinos dos famosos: exercícios/variações válidos, filtros, programa todo, idiomas
 node tests/janelas.js                   # Montar treino, Trocar, Treinos prontos, Cartão para Stories

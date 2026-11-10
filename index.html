@@ -260,6 +260,11 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .tgl-sex{min-width:0;display:inline-grid;place-items:center;padding:8px 14px}.tgl-sex svg{width:19px;height:19px;display:block;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
 .tgl:active{transform:scale(.96)}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+/* owner: the tab bars slide — a thumb under the chosen option that moves on tap and follows the finger when dragged */
+.seg{position:relative;touch-action:pan-y}.seg button{position:relative;z-index:1;transition:color .2s}
+.seg .seg-th{position:absolute;top:3px;left:0;height:calc(100% - 6px);border-radius:8px;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.15);z-index:0;pointer-events:none;transition:transform .28s cubic-bezier(.3,.8,.3,1),width .28s cubic-bezier(.3,.8,.3,1)}
+.seg.has-th button[aria-pressed="true"]{background:none;box-shadow:none}
+.seg.sdrag .seg-th{transition:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}.seg.sdrag button{color:var(--muted)}.seg.sdrag button.snear{color:var(--ink)}
 .zoom{display:inline-flex;gap:4px}
 .zoom button{border:1px solid var(--line);background:var(--surface);border-radius:10px;min-width:36px;height:36px;font-weight:600;font-size:16px;display:inline-grid;place-items:center;padding:0 8px}
 .legend{margin-left:auto;display:flex;gap:14px;font-size:12px;color:var(--muted)}
@@ -4900,7 +4905,7 @@ function renderConf(){
     ${cfRow("Fontes dos estudos","Todos os artigos e links usados no app.",`<a class="btn" href="https://github.com/holmgds-gui/atlas-muscular/blob/main/docs/FONTES.md" target="_blank" rel="noopener">Ver</a>`)}
     ${cfRow("Versão",`<span id="cfVer">—</span>`,"")}
   </div>`;
-  if("caches" in window)caches.keys().then(k=>{const v=k.filter(x=>/^atlas-v\d+/.test(x)).sort().pop();const el=$("cfVer");if(el&&v)el.textContent=v.replace("atlas-","")}).catch(()=>{});
+  if("caches" in window)caches.keys().then(k=>{const v=k.filter(x=>/^atlas-v[\d.]+$/.test(x)).sort().pop();const el=$("cfVer");if(el&&v)el.textContent=v.replace("atlas-v","")}).catch(()=>{});
 }
 function cfSet(k,v){CONF[k]=v;saveConf();applyConf()}
 $("confBody").addEventListener("click",e=>{
@@ -4967,6 +4972,44 @@ document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()
    One line of pages: Atlas → Meus treinos → Treinos prontos → Registro → Ao vivo → Músculos → Força.
    The buttons stay; the swipe only moves to the page next to the current one. Ignored on the figure, charts,
    fields, things that scroll sideways and the Atlas mode strip. */
+/* Sliding tab bars (owner: "deixe arrastável"): every .seg gets a thumb under the chosen option. Tapping slides it
+   (even when the page redraws, from where it was: segLast); dragging moves it with the finger and lifting picks
+   the option under it. */
+const segLast={};
+const segKey=g=>{const b=g.querySelector("button");if(!b)return null;const a=[...b.attributes].find(x=>x.name.startsWith("data-")&&x.name!=="data-notr");return a?a.name:g.className};
+function segPlace(g){const th=g.querySelector(":scope > .seg-th");if(!th)return;
+  const b=[...g.querySelectorAll(':scope > button[aria-pressed="true"]')].find(x=>x.offsetWidth);
+  g.classList.toggle("has-th",!!b);th.hidden=!b;if(!b||!g.offsetWidth)return;
+  const x=b.offsetLeft,w=b.offsetWidth,k=segKey(g),L=segLast[k],set=(x,w)=>{th.style.transform=`translateX(${x}px)`;th.style.width=w+"px"};
+  /* first time on screen: start where this bar was last (so a redrawn page still slides), or just appear */
+  if(!th._set){th._set=1;th.style.transition="none";set(L&&k?L.x:x,L&&k?L.w:w);void th.offsetWidth;th.style.transition=""}
+  set(x,w);if(k)segLast[k]={x,w}}
+function segInit(g){if(g._th||!g.querySelector(":scope > button"))return;g._th=1;
+  const th=document.createElement("i");th.className="seg-th";th.setAttribute("aria-hidden","true");g.prepend(th);
+  segPlace(g);if(window.ResizeObserver)new ResizeObserver(()=>segPlace(g)).observe(g)}
+new MutationObserver(ms=>{for(const m of ms){
+  if(m.type==="attributes"){const g=m.target.parentElement;if(g&&g._th)segPlace(g);continue}
+  m.addedNodes.forEach(n=>{if(n.nodeType!==1)return;if(n.matches(".seg"))segInit(n);n.querySelectorAll&&n.querySelectorAll(".seg").forEach(segInit)})}})
+  .observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:["aria-pressed"]});
+document.querySelectorAll(".seg").forEach(segInit);
+(()=>{let d=null,block=0;
+  document.addEventListener("touchstart",e=>{d=null;const g=e.target.closest&&e.target.closest(".seg");if(!g||!g._th||e.touches.length>1)return;
+    const th=g.querySelector(":scope > .seg-th");if(th.hidden)return;
+    d={g,th,x0:e.touches[0].clientX,y0:e.touches[0].clientY,s:new DOMMatrix(getComputedStyle(th).transform).m41,on:false}},{passive:true});
+  document.addEventListener("touchmove",e=>{if(!d)return;const dx=e.touches[0].clientX-d.x0,dy=e.touches[0].clientY-d.y0;
+    if(!d.on){if(Math.abs(dx)<8)return;if(Math.abs(dy)>Math.abs(dx)){d=null;return}d.on=true;d.g.classList.add("sdrag")}
+    const max=d.g.clientWidth-d.th.offsetWidth-3,x=Math.max(3,Math.min(max,d.s+dx)),c=x+d.th.offsetWidth/2;d.th.style.transform=`translateX(${x}px)`;
+    d.g.querySelectorAll(":scope > button").forEach(b=>b.classList.toggle("snear",c>=b.offsetLeft&&c<b.offsetLeft+b.offsetWidth))},{passive:true});
+  const end=()=>{if(!d)return;const {g,th,on}=d;d=null;if(!on)return;g.classList.remove("sdrag");g.querySelectorAll(".snear").forEach(b=>b.classList.remove("snear"));
+    const x=new DOMMatrix(getComputedStyle(th).transform).m41,c=x+th.offsetWidth/2;
+    const bs=[...g.querySelectorAll(":scope > button")].filter(b=>b.offsetWidth);
+    const b=bs.reduce((a,t)=>Math.abs(t.offsetLeft+t.offsetWidth/2-c)<Math.abs(a.offsetLeft+a.offsetWidth/2-c)?t:a);
+    const k=segKey(g);if(k)segLast[k]={x,w:th.offsetWidth};
+    if(b.getAttribute("aria-pressed")==="true")segPlace(g);else b.click();block=Date.now()};
+  document.addEventListener("touchend",end,{passive:true});document.addEventListener("touchcancel",end,{passive:true});
+  /* the finger lifting after a drag must not also tap the button under it */
+  document.addEventListener("click",e=>{if(Date.now()-block<450&&e.isTrusted&&e.target.closest&&e.target.closest(".seg")){e.stopPropagation();e.preventDefault()}},true);
+})();
 const PAGES=[["atlas"],["ficha","meus"],["ficha","prontos"],["treino","reg"],["treino","live"],["prog","mus"],["prog","kg"]];
 function pageIdx(){const s=tab==="ficha"?fView:tab==="treino"?hView:tab==="prog"?(pView==="kg"?"kg":"mus"):null;
   return PAGES.findIndex(p=>p[0]===tab&&(p.length===1||p[1]===s))}
@@ -4980,7 +5023,7 @@ function goPage(i,dir){const p=PAGES[i];if(!p)return;
   el.classList.remove("sw-l","sw-r");void el.offsetWidth;el.classList.add(dir>0?"sw-l":"sw-r");
   setTimeout(()=>el.classList.remove("sw-l","sw-r"),300)}
 (()=>{let s=null;
-  const skip=t=>{if(t.closest("input,select,textarea,.stage,.ms-track,.modesw,.zwrap,.kg-hit,.chips,.vopts,.lv-tips,[data-noswipe]"))return true;
+  const skip=t=>{if(t.closest("input,select,textarea,.seg,.stage,.ms-track,.modesw,.zwrap,.kg-hit,.chips,.vopts,.lv-tips,[data-noswipe]"))return true;
     for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.scrollWidth>n.clientWidth+2){const o=getComputedStyle(n).overflowX;if(o==="auto"||o==="scroll")return true}}
     return false};
   document.addEventListener("touchstart",e=>{s=null;
