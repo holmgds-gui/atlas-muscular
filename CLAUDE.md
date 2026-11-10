@@ -126,6 +126,8 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 
 ## Decisões já tomadas (não desfazer sem perguntar)
 
+- **"Volte a tela padrão"** (combinado com o dono em 10/11/2026): a limpeza visual (v77: seletor de modos que se arrasta, filtros dos Treinos prontos numa janela, Hoje recolhido, Montar pelo boneco em Meus treinos, sem parágrafos de topo) foi publicada em teste. Se o dono disser "volte a tela padrão" (ou parecido), volte a interface para como estava no commit `8468119` (v76, antes da limpeza; a limpeza está nos commits `4456bdb` e `9ab98a6`, ramo `limpeza-visual`), mantendo qualquer coisa nova feita depois que não seja dessa limpeza, suba o cache e publique.
+
 - **Variações**: um cartão por exercício com botões dentro (decisão do dono). A variação escolhida vai para o treino e conta no Progresso/Cargas. Para mudar exercícios: edite `tools/fam*.js` e `tools/map.js`, rode `node tools/build.js index.html` (com a versão anterior do index) e troque os blocos `const MC=…LEGACY=…` e `const M = {…}` no `index.html`.
 - **Sinergistas**: cada exercício tem uma lista canônica de músculos envolvidos, em ordem de importância. A lista de sinergistas mostrada para um músculo é essa lista menos ele mesmo, então é igual em qualquer tela. Estabilizadores só entram quando o exercício os treina de propósito (prancha, caminhada do fazendeiro, pegada pesada). Exercícios sem sinergista visível aparecem como "Isolado".
 - Sinergistas ficam laranja **só ao tocar num exercício**, nunca ao tocar só no músculo.
