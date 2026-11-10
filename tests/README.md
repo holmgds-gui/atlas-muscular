@@ -10,8 +10,9 @@ node tests/clique.js                    # toque nos músculos e juntas
 node tests/variacoes.js                 # sinergistas e variações (1.325 combinações)
 node tests/arrastar.js                   # painel do Atlas e janelas que se arrastam (simula o dedo)
 node tests/modos.js                      # Atlas › seletor de modos: arrastar, setas, ordem, acompanha o modo
-node tests/paginas.js                    # arrastar para o lado passa de página em página (e não no boneco/campos)
+node tests/paginas.js                    # arrastar para o lado passa de página em página, a página segue o dedo, vibra (e não no boneco/campos)
 node tests/abas.js                       # barras de abas: a pílula desliza ao tocar e segue o dedo ao arrastar
+node tests/reordenar.js                  # Meus treinos: segurar a alça ≡ e arrastar muda a ordem
 node tests/grupos.js                     # Atlas › Grupos: 6 cores, lista que abre, destaque sem abrir exercícios, idiomas
 node tests/treinos-famosos.js           # Treinos dos famosos: exercícios/variações válidos, filtros, programa todo, idiomas
 node tests/janelas.js                   # Montar treino, Trocar, Treinos prontos, Cartão para Stories

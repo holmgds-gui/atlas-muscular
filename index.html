@@ -239,8 +239,10 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;color:inherit}
 .sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
 .sw input:checked+i{background:var(--accent,var(--target))}.sw input:checked+i::after{transform:translateX(18px)}
 .sw input:disabled+i{opacity:.45}.sw input:focus-visible+i{outline:2px solid var(--focus);outline-offset:2px}
-.view.sw-l{animation:swL .26s ease-out}.view.sw-r{animation:swR .26s ease-out}
-@keyframes swL{from{transform:translateX(36px);opacity:.4}to{transform:none;opacity:1}}@keyframes swR{from{transform:translateX(-36px);opacity:.4}to{transform:none;opacity:1}}
+.cin{animation:cardIn .36s cubic-bezier(.2,.8,.3,1) both}@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (hover:none){.btn,.ex,.btabs button,.wk{transition:transform .12s ease}.btn:active,.ex:active,.btabs button:active,.wk:active{transform:scale(.96)}}
+.view.sw-l{animation:swL .28s cubic-bezier(.2,.8,.3,1)}.view.sw-r{animation:swR .28s cubic-bezier(.2,.8,.3,1)}
+@keyframes swL{from{transform:translateX(45%);opacity:.2}to{transform:none;opacity:1}}@keyframes swR{from{transform:translateX(-45%);opacity:.2}to{transform:none;opacity:1}}
 html.noanim *,html.noanim *::before,html.noanim *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 @media (max-width:400px){header{gap:8px}.gear{width:34px;margin-right:-4px}.sbtn{margin-right:0}.sfield input{padding-right:6px}}
 .results{position:absolute;left:0;right:0;top:calc(100% - 2px);background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);max-height:60vh;overflow:auto;z-index:20}
@@ -423,6 +425,8 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .muted-s{display:block;font-weight:400;font-size:12px;color:var(--muted);margin-top:2px}
 .fl{display:grid;gap:4px;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-weight:600}
 .fi-act{display:flex;gap:4px}
+.fi-drag{touch-action:none;cursor:grab}.fi-drag svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round}
+.fi{background:var(--surface)}.fi.fi-lift{position:relative;z-index:5;border-radius:12px;background:var(--chip);border-top-color:transparent;padding-inline:10px;margin-inline:-10px;padding-bottom:10px;margin-bottom:-10px;box-shadow:0 12px 28px rgba(0,0,0,.35),0 0 0 1px var(--line)}.fi.fi-lift .fi-drag{cursor:grabbing}
 .ib{border:1px solid var(--line);background:var(--bg);border-radius:8px;width:36px;height:36px;display:inline-grid;place-items:center;font-size:15px;padding:0}
 .ib.del{color:var(--target)}
 .btn{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:10px 14px;font-weight:600;font-size:14px}
@@ -2741,7 +2745,7 @@ $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.conta
     if(Math.abs(dy)<45||Math.abs(dx)>Math.abs(dy))return;
     /* inside the list, only a pull down from the very top moves the sheet; pushing up just scrolls the list */
     if(B.contains(e.target)&&dy<0&&$("tab-atlas").classList.contains("covered"))return;
-    sheetMove(dy<0?"up":"down",dy>innerHeight*.4)},{passive:true})})();
+    buzz();sheetMove(dy<0?"up":"down",dy>innerHeight*.4)},{passive:true})})();
 
 /* ---------------------------------------------------------- search */
 const q=$("q"),res=$("results");
@@ -3068,7 +3072,7 @@ let openPlan=null,askDelPlan=null;
    load field here and preferred it where it was). Cardio: minutes and intensity. */
 function fiHTML(p,it,j){
   const at=`data-pid="${p.id}" data-j="${j}"`,k=cKey(it);
-  const acts=`<div class="fi-act">${k?"":`<button class="ib" data-act="swap" ${at} aria-label="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}" title="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}">⇄</button>`}<button class="ib" data-act="up" ${at} aria-label="Subir">↑</button><button class="ib" data-act="down" ${at} aria-label="Descer">↓</button><button class="ib del" data-act="rm" ${at} aria-label="Remover ${esc(dName(it.name,it.ref))}">✕</button></div>`;
+  const acts=`<div class="fi-act">${k?"":`<button class="ib" data-act="swap" ${at} aria-label="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}" title="${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}">⇄</button>`}<button class="ib fi-drag" type="button" ${at} aria-label="${tx("Segure e arraste para mudar a ordem","Hold and drag to reorder","Mantén y arrastra para cambiar el orden")}" title="${tx("Segure e arraste para mudar a ordem","Hold and drag to reorder","Mantén y arrastra para cambiar el orden")}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14M5 12h14M5 16h14"/></svg></button><button class="ib del" data-act="rm" ${at} aria-label="Remover ${esc(dName(it.name,it.ref))}">✕</button></div>`;
   const head=`<div class="fi-n">${k?CARDIO[k].i+" ":""}${esc(dName(it.name,it.ref))}<span class="muted-s">${esc(muscleLabel(it.name,it.ref))}</span></div>`;
   if(k){const int=it.int||"m",min=cNum(it.min);
     return `<div class="fi"><div class="fi-top">${head}${acts}</div><div class="fi-row c">
@@ -3125,6 +3129,26 @@ $("fichaBody").addEventListener("click",e=>{
   else if(a==="delPlan"){plans=plans.filter(x=>x.id!==pl.id);openPlan=null;askDelPlan=null;toast("Treino excluído")}
   savePlans();renderFicha();
 });
+
+/* owner: hold the ≡ handle of an exercise in Meus treinos and drag it to change the order (instead of ↑ ↓).
+   The others open a gap where it will land; near the top or bottom of the screen the page scrolls. */
+(()=>{let D=null;const fb=$("fichaBody");
+  fb.addEventListener("pointerdown",e=>{const h=e.target.closest(".fi-drag");if(!h||(e.pointerType==="mouse"&&e.button))return;e.preventDefault();
+    const row=h.closest(".fi"),rows=[...row.parentElement.querySelectorAll(":scope > .fi")],i=rows.indexOf(row),R=rows.map(r=>r.getBoundingClientRect());
+    const gap=R.length>1?Math.max(0,R[1].top-R[0].bottom):0;
+    D={row,rows,i,to:i,y0:e.clientY,R,H:R[i].height+gap,pid:h.dataset.pid,sc:$("tab-ficha"),s0:$("tab-ficha").scrollTop,id:e.pointerId,y:e.clientY};
+    try{h.setPointerCapture(e.pointerId)}catch(x){}row.classList.add("fi-lift");rows.forEach(r=>{if(r!==row)r.style.transition="transform .2s cubic-bezier(.3,.8,.3,1)"});buzz();
+    const loop=()=>{if(!D)return;const sr=D.sc.getBoundingClientRect();let v=0;if(D.y<sr.top+80)v=-9;else if(D.y>sr.bottom-120)v=9;if(v){D.sc.scrollTop+=v;move()}requestAnimationFrame(loop)};requestAnimationFrame(loop)});
+  const move=()=>{const dy=D.y-D.y0+D.sc.scrollTop-D.s0,me=D.R[D.i],c=me.top+me.height/2+dy;D.row.style.transform=`translateY(${dy}px) scale(1.02)`;
+    let to=D.i;for(let k=0;k<D.R.length;k++){const m=D.R[k].top+D.R[k].height/2;if(k<D.i&&c<m){to=k;break}if(k>D.i&&c>m)to=k}
+    if(to!==D.to){D.to=to;buzz()}
+    D.rows.forEach((r,k)=>{if(k===D.i)return;const t=D.i<to&&k>D.i&&k<=to?-D.H:D.i>to&&k<D.i&&k>=to?D.H:0;r.style.transform=t?`translateY(${t}px)`:""})};
+  fb.addEventListener("pointermove",e=>{if(!D||e.pointerId!==D.id)return;D.y=e.clientY;move()});
+  const up=e=>{if(!D||e.pointerId!==D.id)return;const {pid,i,to,rows,row}=D;D=null;
+    rows.forEach(r=>{r.style.transform="";r.style.transition=""});row.classList.remove("fi-lift");
+    const pl=plans.find(x=>x.id===pid);if(pl&&to!==i){const [it]=pl.items.splice(i,1);pl.items.splice(to,0,it);savePlans();renderFicha()}};
+  fb.addEventListener("pointerup",up);fb.addEventListener("pointercancel",up);
+})();
 
 /* ---- "+ Registrar cardio" in Hoje: a quick cardio session on the chosen day (counts as done right away) */
 let cq={k:"walk",int:"m",min:"",km:""};
@@ -3286,7 +3310,7 @@ $("treinoBody").addEventListener("click",e=>{
   const byW=()=>workouts.find(x=>x.id===b.dataset.wid),byP=()=>plans.find(x=>x.id===b.dataset.pid);
   if(a==="log"||a==="startFree"){const nw=startPlan(a==="log"?byP():null,selDate());openW=nw.id;askDel=false;$("tab-treino").scrollTop=0}
   else if(a==="quickDone"){const pl=byP();if(!pl)return;const nw=startPlan(pl,selDate());nw.done=true;setTimeout(()=>checkAch(),0);toast(`${pl.name||"Treino"} marcado como feito${hDate?" em "+fmtDate(nw.date):""}`)}
-  else if(a==="markDone"){const x=byW();if(x){x.done=true;toast(`${x.title||"Treino"} marcado como feito`);celebrate(x);if(live&&live.wid===x.id){live=null;saveLive()}}}
+  else if(a==="markDone"){const x=byW();if(x){x.done=true;toast(`${x.title||"Treino"} marcado como feito`);buzz("ok");celebrate(x);if(live&&live.wid===x.id){live=null;saveLive()}}}
   else if(a==="undo"){const x=byW();if(!x)return;
     const touched=x.notes||x.items.some(it=>it.notes||it.sets.some(st=>(st.r??"")!==""||(st.kg??"")!==""||(st.min??"")!==""));
     if(touched||!x.planId)x.done=false;else workouts=workouts.filter(y=>y.id!==x.id);toast("Desfeito: saiu do Progresso")}
@@ -3314,7 +3338,7 @@ $("treinoBody").addEventListener("click",e=>{
   else if(a==="swapItem")return openSwap(w.items[i],(name,ref)=>{w.items[i].name=name;w.items[i].ref=ref;saveW();renderTreino()});
   else if(a==="up"&&i>0)[w.items[i-1],w.items[i]]=[w.items[i],w.items[i-1]];
   else if(a==="down"&&i<w.items.length-1)[w.items[i+1],w.items[i]]=[w.items[i],w.items[i+1]];
-  else if(a==="done"){w.done=w.done===false;toast(w.done?"Treino marcado como feito":"Treino desmarcado: saiu do Progresso");if(w.done){celebrate(w);if(live&&live.wid===w.id){live=null;saveLive()}}}
+  else if(a==="done"){w.done=w.done===false;toast(w.done?"Treino marcado como feito":"Treino desmarcado: saiu do Progresso");if(w.done){buzz("ok");celebrate(w);if(live&&live.wid===w.id){live=null;saveLive()}}}
   else if(a==="askDel")askDel=true;
   else if(a==="noDel")askDel=false;
   else if(a==="del"){workouts=workouts.filter(x=>x.id!==w.id);openW=null;askDel=false;toast("Treino excluído")}
@@ -3347,7 +3371,7 @@ function workoutPRs(w){const out=[];for(const it of w.items){let best=null;
 const prTxt=p=>`${p.name}: ${fkg(p.kg)} kg × ${p.r}`;
 function celebrate(w){checkAch();const prs=workoutPRs(w);if(!prs.length)return prs;
   toast(prs.length===1?tx(`🏆 Novo recorde! ${prTxt(prs[0])}`,`🏆 New record! ${prTxt(prs[0])}`,`🏆 ¡Nuevo récord! ${prTxt(prs[0])}`)
-    :tx(`🏆 ${prs.length} recordes novos! ${prTxt(prs[0])}…`,`🏆 ${prs.length} new records! ${prTxt(prs[0])}…`,`🏆 ¡${prs.length} récords nuevos! ${prTxt(prs[0])}…`));beep(2);return prs}
+    :tx(`🏆 ${prs.length} recordes novos! ${prTxt(prs[0])}…`,`🏆 ${prs.length} new records! ${prTxt(prs[0])}…`,`🏆 ¡${prs.length} récords nuevos! ${prTxt(prs[0])}…`));beep(2);buzz("pr");return prs}
 
 /* ---- next load: the rep range comes from the target ("8-12"); when every set at the top load reached the
    top of the range, go up one step (barbell/machine/cable 2.5 kg, dumbbells 2 kg each); otherwise one more rep */
@@ -3371,7 +3395,17 @@ function beep(n=3){if(!CONF.sound||!actx)return;try{const t0=actx.currentTime;fo
   o.connect(g).connect(actx.destination);o.start(t0+k*.22);o.stop(t0+k*.22+.2)}}catch(e){}}
 function startRest(sec){unlockAudio();rest={end:Date.now()+sec*1000,total:sec};LS.set("atlas-rest",rest);tickLive(true)}
 function stopRest(){rest=null;LS.set("atlas-rest",null);tickLive(true)}
-function restDone(){stopRest();beep(3);if(CONF.vibe&&navigator.vibrate)try{navigator.vibrate([200,100,200])}catch(e){}
+/* owner: a short vibration on the important taps (set done, workout done, record, tab change). Android uses
+   navigator.vibrate; the iPhone has no such API, but toggling a hidden native switch (Safari 18+) gives one tap of
+   haptic feedback. Off with Configurações › Vibração. */
+let hapEl=null;
+function buzz(k){if(!CONF.vibe)return;const pat={pr:[30,60,30,60,60],ok:[25,50,25],rest:[200,100,200]}[k]||12;
+  try{if(navigator.vibrate&&navigator.vibrate(pat))return}catch(e){}
+  try{if(!hapEl){hapEl=document.createElement("label");hapEl.setAttribute("aria-hidden","true");hapEl.dataset.notr="";
+      hapEl.style.cssText="position:fixed;left:-200px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none";
+      const i=document.createElement("input");i.type="checkbox";i.setAttribute("switch","");i.tabIndex=-1;hapEl.appendChild(i);document.body.appendChild(hapEl)}
+    const n=Array.isArray(pat)?Math.ceil(pat.length/2):1;hapEl.click();for(let j=1;j<n;j++)setTimeout(()=>hapEl.click(),j*120)}catch(e){}}
+function restDone(){stopRest();beep(3);buzz("rest");
   toast(tx("Descanso acabou: próxima série!","Rest is over: next set!","Se acabó el descanso: ¡siguiente serie!"))}
 /* one tick per second: clock of the live workout, rest countdown on the page and in the floating pill */
 function tickLive(force){const w=liveW(),now=Date.now();
@@ -3478,12 +3512,12 @@ $("treinoBody").addEventListener("click",e=>{
     let kg=$("lvKg").value.trim(),r=$("lvR").value.trim();if(!kg&&g&&g.kg!=="")kg=String(fkg(g.kg)).replace(/\s/g,"");if(!r&&g)r=String(g.r);
     if(!(parseInt(r)>0)){toast(tx("Coloque as repetições","Enter the reps","Pon las repeticiones"));$("lvR").focus();return}
     s.kg=kg;s.r=r;const first=!s.ok;s.ok=true;const p=setPR(it,s,w);
-    if(p){toast(tx(`🏆 Recorde! ${fkg(p.kg)} kg × ${p.r}`,`🏆 Record! ${fkg(p.kg)} kg × ${p.r}`,`🏆 ¡Récord! ${fkg(p.kg)} kg × ${p.r}`));beep(2)}
+    if(p){toast(tx(`🏆 Recorde! ${fkg(p.kg)} kg × ${p.r}`,`🏆 Record! ${fkg(p.kg)} kg × ${p.r}`,`🏆 ¡Récord! ${fkg(p.kg)} kg × ${p.r}`));beep(2);buzz("pr")}else buzz();
     saveW();if(first){liveNext(w);if(!w.items.every(x=>x.sets.every(y=>y.ok)))startRest(restFor(it))}}
   else if(a==="cInt"){const s=w.items[live.i].sets[0];cSaveLive(s);s.int=b.dataset.v;saveW()}
   else if(a==="cDone"){const it=w.items[live.i],s=it.sets[0];cSaveLive(s);
     if(!cNum(s.min)){if(cNum(it.target))s.min=String(cNum(it.target));else{toast(tx("Coloque os minutos","Enter the minutes","Pon los minutos"));$("lvMin").focus();return}}
-    const first=!s.ok;s.ok=true;saveW();if(first)liveNext(w)}
+    const first=!s.ok;s.ok=true;saveW();buzz();if(first)liveNext(w)}
   else if(a==="pickSet")live.j=+b.dataset.j;
   else if(a==="pickEx"){live.i=+b.dataset.i;const j=w.items[live.i].sets.findIndex(s=>!s.ok);live.j=j<0?0:j}
   else if(a==="prevEx"||a==="nextEx"){live.i+=a==="nextEx"?1:-1;liveFix(w);const j=w.items[live.i].sets.findIndex(s=>!s.ok);live.j=j<0?0:j}
@@ -4967,7 +5001,11 @@ function setTab(t){
 /* Conquistas: its own page, opened by the trophy next to the title (owner: the trophy is the button for achievements) */
 function renderAch(){$("achBody").innerHTML=`<div class="page-h"><h2>${tx("Conquistas","Achievements","Logros")}<button class="help" data-help="ach" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2></div>`+achHTML()}
 $("achBtn").addEventListener("click",()=>setTab("ach"));
-document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>{if(tab!==b.dataset.tab)buzz();setTab(b.dataset.tab);pageEnter()}));
+/* light animation: when a page or sub-page opens, its cards rise in one after the other (not on every redraw) */
+function pageEnter(){if(document.documentElement.classList.contains("noanim"))return;const el=$("tab-"+tab);if(!el||tab==="atlas")return;
+  el.querySelectorAll(".card").forEach((c,i)=>{if(i>7||c.classList.contains("cin"))return;c.style.animationDelay=i*40+"ms";c.classList.add("cin");
+    c.addEventListener("animationend",()=>{c.classList.remove("cin");c.style.animationDelay=""},{once:true})})}
 /* Swipe sideways from page to page (owner: "de página pra página, dá pra ser arrastável", like Instagram/WhatsApp).
    One line of pages: Atlas → Meus treinos → Treinos prontos → Registro → Ao vivo → Músculos → Força.
    The buttons stay; the swipe only moves to the page next to the current one. Ignored on the figure, charts,
@@ -5007,6 +5045,8 @@ document.querySelectorAll(".seg").forEach(segInit);
     const k=segKey(g);if(k)segLast[k]={x,w:th.offsetWidth};
     if(b.getAttribute("aria-pressed")==="true")segPlace(g);else b.click();block=Date.now()};
   document.addEventListener("touchend",end,{passive:true});document.addEventListener("touchcancel",end,{passive:true});
+  document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".seg > button");if(!b||b.getAttribute("aria-pressed")==="true"||Date.now()-block<450&&e.isTrusted)return;
+    buzz();if(b.closest(".page"))requestAnimationFrame(pageEnter)},true);
   /* the finger lifting after a drag must not also tap the button under it */
   document.addEventListener("click",e=>{if(Date.now()-block<450&&e.isTrusted&&e.target.closest&&e.target.closest(".seg")){e.stopPropagation();e.preventDefault()}},true);
 })();
@@ -5022,18 +5062,32 @@ function goPage(i,dir){const p=PAGES[i];if(!p)return;
   const el=$("tab-"+p[0]);if(p[0]==="atlas")return;el.scrollTop=0;
   el.classList.remove("sw-l","sw-r");void el.offsetWidth;el.classList.add(dir>0?"sw-l":"sw-r");
   setTimeout(()=>el.classList.remove("sw-l","sw-r"),300)}
+/* the page follows the finger (owner: "página segue o dedo"); lifting past ~30% of the width, or a quick flick,
+   finishes the move (the page leaves to that side and the next one comes in from the other); otherwise it springs
+   back. With no page on that side it only stretches a little. */
 (()=>{let s=null;
-  const skip=t=>{if(t.closest("input,select,textarea,.seg,.stage,.ms-track,.modesw,.zwrap,.kg-hit,.chips,.vopts,.lv-tips,[data-noswipe]"))return true;
+  const skip=t=>{if(t.closest("input,select,textarea,.seg,.stage,.ms-track,.modesw,.zwrap,.kg-hit,.chips,.vopts,.lv-tips,.fi-drag,[data-noswipe]"))return true;
     for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.scrollWidth>n.clientWidth+2){const o=getComputedStyle(n).overflowX;if(o==="auto"||o==="scroll")return true}}
     return false};
+  const reset=el=>{el.style.transition="";el.style.transform="";el.style.opacity=""};
   document.addEventListener("touchstart",e=>{s=null;
     if(e.touches.length>1||!matchMedia("(max-width:900px)").matches||pageIdx()<0)return;
     const t=e.target;if(!t.closest||!t.closest("#tab-"+tab)||t.closest(".modal")||skip(t))return;
-    s={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()}},{passive:true});
-  document.addEventListener("touchmove",e=>{if(s&&e.touches.length>1)s=null},{passive:true});
-  document.addEventListener("touchend",e=>{if(!s)return;const c=e.changedTouches[0],dx=c.clientX-s.x,dy=c.clientY-s.y,ms=Date.now()-s.t;s=null;
-    if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*1.8||ms>900)return;
-    const i=pageIdx(),d=dx<0?1:-1;if(PAGES[i+d])goPage(i+d,d)},{passive:true});
+    s={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now(),lock:null,el:$("tab-"+tab),i:pageIdx(),dx:0,v:0,lt:Date.now(),lx:e.touches[0].clientX}},{passive:true});
+  document.addEventListener("touchmove",e=>{if(!s)return;if(e.touches.length>1){reset(s.el);s=null;return}
+    const x=e.touches[0].clientX,dx=x-s.x,dy=e.touches[0].clientY-s.y;
+    if(!s.lock){if(Math.hypot(dx,dy)<10)return;s.lock=Math.abs(dx)>Math.abs(dy)*1.5?"h":"v"}
+    if(s.lock!=="h")return;e.preventDefault();
+    const now=Date.now();s.v=(x-s.lx)/Math.max(1,now-s.lt);s.lx=x;s.lt=now;
+    const has=!!PAGES[s.i+(dx<0?1:-1)],w=innerWidth;s.dx=dx;
+    const m=has?dx:dx*.25;s.el.style.transition="none";s.el.style.transform=`translateX(${m}px)`;s.el.style.opacity=has?String(1-Math.min(.5,Math.abs(dx)/w)):""},{passive:false});
+  const end=()=>{if(!s)return;const {el,dx,i,lock}=s,v=Date.now()-s.lt>100?0:s.v;s=null;if(lock!=="h"){reset(el);return}
+    const d=dx<0?1:-1,go=!!PAGES[i+d]&&(Math.abs(dx)>innerWidth*.3||(Math.abs(dx)>40&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dx)));
+    if(!go){el.style.transition="transform .25s cubic-bezier(.3,.8,.3,1),opacity .25s";el.style.transform="";el.style.opacity="";setTimeout(()=>reset(el),260);return}
+    if(document.documentElement.classList.contains("noanim")){reset(el);return goPage(i+d,d)}
+    el.style.transition="transform .16s ease-in,opacity .16s ease-in";el.style.transform=`translateX(${-d*innerWidth*.6}px)`;el.style.opacity="0";
+    buzz();setTimeout(()=>{reset(el);goPage(i+d,d);pageEnter()},160)};
+  document.addEventListener("touchend",end,{passive:true});document.addEventListener("touchcancel",end,{passive:true});
 })();
 
 /* ------------------------------------------------------------------ apresentação (carrossel da 1ª vez)
