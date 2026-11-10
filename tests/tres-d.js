@@ -1,6 +1,6 @@
 /* Boneco 3D no Atlas (pedido do dono): botão "3D" no canto de baixo do boneco; tocar num músculo funciona igual ao 2D
    (vermelho + lista; exercício pinta sinergistas de laranja); Grupos e Cardio pintam o 3D; Articulações mostra as juntas no 3D (tocar escolhe); botão 3D pequeno com a lista aberta;
-   com ♀ o 3D troca para o corpo feminino (0.15; sem seios desde a 0.16). Também confere que o ⤢ sumiu no celular e que dois toques voltam o zoom.
+   com ♀ o 3D troca para o corpo feminino (0.15), com os seios translúcidos que não recebem toque (0.17): tocar neles escolhe o peitoral. Também confere que o ⤢ sumiu no celular e que dois toques voltam o zoom.
    O Three.js vem do jsDelivr; sem internet no teste, use THREE_DIR=<pasta do pacote three@0.160.0>. */
 const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=require("path").join(__dirname,"out");require("fs").mkdirSync(OUT,{recursive:true});
 const path=require("path"),fs=require("fs");
@@ -10,9 +10,11 @@ const {chromium}=require('playwright');
 for(const th of ['dark','light']){const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,colorScheme:th,locale:'pt-BR'});
 if(TD)await ctx.route("https://cdn.jsdelivr.net/npm/three@0.160.0/**",r=>{const f=path.join(TD,new URL(r.request().url()).pathname.replace("/npm/three@0.160.0/",""));
   fs.existsSync(f)?r.fulfill({path:f,contentType:"application/javascript"}):r.abort()});
-const p=await ctx.newPage();p.setDefaultTimeout(120000);await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");localStorage.setItem("atlas-sex","m")}catch(e){}});
+const p=await ctx.newPage();p.setDefaultTimeout(120000);await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="both";localStorage.setItem("atlas-conf",JSON.stringify(c))}};localStorage.setItem("atlas-sex","m")}catch(e){}});
 p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error'&&!/ERR_TUNNEL|fonts\.g/.test(m.text()))errs.push(m.text())});
 await p.goto(BASE);await p.waitForTimeout(700);
+// "2D e 3D" opens in 3D (0.17): this test starts from the 2D and turns the 3D on with the button
+await p.evaluate(()=>set3D(false));await p.waitForTimeout(200);
 // the ⤢ square is gone on the phone
 const zr=await p.evaluate(()=>getComputedStyle(document.getElementById('zReset')).display==='none'||!document.getElementById('zReset').offsetParent);if(!zr){console.log('⤢ ainda aparece');bad++}
 // double tap resets the 2D zoom
@@ -65,13 +67,13 @@ a=await p.evaluate(()=>({curJ,cov:document.getElementById('tab-atlas').classList
 console.log(' toque no joelho',JSON.stringify(a));if(a.curJ!=='joelho'||a.c!==a.t)bad++;
 await p.evaluate(()=>{peek=true;render()});await p.waitForTimeout(600);await p.screenshot({path:`${OUT}/tres-d-${th}-8-joelho.png`});
 await p.evaluate(()=>setMode('mus'));await p.waitForTimeout(300);
-// ♀ (owner 0.15/0.16): the 3D swaps to the female body (no breasts since 0.16); tapping the chest works as in the male body
+// ♀ (owner 0.15–0.17): the 3D swaps to the female body; the breasts are a see-through aura ("mama"): a tap on the chest goes through to the pectoral
 await p.evaluate(()=>set3D(true));await p.waitForTimeout(500);await p.evaluate(()=>setSex('f'));
 await p.waitForFunction(()=>V3.sexNow()==='f'&&document.getElementById('v3load').hidden&&V3.keys().length>30,null,{timeout:90000}).catch(()=>{console.log('corpo ♀ não carregou');bad++});
 await p.evaluate(()=>V3.view('front'));await p.waitForTimeout(900);
-a=await p.evaluate(()=>({on:v3on,sx:V3.sexNow(),mama:V3.keys().filter(k=>k.startsWith('mama_')).length,j:!!V3.jointAt('joelho')}));console.log(' ♀',JSON.stringify(a));if(!a.on||a.sx!=='f'||a.mama||!a.j)bad++;
+a=await p.evaluate(()=>({on:v3on,sx:V3.sexNow(),mama:V3.keys().includes('mama'),j:!!V3.jointAt('joelho')}));console.log(' ♀',JSON.stringify(a));if(!a.on||a.sx!=='f'||!a.mama||!a.j)bad++;
 await p.screenshot({path:`${OUT}/tres-d-${th}-5-fem.png`});
-const mp=await p.evaluate(()=>V3.at('peito_medial'));await p.touchscreen.tap(mp.x,mp.y);await p.waitForTimeout(500);
+const mp=await p.evaluate(()=>V3.at('mama'));await p.touchscreen.tap(mp.x,mp.y);await p.waitForTimeout(500);
 s=await p.evaluate(()=>({cur,c:V3.color(cur),t:getComputedStyle(document.documentElement).getPropertyValue('--target').trim().toLowerCase()}));
 console.log(' ♀ toque no peito',JSON.stringify(s));if(!/^peito/.test(s.cur||'')||s.c!==s.t)bad++;
 await p.evaluate(()=>{peek=true;render()});await p.waitForTimeout(600);await p.screenshot({path:`${OUT}/tres-d-${th}-5b-fem-peito.png`});

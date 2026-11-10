@@ -1,6 +1,6 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
-   in index.html; the models are 3d/corpo-6.glb (male) and 3d/corpo-f-2.glb (female, owner 0.15/0.16), each with its joint
+   in index.html; the models are 3d/corpo-6.glb (male) and 3d/corpo-f-3.glb (female, owner 0.15–0.17), each with its joint
    marks (3d/juntas-2.json, 3d/juntas-f-2.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
    Atlas muscle keys, A-pose, Classic Physique upper body, proportional legs, skull, skin on hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
@@ -32,12 +32,18 @@ export function mount(box, api){
   const rim=new THREE.DirectionalLight(0xffffff,0.45);rim.position.set(-1,0.3,-0.6);camera.add(rim);scene.add(camera);
 
   const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-  const C={};const readColors=()=>{for(const [k,v] of [["m","--v3-m"],["mlo","--v3-mlo"],["bone","--v3-bone"],["sep","--v3-sep"],["fib","--v3-fib"],["base","--v3-base"],["hov","--v3-hov"],["target","--target"],["syn","--syn"],["art","--fig-art"],["art2","--fig-art2"],["surf","--surface"],["thi","--target-hi"]])C[k]=new THREE.Color(css(v)||"#888");
+  const C={};const readColors=()=>{for(const [k,v] of [["m","--v3-m"],["mlo","--v3-mlo"],["bone","--v3-bone"],["sep","--v3-sep"],["fib","--v3-fib"],["base","--v3-base"],["hov","--v3-hov"],["aura","--v3-aura"],["target","--target"],["syn","--syn"],["art","--fig-art"],["art2","--fig-art2"],["surf","--surface"],["thi","--target-hi"]])C[k]=new THREE.Color(css(v)||"#888");
     C.sepA=parseFloat(css("--v3-sepa"))||.45};readColors();
 
   const parts={},pickables=[],meshes=[];let state={},hov=null,hovJ=null,root=null,curSex=null;
   /* the female breasts are split by the pectoral part under them ("mama_peito_medial"…): same colour, a tap on them is a tap on that part */
   const BASEK=k=>k.startsWith("mama_")?k.slice(5):k;
+  /* owner 0.17: the female breasts are a see-through "aura" (node "mama"): no tap, no outline, the pectoral shows through */
+  const ghosts=[];
+  /* aura: almost clear in the middle, stronger toward the outline (like a glow around the shape) */
+  const ghostMat=()=>new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.FrontSide,vertexColors:true,uniforms:{col:{value:new THREE.Color()},a0:{value:.14},a1:{value:.45}},
+    vertexShader:`varying vec3 vN;varying vec3 vV;varying float vF;void main(){vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);vF=color.r;gl_Position=projectionMatrix*mv;}`,
+    fragmentShader:`uniform vec3 col;uniform float a0;uniform float a1;varying vec3 vN;varying vec3 vV;varying float vF;void main(){float r=1.0-abs(dot(normalize(vN),normalize(vV)));gl_FragColor=vec4(col,(a0+a1*pow(r,3.0))*vF);}`});   /* vF: fades out toward the edge */
   const jScene=new THREE.Scene(),jMarks=[],jFills=[];jScene.visible=false;
   const ringG=new THREE.RingGeometry(0.62,1,40),dotG=new THREE.CircleGeometry(0.64,40);
   function clearJoints(){for(const g of jMarks){jScene.remove(g);g.children.forEach(c=>c.material.dispose())}jMarks.length=0;jFills.length=0}
@@ -65,7 +71,7 @@ export function mount(box, api){
       camera.position.set(Math.sin(ang)*dd,from.y+(to.y-from.y)*e,Math.cos(ang)*dd);controls.target.lerpVectors(ft,tt,e);need=true;if(k<1)requestAnimationFrame(step)})()}
 
   function paint(){const art=!!state.__art;
-    for(const [k0,o] of Object.entries(parts)){const k=BASEK(k0),s=art?{}:state[k]||{};
+    for(const [k0,o] of Object.entries(parts)){if(k0==="mama"){o.material.uniforms.col.value.copy(art?C.art:C.aura);continue}const k=BASEK(k0),s=art?{}:state[k]||{};
     const c=art?(/^(osso|fundo|base|pele|tend)$/.test(k)?C.art:C.art2):s.on?C.target:s.syn?C.syn:k==="osso"?C.bone:k==="fundo"||k==="base"?C.base:k==="deco"||k==="tend"?C.mlo:k==="pele"?C.m:s.c?(s.dim?new THREE.Color(s.c).lerp(C.m,.75):new THREE.Color(s.c)):(k===hov?C.hov:C.m);
     if(o.userData.fu)o.userData.fu.value.copy(C.fib);baseU.value.copy(C.base);
     o.material.color.copy(c);o.material.emissive.copy(s.on?C.target:s.syn?C.syn:new THREE.Color(0));o.material.emissiveIntensity=s.on||s.syn?0.18:0}
@@ -100,9 +106,9 @@ export function mount(box, api){
     const dd=camera.position.distanceTo(controls.target);nearU.value=Math.min(1,Math.max(0,(2.5-dd)/1.1));
     sepMat.uniforms.col.value.copy(C.sep);sepMat.uniforms.a.value=C.sepA*Math.min(1,Math.max(0.3,1.5/dd));
     renderer.autoClear=true;renderer.render(scene,camera);if(!meshes.length)return;
-    for(const o of meshes){o.userData.mat=o.material;o.material=o.userData.idm}
+    for(const o of meshes){o.userData.mat=o.material;o.material=o.userData.idm}for(const o of ghosts)o.visible=false;
     renderer.setRenderTarget(idT);renderer.setClearColor(0x000000,1);renderer.clear();renderer.render(scene,camera);renderer.setRenderTarget(null);renderer.setClearColor(0x000000,0);
-    for(const o of meshes)o.material=o.userData.mat;
+    for(const o of meshes)o.material=o.userData.mat;for(const o of ghosts)o.visible=true;
     renderer.autoClear=false;renderer.render(sepScene,sepCam);
     if(jScene.visible){const s=camera.position.distanceTo(controls.target)*0.0085+0.004;for(const g of jMarks){g.quaternion.copy(camera.quaternion);g.scale.setScalar(s)}renderer.render(jScene,camera)}
     renderer.autoClear=true}
@@ -167,7 +173,7 @@ export function mount(box, api){
   const mo=new MutationObserver(()=>{readColors();paint()});mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class"]});
   const mq=matchMedia("(prefers-color-scheme: dark)"),onMq=()=>{readColors();paint()};mq.addEventListener("change",onMq);
 
-  const FILES={m:["./corpo-6.glb","./juntas-2.json"],f:["./corpo-f-2.glb","./juntas-f-2.json"]};let loadN=0;
+  const FILES={m:["./corpo-6.glb","./juntas-2.json"],f:["./corpo-f-3.glb","./juntas-f-2.json"]};let loadN=0;
   async function load(sx){sx=sx==="f"?"f":"m";if(sx===curSex)return;curSex=sx;const my=++loadN,live=()=>alive&&my===loadN;
     let buf;
     fetch(new URL(FILES[sx][1],import.meta.url)).then(r=>r.json()).then(j=>{if(live()){clearJoints();addJoints(j)}}).catch(()=>{});
@@ -180,12 +186,14 @@ export function mount(box, api){
     new GLTFLoader().parse(buf,"",g=>{if(!live())return;
       /* swapping ♂/♀: the old body goes away only when the new one is ready */
       if(root){scene.remove(root);root.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose();o.userData.idm&&o.userData.idm.dispose()}})}
-      for(const k in parts)delete parts[k];pickables.length=0;meshes.length=0;root=g.scene;
+      for(const k in parts)delete parts[k];pickables.length=0;meshes.length=0;ghosts.length=0;root=g.scene;
       const ms=[];g.scene.traverse(o=>{if(o.isMesh)ms.push(o)});
       ms.forEach(o=>{const k=(o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"deco").replace(/_\d+$/,"");
         o.material=new THREE.MeshStandardMaterial({color:0x999999,roughness:k==="osso"?0.75:0.55,metalness:0,side:THREE.DoubleSide,vertexColors:!!o.geometry.attributes.color});   /* skull: baked shadow in the orbits, nose and teeth */
         shade(o,!!o.geometry.attributes.uv&&k!=="osso"&&k!=="fundo");o.userData.k=k;parts[k]=o;pickables.push(o);
         o.userData.idm=new THREE.ShaderMaterial({uniforms:{id:{value:k.startsWith("mama_")?250:meshes.length+1},sd:{value:/^(osso|fundo|base|pele|tend|mama_.*)$/.test(k)?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
+        if(k==="mama"){o.material=ghostMat();o.renderOrder=5;
+          pickables.splice(pickables.indexOf(o),1);ghosts.push(o);return}
         lay(o.material,k);lay(o.userData.idm,k);meshes.push(o)});
       scene.add(g.scene);const b=new THREE.Box3().setFromObject(g.scene),H=b.max.y-b.min.y;CY=b.min.y+H*0.5;BB=b.clone().expandByScalar(0.05);BH=H;BW=b.max.x-b.min.x;
       /* a light cloud of points on the body: the camera is kept a little away from it, so zooming never goes inside */

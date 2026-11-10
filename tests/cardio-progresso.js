@@ -5,10 +5,10 @@ const {chromium}=require("playwright");
 (async()=>{const b=await chromium.launch();const errs=[],bad=[];
 for(const [loc,theme] of [["pt-BR","light"],["es-ES","dark"]]){
 const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,timezoneId:"America/Sao_Paulo",locale:loc,colorScheme:theme});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on("pageerror",e=>errs.push(e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on("pageerror",e=>errs.push(e.message));
 await p.clock.setFixedTime(new Date("2026-11-07T10:00:00-03:00"));
 await p.goto(BASE);await p.waitForTimeout(300);
-await p.evaluate(()=>{localStorage.clear();localStorage.setItem("atlas-intro","1");localStorage.setItem("atlas-rank",JSON.stringify({bw:80,man:[]}));
+await p.evaluate(()=>{localStorage.clear();localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}};localStorage.setItem("atlas-rank",JSON.stringify({bw:80,man:[]}));
   const car=(d,k,min,int)=>({id:"c"+d+k,date:d,title:"Cardio",done:true,notes:"",items:[{name:k,ref:"cardio:"+k,target:"",notes:"",sets:[{min:String(min),km:"",int,ok:true}]}]});
   localStorage.setItem("atlas-workouts",JSON.stringify([car("2026-11-02","run",30,"m"),car("2026-11-04","bike",90,"f"),car("2026-11-05","walk",40,"l"),car("2026-11-06","box",20,"m")]))});
 await p.reload();await p.waitForTimeout(400);

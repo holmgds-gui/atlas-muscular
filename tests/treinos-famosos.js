@@ -5,7 +5,7 @@ const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const errs=[];let bad=0;
 for(const [loc,theme] of [['pt-BR','light'],['en-US','dark'],['es-ES','light']]){
 const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,locale:loc,colorScheme:theme,timezoneId:'America/Sao_Paulo'});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(loc+' '+e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on('pageerror',e=>errs.push(loc+' '+e.message));
 await p.goto(BASE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(500);
 if(loc==='pt-BR'){const r=await p.evaluate(()=>{const out=[];let n=0;
   for(const w of RT.filter(w=>w.pg)){n++;for(const [id,ov] of w.it){const f=FAMBY[id];if(!f){out.push(w.id+': família '+id);continue}

@@ -5,7 +5,7 @@ const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const errs=[];let bad=0;
 for(const [loc,th] of [['pt-BR','dark'],['pt-BR','light'],['en-US','light'],['es-ES','dark']]){
 const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,locale:loc,colorScheme:th});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(loc+' '+e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on('pageerror',e=>errs.push(loc+' '+e.message));
 await p.goto(BASE);await p.waitForTimeout(500);
 await p.tap('[data-mode="grp"]');await p.waitForTimeout(250);
 const a=await p.evaluate(()=>{const f=document.getElementById('fig');const ms=[...f.querySelectorAll('[data-m]')];

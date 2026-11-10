@@ -4,7 +4,7 @@ const {chromium}=require('playwright');const out=OUT;
 (async()=>{const b=await chromium.launch();const errs=[];
 for(const [loc,theme] of [['pt-BR','light'],['es-ES','dark']]){
 const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,timezoneId:'America/Sao_Paulo',colorScheme:theme,locale:loc});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
 await p.goto(BASE);await p.waitForTimeout(300);
 await p.evaluate(()=>{localStorage.clear();
   const R=(id,sel={})=>{const f=FAMBY[id];const s={...f.d,...sel};return [vName(f,s),mkRef(f,s)]};
@@ -13,7 +13,7 @@ await p.evaluate(()=>{localStorage.clear();
   const P=[{id:'p1',name:'Peito e tríceps',days:[0,1,2,3,4,5,6],items:[{name:R('supino')[0],ref:R('supino')[1],sets:3,reps:'8-12'},{name:R('pushdown')[0],ref:R('pushdown')[1],sets:3,reps:'10-15'}]}];
   localStorage.setItem('atlas-plans',JSON.stringify(P));
   localStorage.setItem('atlas-workouts',JSON.stringify([{id:'a',date:iso,title:'Peito e tríceps',planId:'p1',done:true,notes:'',items:[it(R('supino'),[[12,80],[12,80],[12,80]]),it(R('pushdown'),[[12,30],[11,30]],'10-15')]}]));
-  localStorage.setItem('atlas-conf',JSON.stringify({rest:90}));
+  localStorage.setItem('atlas-conf',JSON.stringify({rest:90,fig:'2d'}));
 });
 await p.reload();await p.waitForTimeout(400);
 await p.evaluate(()=>setTab('treino'));await p.waitForTimeout(200);

@@ -6,9 +6,9 @@ const {chromium}=require("playwright");
 for(const [loc,theme,vp] of [["pt-BR","light",{width:390,height:844}],["en-US","dark",{width:390,height:844}],["es-ES","light",{width:1280,height:860}]]){
   const mob=vp.width<500;
   const ctx=await b.newContext({viewport:vp,isMobile:mob,hasTouch:mob,deviceScaleFactor:2,colorScheme:theme,locale:loc});
-  const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on("pageerror",e=>errs.push(loc+" "+e.message));
+  const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on("pageerror",e=>errs.push(loc+" "+e.message));
   const shot=n=>p.screenshot({path:`${OUT}/cardio-atlas-${loc}-${n}.png`});
-  await p.goto(BASE);await p.evaluate(()=>{localStorage.clear();localStorage.setItem("atlas-intro","1");localStorage.setItem("atlas-rank",JSON.stringify({bw:80,man:[]}))});await p.reload();await p.waitForTimeout(500);
+  await p.goto(BASE);await p.evaluate(()=>{localStorage.clear();localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}};localStorage.setItem("atlas-rank",JSON.stringify({bw:80,man:[]}))});await p.reload();await p.waitForTimeout(500);
   if(!await p.isVisible('[data-mode="cd"]'))bad.push(loc+": botão Cardio não aparece");
   await shot("0-inicio");
   await p.click('[data-mode="cd"]');await p.waitForTimeout(300);

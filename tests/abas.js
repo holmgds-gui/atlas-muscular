@@ -6,7 +6,7 @@ const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=requir
 const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const errs=[];let bad=0;
 for(const th of ['dark','light']){const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,colorScheme:th,locale:'pt-BR',timezoneId:'America/Sao_Paulo'});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
 await p.goto(BASE);await p.waitForTimeout(600);
 /* drag from the middle of button `from` by dx; `hold` leaves the finger down (for a screenshot) */
 const drag=(seg,from,dx,dy=0,hold=false)=>p.evaluate(([seg,from,dx,dy,hold])=>{const g=[...document.querySelectorAll(seg)].find(e=>e.offsetWidth),el=g.querySelector(from),r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+r.height/2;

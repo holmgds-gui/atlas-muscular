@@ -5,7 +5,7 @@ const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=requir
 const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const errs=[];let bad=0;
 for(const th of ['dark','light']){const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,colorScheme:th,locale:'pt-BR',timezoneId:'America/Sao_Paulo'});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}navigator.vibrate=()=>{window.__vib=(window.__vib||0)+1;return true}});p.on('pageerror',e=>errs.push(e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}navigator.vibrate=()=>{window.__vib=(window.__vib||0)+1;return true}});p.on('pageerror',e=>errs.push(e.message));
 await p.goto(BASE);await p.waitForTimeout(600);
 const swipe=(sel,dx,dy=0)=>p.evaluate(([sel,dx,dy])=>{const el=[...document.querySelectorAll(sel)].find(e=>e.offsetParent!==null&&e.getBoundingClientRect().height>0)||document.querySelector(sel);
   const r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+Math.min(30,r.height/2);

@@ -19,7 +19,7 @@ const seed=(lang)=>{const R=(id,sel={})=>{const f=FAMBY[id];const s={...f.d,...s
 (async()=>{const b=await chromium.launch();const all=new Map();const errs=[];
 for(const vp of [{width:390,height:844},{width:1280,height:860}]){
 const ctx=await b.newContext({locale:{en:'en-US',es:'es-ES',pt:'pt-BR'}[lang],viewport:vp,isMobile:vp.width<500,hasTouch:vp.width<500,timezoneId:'America/Sao_Paulo'});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
 await p.goto(BASE);await p.waitForTimeout(300);await p.evaluate(seed,lang);await p.reload();await p.waitForTimeout(500);
 await p.evaluate(()=>{window.__toasts=[];const o=window.toast;window.toast=m=>{o(m);setTimeout(()=>window.__toasts.push(document.getElementById('toast').textContent),40)}});
 const grab=async(tag)=>{await p.waitForTimeout(60);const r=await p.evaluate(()=>{const o=[];const seen=new Set();

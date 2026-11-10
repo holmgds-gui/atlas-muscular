@@ -4,7 +4,7 @@ const {chromium}=require('playwright');const out=OUT;
 (async()=>{const b=await chromium.launch();const errs=[];
 for(const [loc,theme] of [['pt-BR','light'],['es-ES','dark'],['en-US','light']]){
  const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,colorScheme:theme,locale:loc,timezoneId:'America/Sao_Paulo'});
- const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(loc+' '+e.message));
+ const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on('pageerror',e=>errs.push(loc+' '+e.message));
  await p.goto(BASE);await p.waitForTimeout(500);
  await p.evaluate(()=>{localStorage.clear()});await p.reload();await p.waitForTimeout(500);
  await p.evaluate(()=>{setTab('atlas');setModel('det');selectMuscle('peito_medial')});await p.waitForTimeout(200);
@@ -24,7 +24,7 @@ for(const [loc,theme] of [['pt-BR','light'],['es-ES','dark'],['en-US','light']])
  console.log(loc,'after change',await p.evaluate(()=>{const d=document.querySelector('.ex.sel details.how');return d&&[d.open,(d.querySelector('.how-v')||{}).innerText]}));
  await ctx.close()}
 // offline fallback
-const ctx=await b.newContext({viewport:{width:390,height:844}});const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});await p.route('**/how/*.json',r=>r.abort());
+const ctx=await b.newContext({viewport:{width:390,height:844}});const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});await p.route('**/how/*.json',r=>r.abort());
 await p.goto(BASE);await p.waitForTimeout(500);
 await p.evaluate(()=>{setTab('atlas');setModel('det');selectMuscle('biceps_longa');selectExercise(0)});await p.waitForTimeout(800);
 console.log('offline',await p.evaluate(()=>document.querySelector('.ex.sel details.how .how-b').innerText));

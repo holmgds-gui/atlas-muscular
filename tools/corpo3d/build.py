@@ -1,6 +1,6 @@
 # Muscle Atlas 3D bodies (3d/corpo-N.glb male, 3d/corpo-f-N.glb female). BodyParts3D (DBCLS, CC BY-SA 2.1 JP) -> muscles
 # grouped by the Atlas keys, A-pose, Classic Physique (male) or female (SEX=f: wide hips, small waist, round glutes,
-# moderate thighs, narrower shoulders; breasts only with BREASTS=1, off since 0.16), solid skull with teeth (baked shadow), skin only on hands,
+# moderate thighs, narrower shoulders; breasts as a see-through aura, BREASTS=0 turns them off), solid skull with teeth (baked shadow), skin only on hands,
 # feet and the front of the neck (owner, nov/2026).
 # Needs: pip install trimesh fast_simplification scipy scikit-image (embree/pyembree speeds up the skull shadow) ; the BodyParts3D
 #        STL folder in BP3D_STL (muscles, bones, skin FMA7163, the 28 teeth and the eyeballs FMA12513) ; sel.tsv next to this file.
@@ -163,7 +163,8 @@ for sd,sx in(("right",-1),("left",1)):
 # ---- female breasts (owner: "contorno suave", like the 2D): a smooth volume over each pectoral taken from the skin and
 #      pushed forward, fuller below; its rim sinks under the muscle, so only a soft outline shows. Not a muscle: it takes
 #      the colour of the pectoral part under it and a tap on it is a tap on that part (3d/v3.js, keys "mama_<pec key>").
-if FEM and os.environ.get("BREASTS")=="1":   # owner 0.16: "tire os seios" — off (kept for reference)
+MAMA_PR=[]
+if FEM and os.environ.get("BREASTS","1")=="1":   # owner 0.17: back, but as a see-through "aura" (one node "mama", see 3d/v3.js)
   N0=SK.vertex_normals
   for sd,sx in(("right",-1),("left",1)):
     cx,cz,rx=92*sx,1195,96
@@ -177,15 +178,18 @@ if FEM and os.environ.get("BREASTS")=="1":   # owner 0.16: "tire os seios" — o
     dg=np.asarray(Wm.sum(1)).ravel();bd=np.zeros(n,bool)
     be=b.edges_sorted[trimesh.grouping.group_rows(b.edges_sorted,require_count=1)];bd[be.ravel()]=True
     V=b.vertices.copy()
-    for _ in range(40):Vn=(Wm@V)/dg[:,None];V[~bd]=Vn[~bd]
+    for _ in range(250):Vn=(Wm@V)/dg[:,None];V[~bd]=Vn[~bd]
     b=trimesh.Trimesh(V,b.faces,process=False);V=b.vertices.copy();nn=b.vertex_normals.copy()
     if (nn[:,1]<0).mean()<0.5:nn=-nn   # outward = forward here
+    # see-through aura (0.17): nothing sinks under the muscle any more (the sunk rim showed through as crumples) and the
+    # edge fades out (vertex colour = fade, worked out on the finished shape)
     pr=np.clip(1-r2(V[:,0],V[:,2]),0,1)**1.2
     d=0.5*nn+0.5*np.array([0.1*sx,-1,-0.25]);d/=np.linalg.norm(d,axis=1,keepdims=True)
-    V=V+d*(46*pr-14)[:,None];b=trimesh.Trimesh(V,b.faces,process=False)
-    trimesh.smoothing.filter_taubin(b,iterations=6)
-    if len(b.faces)>5000:
-      v,f=fs.simplify(b.vertices.astype(np.float32),b.faces.astype(np.int32),target_reduction=1-5000/len(b.faces));b=trimesh.Trimesh(v,f,process=True)
+    V=V+d*(40*pr+1.5)[:,None];b=trimesh.Trimesh(V,b.faces,process=False)
+    trimesh.smoothing.filter_taubin(b,iterations=30)
+    if len(b.faces)>4000:
+      v,f=fs.simplify(b.vertices.astype(np.float32),b.faces.astype(np.int32),target_reduction=1-4000/len(b.faces));b=trimesh.Trimesh(v,f,process=True)
+    MAMA_PR.append(np.clip(np.clip(1-r2(b.vertices[:,0],b.vertices[:,2]+8),0,1)*2.2,0,1)**0.8)
     raw.append(('mama',"skinbreast "+sd,b))
 
 # ---- A-pose (owner): arms out to ~38 deg (from 11), legs out 6 deg. Bones and muscles of the limb turn rigidly
@@ -271,14 +275,9 @@ for key,n,m in raw:
   else: add(key,m)
 v=SKULL.vertices;_s=trimesh.Trimesh(np.c_[v[:,0],v[:,2],-v[:,1]]/1000.0,SKULL.faces,process=False)
 _g=(SKULL_AO*255).astype(np.uint8);_s.visual=trimesh.visual.ColorVisuals(_s,vertex_colors=np.c_[_g,_g,_g,np.full(len(_g),255,np.uint8)]);add('osso',_s)
-if "mama" in meshes:   # each bit of the breast belongs to the pectoral part right under it
-  from scipy.spatial import cKDTree
-  pk=[k for k in("peito_superior","peito_medial","peito_inferior") if k in meshes];PV=[trimesh.util.concatenate(meshes[k]).vertices for k in pk]
-  lab=np.concatenate([np.full(len(p),i) for i,p in enumerate(PV)]);M=trimesh.util.concatenate(meshes.pop("mama"))
-  fl=lab[cKDTree(np.vstack(PV)).query(M.triangles_center)[1]]
-  for i,k in enumerate(pk):
-    sel=np.where(fl==i)[0]
-    if len(sel):meshes["mama_"+k]=[M.submesh([sel],append=True)]
+if "mama" in meshes:   # one see-through node, not a muscle; the fade toward the edge rides in the vertex colour
+  _m=trimesh.util.concatenate(meshes["mama"]);_g=(np.concatenate(MAMA_PR)*255).astype(np.uint8)
+  _m.visual=trimesh.visual.ColorVisuals(_m,vertex_colors=np.c_[_g,_g,_g,np.full(len(_g),255,np.uint8)]);meshes["mama"]=[_m]
 if "obliquos" in meshes and "abdomen_supra" in meshes:
   ra=trimesh.util.concatenate(meshes["abdomen_supra"]+meshes["abdomen_infra"]);lim=np.abs(ra.vertices[:,0]).max()*1.02
   ylo,yhi=ra.vertices[:,1].min(),ra.vertices[:,1].max()

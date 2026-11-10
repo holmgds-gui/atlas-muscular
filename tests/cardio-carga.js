@@ -5,10 +5,10 @@ const {chromium}=require("playwright");
 (async()=>{const b=await chromium.launch();const errs=[],bad=[];
 for(const [loc,theme] of [["pt-BR","light"],["es-ES","dark"]]){
   const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,timezoneId:"America/Sao_Paulo",colorScheme:theme,locale:loc});
-  const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on("pageerror",e=>errs.push(loc+" "+e.message));
+  const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on("pageerror",e=>errs.push(loc+" "+e.message));
   const shot=n=>p.screenshot({path:`${OUT}/cardio-${loc}-${n}.png`});
   await p.goto(BASE);await p.waitForTimeout(300);
-  await p.evaluate(()=>{localStorage.clear();localStorage.setItem("atlas-intro","1");
+  await p.evaluate(()=>{localStorage.clear();localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}};
     const f=FAMBY.supino,sel={...f.d},d=new Date();d.setDate(d.getDate()-7);
     localStorage.setItem("atlas-workouts",JSON.stringify([{id:"old",date:isoDate(d),title:"A",planId:null,done:true,notes:"",items:[{name:vName(f,sel),ref:mkRef(f,sel),target:"8-12",notes:"",sets:[{r:"8",kg:"80"},{r:"8",kg:"80"},{r:"7",kg:"80"}]}]}]));
     localStorage.setItem("atlas-rank",JSON.stringify({bw:80,man:[]}))});

@@ -13,7 +13,8 @@ node tests/modos.js                      # Atlas › seletor de modos: arrastar,
 node tests/paginas.js                    # arrastar para o lado passa de página em página, a página segue o dedo, vibra (e não no boneco/campos)
 node tests/abas.js                       # barras de abas: a pílula desliza ao tocar e segue o dedo ao arrastar
 node tests/reordenar.js                  # Meus treinos: segurar a alça ≡ e arrastar muda a ordem
-node tests/tres-d.js                     # boneco 3D: botão, limites da câmera, toque igual ao 2D, Grupos/Cardio, juntas em Articulações, botão pequeno com lista, ♀ troca para o corpo feminino; ⤢ fora do celular (sem internet: THREE_DIR=<pasta do three@0.160.0>)
+node tests/tres-d.js                     # boneco 3D: botão, limites da câmera, toque igual ao 2D, Grupos/Cardio, juntas em Articulações, botão pequeno com lista, ♀ troca para o corpo feminino e tocar nos seios (aura translúcida) escolhe o peitoral; ⤢ fora do celular (sem internet: THREE_DIR=<pasta do three@0.160.0>)
+node tests/boneco-padrao.js              # o Atlas abre em 3D sem o botão; Configurações › Boneco do Atlas: só 2D, 2D e 3D (botão aparece), só 3D; fica salvo (sem internet: THREE_DIR=…)
 node tests/grupos.js                     # Atlas › Grupos: 6 cores, lista que abre, destaque sem abrir exercícios, idiomas
 node tests/treinos-famosos.js           # Treinos dos famosos: exercícios/variações válidos, filtros, programa todo, idiomas
 node tests/janelas.js                   # Montar treino, Trocar, Treinos prontos, Cartão para Stories
@@ -38,3 +39,5 @@ node tests/i18n-coleta.js pt && node tests/i18n-coleta.js en && node tests/i18n-
 - Cada teste termina com `errs []` (ou `erros []`) quando a página não teve erros. Erros `ERR_TUNNEL_CONNECTION_FAILED` são só fontes da web bloqueadas no ambiente de teste.
 - Os outros testes marcam `atlas-intro` com `addInitScript`, para o carrossel de boas-vindas não cobrir a tela. Teste novo: faça o mesmo.
 - Os testes apagam o `localStorage` da página de teste e semeiam dados de exemplo; não use contra o seu celular.
+
+Desde a 0.17 o app abre no 3D: os testes começam em 2D porque o `addInitScript` grava `fig:"2d"` no `atlas-conf` (o `tres-d.js` usa `"both"`). Em teste novo, copie essa linha.

@@ -4,7 +4,7 @@ const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=requir
 const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const errs=[];let bad=0;
 for(const th of ['dark','light']){const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,colorScheme:th,locale:'pt-BR',timezoneId:'America/Sao_Paulo'});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
 await p.goto(BASE);await p.waitForTimeout(600);
 await p.evaluate(()=>{const names=["Supino reto","Remada curvada","Agachamento","Rosca direta"];
   plans=[{id:"t1",name:"Teste",days:[],items:names.map(n=>({name:n,sets:3,reps:"8-12"}))}];savePlans();openPlan="t1";fView="meus";setTab("ficha")});

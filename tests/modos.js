@@ -4,7 +4,7 @@ const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=requir
 const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const errs=[];let bad=0;
 for(const th of ['dark','light']){const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,colorScheme:th,locale:'pt-BR'});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on('pageerror',e=>errs.push(e.message));
 await p.goto(BASE);await p.waitForTimeout(600);
 const st=()=>p.evaluate(()=>({mode:curMode(),mid:(()=>{const t=document.getElementById('msTrack'),c=t.getBoundingClientRect(),x=c.left+c.width/2;return [...t.querySelectorAll('[data-mode]')].find(b=>{const r=b.getBoundingClientRect();return r.left<=x&&r.right>=x})?.dataset.mode})(),
   dot:[...document.querySelectorAll('#modeSw .ms-dots i')].findIndex(d=>d.classList.contains('on')),order:[...document.querySelectorAll('#msTrack [data-mode]')].map(b=>b.dataset.mode).join(',')}));

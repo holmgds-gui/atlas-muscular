@@ -4,7 +4,7 @@ const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch();const errs=[];
 for(const [loc,theme] of [['pt-BR','light'],['es-ES','dark']]){
 const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,locale:loc,colorScheme:theme,timezoneId:'America/Sao_Paulo'});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(loc+' '+e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on('pageerror',e=>errs.push(loc+' '+e.message));
 await p.goto(BASE);await p.evaluate(()=>{localStorage.clear()});await p.reload();await p.waitForTimeout(600);
 // 1 build -> train now
 await p.evaluate(()=>startBuild());await p.waitForTimeout(200);

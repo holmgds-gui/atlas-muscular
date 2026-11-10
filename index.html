@@ -28,7 +28,7 @@ img{max-width:100%}
 :root{
   --bg:#E9ECEF; --surface:#F7F8F9; --ink:#1A1F26; --muted:#5B6470; --line:#CDD2D8;
   --skin:#D6DADF; --fig-skin:#CDD3DA; --fig-art:#DCE0E5; --fig-art2:#C9D0D7; --m:#AEB6C0; --m-hi:#C3CAD2; --m-lo:#97A0AB; --m-edge:#E9ECEF; --fiber:rgba(26,31,38,.13);
-  --v3-m:#AEB6C0; --v3-mlo:#9AA3AE; --v3-bone:#D3CFC6; --v3-sep:#5E6672; --v3-sepa:.42; --v3-fib:#6E7782; --v3-base:#9AA3AE; --v3-hov:#C9CFD6;
+  --v3-m:#AEB6C0; --v3-mlo:#9AA3AE; --v3-bone:#D3CFC6; --v3-sep:#5E6672; --v3-sepa:.42; --v3-fib:#6E7782; --v3-base:#9AA3AE; --v3-hov:#C9CFD6; --v3-aura:#5D7FA6;
   --target:#D3222A; --target-hi:#F04A50; --target-lo:#A0141B;
   --syn:#F08A24; --syn-soft:rgba(240,138,36,.55); --c-l:#EFCB5A; --c-m:#F08A24; --c-f:#D3222A;
   --gp-peito:#2F7FD8; --gp-ombros:#0E9C9C; --gp-bracos:#8A55D6; --gp-core:#C99A00; --gp-pernas:#2E9E5B; --gp-costas:#D0569A;
@@ -39,7 +39,7 @@ img{max-width:100%}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
   --skin:#1E242C; --fig-skin:#5E6976; --fig-art:#2F3741; --fig-art2:#3A444F; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
-  --v3-m:#5A6674; --v3-mlo:#46515E; --v3-bone:#6F6C66; --v3-sep:#0B0E12; --v3-sepa:.5; --v3-fib:#2A323C; --v3-base:#444F5C; --v3-hov:#76838F;
+  --v3-m:#5A6674; --v3-mlo:#46515E; --v3-bone:#6F6C66; --v3-sep:#0B0E12; --v3-sepa:.5; --v3-fib:#2A323C; --v3-base:#444F5C; --v3-hov:#76838F; --v3-aura:#C8D6E6;
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5); --c-l:#D9B85A; --c-m:#F59A3C; --c-f:#E8343B;
   --gp-peito:#4F9BEF; --gp-ombros:#2CC2BF; --gp-bracos:#A577F0; --gp-core:#E6BC2A; --gp-pernas:#44BF77; --gp-costas:#EA79B6;
@@ -47,7 +47,7 @@ img{max-width:100%}
 :root[data-theme="dark"]{
   --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
   --skin:#1E242C; --fig-skin:#5E6976; --fig-art:#2F3741; --fig-art2:#3A444F; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
-  --v3-m:#5A6674; --v3-mlo:#46515E; --v3-bone:#6F6C66; --v3-sep:#0B0E12; --v3-sepa:.5; --v3-fib:#2A323C; --v3-base:#444F5C; --v3-hov:#76838F;
+  --v3-m:#5A6674; --v3-mlo:#46515E; --v3-bone:#6F6C66; --v3-sep:#0B0E12; --v3-sepa:.5; --v3-fib:#2A323C; --v3-base:#444F5C; --v3-hov:#76838F; --v3-aura:#C8D6E6;
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5); --c-l:#D9B85A; --c-m:#F59A3C; --c-f:#E8343B;
   --gp-peito:#4F9BEF; --gp-ombros:#2CC2BF; --gp-bracos:#A577F0; --gp-core:#E6BC2A; --gp-pernas:#44BF77; --gp-costas:#EA79B6;
@@ -2322,7 +2322,7 @@ const LS={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.pa
           set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 /* app settings (Configurações). Some are saved but not active yet; see renderConf. */
-const CONF_DEF={name:"",age:null,height:null,exp:"",theme:"auto",accent:"",fs:"m",noanim:false,lang:null,unit:"kg",sets:3,reps:"8-12",rest:90,goal:0,remind:false,rdays:[0,2,4],rtime:"18:00",sound:true,vibe:true};
+const CONF_DEF={name:"",age:null,height:null,exp:"",theme:"auto",accent:"",fs:"m",noanim:false,lang:null,unit:"kg",sets:3,reps:"8-12",rest:90,goal:0,remind:false,rdays:[0,2,4],rtime:"18:00",sound:true,vibe:true,fig:"3d"};
 let CONF=(()=>{const c=LS.get("atlas-conf",null);return {...CONF_DEF,...(c&&typeof c==="object"?c:{})}})();
 const saveConf=()=>{if(!LS.set("atlas-conf",CONF))toast("Não foi possível salvar neste aparelho")};
 function applyConf(){
@@ -2557,7 +2557,9 @@ function v3state(){const s={},gp=svg.classList.contains("grp");
     if(gp&&!o.c&&g.dataset.gp){o.c=getComputedStyle(document.documentElement).getPropertyValue("--gp-"+g.dataset.gp).trim();o.dim=svg.classList.contains("ghl")&&!g.classList.contains("ghi")}});return s}
 function v3sync(){if(V3&&v3on)V3.sync(v3state())}
 {const p0=paint;paint=function(){p0.apply(this,arguments);v3sync()}}
-function v3ui(){const a=$("tab-atlas"),b=$("b3d"),art=model==="art";b.hidden=false;
+/* owner (0.17): the Atlas opens in 3D; Configurações › Boneco do Atlas = só 2D, só 3D (default) or 2D e 3D (only then the
+   2D/3D button shows) */
+function v3ui(){const a=$("tab-atlas"),b=$("b3d"),art=model==="art";b.hidden=CONF.fig!=="both";
   b.textContent=v3on?"2D":"3D";b.setAttribute("aria-pressed",String(v3on));b.title=b.ariaLabel=v3on?tx("Voltar para o boneco 2D","Back to the 2D figure","Volver al muñeco 2D"):tx("Ver o boneco em 3D","See the figure in 3D","Ver el muñeco en 3D");
   a.classList.toggle("is3d",v3on);$("v3").hidden=!v3on;
   $("v3hint").textContent=art?tx("Arraste para girar · toque numa articulação","Drag to turn · tap a joint","Arrastra para girar · toca una articulación"):tx("Arraste para girar · toque num músculo","Drag to turn · tap a muscle","Arrastra para girar · toca un músculo")}
@@ -2565,7 +2567,7 @@ function v3ui(){const a=$("tab-atlas"),b=$("b3d"),art=model==="art";b.hidden=fal
 const v3loading=()=>{const L=$("v3load");L.hidden=false;
   L.innerHTML=`<span>${tx("Carregando o corpo 3D…","Loading the 3D body…","Cargando el cuerpo 3D…")}</span><span class="v3bar"><i id="v3bar"></i></span><small>${tx("Só na primeira vez (4 MB)","Only the first time (4 MB)","Solo la primera vez (4 MB)")}</small>`};
 function v3sex(){if(!V3||!V3.sexNow||V3.sexNow()===sex)return;v3busy=true;v3loading();V3.sex(sex)}
-async function set3D(on){v3on=on;v3ui();if(!on)return;buzz();
+async function set3D(on,quiet){v3on=on;v3ui();if(!on)return;if(!quiet)buzz();
   if(V3){V3.view(view==="back"?"back":"front");v3sync();v3sex();return}
   if(v3busy)return;v3busy=true;v3loading();const L=$("v3load");
   const fail=()=>{L.hidden=false;L.innerHTML=`<span>${tx("Não deu para carregar o 3D. Confira a internet e toque em 3D de novo.","Couldn't load the 3D body. Check the internet and tap 3D again.","No se pudo cargar el 3D. Revisa internet y toca 3D otra vez.")}</span>`;
@@ -2578,6 +2580,8 @@ async function set3D(on){v3on=on;v3ui();if(!on)return;buzz();
       ready:()=>{$("v3load").hidden=true;v3busy=false;if(V3){V3.view(view==="back"?"back":"front");v3sync()}},fail})}
   catch(e){fail()}}
 $("b3d").addEventListener("click",()=>set3D(!v3on));
+function applyFig(start){if(CONF.fig==="2d"){if(v3on)set3D(false);else v3ui()}else if(!v3on&&(start||CONF.fig==="3d"||!V3))set3D(true,true);else v3ui()}
+setTimeout(()=>applyFig(true),0);
 $("v3").addEventListener("pointerdown",()=>{$("v3hint").hidden=true});   /* the hint goes away once the body is touched */
 
 function chips(){
@@ -4981,6 +4985,7 @@ function renderConf(){
     ${cfRow("Tema","",cfSeg("theme",[["auto","Automático"],["light","Claro"],["dark","Escuro"]],c.theme,"Tema"),false,1)}
     ${cfRow("Cor de destaque","Título, aba atual e botões de destaque. O músculo-alvo continua vermelho.",`<div class="cf-dots" role="group" aria-label="Cor de destaque">${ACCENTS.map(([v,t,css])=>`<button data-cf="accent" data-v="${v}" aria-pressed="${c.accent===v}" aria-label="${t}" title="${t}" style="background:${css||v}"></button>`).join("")}</div>`,false,1)}
     ${cfRow("Tamanho da letra","",cfSeg("fs",[["s","Pequena"],["m","Normal"],["l","Grande"]],c.fs,"Tamanho da letra"),false,1)}
+    ${cfRow(tx("Boneco do Atlas","Atlas figure","Muñeco del Atlas"),tx("Com 2D e 3D, um botão no canto do boneco troca entre os dois.","With 2D and 3D, a button in the corner of the figure switches between them.","Con 2D y 3D, un botón en la esquina del muñeco cambia entre los dos."),cfSeg("fig",[["2d",tx("Só 2D","2D only","Solo 2D")],["3d",tx("Só 3D","3D only","Solo 3D")],["both",tx("2D e 3D","2D and 3D","2D y 3D")]],c.fig,tx("Boneco do Atlas","Atlas figure","Muñeco del Atlas")),false,1)}
     ${cfRow("Reduzir animações","Desliga as transições.",cfSw("noanim",c.noanim))}
     ${cfRow("Idioma","",`<select class="inp cf-in" data-cfsel="lang" data-notr><option value="pt"${LANG==="pt"?" selected":""}>Português</option><option value="en"${LANG==="en"?" selected":""}>English</option><option value="es"${LANG==="es"?" selected":""}>Español</option></select>`)}
   </div>
@@ -5033,6 +5038,7 @@ $("confBody").addEventListener("click",e=>{
   const b=e.target.closest("[data-cf]");
   if(b){const k=b.dataset.cf,v=b.dataset.v;
     if(k==="sex"){setSex(v)}
+    else if(k==="fig"){cfSet(k,v);applyFig(false)}
     else if(k==="goal"||k==="rest")cfSet(k,+v);
     else cfSet(k,k==="exp"&&CONF.exp===v?"":v);
     return renderConf()}
@@ -5220,20 +5226,23 @@ function introSlides(){
       <p class="in-note">${ios?tx("No iPhone, o app instalado começa do zero: instale <b>antes</b> de anotar seus treinos. ","On iPhone the installed app starts fresh: install it <b>before</b> logging workouts. ","En iPhone la app instalada empieza de cero: instálala <b>antes</b> de anotar tus entrenos. "):""}${tx("Seus dados ficam só neste aparelho.","Your data stays on this device only.","Tus datos se quedan solo en este dispositivo.")}</p>`);
   }
   S.push(`${img("atlas")}<h2>${tx("Toque num músculo","Tap a muscle","Toca un músculo")}</h2>
-    <p>${tx("Ele fica vermelho e aparece a lista de exercícios, do que <b>mais estimula</b> para o que menos, com o tipo de estudo de cada um.","It turns red and you get the list of exercises, from the <b>most stimulating</b> down, with the kind of study behind each one.","Se pone rojo y aparece la lista de ejercicios, del que <b>más estimula</b> al que menos, con el tipo de estudio de cada uno.")}</p>`);
+    <p>${tx("O corpo é <b>3D</b>: gire com um dedo e aproxime com dois. Toque num músculo: ele fica vermelho e aparece a lista de exercícios, do que <b>mais estimula</b> para o que menos.","The body is <b>3D</b>: turn it with one finger, zoom with two. Tap a muscle: it turns red and you get the list of exercises, from the <b>most stimulating</b> down.","El cuerpo es <b>3D</b>: gíralo con un dedo y acércalo con dos. Toca un músculo: se pone rojo y aparece la lista de ejercicios, del que <b>más estimula</b> al que menos.")}</p>
+    <p class="in-hint">${tx("Corpo masculino ou feminino no botão ♂/♀. Prefere o desenho 2D? Escolha em Configurações › Boneco do Atlas.","Male or female body with the ♂/♀ button. Prefer the 2D drawing? Pick it in Settings › Atlas figure.","Cuerpo masculino o femenino con el botón ♂/♀. ¿Prefieres el dibujo 2D? Elígelo en Ajustes › Muñeco del Atlas.")}</p>`);
   S.push(`${img("ex")}<h2>${tx("Escolha o exercício","Pick the exercise","Elige el ejercicio")}</h2>
     <p>${tx("Os músculos que ajudam ficam <b>laranja</b>. Troque pegada, banco ou equipamento e veja o que muda. Em <b>Como fazer</b> tem o passo a passo.","Helper muscles turn <b>orange</b>. Change grip, bench or equipment and see what changes. <b>How to do it</b> has the step by step.","Los músculos que ayudan se ponen <b>naranjas</b>. Cambia agarre, banco o equipo y mira qué cambia. En <b>Cómo hacerlo</b> está el paso a paso.")}</p>`);
+  S.push(`${img("modos")}<h2>${tx("Quatro jeitos de ver","Four ways to look","Cuatro formas de ver")}</h2>
+    <p>${tx("Arraste a faixa no topo do Atlas: <b>Músculos</b>, <b>Grupos</b> (peito, costas, pernas… cada um de uma cor), <b>Articulações</b> (aquecimento, mobilidade e alongamento) e <b>Cardio</b>.","Swipe the strip at the top of the Atlas: <b>Muscles</b>, <b>Groups</b> (chest, back, legs… each in its own colour), <b>Joints</b> (warm-up, mobility and stretching) and <b>Cardio</b>.","Desliza la franja de arriba del Atlas: <b>Músculos</b>, <b>Grupos</b> (pecho, espalda, piernas… cada uno de un color), <b>Articulaciones</b> (calentamiento, movilidad y estiramiento) y <b>Cardio</b>.")}</p>`);
   S.push(`${img("cardio")}<h2>${tx("Cardio também","Cardio too","Cardio también")}</h2>
-    <p>${tx("No botão <b>Cardio</b> do Atlas: corrida, bike, boxe, dança e mais, do que mais gasta para o que menos, com os músculos de cada um. Registre em <b>Hoje › + Registrar cardio</b> ou ponha no treino.","In the Atlas <b>Cardio</b> button: running, cycling, boxing, dancing and more, from the biggest burner down, with the muscles each one works. Log it in <b>Today › + Log cardio</b> or add it to a workout.","En el botón <b>Cardio</b> del Atlas: carrera, bici, boxeo, baile y más, del que más gasta al que menos, con los músculos de cada uno. Regístralo en <b>Hoy › + Registrar cardio</b> o ponlo en el entreno.")}</p>`);
+    <p>${tx("No modo <b>Cardio</b> do Atlas: corrida, bike, boxe, dança e mais, do que mais gasta para o que menos, com os músculos de cada um. Registre em <b>Hoje › + Registrar cardio</b> ou ponha no treino.","In the Atlas <b>Cardio</b> mode: running, cycling, boxing, dancing and more, from the biggest burner down, with the muscles each one works. Log it in <b>Today › + Log cardio</b> or add it to a workout.","En el modo <b>Cardio</b> del Atlas: carrera, bici, boxeo, baile y más, del que más gasta al que menos, con los músculos de cada uno. Regístralo en <b>Hoy › + Registrar cardio</b> o ponlo en el entreno.")}</p>`);
   S.push(`${img("prontos")}<h2>${tx("Treinos prontos ou do seu jeito","Ready-made or your own","Entrenos listos o a tu manera")}</h2>
-    <p>${tx("Na aba <b>Treinos</b>, pegue um treino pronto (iniciante ou avançado) ou monte o seu. No boneco, <b>Montar treino</b> monta um com os músculos que você tocar.","In <b>Workouts</b>, grab a ready-made plan (beginner or advanced) or build your own. On the figure, <b>Build a workout</b> makes one from the muscles you tap.","En <b>Entrenos</b>, toma un entreno listo (principiante o avanzado) o arma el tuyo. En el muñeco, <b>Armar entreno</b> arma uno con los músculos que toques.")}</p>`);
+    <p>${tx("Em <b>Treinos › Treinos prontos</b> tem treinos do app (iniciante ou avançado) e os <b>treinos dos famosos</b>, com filtros por tipo e músculo. Em <b>Meus treinos</b>, monte o seu ou use <b>Montar pelo boneco</b>.","In <b>Workouts › Ready-made</b> you'll find the app's plans (beginner or advanced) and <b>workouts from the famous</b>, with filters by type and muscle. In <b>My workouts</b>, build your own or use <b>Build on the figure</b>.","En <b>Entrenos › Entrenos listos</b> hay entrenos de la app (principiante o avanzado) y los <b>entrenos de los famosos</b>, con filtros por tipo y músculo. En <b>Mis entrenos</b>, arma el tuyo o usa <b>Armar en el muñeco</b>.")}</p>`);
   S.push(`${img("live")}<h2>${tx("Treine ao vivo","Train live","Entrena en vivo")}</h2>
     <p>${tx("Em <b>Hoje › Ao vivo</b>, siga série a série: o app conta o descanso, sugere a próxima carga e avisa quando você bate um recorde. Com pressa? Só <b>Marcar como feito</b>.","In <b>Today › Live</b>, go set by set: the app times your rest, suggests the next load and tells you when you hit a record. In a hurry? Just <b>Mark as done</b>.","En <b>Hoy › En vivo</b>, sigue serie a serie: la app cuenta el descanso, sugiere la próxima carga y avisa cuando logras un récord. ¿Con prisa? Solo <b>Marcar como hecho</b>.")}</p>`);
   S.push(`<div class="in-duo">${img("prog")}${img("cprog")}</div><h2>${tx("Veja o que você treinou","See what you trained","Mira lo que entrenaste")}</h2>
     <p>${tx("Em <b>Progresso</b>, o mapa mostra quanto cada músculo trabalhou na semana e se está na faixa ideal. Embaixo, os minutos de cardio e a meta da OMS.","In <b>Progress</b>, the map shows how much each muscle worked this week and whether it's in the ideal range. Below, your cardio minutes and the WHO goal.","En <b>Progreso</b>, el mapa muestra cuánto trabajó cada músculo en la semana y si está en el rango ideal. Abajo, los minutos de cardio y la meta de la OMS.")}</p>`);
   S.push(`<div class="in-duo">${img("rank")}${img("ach")}</div><h2>${tx("Seu nível e suas conquistas","Your level and badges","Tu nivel y tus logros")}</h2>
     <p>${tx("Do <b>Ameba</b> ao <b>Bizarro</b>: compare sua força em Progresso › Força. As <b>conquistas</b> ficam no troféu 🏆 ao lado do nome; faça 3 treinos por semana para manter o 🔥.","From <b>Amoeba</b> to <b>Freak</b>: compare your strength in Progress › Strength. <b>Badges</b> live in the 🏆 trophy next to the name; do 3 workouts a week to keep the 🔥 going.","De <b>Ameba</b> a <b>Fenómeno</b>: compara tu fuerza en Progreso › Fuerza. Los <b>logros</b> están en el trofeo 🏆 junto al nombre; haz 3 entrenos por semana para mantener el 🔥.")}</p>
-    <p class="in-hint">${tx("Dúvida em alguma tela? Toque no <b>+</b> ao lado do título.","Unsure about a screen? Tap the <b>+</b> next to its title.","¿Dudas en alguna pantalla? Toca el <b>+</b> junto al título.")}</p>`);
+    <p class="in-hint">${tx("Arraste para o lado para passar de página. Dúvida em alguma tela? Toque no <b>+</b> ao lado do título.","Swipe sideways to change page. Unsure about a screen? Tap the <b>+</b> next to its title.","Desliza hacia el lado para cambiar de página. ¿Dudas en alguna pantalla? Toca el <b>+</b> junto al título.")}</p>`);
   return S;
 }
 function openIntro(){

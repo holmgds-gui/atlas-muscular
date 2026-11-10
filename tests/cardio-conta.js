@@ -4,10 +4,10 @@ const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=requir
 const {chromium}=require("playwright");
 (async()=>{const b=await chromium.launch();const errs=[],bad=[];
 const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,timezoneId:"America/Sao_Paulo",locale:"pt-BR"});
-const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on("pageerror",e=>errs.push(e.message));
+const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});p.on("pageerror",e=>errs.push(e.message));
 await p.clock.setFixedTime(new Date("2026-11-07T10:00:00-03:00")); // sábado
 await p.goto(BASE);await p.waitForTimeout(300);
-await p.evaluate(()=>{localStorage.clear();localStorage.setItem("atlas-intro","1");
+await p.evaluate(()=>{localStorage.clear();localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}};
   const f=FAMBY.supino,sel={...f.d},str=d=>({id:"s"+d,date:d,title:"Peito",done:true,notes:"",items:[{name:vName(f,sel),ref:mkRef(f,sel),target:"8-12",notes:"",sets:[{r:"8",kg:"80"}]}]});
   const car=(d,k,min,int,id)=>({id:id||"c"+d+k,date:d,title:"Cardio",done:true,notes:"",items:[{name:k,ref:"cardio:"+k,target:"",notes:"",sets:[{min:String(min),km:"",int,ok:true}]}]});
   const W=[
