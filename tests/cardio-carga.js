@@ -50,7 +50,7 @@ for(const [loc,theme] of [["pt-BR","light"],["es-ES","dark"]]){
   await p.click('[data-lv="pickEx"][data-i="0"]');await p.click('[data-lv="setDone"]');await p.waitForTimeout(100);
   await p.click('[data-lv="finish"]');await p.waitForTimeout(200);await p.click('[data-lv="sumOk"]');
   // 5. + Registrar cardio
-  await p.click('[data-hv="reg"]');await p.click('[data-act="cardio"]');await p.waitForTimeout(150);
+  await p.click('[data-hv="reg"]');await p.click('[data-act="addMenu"]');await p.waitForTimeout(150);await p.click('#gBody [data-g="cardio"]');await p.waitForTimeout(150);
   await p.click('[data-g="ck"][data-k="bike"]');await p.fill("#cqMin","40");await p.fill("#cqKm","15");await p.click('[data-g="ci"][data-v="l"]');await p.waitForTimeout(100);
   await shot("4-registrar-cardio");
   await p.click('[data-g="save"]');await p.waitForTimeout(300);

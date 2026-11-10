@@ -7,10 +7,10 @@ for(const [loc,th] of [['pt-BR','dark'],['pt-BR','light'],['en-US','light'],['es
 const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,locale:loc,colorScheme:th});
 const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(loc+' '+e.message));
 await p.goto(BASE);await p.waitForTimeout(500);
-await p.tap('#grpTgl');await p.waitForTimeout(250);
+await p.tap('[data-mode="grp"]');await p.waitForTimeout(250);
 const a=await p.evaluate(()=>{const f=document.getElementById('fig');const ms=[...f.querySelectorAll('[data-m]')];
   return {grp:f.classList.contains('grp'),nogp:ms.filter(e=>!e.dataset.gp).map(e=>e.dataset.m),cols:new Set(ms.map(e=>getComputedStyle(e.querySelector('.m')).fill)).size,
-    rows:document.querySelectorAll('.gl-h').length,covered:document.getElementById('tab-atlas').classList.contains('covered'),btn:document.getElementById('grpTgl').textContent}});
+    rows:document.querySelectorAll('.gl-h').length,covered:document.getElementById('tab-atlas').classList.contains('covered'),btn:document.querySelector('[data-mode="grp"]').textContent}});
 console.log(loc,th,JSON.stringify(a));if(!a.grp||a.nogp.length||a.rows!==6||a.cols<6||a.covered)bad++;
 await p.screenshot({path:`${OUT}/grupos-${loc}-${th}-0.png`});
 await p.tap('[data-gk="bracos"]');await p.waitForTimeout(250);
@@ -24,7 +24,7 @@ await p.evaluate(()=>{const e=document.querySelector('#fig [data-m="peito_medial
 const d=await p.evaluate(()=>({open:document.querySelector('.gl-h[aria-expanded="true"]')?.dataset.gk,hi:[...document.querySelectorAll('#fig .ghi')].map(e=>e.dataset.m)}));
 console.log(' toque no boneco:',JSON.stringify(d));if(d.open!=='peito')bad++;
 await p.tap('#clear');await p.waitForTimeout(200);
-const e=await p.evaluate(()=>({grp:document.getElementById('fig').classList.contains('grp'),pressed:document.getElementById('grpTgl').getAttribute('aria-pressed')}));if(e.grp||e.pressed!=='false')bad++;
+const e=await p.evaluate(()=>({grp:document.getElementById('fig').classList.contains('grp'),pressed:document.querySelector('[data-mode="grp"]').getAttribute('aria-pressed')}));if(e.grp||e.pressed!=='false')bad++;
 // a normal muscle tap still works after leaving
 await p.evaluate(()=>selectMuscle('biceps_longa'));await p.waitForTimeout(200);
 if(!(await p.evaluate(()=>!!document.querySelector('#body .ex'))))bad++;

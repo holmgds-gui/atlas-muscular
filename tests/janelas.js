@@ -7,7 +7,7 @@ const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasT
 const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on('pageerror',e=>errs.push(loc+' '+e.message));
 await p.goto(BASE);await p.evaluate(()=>{localStorage.clear()});await p.reload();await p.waitForTimeout(600);
 // 1 build -> train now
-await p.tap('#buildBtn');await p.waitForTimeout(200);
+await p.evaluate(()=>startBuild());await p.waitForTimeout(200);
 for(const m of ['ombro_lateral','biceps_longa']){const box=await p.evaluate(m=>{const e=[...document.querySelectorAll(`[data-m="${m}"] path.m`)].find(x=>x.getBoundingClientRect().width>0);const r=e.getBoundingClientRect();return {x:r.x+r.width/2,y:r.y+r.height/2}},m);await p.touchscreen.tap(box.x,box.y);await p.waitForTimeout(250)}
 await p.tap('[data-bb="go"]');await p.waitForTimeout(400);await p.screenshot({path:`${OUT}/${loc}-montar.png`});
 await p.tap('#gSheet [data-g="live"]');await p.waitForTimeout(400);

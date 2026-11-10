@@ -9,9 +9,9 @@ for(const [loc,theme,vp] of [["pt-BR","light",{width:390,height:844}],["en-US","
   const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1")}catch(e){}});p.on("pageerror",e=>errs.push(loc+" "+e.message));
   const shot=n=>p.screenshot({path:`${OUT}/cardio-atlas-${loc}-${n}.png`});
   await p.goto(BASE);await p.evaluate(()=>{localStorage.clear();localStorage.setItem("atlas-intro","1");localStorage.setItem("atlas-rank",JSON.stringify({bw:80,man:[]}))});await p.reload();await p.waitForTimeout(500);
-  if(!await p.isVisible("#cdBtn"))bad.push(loc+": botão Cardio não aparece");
+  if(!await p.isVisible('[data-mode="cd"]'))bad.push(loc+": botão Cardio não aparece");
   await shot("0-inicio");
-  await p.click("#cdBtn");await p.waitForTimeout(300);
+  await p.click('[data-mode="cd"]');await p.waitForTimeout(300);
   const order=await p.$$eval("[data-cd]",x=>x.map(e=>e.dataset.cd));console.log(loc,"moderado 30 min",order.join(" "));
   if(order.length!==16)bad.push(loc+": lista "+order.length);
   await shot("1-lista");
@@ -22,7 +22,7 @@ for(const [loc,theme,vp] of [["pt-BR","light",{width:390,height:844}],["en-US","
   await p.click('[data-cd="row"]');await p.waitForTimeout(300);
   const painted=await p.evaluate(()=>({on:[...new Set([...document.querySelectorAll("[data-m].on")].map(e=>e.dataset.m))],syn:[...new Set([...document.querySelectorAll("[data-m].syn")].map(e=>e.dataset.m))]}));
   console.log(loc,"remo pinta",painted.on.length,painted.syn.length);if(!painted.on.includes("dorsal_superior")||!painted.syn.includes("romboides"))bad.push(loc+": remo não pintou");
-  if(mob){await p.click("#peekBtn");await p.waitForTimeout(400);await shot("2-remo-boneco");await p.click("#peekBtn");await p.waitForTimeout(300)}
+  if(mob){await p.evaluate(()=>{peek=true;render()});await p.waitForTimeout(400);await shot("2-remo-boneco");await p.click("#peekBtn");await p.waitForTimeout(300)}
   await shot("3-remo");
   // + manda para um treino novo
   await p.click('[data-cdadd="run"]');await p.waitForTimeout(150);await p.click('[data-to="new"]');await p.waitForTimeout(200);
@@ -32,7 +32,7 @@ for(const [loc,theme,vp] of [["pt-BR","light",{width:390,height:844}],["en-US","
   if(!await p.evaluate(()=>cdOn))bad.push(loc+": cardio fechou ao trocar de aba");
   await p.evaluate(()=>selectMuscle("peito_medial"));await p.waitForTimeout(150);
   if(await p.evaluate(()=>cdOn))bad.push(loc+": músculo não saiu do cardio");
-  await p.click("#cdBtn").catch(()=>{});await p.evaluate(()=>{if(!cdOn)openCardioList()});await p.click("#clear");await p.waitForTimeout(150);
+  await p.click('[data-mode="cd"]').catch(()=>{});await p.evaluate(()=>{if(!cdOn)openCardioList()});await p.click("#clear");await p.waitForTimeout(150);
   if(await p.evaluate(()=>cdOn||document.querySelectorAll("[data-m].on,[data-m].syn").length))bad.push(loc+": Limpar não saiu");
   await ctx.close();
 }

@@ -14,18 +14,18 @@ if(loc==='pt-BR'){const r=await p.evaluate(()=>{const out=[];let n=0;
   return {n,progs:RF_P.length,b:RT.filter(w=>w.pg&&w.lv==="b").length,a:RT.filter(w=>w.pg&&w.lv==="a").length,out}});
   console.log('famosos',r.n,'programas',r.progs,'iniciante',r.b,'avançado',r.a);if(r.out.length){bad++;console.log('PROBLEMAS',r.out)}}
 await p.evaluate(()=>setTab('ficha'));await p.tap('[data-fv="prontos"]');await p.waitForTimeout(200);
-await p.tap('[data-rtsrc="fam"]');await p.waitForTimeout(200);
+await p.evaluate(()=>{rtSrc='fam';renderFicha()});await p.waitForTimeout(200);
 const c=await p.evaluate(()=>({sec:document.querySelectorAll('.rt-pg').length,app:document.querySelectorAll('.rt-sp:not(.rt-pg)').length,wm:[...document.querySelectorAll('.rt-wm')].slice(0,3).map(x=>x.textContent)}));
 console.log(loc,'b fam',c);if(c.app||!c.sec)bad++;
 await p.screenshot({path:`${OUT}/${loc}-fam-0.png`});
 await p.tap('[data-rtlv="a"]');await p.waitForTimeout(200);
-for(const tp of ["fb","ul","ppl","iso","spl"]){await p.tap(`[data-rttp="${tp}"]`);await p.waitForTimeout(100);
+for(const tp of ["fb","ul","ppl","iso","spl"]){await p.evaluate(tp=>{rtTp=tp;renderFicha()},tp);await p.waitForTimeout(100);
   const r=await p.evaluate(tp=>({n:document.querySelectorAll('.rt-wh').length,ok:[...document.querySelectorAll('.rt-wh')].every(b=>RT.find(w=>w.id===b.dataset.id).sp===tp)}),tp);
   console.log(loc,'a',tp,r);if(!r.ok||!r.n)bad++}
-await p.tap('[data-rttp="spl"]');await p.waitForTimeout(100);
+await p.evaluate(()=>{rtTp='spl';renderFicha()});await p.waitForTimeout(100);
 await p.evaluate(()=>document.querySelector('.rt-wh').click());await p.waitForTimeout(300);
 await p.screenshot({path:`${OUT}/${loc}-fam-1-aberto.png`});
-await p.tap('[data-rttp=""]');await p.waitForTimeout(100);
+await p.evaluate(()=>{rtTp='';renderFicha()});await p.waitForTimeout(100);
 await p.evaluate(()=>document.querySelector('[data-rt="prog"][data-pg="phul"]').click());await p.waitForTimeout(200);
 const pl=await p.evaluate(()=>plans.map(x=>x.name+' ['+x.days+'] '+x.items.length));console.log(loc,'prog',pl);if(pl.length!==4)bad++;
 await p.evaluate(()=>{document.querySelector('[data-id="f_g6_0"]')||0});

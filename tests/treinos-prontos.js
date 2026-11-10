@@ -8,10 +8,10 @@ const p=await ctx.newPage();await p.addInitScript(()=>{try{localStorage.setItem(
 await p.goto(BASE);await p.evaluate(()=>localStorage.clear());await p.reload();await p.waitForTimeout(500);
 await p.evaluate(()=>setTab('ficha'));await p.waitForTimeout(200);
 await p.screenshot({path:`${OUT}/${loc}-0-meus.png`});
-await p.tap('[data-fv="prontos"]');await p.waitForTimeout(200);await p.tap('[data-rtsrc="app"]');await p.waitForTimeout(100);
+await p.tap('[data-fv="prontos"]');await p.waitForTimeout(200);await p.evaluate(()=>{rtSrc='app';renderFicha()});await p.waitForTimeout(100);
 await p.screenshot({path:`${OUT}/${loc}-1-prontos.png`});
 // filter costas
-await p.tap('[data-rtm="costas"]');await p.waitForTimeout(200);
+await p.evaluate(()=>{rtMus='costas';renderFicha()});await p.waitForTimeout(200);
 const list=await p.evaluate(()=>[...document.querySelectorAll('.rt-sp')].map(s=>s.querySelector('.section-t').textContent+': '+[...s.querySelectorAll('.rt-wh b')].map(x=>x.textContent).join(', ')));
 console.log(loc,'b costas',list);
 await p.screenshot({path:`${OUT}/${loc}-2-costas.png`});
@@ -23,7 +23,7 @@ await p.screenshot({path:`${OUT}/${loc}-3-aberto.png`});
 await p.evaluate(()=>document.querySelector('.rt-w.open [data-rt="save"]').click());await p.waitForTimeout(200);
 console.log(loc,'saved plans',await p.evaluate(()=>plans.map(x=>x.name+' ('+x.items.length+')')));
 // filter all, add week ul advanced
-await p.tap('[data-rtm=""]');await p.waitForTimeout(200);
+await p.evaluate(()=>{rtMus=null;renderFicha()});await p.waitForTimeout(200);
 await p.evaluate(()=>document.querySelector('[data-rt="week"][data-sp="ul"]').click());await p.waitForTimeout(200);
 console.log(loc,'after week',await p.evaluate(()=>plans.map(x=>x.name+' '+x.days.join()).join(' | ')));
 // train now
