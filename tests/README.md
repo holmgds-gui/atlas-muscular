@@ -13,7 +13,7 @@ node tests/modos.js                      # Atlas › seletor de modos: arrastar,
 node tests/paginas.js                    # arrastar para o lado passa de página em página, a página segue o dedo, vibra (e não no boneco/campos)
 node tests/abas.js                       # barras de abas: a pílula desliza ao tocar e segue o dedo ao arrastar
 node tests/reordenar.js                  # Meus treinos: segurar a alça ≡ e arrastar muda a ordem
-node tests/tres-d.js                     # boneco 3D: botão, limites da câmera, toque igual ao 2D, Grupos/Cardio, juntas em Articulações, botão pequeno com lista, ♀; ⤢ fora do celular (sem internet: THREE_DIR=<pasta do three@0.160.0>)
+node tests/tres-d.js                     # boneco 3D: botão, limites da câmera, toque igual ao 2D, Grupos/Cardio, juntas em Articulações, botão pequeno com lista, ♀ troca para o corpo feminino e tocar no seio escolhe o peitoral; ⤢ fora do celular (sem internet: THREE_DIR=<pasta do three@0.160.0>)
 node tests/grupos.js                     # Atlas › Grupos: 6 cores, lista que abre, destaque sem abrir exercícios, idiomas
 node tests/treinos-famosos.js           # Treinos dos famosos: exercícios/variações válidos, filtros, programa todo, idiomas
 node tests/janelas.js                   # Montar treino, Trocar, Treinos prontos, Cartão para Stories

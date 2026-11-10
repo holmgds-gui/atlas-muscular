@@ -1,11 +1,13 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
-   in index.html; the model is 3d/corpo-4.glb (+ joint marks 3d/juntas-1.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
+   in index.html; the models are 3d/corpo-5.glb (male) and 3d/corpo-f-1.glb (female, Wellness, owner 0.15), each with its joint
+   marks (3d/juntas-2.json, 3d/juntas-f-1.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
    Atlas muscle keys, A-pose, Classic Physique upper body, proportional legs, skull, skin on hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
    the 2D figure shows for the rest (groups, cardio), and a tap here is passed back to the same code as a tap in 2D.
 
-   mount(box, api) → {sync(state), view(v), refit(), dispose()}
+   mount(box, api) → {sync(state), view(v), refit(), sex(s), dispose()}
+     api.sex()          — "m" | "f": which body to load first (sex(s) swaps it later)
      api.tap(key|null)  — a tap on a muscle (or on nothing)
      api.covered()      — true when the figure is the small one in the corner (taps only enlarge it, no rotating)
      api.progress(0..1), api.ready(), api.fail()                                                                     */
@@ -33,9 +35,12 @@ export function mount(box, api){
   const C={};const readColors=()=>{for(const [k,v] of [["m","--v3-m"],["mlo","--v3-mlo"],["bone","--v3-bone"],["sep","--v3-sep"],["fib","--v3-fib"],["base","--v3-base"],["hov","--v3-hov"],["target","--target"],["syn","--syn"],["art","--fig-art"],["art2","--fig-art2"],["surf","--surface"],["thi","--target-hi"]])C[k]=new THREE.Color(css(v)||"#888");
     C.sepA=parseFloat(css("--v3-sepa"))||.45};readColors();
 
-  const parts={},pickables=[],meshes=[];let state={},hov=null,hovJ=null;
+  const parts={},pickables=[],meshes=[];let state={},hov=null,hovJ=null,root=null,curSex=null;
+  /* the female breasts are split by the pectoral part under them ("mama_peito_medial"…): same colour, a tap on them is a tap on that part */
+  const BASEK=k=>k.startsWith("mama_")?k.slice(5):k;
   const jScene=new THREE.Scene(),jMarks=[],jFills=[];jScene.visible=false;
   const ringG=new THREE.RingGeometry(0.62,1,40),dotG=new THREE.CircleGeometry(0.64,40);
+  function clearJoints(){for(const g of jMarks){jScene.remove(g);g.children.forEach(c=>c.material.dispose())}jMarks.length=0;jFills.length=0}
   function addJoints(JT){for(const [j,pts] of Object.entries(JT))for(const p of pts){const g=new THREE.Group();g.position.set(p[0],p[1],p[2]);
     const mk=(geo,o)=>{const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({depthTest:false,depthWrite:false,transparent:true}));m.renderOrder=o;g.add(m);return m};
     const fill=mk(dotG,10),ring=mk(ringG,11);fill.userData.j=j;g.userData={j,fill,ring};jMarks.push(g);jFills.push(fill);jScene.add(g)}paint()}
@@ -60,7 +65,7 @@ export function mount(box, api){
       camera.position.set(Math.sin(ang)*dd,from.y+(to.y-from.y)*e,Math.cos(ang)*dd);controls.target.lerpVectors(ft,tt,e);need=true;if(k<1)requestAnimationFrame(step)})()}
 
   function paint(){const art=!!state.__art;
-    for(const [k,o] of Object.entries(parts)){const s=art?{}:state[k]||{};
+    for(const [k0,o] of Object.entries(parts)){const k=BASEK(k0),s=art?{}:state[k]||{};
     const c=art?(/^(osso|fundo|base|pele|tend)$/.test(k)?C.art:C.art2):s.on?C.target:s.syn?C.syn:k==="osso"?C.bone:k==="fundo"||k==="base"?C.base:k==="deco"||k==="tend"?C.mlo:k==="pele"?C.m:s.c?(s.dim?new THREE.Color(s.c).lerp(C.m,.75):new THREE.Color(s.c)):(k===hov?C.hov:C.m);
     if(o.userData.fu)o.userData.fu.value.copy(C.fib);baseU.value.copy(C.base);
     o.material.color.copy(c);o.material.emissive.copy(s.on?C.target:s.syn?C.syn:new THREE.Color(0));o.material.emissiveIntensity=s.on||s.syn?0.18:0}
@@ -133,9 +138,9 @@ export function mount(box, api){
     const hs=ray.intersectObjects(pickables,false),h=hs[0];lastHit=h?h.point:null;if(!h||!h.face)return null;
     const front=x=>x.face&&x.face.normal.clone().transformDirection(x.object.matrixWorld).dot(ray.ray.direction)<0;  /* the inside of a muscle seen through a gap is not a tap on it */
     const NM=k=>/^(osso|fundo|base|deco|tend|pele)$/.test(k);
-    if(!front(h))return null;if(!NM(h.object.userData.k))return h.object.userData.k;
+    if(!front(h))return null;if(!NM(h.object.userData.k))return BASEK(h.object.userData.k);
     /* the filler layer sits just under the muscles: a tap on a seam still picks the muscle right behind it */
-    const m=hs.find(x=>x.distance-h.distance<0.02&&!NM(x.object.userData.k)&&front(x));return m?m.object.userData.k:h.object.userData.k}
+    const m=hs.find(x=>x.distance-h.distance<0.02&&!NM(x.object.userData.k)&&front(x));return m?BASEK(m.object.userData.k):h.object.userData.k}
   function focusAt(pt){if(!pt)return;const t0=performance.now(),ft=controls.target.clone(),fp=camera.position.clone(),dir=fp.clone().sub(ft).normalize();
     const nd=Math.max(controls.minDistance,Math.min(1.1,fp.distanceTo(ft)*0.5)),tp=pt.clone().add(dir.multiplyScalar(nd));
     (function step(){if(!alive)return;const k=Math.min(1,(performance.now()-t0)/420),e=1-Math.pow(1-k,3);controls.target.lerpVectors(ft,pt,e);camera.position.lerpVectors(fp,tp,e);need=true;if(k<1)requestAnimationFrame(step)})()}
@@ -162,28 +167,33 @@ export function mount(box, api){
   const mo=new MutationObserver(()=>{readColors();paint()});mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class"]});
   const mq=matchMedia("(prefers-color-scheme: dark)"),onMq=()=>{readColors();paint()};mq.addEventListener("change",onMq);
 
-  (async()=>{
+  const FILES={m:["./corpo-5.glb","./juntas-2.json"],f:["./corpo-f-1.glb","./juntas-f-1.json"]};let loadN=0;
+  async function load(sx){sx=sx==="f"?"f":"m";if(sx===curSex)return;curSex=sx;const my=++loadN,live=()=>alive&&my===loadN;
     let buf;
-    fetch(new URL("./juntas-1.json",import.meta.url)).then(r=>r.json()).then(j=>{if(alive)addJoints(j)}).catch(()=>{});
-    try{const r=await fetch(new URL("./corpo-4.glb",import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||3600000;
+    fetch(new URL(FILES[sx][1],import.meta.url)).then(r=>r.json()).then(j=>{if(live()){clearJoints();addJoints(j)}}).catch(()=>{});
+    try{const r=await fetch(new URL(FILES[sx][0],import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||3800000;
       if(r.body&&r.body.getReader){const rd=r.body.getReader(),ch=[];let got=0;
         for(;;){const {done,value}=await rd.read();if(done)break;ch.push(value);got+=value.length;api.progress(Math.min(1,got/tot))}
         buf=await new Blob(ch).arrayBuffer()}else buf=await r.arrayBuffer()}
-    catch(e){api.fail();return}
-    if(!alive)return;
-    new GLTFLoader().parse(buf,"",g=>{if(!alive)return;
+    catch(e){if(live())api.fail();return}
+    if(!live())return;
+    new GLTFLoader().parse(buf,"",g=>{if(!live())return;
+      /* swapping ♂/♀: the old body goes away only when the new one is ready */
+      if(root){scene.remove(root);root.traverse(o=>{if(o.isMesh){o.geometry.dispose();o.material.dispose();o.userData.idm&&o.userData.idm.dispose()}})}
+      for(const k in parts)delete parts[k];pickables.length=0;meshes.length=0;root=g.scene;
       const ms=[];g.scene.traverse(o=>{if(o.isMesh)ms.push(o)});
       ms.forEach(o=>{const k=(o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"deco").replace(/_\d+$/,"");
-        o.material=new THREE.MeshStandardMaterial({color:0x999999,roughness:k==="osso"?0.75:0.55,metalness:0,side:THREE.DoubleSide});
+        o.material=new THREE.MeshStandardMaterial({color:0x999999,roughness:k==="osso"?0.75:0.55,metalness:0,side:THREE.DoubleSide,vertexColors:!!o.geometry.attributes.color});   /* skull: baked shadow in the orbits, nose and teeth */
         shade(o,!!o.geometry.attributes.uv&&k!=="osso"&&k!=="fundo");o.userData.k=k;parts[k]=o;pickables.push(o);
-        o.userData.idm=new THREE.ShaderMaterial({uniforms:{id:{value:meshes.length+1},sd:{value:/^(osso|fundo|base|pele|tend)$/.test(k)?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
+        o.userData.idm=new THREE.ShaderMaterial({uniforms:{id:{value:k.startsWith("mama_")?250:meshes.length+1},sd:{value:/^(osso|fundo|base|pele|tend|mama_.*)$/.test(k)?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
         lay(o.material,k);lay(o.userData.idm,k);meshes.push(o)});
       scene.add(g.scene);const b=new THREE.Box3().setFromObject(g.scene),H=b.max.y-b.min.y;CY=b.min.y+H*0.5;BB=b.clone().expandByScalar(0.05);BH=H;BW=b.max.x-b.min.x;
       /* a light cloud of points on the body: the camera is kept a little away from it, so zooming never goes inside */
       {const P=[];g.scene.updateMatrixWorld(true);const v=new THREE.Vector3();
         for(const o of ms){const a=o.geometry.attributes.position,st=Math.max(1,Math.floor(a.count/260));for(let i=0;i<a.count;i+=st){v.fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);P.push(v.x,v.y,v.z)}}
         CLOUD=new Float32Array(P)}
-      ready=true;resize();view(curV,false);paint();api.ready()},()=>api.fail())})();
+      const first=!ready;ready=true;if(first){resize();view(curV,false)}else{controls.maxDistance=fitD()*1.3;need=true}paint();api.ready()},()=>{if(live())api.fail()})}
+  load(api.sex?api.sex():"m");
 
   renderer.setAnimationLoop(()=>{if(!box.offsetParent)return;   /* hidden (2D or another tab): no drawing */
     controls.enabled=!api.covered();
@@ -200,6 +210,8 @@ export function mount(box, api){
   return {
     sync(s){state=s||{};paint()},
     view(v){view(v==="back"?"back":"front")},
+    sex(s){return load(s)},
+    sexNow(){return curSex},
     refit(){resize();view(curV,true)},
     keys(){return Object.keys(parts)},
     /* for tests: where a muscle is on screen (middle of its front/back half), and its colour now */

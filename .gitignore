@@ -3,3 +3,5 @@ node_modules/
 .DS_Store
 tools/corpo3d/corpo.glb
 tools/corpo3d/juntas.json
+tools/corpo3d/corpo-f.glb
+tools/corpo3d/juntas-f.json

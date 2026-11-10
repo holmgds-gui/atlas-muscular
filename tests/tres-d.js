@@ -1,6 +1,6 @@
 /* Boneco 3D no Atlas (pedido do dono): botão "3D" no canto de baixo do boneco; tocar num músculo funciona igual ao 2D
    (vermelho + lista; exercício pinta sinergistas de laranja); Grupos e Cardio pintam o 3D; Articulações mostra as juntas no 3D (tocar escolhe); botão 3D pequeno com a lista aberta;
-   com ♀ aparece o aviso "Modelo 3D masculino". Também confere que o ⤢ sumiu no celular e que dois toques voltam o zoom.
+   com ♀ o 3D troca para o corpo feminino (Wellness, 0.15) e tocar no seio escolhe o peitoral embaixo. Também confere que o ⤢ sumiu no celular e que dois toques voltam o zoom.
    O Three.js vem do jsDelivr; sem internet no teste, use THREE_DIR=<pasta do pacote three@0.160.0>. */
 const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=require("path").join(__dirname,"out");require("fs").mkdirSync(OUT,{recursive:true});
 const path=require("path"),fs=require("fs");
@@ -65,10 +65,18 @@ a=await p.evaluate(()=>({curJ,cov:document.getElementById('tab-atlas').classList
 console.log(' toque no joelho',JSON.stringify(a));if(a.curJ!=='joelho'||a.c!==a.t)bad++;
 await p.evaluate(()=>{peek=true;render()});await p.waitForTimeout(600);await p.screenshot({path:`${OUT}/tres-d-${th}-8-joelho.png`});
 await p.evaluate(()=>setMode('mus'));await p.waitForTimeout(300);
-// ♀: 3D stays male with a note
-await p.evaluate(()=>set3D(true));await p.waitForTimeout(500);await p.evaluate(()=>setSex('f'));await p.waitForTimeout(400);
-a=await p.evaluate(()=>({on:v3on,note:!document.getElementById('v3note').hidden}));console.log(' ♀',JSON.stringify(a));if(!a.on||!a.note)bad++;
+// ♀ (owner 0.15): the 3D swaps to the female body; a tap on a breast picks the pectoral part under it
+await p.evaluate(()=>set3D(true));await p.waitForTimeout(500);await p.evaluate(()=>setSex('f'));
+await p.waitForFunction(()=>V3.sexNow()==='f'&&document.getElementById('v3load').hidden&&V3.keys().some(k=>k.startsWith('mama_')),null,{timeout:90000}).catch(()=>{console.log('corpo ♀ não carregou');bad++});
+await p.evaluate(()=>V3.view('front'));await p.waitForTimeout(900);
+a=await p.evaluate(()=>({on:v3on,sx:V3.sexNow(),mama:V3.keys().filter(k=>k.startsWith('mama_')),j:!!V3.jointAt('joelho')}));console.log(' ♀',JSON.stringify(a));if(!a.on||a.sx!=='f'||!a.mama.length||!a.j)bad++;
 await p.screenshot({path:`${OUT}/tres-d-${th}-5-fem.png`});
+const mp=await p.evaluate(k=>V3.at(k),a.mama[0]);await p.touchscreen.tap(mp.x,mp.y);await p.waitForTimeout(500);
+s=await p.evaluate(()=>({cur,c:V3.color('mama_'+cur),t:getComputedStyle(document.documentElement).getPropertyValue('--target').trim().toLowerCase()}));
+console.log(' toque no seio',JSON.stringify(s));if(!/^peito/.test(s.cur||'')||s.c!==s.t)bad++;
+await p.evaluate(()=>{peek=true;render()});await p.waitForTimeout(600);await p.screenshot({path:`${OUT}/tres-d-${th}-5b-fem-peito.png`});
+await p.evaluate(()=>{document.getElementById('clear').click();setSex('m')});
+await p.waitForFunction(()=>V3.sexNow()==='m'&&document.getElementById('v3load').hidden&&!V3.keys().some(k=>k.startsWith('mama_')),null,{timeout:90000}).catch(()=>{console.log('volta ♂ falhou');bad++});
 // back to 2D
 await p.tap('#b3d');await p.waitForTimeout(300);if(await p.evaluate(()=>v3on||!document.getElementById('v3').hidden))bad++;
 await ctx.close()}

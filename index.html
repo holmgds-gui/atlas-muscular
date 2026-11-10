@@ -288,12 +288,11 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .v3 .v3c{display:block;width:100%;height:100%;outline:none;touch-action:none}
 .v3load{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:10px;font-size:14px;color:var(--muted);text-align:center;padding:16px}
 .v3load .v3bar{width:180px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}.v3load .v3bar i{display:block;height:100%;width:0;background:var(--target);transition:width .2s}
-.v3note{position:absolute;left:12px;top:8px;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 9px;pointer-events:none}
 .v3cred{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:8px;font-size:10px;color:var(--muted);opacity:.8;text-decoration:none}
 .v3hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:12px;color:var(--muted);pointer-events:none;white-space:nowrap}
 .v3tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;font-weight:600;padding:4px 8px;border-radius:6px;transform:translate(-50%,-140%);white-space:nowrap}
 #tab-atlas.is3d #hint,#tab-atlas.is3d .zoom{display:none}#tab-atlas.is3d #fig{visibility:hidden}
-@media (max-width:900px){#tab-atlas.covered .v3cred,#tab-atlas.covered .v3hint,#tab-atlas.covered .v3note{display:none}
+@media (max-width:900px){#tab-atlas.covered .v3cred,#tab-atlas.covered .v3hint{display:none}
   #tab-atlas.covered .b3d{right:4px;bottom:4px;min-width:34px;height:28px;padding:0 6px;font-size:13px;border-radius:9px}}
 .hint{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:10px;font-size:12px;color:var(--muted);pointer-events:none}
 
@@ -825,7 +824,7 @@ button.brand:hover{background:var(--chip)}
       <div class="canvas">
         <svg id="fig" preserveAspectRatio="xMidYMid meet" aria-label="Boneco com músculos e articulações clicáveis"></svg>
         <div class="hint" id="hint">Toque num músculo · pinça para zoom · arraste para mover</div>
-        <div class="v3" id="v3" hidden data-notr><div class="v3load" id="v3load" hidden></div><div class="v3note" id="v3note" hidden></div><div class="v3hint" id="v3hint"></div>
+        <div class="v3" id="v3" hidden data-notr><div class="v3load" id="v3load" hidden></div><div class="v3hint" id="v3hint"></div>
           <a class="v3cred" href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" target="_blank" rel="noopener">BodyParts3D · CC BY-SA</a></div>
         <button class="b3d" id="b3d" type="button" aria-pressed="false" data-notr>3D</button>
       </div>
@@ -2487,7 +2486,7 @@ function sexTgl(){const b=document.getElementById("sexTgl");if(!b)return;b.inner
 function setSex(x){
   sex=x;try{localStorage.setItem("atlas-sex",x)}catch(e){}
   document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===x));sexTgl();
-  buildFigure();setView(view,true);paint();if(typeof v3ui==="function")v3ui();
+  buildFigure();setView(view,true);paint();if(typeof v3ui==="function"){v3ui();if(v3on)v3sex()}
 }
 document.getElementById("sexTgl").addEventListener("click",()=>setSex(sex==="m"?"f":"m"));sexTgl();
 document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===sex));
@@ -2561,20 +2560,22 @@ function v3sync(){if(V3&&v3on)V3.sync(v3state())}
 function v3ui(){const a=$("tab-atlas"),b=$("b3d"),art=model==="art";b.hidden=false;
   b.textContent=v3on?"2D":"3D";b.setAttribute("aria-pressed",String(v3on));b.title=b.ariaLabel=v3on?tx("Voltar para o boneco 2D","Back to the 2D figure","Volver al muñeco 2D"):tx("Ver o boneco em 3D","See the figure in 3D","Ver el muñeco en 3D");
   a.classList.toggle("is3d",v3on);$("v3").hidden=!v3on;
-  $("v3note").hidden=!(v3on&&sex==="f");$("v3note").textContent=tx("Modelo 3D masculino","Male 3D model","Modelo 3D masculino");
   $("v3hint").textContent=art?tx("Arraste para girar · toque numa articulação","Drag to turn · tap a joint","Arrastra para girar · toca una articulación"):tx("Arraste para girar · toque num músculo","Drag to turn · tap a muscle","Arrastra para girar · toca un músculo")}
+/* owner (0.15): a female 3D body too — ♂/♀ swaps the 3D body (each is downloaded the first time it is shown) */
+const v3loading=()=>{const L=$("v3load");L.hidden=false;
+  L.innerHTML=`<span>${tx("Carregando o corpo 3D…","Loading the 3D body…","Cargando el cuerpo 3D…")}</span><span class="v3bar"><i id="v3bar"></i></span><small>${tx("Só na primeira vez (4 MB)","Only the first time (4 MB)","Solo la primera vez (4 MB)")}</small>`};
+function v3sex(){if(!V3||!V3.sexNow||V3.sexNow()===sex)return;v3busy=true;v3loading();V3.sex(sex)}
 async function set3D(on){v3on=on;v3ui();if(!on)return;buzz();
-  if(V3){V3.view(view==="back"?"back":"front");v3sync();return}
-  if(v3busy)return;v3busy=true;const L=$("v3load");L.hidden=false;
-  L.innerHTML=`<span>${tx("Carregando o corpo 3D…","Loading the 3D body…","Cargando el cuerpo 3D…")}</span><span class="v3bar"><i id="v3bar"></i></span><small>${tx("Só na primeira vez (3 MB)","Only the first time (3 MB)","Solo la primera vez (3 MB)")}</small>`;
+  if(V3){V3.view(view==="back"?"back":"front");v3sync();v3sex();return}
+  if(v3busy)return;v3busy=true;v3loading();const L=$("v3load");
   const fail=()=>{L.hidden=false;L.innerHTML=`<span>${tx("Não deu para carregar o 3D. Confira a internet e toque em 3D de novo.","Couldn't load the 3D body. Check the internet and tap 3D again.","No se pudo cargar el 3D. Revisa internet y toca 3D otra vez.")}</span>`;
     if(V3){V3.dispose();V3=null}v3busy=false;v3on=false;v3ui();$("v3").hidden=false;setTimeout(()=>{if(!v3on){$("v3").hidden=true;L.hidden=true}},3500)};
   try{const mod=await import("./3d/v3.js");
-    V3=mod.mount($("v3"),{covered:isCovered,name:k=>M[k]?M[k].n:"",jname:j=>JOINTS[j]?JOINTS[j].n:"",
+    V3=mod.mount($("v3"),{covered:isCovered,sex:()=>sex,name:k=>M[k]?M[k].n:"",jname:j=>JOINTS[j]?JOINTS[j].n:"",
       joint:j=>{if(isCovered()){peek=true;render();return}const g=svg.querySelector(`.jt[data-j="${j}"]`);if(g)onFigTap(g);else selectJoint(j,true)},
       tap:k=>{if(isCovered()){peek=true;render();return}if(!k)return;const g=svg.querySelector(`[data-m="${k}"]`);if(g)onFigTap(g);else if(M[k])selectMuscle(k,true)},
       progress:x=>{const b=$("v3bar");if(b)b.style.width=Math.round(x*100)+"%"},
-      ready:()=>{L.hidden=true;v3busy=false;if(V3){V3.view(view==="back"?"back":"front");v3sync()}},fail})}
+      ready:()=>{$("v3load").hidden=true;v3busy=false;if(V3){V3.view(view==="back"?"back":"front");v3sync()}},fail})}
   catch(e){fail()}}
 $("b3d").addEventListener("click",()=>set3D(!v3on));
 $("v3").addEventListener("pointerdown",()=>{$("v3hint").hidden=true});   /* the hint goes away once the body is touched */
