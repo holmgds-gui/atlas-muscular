@@ -22,7 +22,7 @@ for(const [loc,theme,vp] of [["pt-BR","light",{width:390,height:844}],["en-US","
   await p.click('[data-cd="row"]');await p.waitForTimeout(300);
   const painted=await p.evaluate(()=>({on:[...new Set([...document.querySelectorAll("[data-m].on")].map(e=>e.dataset.m))],syn:[...new Set([...document.querySelectorAll("[data-m].syn")].map(e=>e.dataset.m))]}));
   console.log(loc,"remo pinta",painted.on.length,painted.syn.length);if(!painted.on.includes("dorsal_superior")||!painted.syn.includes("romboides"))bad.push(loc+": remo não pintou");
-  if(mob){await p.evaluate(()=>{peek=true;render()});await p.waitForTimeout(400);await shot("2-remo-boneco");await p.click("#peekBtn");await p.waitForTimeout(300)}
+  if(mob){await p.evaluate(()=>{peek=true;render()});await p.waitForTimeout(400);await shot("2-remo-boneco");await p.click("#pGrab");await p.waitForTimeout(300)}
   await shot("3-remo");
   // + manda para um treino novo
   await p.click('[data-cdadd="run"]');await p.waitForTimeout(150);await p.click('[data-to="new"]');await p.waitForTimeout(200);
