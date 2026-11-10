@@ -239,6 +239,8 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;color:inherit}
 .sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
 .sw input:checked+i{background:var(--accent,var(--target))}.sw input:checked+i::after{transform:translateX(18px)}
 .sw input:disabled+i{opacity:.45}.sw input:focus-visible+i{outline:2px solid var(--focus);outline-offset:2px}
+.view.sw-l{animation:swL .26s ease-out}.view.sw-r{animation:swR .26s ease-out}
+@keyframes swL{from{transform:translateX(36px);opacity:.4}to{transform:none;opacity:1}}@keyframes swR{from{transform:translateX(-36px);opacity:.4}to{transform:none;opacity:1}}
 html.noanim *,html.noanim *::before,html.noanim *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 @media (max-width:400px){header{gap:8px}.gear{width:34px;margin-right:-4px}.sbtn{margin-right:0}.sfield input{padding-right:6px}}
 .results{position:absolute;left:0;right:0;top:calc(100% - 2px);background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);max-height:60vh;overflow:auto;z-index:20}
@@ -4951,6 +4953,35 @@ function setTab(t){
 function renderAch(){$("achBody").innerHTML=`<div class="page-h"><h2>${tx("Conquistas","Achievements","Logros")}<button class="help" data-help="ach" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2></div>`+achHTML()}
 $("achBtn").addEventListener("click",()=>setTab("ach"));
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>setTab(b.dataset.tab)));
+/* Swipe sideways from page to page (owner: "de página pra página, dá pra ser arrastável", like Instagram/WhatsApp).
+   One line of pages: Atlas → Meus treinos → Treinos prontos → Registro → Ao vivo → Músculos → Força.
+   The buttons stay; the swipe only moves to the page next to the current one. Ignored on the figure, charts,
+   fields, things that scroll sideways and the Atlas mode strip. */
+const PAGES=[["atlas"],["ficha","meus"],["ficha","prontos"],["treino","reg"],["treino","live"],["prog","mus"],["prog","kg"]];
+function pageIdx(){const s=tab==="ficha"?fView:tab==="treino"?hView:tab==="prog"?(pView==="kg"?"kg":"mus"):null;
+  return PAGES.findIndex(p=>p[0]===tab&&(p.length===1||p[1]===s))}
+function goPage(i,dir){const p=PAGES[i];if(!p)return;
+  if(p[0]==="ficha"){fView=p[1];LS.set("atlas-fview",fView)}
+  if(p[0]==="treino"){hView=p[1];LS.set("atlas-hview",hView)}
+  if(p[0]==="prog"){pView=p[1];LS.set("atlas-pview",pView)}
+  if(p[0]===tab){if(tab==="ficha")renderFicha();else if(tab==="treino"){openW=null;renderTreino()}else renderProg()}
+  else setTab(p[0]);
+  const el=$("tab-"+p[0]);if(p[0]==="atlas")return;el.scrollTop=0;
+  el.classList.remove("sw-l","sw-r");void el.offsetWidth;el.classList.add(dir>0?"sw-l":"sw-r");
+  setTimeout(()=>el.classList.remove("sw-l","sw-r"),300)}
+(()=>{let s=null;
+  const skip=t=>{if(t.closest("input,select,textarea,.stage,.ms-track,.modesw,.zwrap,.kg-hit,.chips,.vopts,.lv-tips,[data-noswipe]"))return true;
+    for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.scrollWidth>n.clientWidth+2){const o=getComputedStyle(n).overflowX;if(o==="auto"||o==="scroll")return true}}
+    return false};
+  document.addEventListener("touchstart",e=>{s=null;
+    if(e.touches.length>1||!matchMedia("(max-width:900px)").matches||pageIdx()<0)return;
+    const t=e.target;if(!t.closest||!t.closest("#tab-"+tab)||t.closest(".modal")||skip(t))return;
+    s={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now()}},{passive:true});
+  document.addEventListener("touchmove",e=>{if(s&&e.touches.length>1)s=null},{passive:true});
+  document.addEventListener("touchend",e=>{if(!s)return;const c=e.changedTouches[0],dx=c.clientX-s.x,dy=c.clientY-s.y,ms=Date.now()-s.t;s=null;
+    if(Math.abs(dx)<60||Math.abs(dx)<Math.abs(dy)*1.8||ms>900)return;
+    const i=pageIdx(),d=dx<0?1:-1;if(PAGES[i+d])goPage(i+d,d)},{passive:true});
+})();
 
 /* ------------------------------------------------------------------ apresentação (carrossel da 1ª vez)
    Aparece só na 1ª vez em cada aparelho/navegador (atlas-intro). No navegador tem a tela "Instale";
