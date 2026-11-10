@@ -29,6 +29,17 @@ await p.tap('#clear');await p.waitForTimeout(300);
 await p.evaluate(()=>setMode('grp'));await p.waitForTimeout(400);await drag('#pGrab',-120);await p.waitForTimeout(400);s=await st();console.log(' grupos ↑',JSON.stringify(s));if(!s.cov)bad++;
 await drag('#pGrab',120);await p.waitForTimeout(400);s=await st();if(s.cov)bad++;
 await p.evaluate(()=>setMode('mus'));await p.waitForTimeout(300);
+// owner: down once more (or all the way) hides the sheet and the figure takes the whole screen
+const hid=()=>p.evaluate(()=>{const a=document.getElementById('tab-atlas'),st=a.querySelector('.stage').getBoundingClientRect(),pn=a.querySelector('.panel').getBoundingClientRect();return {hid:a.classList.contains('hid'),stage:Math.round(st.height),panel:Math.round(pn.height),peek,cov:a.classList.contains('covered')}});
+await drag('#pGrab',120);await p.waitForTimeout(500);let H=await hid();console.log(' parado ↓',JSON.stringify(H));if(!H.hid||H.panel>40)bad++;
+await p.screenshot({path:`${OUT}/arrastar-${th}-3-tela-cheia.png`});
+await drag('#pGrab',-120);await p.waitForTimeout(500);H=await hid();console.log(' ↑ volta',JSON.stringify(H));if(H.hid)bad++;
+await p.evaluate(()=>selectMuscle('peito_medial'));await p.waitForTimeout(400);
+await drag('#pGrab',500);await p.waitForTimeout(500);H=await hid();console.log(' músculo ↓ até o fim',JSON.stringify(H));if(!H.hid||H.cov)bad++;
+await drag('#pGrab',-120);await p.waitForTimeout(500);H=await hid();console.log(' ↑',JSON.stringify(H));if(H.hid||!H.peek)bad++;
+await drag('#pGrab',120);await p.waitForTimeout(500);H=await hid();console.log(' ↓ de novo',JSON.stringify(H));if(!H.hid)bad++;
+await p.tap('#pGrab');await p.waitForTimeout(400);H=await hid();if(H.hid)bad++;
+await p.evaluate(()=>document.getElementById('clear').click());await p.waitForTimeout(300);
 // sheets close when dragged down from the top
 await p.evaluate(()=>openHelp('atlas'));await p.waitForTimeout(300);
 await drag('#helpSheet .sheet-h',140);await p.waitForTimeout(400);const h=await p.evaluate(()=>document.getElementById('helpSheet').hidden);console.log(' janela ↓ fechou',h);if(!h)bad++;

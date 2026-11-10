@@ -157,6 +157,7 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 - **Visão menos poluída** (nov/2026, pedido do dono): Atlas com uma fileira de modos (Músculos, Grupos, Cardio, Articulações) e Detalhado/Básico num botão pequeno; ✕ no lugar de Limpar; equipamentos atrás de um botão; Montar treino foi para Meus treinos ("Montar pelo boneco"). Treinos prontos com os filtros numa janela. Hoje com os treinos do dia em cima, o resto e o histórico recolhidos e um só "+ Adicionar". Sem parágrafos de explicação no topo das abas.
 - **Arrastar em vez de botão** (nov/2026, pedido do dono): no celular o painel do Atlas se arrasta (para cima abre a lista, para baixo mostra o boneco grande), no lugar de "Ver lista" e "Ampliar/Diminuir boneco"; vale em todos os modos. As janelas de baixo fecham arrastando para baixo.
 - **Arrastar de página em página** (nov/2026, v79, pedido do dono): no celular, arrastar para o lado passa para a página vizinha: Atlas → Meus treinos → Treinos prontos → Registro → Ao vivo → Músculos → Força. Os botões continuam iguais. Não vale no boneco, nos gráficos nem nos campos.
+- **Boneco na tela toda** (nov/2026, v80, pedido do dono): no Atlas, arrastar a folha para baixo mais uma vez (ou de uma vez até o fim) faz ela sumir e o boneco ocupar a tela toda; fica só a alça embaixo para puxar de volta.
 - Corrigido junto: séries só com a carga planejada não contam mais como feitas no Ao vivo, e a "Última vez" ignora séries sem repetições.
 
 ## 17. Perguntas que o dono fez (respostas resumidas)

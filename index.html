@@ -504,6 +504,12 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   #tab-atlas.idle .p-latin,#tab-atlas.idle .chips,#tab-atlas.idle .p-body{display:none}
   #tab-atlas.idle .p-head{border-bottom:0;padding-block:10px}
   #tab-atlas.idle .p-title{font-size:20px}
+  /* owner: drag the sheet all the way down (or down once more) and it goes away; the figure takes the whole screen.
+     Only the handle stays at the bottom to pull it back up. */
+  #tab-atlas.hid .stage{flex-basis:calc(100% - 26px)}
+  #tab-atlas.hid .p-head > :not(.p-grab),#tab-atlas.hid .p-body{display:none!important}
+  #tab-atlas.hid .p-head{padding:0;border-bottom:0}
+  #tab-atlas.hid .p-grab{margin:0;padding:10px 0 11px}
   #tab-atlas.covered{display:grid;grid-template-columns:112px minmax(0,1fr);grid-template-rows:auto minmax(0,1fr);grid-template-areas:"fig head" "body body";background:var(--surface)}
   #tab-atlas.covered .stage{grid-area:fig;height:196px;align-self:start;cursor:zoom-in}
   #tab-atlas.covered .bar,#tab-atlas.covered .hint{display:none}
@@ -2545,13 +2551,13 @@ $("body").addEventListener("click",e=>{if(!grp)return;
   const h=e.target.closest("[data-gk]");if(h){const k=h.dataset.gk;grpOpen=grpOpen===k?null:k;grpHi=grpOpen?"g:"+k:null;paint();render();return}
   const b=e.target.closest("[data-gm]");if(b){const m=b.dataset.gm;grpHi=grpHi===m?"g:"+grpOpen:m;if(grpHi===m)ensureVisible(viewsOf([m]));paint();render()}});
 let listOpen=false;
-let peek=false,lastSel=null;
+let peek=false,lastSel=null,sheetHid=false;
 function updateIdle(){
   const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null)||(grp?"grp":null);if(sel)listOpen=false;
-  if(sel!==lastSel){peek=false;lastSel=sel}
+  if(sel!==lastSel){peek=false;sheetHid=false;lastSel=sel}if(listOpen||build)sheetHid=false;
   $("tab-atlas").classList.toggle("idle",!sel&&!listOpen);
   /* the open list (Ver lista) also gets the small figure in the corner, so the list has room (owner: 2–3 items visible) */
-  const cov=(grp?grpUp:(!!sel||listOpen))&&!peek;
+  const cov=(grp?grpUp:(!!sel||listOpen))&&!peek&&!sheetHid;$("tab-atlas").classList.toggle("hid",sheetHid);
   if(cov&&!$("tab-atlas").classList.contains("covered")&&matchMedia("(max-width:900px)").matches){vb=[...BOX[view]];applyVB()}
   $("tab-atlas").classList.toggle("covered",cov);
   const lb=$("listBtn");lb.hidden=!!sel;lb.textContent=listOpen?"Fechar lista":"Ver lista";
@@ -2712,11 +2718,15 @@ $("listBtn").onclick=()=>{listOpen=!listOpen;updateIdle()};
 $("peekBtn").onclick=()=>{peek=!peek;render()};
 $("eqBtn").onclick=()=>{eqOpen=!eqOpen;render()};
 /* phone: the panel is a sheet. Up = open the list (or bring it back over the figure); down = close it / show the figure big */
-function sheetMove(d){const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null);
-  if(d==="up"){if(peek){peek=false;return render()}if(grp){if(!grpUp){grpUp=true;updateIdle()}return}if(!sel&&!listOpen&&!build){listOpen=true;updateIdle()}return}
+function sheetMove(d,far){const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null);
+  if(d==="up"){if(sheetHid){sheetHid=false;return render()}if(peek){peek=false;return render()}if(grp){if(!grpUp){grpUp=true;updateIdle()}return}if(!sel&&!listOpen&&!build){listOpen=true;updateIdle()}return}
+  if(build)return;
+  /* all the way down = straight to the full-screen figure; coming back up returns to the figure with the sheet open */
+  if(far){listOpen=false;grpUp=false;if(sel)peek=true;sheetHid=true;return render()}
   if(listOpen){listOpen=false;return updateIdle()}
   if(grp&&grpUp){grpUp=false;return updateIdle()}
-  if(sel&&!peek){peek=true;render()}}
+  if(sel&&!peek){peek=true;return render()}
+  if(!sheetHid){sheetHid=true;render()}}
 $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.contains("covered");sheetMove(up?"down":"up")});
 (()=>{const P=document.querySelector("#tab-atlas .panel"),B=$("body");let y0=null,x0=0,ok=false;
   P.addEventListener("touchstart",e=>{if(e.touches.length>1||!matchMedia("(max-width:900px)").matches){y0=null;return}
@@ -2726,7 +2736,7 @@ $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.conta
     if(Math.abs(dy)<45||Math.abs(dx)>Math.abs(dy))return;
     /* inside the list, only a pull down from the very top moves the sheet; pushing up just scrolls the list */
     if(B.contains(e.target)&&dy<0&&$("tab-atlas").classList.contains("covered"))return;
-    sheetMove(dy<0?"up":"down")},{passive:true})})();
+    sheetMove(dy<0?"up":"down",dy>innerHeight*.4)},{passive:true})})();
 
 /* ---------------------------------------------------------- search */
 const q=$("q"),res=$("results");
