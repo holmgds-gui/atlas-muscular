@@ -39,6 +39,10 @@ u=await under('.seg.fview');if(!u.ok)bad++;
 await p.evaluate(()=>{pView="mus";setTab("prog")});await p.waitForTimeout(400);
 await drag('.seg.pview','[data-pv="mus"]',160);await p.waitForTimeout(450);s=await st();console.log(' Progresso',s.pView,s.tab);if(s.pView!=='kg'||s.tab!=='prog')bad++;
 u=await under('.seg.pview');if(!u.ok)bad++;
+// ring (owner: "ciclo infinito"): on Força, pulling the pill further right goes round to Músculos
+await drag('.seg.pview','[data-pv="kg"]',120);await p.waitForTimeout(450);s=await st();console.log(' Força → de novo',s.pView);if(s.pView!=='mus')bad++;
+u=await under('.seg.pview');if(!u.ok)bad++;
+await drag('.seg.pview','[data-pv="mus"]',-120);await p.waitForTimeout(450);s=await st();console.log(' Músculos ← de novo',s.pView);if(s.pView!=='kg')bad++;
 // a plain tap slides it too and ends under the new option
 await p.tap('[data-pv="mus"]');await p.waitForTimeout(450);s=await st();if(s.pView!=='mus')bad++;u=await under('.seg.pview');if(!u.ok)bad++;
 // Semana/Dia (no redraw of a whole page) also follows

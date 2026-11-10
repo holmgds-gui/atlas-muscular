@@ -161,6 +161,7 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 - **Versão 0.8** (nov/2026, pedido do dono): a versão do app passou a se chamar 0.8 em vez de 80 (Configurações › Versão; cache `atlas-v0.8`).
 - **Barras de abas que deslizam** (nov/2026, versão 0.8, pedido do dono): nas barras de cima (Registro/Ao vivo, Meus treinos/Treinos prontos, Músculos/Força, Semana/Dia e as outras) a pílula da opção escolhida desliza ao tocar e dá para arrastar com o dedo.
 - **Versão 0.9 — mais fluido** (nov/2026, escolhas do dono): a página segue o dedo ao arrastar entre páginas; em Meus treinos segura-se a alça ≡ e arrasta para mudar a ordem (no lugar de ↑ ↓); vibração curta nos toques importantes (também no iPhone) e cartões que sobem com animação ao abrir uma página.
+- **Versão 0.10 — ciclo infinito** (nov/2026, pedido do dono): a folha do Atlas segue o dedo para cima e para baixo; arrastar entre abas dá a volta nos dois sentidos (páginas, barras de abas e faixa de modos do Atlas).
 - Corrigido junto: séries só com a carga planejada não contam mais como feitas no Ao vivo, e a "Última vez" ignora séries sem repetições.
 
 ## 17. Perguntas que o dono fez (respostas resumidas)

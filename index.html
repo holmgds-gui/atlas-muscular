@@ -174,6 +174,7 @@ details.how b{font-size:13px;color:var(--muted)}
   #listBtn{display:none!important}
   .p-swipe:not([hidden]){display:block;margin:4px 0 0;font-size:13px;color:var(--muted)}
   #tab-atlas.covered .p-grab{justify-content:flex-start;padding-left:4px}
+  #tab-atlas .pdrag{position:relative;z-index:4;will-change:transform}#tab-atlas .panel.pdrag{box-shadow:0 -8px 24px rgba(0,0,0,.18)}#tab-atlas .panel.pdrag::after{content:"";position:absolute;left:0;right:0;top:100%;height:var(--pd,0px);background:var(--surface)}
 }
 .sh-grab{display:none}
 @media (max-width:900px){.sh-grab{display:flex;justify-content:center;padding:8px 0 0;touch-action:none}.sh-grab i{width:42px;height:5px;border-radius:3px;background:var(--line)}
@@ -2433,11 +2434,16 @@ function msCenter(m,smooth){const b=msT.querySelector(`[data-mode="${m}"]`);clea
 msT.addEventListener("scroll",()=>{if(msLock){clearTimeout(msTm);msTm=setTimeout(()=>{msLock=false},160);return}clearTimeout(msTm);msTm=setTimeout(()=>{if(!msT.clientWidth)return;const c=msT.scrollLeft+msT.clientWidth/2;let best=null,bd=1e9;
   msT.querySelectorAll("[data-mode]").forEach(b=>{const d=Math.abs(b.offsetLeft+b.offsetWidth/2-c);if(d<bd){bd=d;best=b}});
   if(best&&best.dataset.mode!==curMode())setMode(best.dataset.mode);else msCenter(curMode(),true)},130)},{passive:true});
-document.querySelectorAll("#modeSw [data-step]").forEach(b=>b.addEventListener("click",()=>{const i=MODES.indexOf(curMode())+(+b.dataset.step);if(i>=0&&i<MODES.length)setMode(MODES[i])}));
+document.querySelectorAll("#modeSw [data-step]").forEach(b=>b.addEventListener("click",()=>{const n=MODES.length;setMode(MODES[(MODES.indexOf(curMode())+(+b.dataset.step)+n)%n])}));
+/* owner: "ciclo infinito" — at Cardio, pulling further goes round to Músculos (and the other way) */
+(()=>{let t=null;msT.addEventListener("touchstart",e=>{const max=msT.scrollWidth-msT.clientWidth;t={x:e.touches[0].clientX,y:e.touches[0].clientY,end:msT.scrollLeft>=max-3?1:msT.scrollLeft<=3?-1:0}},{passive:true});
+  msT.addEventListener("touchend",e=>{if(!t)return;const dx=e.changedTouches[0].clientX-t.x,dy=e.changedTouches[0].clientY-t.y,E=t.end;t=null;
+    if(Math.abs(dx)<40||Math.abs(dx)<Math.abs(dy))return;const i=MODES.indexOf(curMode());
+    if(E===1&&dx<0&&i===MODES.length-1){buzz();setMode(MODES[0])}else if(E===-1&&dx>0&&i===0){buzz();setMode(MODES[MODES.length-1])}},{passive:true})})();
 addEventListener("resize",()=>msCenter(curMode(),false));
 function syncModes(){const m=curMode();document.querySelectorAll("[data-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===m)));
   const mi=MODES.indexOf(m);document.querySelectorAll("#modeSw .ms-dots i").forEach((d,i)=>d.classList.toggle("on",i===mi));
-  document.querySelectorAll("#modeSw [data-step]").forEach(b=>{const j=mi+(+b.dataset.step);b.disabled=j<0||j>=MODES.length});
+  document.querySelectorAll("#modeSw [data-step]").forEach(b=>{b.disabled=false});
   msCenter(m,true);
   const d=document.getElementById("detTgl");if(d){d.hidden=m!=="mus"||!!build;d.textContent=model==="bas"?tx("Básico","Basic","Básico"):tx("Detalhado","Detailed","Detallado");
     d.title=d.ariaLabel=tx("Trocar entre detalhado e básico","Switch between detailed and basic","Cambiar entre detallado y básico")}}   /* "Grupos" mode: open big group, highlighted muscle (or "g:<group>") */
@@ -2737,15 +2743,33 @@ function sheetMove(d,far){const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":nul
   if(sel&&!peek){peek=true;return render()}
   if(!sheetHid){sheetHid=true;render()}}
 $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.contains("covered");sheetMove(up?"down":"up")});
-(()=>{const P=document.querySelector("#tab-atlas .panel"),B=$("body");let y0=null,x0=0,ok=false;
-  P.addEventListener("touchstart",e=>{if(e.touches.length>1||!matchMedia("(max-width:900px)").matches){y0=null;return}
-    ok=!e.target.closest("input,select,textarea,.chips,.vopts,.ms-track,.seg")&&(!B.contains(e.target)||B.scrollTop<=0);
-    y0=e.touches[0].clientY;x0=e.touches[0].clientX},{passive:true});
-  P.addEventListener("touchend",e=>{if(y0==null||!ok){y0=null;return}const t=e.changedTouches[0],dy=t.clientY-y0,dx=t.clientX-x0;y0=null;
-    if(Math.abs(dy)<45||Math.abs(dx)>Math.abs(dy))return;
-    /* inside the list, only a pull down from the very top moves the sheet; pushing up just scrolls the list */
-    if(B.contains(e.target)&&dy<0&&$("tab-atlas").classList.contains("covered"))return;
-    buzz();sheetMove(dy<0?"up":"down",dy>innerHeight*.4)},{passive:true})})();
+/* owner: the sheet follows the finger up and down (same feel as the side swipe). Past 45 px the move happens and
+   the header glides to its new place (FLIP); shorter, it springs back; with nothing to open/close it only stretches. */
+(()=>{const P=document.querySelector("#tab-atlas .panel"),B=$("body"),A=$("tab-atlas");let g=null;
+  const can=d=>{const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null);if(build)return false;
+    if(d==="up")return sheetHid||peek||(grp&&!grpUp)||(!grp&&!sel&&!listOpen);
+    return listOpen||(grp&&grpUp)||(!!sel&&!peek)||!sheetHid};
+  const noanim=()=>document.documentElement.classList.contains("noanim");
+  P.addEventListener("touchstart",e=>{g=null;if(e.touches.length>1||!matchMedia("(max-width:900px)").matches)return;
+    if(e.target.closest("input,select,textarea,.chips,.vopts,.ms-track,.seg")||(B.contains(e.target)&&B.scrollTop>0))return;
+    g={y0:e.touches[0].clientY,x0:e.touches[0].clientX,lock:null,dy:0,t:e.target}},{passive:true});
+  P.addEventListener("touchmove",e=>{if(!g||e.touches.length>1)return;const dy=e.touches[0].clientY-g.y0,dx=e.touches[0].clientX-g.x0;
+    if(!g.lock){if(Math.hypot(dx,dy)<10)return;
+      /* inside the list, only a pull down from the very top moves the sheet; pushing up just scrolls the list */
+      if(Math.abs(dx)>Math.abs(dy)||(B.contains(g.t)&&dy<0&&A.classList.contains("covered"))){g.lock="no";return}
+      g.lock="v";g.els=A.classList.contains("covered")?[P.querySelector(".p-head"),B]:[P];g.els.forEach(x=>{x.style.transition="none";x.classList.add("pdrag")})}
+    if(g.lock!=="v")return;e.preventDefault();g.dy=dy;const m=can(dy<0?"up":"down")?dy:dy*.25;g.els.forEach(x=>{x.style.transform=`translateY(${m}px)`;x.style.setProperty("--pd",Math.max(0,-m)+"px")})},{passive:false});
+  const end=()=>{if(!g)return;const G=g;g=null;if(G.lock!=="v")return;const dy=G.dy,d=dy<0?"up":"down";
+    if(Math.abs(dy)<45||!can(d)){G.els.forEach(x=>{x.style.transition="transform .26s cubic-bezier(.3,.8,.3,1)";x.style.transform="";
+      setTimeout(()=>{x.style.transition="";x.classList.remove("pdrag")},270)});return}
+    const head=P.querySelector(".p-head"),before=head.getBoundingClientRect().top;
+    G.els.forEach(x=>{x.style.transition="none";x.style.transform="";x.classList.remove("pdrag")});
+    buzz();sheetMove(d,dy>innerHeight*.4);
+    const off=before-head.getBoundingClientRect().top;if(Math.abs(off)<3||noanim())return;
+    const t=[head];if(B.offsetParent&&A.classList.contains("covered"))t.push(B);
+    t.forEach(x=>{x.style.transition="none";x.style.transform=`translateY(${off}px)`});void head.offsetWidth;
+    t.forEach(x=>{x.style.transition="transform .34s cubic-bezier(.2,.8,.3,1)";x.style.transform=""});setTimeout(()=>t.forEach(x=>x.style.transition=""),360)};
+  P.addEventListener("touchend",end,{passive:true});P.addEventListener("touchcancel",end,{passive:true})})();
 
 /* ---------------------------------------------------------- search */
 const q=$("q"),res=$("results");
@@ -2826,7 +2850,7 @@ function closeModals(){document.querySelectorAll(".modal").forEach(m=>m.hidden=t
 document.querySelectorAll(".modal .sheet").forEach(sh=>{const g=document.createElement("div");g.className="sh-grab";g.innerHTML="<i></i>";g.setAttribute("aria-hidden","true");sh.prepend(g);
   let y0=null;const on=e=>e.target.closest(".sh-grab,.sheet-h")&&!e.target.closest("button,input");
   sh.addEventListener("touchstart",e=>{if(e.touches.length>1||!on(e))return;y0=e.touches[0].clientY;sh.classList.add("dragging")},{passive:true});
-  sh.addEventListener("touchmove",e=>{if(y0==null)return;const dy=Math.max(0,e.touches[0].clientY-y0);sh.style.transform=`translateY(${dy}px)`},{passive:true});
+  sh.addEventListener("touchmove",e=>{if(y0==null)return;const d=e.touches[0].clientY-y0,dy=d<0?Math.max(-24,d*.2):d;sh.style.transform=`translateY(${dy}px)`},{passive:true});
   sh.addEventListener("touchend",e=>{if(y0==null)return;const dy=e.changedTouches[0].clientY-y0;y0=null;sh.classList.remove("dragging");sh.style.transform="";
     if(dy>70){const m=sh.closest(".modal");if(m.querySelector("[data-close]"))m.querySelector("[data-close]").click();else closeModals()}},{passive:true})});
 /* page help: the small + next to each page title */
@@ -5036,12 +5060,14 @@ document.querySelectorAll(".seg").forEach(segInit);
     d={g,th,x0:e.touches[0].clientX,y0:e.touches[0].clientY,s:new DOMMatrix(getComputedStyle(th).transform).m41,on:false}},{passive:true});
   document.addEventListener("touchmove",e=>{if(!d)return;const dx=e.touches[0].clientX-d.x0,dy=e.touches[0].clientY-d.y0;
     if(!d.on){if(Math.abs(dx)<8)return;if(Math.abs(dy)>Math.abs(dx)){d=null;return}d.on=true;d.g.classList.add("sdrag")}
-    const max=d.g.clientWidth-d.th.offsetWidth-3,x=Math.max(3,Math.min(max,d.s+dx)),c=x+d.th.offsetWidth/2;d.th.style.transform=`translateX(${x}px)`;
+    const max=d.g.clientWidth-d.th.offsetWidth-3,raw=d.s+dx,o=raw>max?raw-max:raw<3?raw-3:0,x=Math.max(3,Math.min(max,raw))+Math.sign(o)*Math.min(28,Math.abs(o)*.35),c=x+d.th.offsetWidth/2;
+    /* pulled past the end = goes round to the other end (owner: "ciclo infinito") */d.over=o>30?1:o<-30?-1:0;d.th.style.transform=`translateX(${x}px)`;
     d.g.querySelectorAll(":scope > button").forEach(b=>b.classList.toggle("snear",c>=b.offsetLeft&&c<b.offsetLeft+b.offsetWidth))},{passive:true});
-  const end=()=>{if(!d)return;const {g,th,on}=d;d=null;if(!on)return;g.classList.remove("sdrag");g.querySelectorAll(".snear").forEach(b=>b.classList.remove("snear"));
+  const end=()=>{if(!d)return;const {g,th,on,over}=d;d=null;if(!on)return;g.classList.remove("sdrag");g.querySelectorAll(".snear").forEach(b=>b.classList.remove("snear"));
     const x=new DOMMatrix(getComputedStyle(th).transform).m41,c=x+th.offsetWidth/2;
     const bs=[...g.querySelectorAll(":scope > button")].filter(b=>b.offsetWidth);
-    const b=bs.reduce((a,t)=>Math.abs(t.offsetLeft+t.offsetWidth/2-c)<Math.abs(a.offsetLeft+a.offsetWidth/2-c)?t:a);
+    const near=bs.reduce((a,t)=>Math.abs(t.offsetLeft+t.offsetWidth/2-c)<Math.abs(a.offsetLeft+a.offsetWidth/2-c)?t:a);
+    const b=over===1&&near===bs[bs.length-1]?bs[0]:over===-1&&near===bs[0]?bs[bs.length-1]:near;
     const k=segKey(g);if(k)segLast[k]={x,w:th.offsetWidth};
     if(b.getAttribute("aria-pressed")==="true")segPlace(g);else b.click();block=Date.now()};
   document.addEventListener("touchend",end,{passive:true});document.addEventListener("touchcancel",end,{passive:true});
@@ -5053,7 +5079,8 @@ document.querySelectorAll(".seg").forEach(segInit);
 const PAGES=[["atlas"],["ficha","meus"],["ficha","prontos"],["treino","reg"],["treino","live"],["prog","mus"],["prog","kg"]];
 function pageIdx(){const s=tab==="ficha"?fView:tab==="treino"?hView:tab==="prog"?(pView==="kg"?"kg":"mus"):null;
   return PAGES.findIndex(p=>p[0]===tab&&(p.length===1||p[1]===s))}
-function goPage(i,dir){const p=PAGES[i];if(!p)return;
+const pageAt=i=>(i+PAGES.length)%PAGES.length;
+function goPage(i,dir){const p=PAGES[pageAt(i)];if(!p)return;
   if(p[0]==="ficha"){fView=p[1];LS.set("atlas-fview",fView)}
   if(p[0]==="treino"){hView=p[1];LS.set("atlas-hview",hView)}
   if(p[0]==="prog"){pView=p[1];LS.set("atlas-pview",pView)}
@@ -5064,7 +5091,7 @@ function goPage(i,dir){const p=PAGES[i];if(!p)return;
   setTimeout(()=>el.classList.remove("sw-l","sw-r"),300)}
 /* the page follows the finger (owner: "página segue o dedo"); lifting past ~30% of the width, or a quick flick,
    finishes the move (the page leaves to that side and the next one comes in from the other); otherwise it springs
-   back. With no page on that side it only stretches a little. */
+   back. The pages are a ring (owner: "ciclo infinito"): after Força comes Atlas, and before Atlas comes Força. */
 (()=>{let s=null;
   const skip=t=>{if(t.closest("input,select,textarea,.seg,.stage,.ms-track,.modesw,.zwrap,.kg-hit,.chips,.vopts,.lv-tips,.fi-drag,[data-noswipe]"))return true;
     for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.scrollWidth>n.clientWidth+2){const o=getComputedStyle(n).overflowX;if(o==="auto"||o==="scroll")return true}}
@@ -5079,10 +5106,10 @@ function goPage(i,dir){const p=PAGES[i];if(!p)return;
     if(!s.lock){if(Math.hypot(dx,dy)<10)return;s.lock=Math.abs(dx)>Math.abs(dy)*1.5?"h":"v"}
     if(s.lock!=="h")return;e.preventDefault();
     const now=Date.now();s.v=(x-s.lx)/Math.max(1,now-s.lt);s.lx=x;s.lt=now;
-    const has=!!PAGES[s.i+(dx<0?1:-1)],w=innerWidth;s.dx=dx;
+    const has=PAGES.length>1,w=innerWidth;s.dx=dx;
     const m=has?dx:dx*.25;s.el.style.transition="none";s.el.style.transform=`translateX(${m}px)`;s.el.style.opacity=has?String(1-Math.min(.5,Math.abs(dx)/w)):""},{passive:false});
   const end=()=>{if(!s)return;const {el,dx,i,lock}=s,v=Date.now()-s.lt>100?0:s.v;s=null;if(lock!=="h"){reset(el);return}
-    const d=dx<0?1:-1,go=!!PAGES[i+d]&&(Math.abs(dx)>innerWidth*.3||(Math.abs(dx)>40&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dx)));
+    const d=dx<0?1:-1,go=PAGES.length>1&&(Math.abs(dx)>innerWidth*.3||(Math.abs(dx)>40&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dx)));
     if(!go){el.style.transition="transform .25s cubic-bezier(.3,.8,.3,1),opacity .25s";el.style.transform="";el.style.opacity="";setTimeout(()=>reset(el),260);return}
     if(document.documentElement.classList.contains("noanim")){reset(el);return goPage(i+d,d)}
     el.style.transition="transform .16s ease-in,opacity .16s ease-in";el.style.transform=`translateX(${-d*innerWidth*.6}px)`;el.style.opacity="0";

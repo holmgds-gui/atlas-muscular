@@ -21,8 +21,9 @@ let w=await where();if(w!=='atlas'){console.log('início',w);bad++}
 await swipe('#tab-atlas .stage',-150);await p.waitForTimeout(200);if(await where()!=='atlas'){console.log('boneco trocou a página');bad++}
 for(let i=1;i<want.length;i++){const sel=bodyOf[want[i-1].split('/')[0]];await swipe(sel,-150);await p.waitForTimeout(350);w=await where();
   console.log(th,'←',w);if(w!==want[i])bad++;await p.screenshot({path:`${OUT}/paginas-${th}-${i}.png`})}
-// past the last page nothing happens
-await swipe('#progBody',-150);await p.waitForTimeout(200);if(await where()!=='prog/kg')bad++;
+// a ring (owner: "ciclo infinito"): after the last page comes the first, and back
+await swipe('#progBody',-150);await p.waitForTimeout(350);w=await where();console.log(th,'← depois da última',w);if(w!=='atlas')bad++;
+await swipe(bodyOf.atlas,150);await p.waitForTimeout(350);w=await where();console.log(th,'→ antes da primeira',w);if(w!=='prog/kg')bad++;
 // a vertical drag and a short drag do nothing
 await swipe('#progBody',-40,-200);await p.waitForTimeout(200);if(await where()!=='prog/kg')bad++;
 await swipe('#progBody',-30);await p.waitForTimeout(200);if(await where()!=='prog/kg')bad++;

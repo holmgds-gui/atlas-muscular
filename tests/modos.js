@@ -23,5 +23,12 @@ await p.tap('#clear');await p.waitForTimeout(800);s=await st();console.log(' ✕
 // changed elsewhere (tap on the figure) → strip follows
 await p.evaluate(()=>{setMode('grp')});await p.waitForTimeout(700);await p.evaluate(()=>selectMuscle('biceps_longa'));await p.waitForTimeout(300);await p.tap('#clear');await p.waitForTimeout(800);
 s=await st();console.log(' depois de um músculo',JSON.stringify(s));if(s.mode!=='mus'||s.mid!=='mus')bad++;
+// ring (owner: "ciclo infinito"): ‹ on Músculos goes to Cardio; pulling the strip past its start does too
+await p.tap('#modeSw [data-step="-1"]');await p.waitForTimeout(700);s=await st();console.log(' ‹ no começo',s.mode);if(s.mode!=='cd')bad++;
+await p.tap('#clear');await p.waitForTimeout(800);
+await p.evaluate(()=>{const t=document.getElementById('msTrack'),r=t.getBoundingClientRect(),y=r.top+r.height/2,T=x=>new Touch({identifier:1,target:t,clientX:x,clientY:y});t.scrollLeft=0;
+  t.dispatchEvent(new TouchEvent('touchstart',{touches:[T(150)],changedTouches:[T(150)],bubbles:true}));t.dispatchEvent(new TouchEvent('touchend',{touches:[],changedTouches:[T(260)],bubbles:true}))});
+await p.waitForTimeout(700);s=await st();console.log(' puxou para trás no começo',s.mode);if(s.mode!=='cd')bad++;
+await p.tap('#clear');await p.waitForTimeout(800);
 await ctx.close()}
 console.log('errs',errs);console.log(bad?'FALHOU '+bad:'OK');await b.close();process.exit(bad||errs.length?1:0)})();

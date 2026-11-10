@@ -12,6 +12,15 @@ const drag=(sel,dy)=>p.evaluate(([sel,dy])=>{const el=document.querySelector(sel
   el.dispatchEvent(new TouchEvent('touchmove',{touches:[T(y+dy)],changedTouches:[T(y+dy)],bubbles:true}));
   el.dispatchEvent(new TouchEvent('touchend',{touches:[],changedTouches:[T(y+dy)],bubbles:true}))},[sel,dy]);
 const st=()=>p.evaluate(()=>{const a=document.getElementById('tab-atlas');return {idle:a.classList.contains('idle'),cov:a.classList.contains('covered'),list:listOpen,peek,hint:!document.getElementById('pSwipe').hidden,ver:getComputedStyle(document.getElementById('listBtn')).display}});
+// the sheet follows the finger (owner: same feel as the side swipe)
+await p.evaluate(()=>{const el=document.getElementById('pGrab'),r=el.getBoundingClientRect(),x=r.left+r.width/2,y=r.top+10,T=yy=>new Touch({identifier:1,target:el,clientX:x,clientY:yy});
+  el.dispatchEvent(new TouchEvent('touchstart',{touches:[T(y)],changedTouches:[T(y)],bubbles:true}));
+  for(let i=1;i<=5;i++)el.dispatchEvent(new TouchEvent('touchmove',{touches:[T(y-24*i)],changedTouches:[T(y-24*i)],bubbles:true,cancelable:true}))});
+await p.waitForTimeout(80);const tf=await p.evaluate(()=>document.querySelector('#tab-atlas .panel').style.transform);console.log(th,'seguindo',tf);if(tf!=='translateY(-120px)')bad++;
+await p.screenshot({path:`${OUT}/arrastar-${th}-seguindo.png`});
+await p.evaluate(()=>{const el=document.getElementById('pGrab');el.dispatchEvent(new TouchEvent('touchend',{touches:[],changedTouches:[new Touch({identifier:1,target:el,clientX:0,clientY:0})],bubbles:true}))});
+await p.waitForTimeout(500);if(!(await p.evaluate(()=>listOpen))){console.log('não abriu');bad++}
+await p.evaluate(()=>{listOpen=false;updateIdle()});await p.waitForTimeout(400);
 let s=await st();console.log(th,'início',JSON.stringify(s));if(!s.idle||!s.hint||s.ver!=='none')bad++;
 await p.screenshot({path:`${OUT}/arrastar-${th}-0.png`});
 await drag('#pGrab',-120);await p.waitForTimeout(400);s=await st();console.log(' ↑',JSON.stringify(s));if(!s.list||!s.cov)bad++;
