@@ -1,6 +1,6 @@
 # Muscle Atlas 3D bodies (3d/corpo-N.glb male, 3d/corpo-f-N.glb female). BodyParts3D (DBCLS, CC BY-SA 2.1 JP) -> muscles
-# grouped by the Atlas keys, A-pose, Classic Physique (male) or Wellness (female, SEX=f: wide hips, small waist, big glutes,
-# thick thighs, lighter shoulders/arms, smooth breast contour), solid skull with teeth (baked shadow), skin only on hands,
+# grouped by the Atlas keys, A-pose, Classic Physique (male) or female (SEX=f: wide hips, small waist, round glutes,
+# moderate thighs, narrower shoulders; breasts only with BREASTS=1, off since 0.16), solid skull with teeth (baked shadow), skin only on hands,
 # feet and the front of the neck (owner, nov/2026).
 # Needs: pip install trimesh fast_simplification scipy scikit-image (embree/pyembree speeds up the skull shadow) ; the BodyParts3D
 #        STL folder in BP3D_STL (muscles, bones, skin FMA7163, the 28 teeth and the eyeballs FMA12513) ; sel.tsv next to this file.
@@ -34,8 +34,8 @@ INF={"peito_superior":23,"peito":20,"ombro_lateral":27,"ombro":25,"biceps":24,"b
 import os
 FEM=os.environ.get("SEX")=="f"
 if FEM:   # owner (0.15): female 3D, Wellness — thick thighs, very big glutes, small waist, wide hips, lighter shoulders and arms
-  INF={"peito_superior":5,"peito":5,"ombro_lateral":12,"ombro":10,"biceps":8,"braquial":5,"triceps":9,"antebraco":4,"trapezio_superior":4,"trapezio":7,"infraespinhal":7,"redondo":6,"DORSAL":8,
-   "serratil":3,"ABDOMEN":4,"obliquos":0,"gluteo_maximo":27,"gluteo_medio":14,"abdutores":8,"adutores":24,"quad_vasto_lateral":24,"quad_vasto_medial":12,"quad_reto_femoral":14,"quad":10,"isquio":18,
+  INF={"peito_superior":5,"peito":5,"ombro_lateral":14,"ombro":12,"biceps":12,"braquial":7,"triceps":13,"antebraco":6,"trapezio_superior":1,"trapezio":5,"infraespinhal":7,"redondo":6,"DORSAL":8,
+   "serratil":2,"ABDOMEN":1,"obliquos":0,"gluteo_maximo":23,"gluteo_medio":12,"abdutores":5,"adutores":13,"quad_vasto_lateral":14,"quad_vasto_medial":8,"quad_reto_femoral":9,"quad":6,"isquio":11,
    "panturrilha_gastro":8,"panturrilha_soleo":3}
 PEAK={"quad_vasto_lateral":(0.55,0.3),"quad_vasto_medial":(0.2,0.14),"quad_reto_femoral":(0.6,0.33),"panturrilha_gastro":(0.74,0.17),
  "panturrilha_soleo":(0.4,0.25),"isquio":(0.65,0.3),"adutores":(0.82,0.22)}
@@ -156,14 +156,14 @@ def crop(mask,name,tgt,taper=None):
   raw.append(('pele',name,s))
 x,y,z=SKc[:,0],SKc[:,1],SKc[:,2]
 
-crop((z>1330)&(z<=1437)&(np.abs(x)<44)&(y<-118),"skinneck",700)
+crop((z>1330)&(z<=1408)&(np.abs(x)<44)&(y<-118)&(SK.face_normals[:,2]>-0.55),"skinneck",700,(1408,40,0.35))
 for sd,sx in(("right",-1),("left",1)):
   crop((z<872)&(z>560)&(x*sx>201),"skinhand "+sd,6000,(872,70,0.42))
   crop((z<150)&(x*sx>0),"skinfoot "+sd,4500,(150,95,0.5))
 # ---- female breasts (owner: "contorno suave", like the 2D): a smooth volume over each pectoral taken from the skin and
 #      pushed forward, fuller below; its rim sinks under the muscle, so only a soft outline shows. Not a muscle: it takes
 #      the colour of the pectoral part under it and a tap on it is a tap on that part (3d/v3.js, keys "mama_<pec key>").
-if FEM:
+if FEM and os.environ.get("BREASTS")=="1":   # owner 0.16: "tire os seios" — off (kept for reference)
   N0=SK.vertex_normals
   for sd,sx in(("right",-1),("left",1)):
     cx,cz,rx=92*sx,1195,96
@@ -217,7 +217,7 @@ def fh(z):   # hip widening: most at the hip joints/trochanters, gone by the wai
 def fem(V,arm,n,side,S,H):
   V=V.copy();dS=S[0]*(fg(S[2])-1)
   if (arm>=0.999).all():   # thinner arm: shrink around the shoulder-wrist line
-    a=WR[side]-S;a/=np.linalg.norm(a);r=V-S;t=r@a;P=S+t[:,None]*a[None];V=P+(V-P)*0.87
+    a=WR[side]-S;a/=np.linalg.norm(a);r=V-S;t=r@a;P=S+t[:,None]*a[None];V=P+(V-P)*0.95
   Va=V+[dS,0,0];Vt=V.copy();Vt[:,0]*=fg(V[:,2])
   V=arm[:,None]*Va+(1-arm[:,None])*Vt
   V[:,0]*=1+0.12*fh(V[:,2])*(1-arm)

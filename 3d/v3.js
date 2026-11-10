@@ -1,7 +1,7 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
-   in index.html; the models are 3d/corpo-5.glb (male) and 3d/corpo-f-1.glb (female, Wellness, owner 0.15), each with its joint
-   marks (3d/juntas-2.json, 3d/juntas-f-1.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
+   in index.html; the models are 3d/corpo-6.glb (male) and 3d/corpo-f-2.glb (female, owner 0.15/0.16), each with its joint
+   marks (3d/juntas-2.json, 3d/juntas-f-2.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
    Atlas muscle keys, A-pose, Classic Physique upper body, proportional legs, skull, skin on hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
    the 2D figure shows for the rest (groups, cardio), and a tap here is passed back to the same code as a tap in 2D.
@@ -167,7 +167,7 @@ export function mount(box, api){
   const mo=new MutationObserver(()=>{readColors();paint()});mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class"]});
   const mq=matchMedia("(prefers-color-scheme: dark)"),onMq=()=>{readColors();paint()};mq.addEventListener("change",onMq);
 
-  const FILES={m:["./corpo-5.glb","./juntas-2.json"],f:["./corpo-f-1.glb","./juntas-f-1.json"]};let loadN=0;
+  const FILES={m:["./corpo-6.glb","./juntas-2.json"],f:["./corpo-f-2.glb","./juntas-f-2.json"]};let loadN=0;
   async function load(sx){sx=sx==="f"?"f":"m";if(sx===curSex)return;curSex=sx;const my=++loadN,live=()=>alive&&my===loadN;
     let buf;
     fetch(new URL(FILES[sx][1],import.meta.url)).then(r=>r.json()).then(j=>{if(live()){clearJoints();addJoints(j)}}).catch(()=>{});
