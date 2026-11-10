@@ -1,7 +1,7 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
-   in index.html; the model is 3d/corpo-1.glb (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
-   Atlas muscle keys, inflated to a bodybuilder and posed in an A-pose — see docs/FONTES.md).
+   in index.html; the model is 3d/corpo-2.glb (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
+   Atlas muscle keys, A-pose, Classic Physique build, skin on head/hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
    the 2D figure shows for the rest (groups, cardio), and a tap here is passed back to the same code as a tap in 2D.
 
@@ -54,7 +54,7 @@ export function mount(box, api){
       camera.position.set(Math.sin(ang)*dd,from.y+(to.y-from.y)*e,Math.cos(ang)*dd);controls.target.lerpVectors(ft,tt,e);need=true;if(k<1)requestAnimationFrame(step)})()}
 
   function paint(){for(const [k,o] of Object.entries(parts)){const s=state[k]||{};
-    const c=s.on?C.target:s.syn?C.syn:k==="osso"?C.bone:k==="fundo"||k==="base"?C.base:k==="deco"?C.mlo:s.c?(s.dim?new THREE.Color(s.c).lerp(C.m,.75):new THREE.Color(s.c)):(k===hov?C.hov:C.m);
+    const c=s.on?C.target:s.syn?C.syn:k==="osso"?C.bone:k==="fundo"||k==="base"?C.base:k==="deco"||k==="tend"?C.mlo:k==="pele"?C.m:s.c?(s.dim?new THREE.Color(s.c).lerp(C.m,.75):new THREE.Color(s.c)):(k===hov?C.hov:C.m);
     if(o.userData.fu)o.userData.fu.value.copy(C.fib);baseU.value.copy(C.base);
     o.material.color.copy(c);o.material.emissive.copy(s.on?C.target:s.syn?C.syn:new THREE.Color(0));o.material.emissiveIntensity=s.on||s.syn?0.18:0}need=true}
 
@@ -67,7 +67,7 @@ export function mount(box, api){
   const LAYER={trapezio_superior:-3,trapezio_medio:-3,trapezio_inferior:-3,ombro_frontal:-3,ombro_lateral:-3,ombro_posterior:-3,peito_superior:-3,peito_medial:-3,peito_inferior:-3,
     dorsal_superior:-2,dorsal_inferior:-2,gluteo_maximo:-3,obliquos:-1,abdomen_supra:-2,abdomen_infra:-2,biceps_longa:-2,biceps_curta:-2,triceps_longa:-2,triceps_lateral:-2,
     antebraco_braquiorradial:-2,quad_reto_femoral:-2,isquio_biceps_femoral:-2,panturrilha_gastro:-2,abdutores:-1,
-    infraespinhal:1,redondo_maior:1,serratil:1,gluteo_medio:1,braquial:1,adutores:1,panturrilha_soleo:1,triceps_medial:1,osso:3,fundo:3};
+    infraespinhal:1,redondo_maior:1,serratil:1,gluteo_medio:1,braquial:1,adutores:1,panturrilha_soleo:1,triceps_medial:1,osso:3,fundo:3,tend:2};
   const lay=(m,k)=>{const l=LAYER[k]||0;if(l){m.polygonOffset=true;m.polygonOffsetFactor=l;m.polygonOffsetUnits=l*4}};
   const sepMat=new THREE.ShaderMaterial({transparent:true,depthTest:false,depthWrite:false,
     uniforms:{t:{value:idT.texture},px:{value:new THREE.Vector2()},col:{value:new THREE.Color()},a:{value:0.9}},
@@ -115,7 +115,7 @@ export function mount(box, api){
   function pick(x,y){const r=canvas.getBoundingClientRect();ndc.set(((x-r.left)/r.width)*2-1,-((y-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);
     const hs=ray.intersectObjects(pickables,false),h=hs[0];lastHit=h?h.point:null;if(!h||!h.face)return null;
     const front=x=>x.face&&x.face.normal.clone().transformDirection(x.object.matrixWorld).dot(ray.ray.direction)<0;  /* the inside of a muscle seen through a gap is not a tap on it */
-    const NM=k=>k==="osso"||k==="fundo"||k==="base"||k==="deco";
+    const NM=k=>/^(osso|fundo|base|deco|tend|pele)$/.test(k);
     if(!front(h))return null;if(!NM(h.object.userData.k))return h.object.userData.k;
     /* the filler layer sits just under the muscles: a tap on a seam still picks the muscle right behind it */
     const m=hs.find(x=>x.distance-h.distance<0.02&&!NM(x.object.userData.k)&&front(x));return m?m.object.userData.k:h.object.userData.k}
@@ -131,7 +131,7 @@ export function mount(box, api){
     if(api.covered()){api.tap(null);return}
     const k=pick(e.clientX,e.clientY),now=performance.now();
     if(now-lastTap.t<330&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<30){lastTap.t=0;focusAt(lastHit);return}
-    lastTap={t:now,x:e.clientX,y:e.clientY};api.tap(k&&!/^(osso|fundo|base|deco)$/.test(k)?k:null)});
+    lastTap={t:now,x:e.clientX,y:e.clientY};api.tap(k&&!/^(osso|fundo|base|deco|tend|pele)$/.test(k)?k:null)});
   const tip=document.createElement("div");tip.className="v3tip";tip.hidden=true;box.appendChild(tip);
   canvas.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse"||e.buttons)return;const k=pick(e.clientX,e.clientY),nm=k&&api.name(k);const nk=nm?k:null;
     if(nk!==hov){hov=nk;paint();canvas.style.cursor=nk?"pointer":"grab"}
@@ -144,7 +144,7 @@ export function mount(box, api){
 
   (async()=>{
     let buf;
-    try{const r=await fetch(new URL("./corpo-1.glb",import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||2972592;
+    try{const r=await fetch(new URL("./corpo-2.glb",import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||3600000;
       if(r.body&&r.body.getReader){const rd=r.body.getReader(),ch=[];let got=0;
         for(;;){const {done,value}=await rd.read();if(done)break;ch.push(value);got+=value.length;api.progress(Math.min(1,got/tot))}
         buf=await new Blob(ch).arrayBuffer()}else buf=await r.arrayBuffer()}
@@ -155,7 +155,7 @@ export function mount(box, api){
       ms.forEach(o=>{const k=(o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"deco").replace(/_\d+$/,"");
         o.material=new THREE.MeshStandardMaterial({color:0x999999,roughness:k==="osso"?0.75:0.55,metalness:0,side:THREE.DoubleSide});
         shade(o,!!o.geometry.attributes.uv&&k!=="osso"&&k!=="fundo");o.userData.k=k;parts[k]=o;pickables.push(o);
-        o.userData.idm=new THREE.ShaderMaterial({uniforms:{id:{value:meshes.length+1},sd:{value:k==="osso"||k==="fundo"||k==="base"?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
+        o.userData.idm=new THREE.ShaderMaterial({uniforms:{id:{value:meshes.length+1},sd:{value:/^(osso|fundo|base|pele|tend)$/.test(k)?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
         lay(o.material,k);lay(o.userData.idm,k);meshes.push(o)});
       scene.add(g.scene);const b=new THREE.Box3().setFromObject(g.scene),H=b.max.y-b.min.y;CY=b.min.y+H*0.5;BB=b.clone().expandByScalar(0.05);BH=H;BW=b.max.x-b.min.x;
       ready=true;resize();view(curV,false);paint();api.ready()},()=>api.fail())})();
@@ -174,6 +174,9 @@ export function mount(box, api){
     /* for tests: where a muscle is on screen (middle of its front/back half), and its colour now */
     at(k){const o=parts[k];if(!o)return null;const bb=new THREE.Box3().setFromObject(o),c=bb.getCenter(new THREE.Vector3());c.z=curV==="back"?bb.min.z:bb.max.z;c.x=bb.min.x+(bb.max.x-bb.min.x)*0.3;
       c.project(camera);const r=canvas.getBoundingClientRect();return {x:r.left+(c.x+1)/2*r.width,y:r.top+(1-c.y)/2*r.height}},
+    /* for screenshots: look from an angle (deg, 0 = front), distance (m) and height (0..1 of the body) */
+    look(deg,dist,yf){const a=THREE.MathUtils.degToRad(deg),y=yf==null?CY:BB.min.y+(BB.max.y-BB.min.y)*yf,d=dist||fitD();
+      controls.target.set(0,y,0);camera.position.set(Math.sin(a)*d,y+0.03,Math.cos(a)*d);need=true},
     color(k){const o=parts[k];return o?"#"+o.material.color.getHexString():null},
     dispose(){alive=false;renderer.setAnimationLoop(null);ro.disconnect();mo.disconnect();mq.removeEventListener("change",onMq);controls.dispose();renderer.dispose();canvas.remove();tip.remove()}
   };
