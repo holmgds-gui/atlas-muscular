@@ -1,5 +1,5 @@
 # Muscle Atlas 3D body (3d/corpo-N.glb). BodyParts3D (DBCLS, CC BY-SA 2.1 JP) -> muscles grouped by the Atlas keys,
-# A-pose, inflated to a Classic Physique build (owner, nov/2026), skin only on head, hands and feet.
+# A-pose, Classic Physique upper body with lighter, proportional legs (owner, nov/2026), skull kept, skin only on hands and feet.
 # Needs: pip install trimesh fast_simplification scipy ; the BodyParts3D STL folder in BP3D_STL ; sel.tsv next to this file.
 # Run:  BP3D_STL=/path/to/stl/ python3 build.py  ->  corpo.glb ; then  npx @gltf-transform/cli quantize corpo.glb ../../3d/corpo-N.glb
 import trimesh, numpy as np, fast_simplification as fs, re, sys, os
@@ -21,16 +21,16 @@ MAP=[("clavicular part of .* pectoralis","peito_superior"),("sternocostal part o
 # Owner: "bem mais forte, musculoso que o normal". Push each muscle out along its normals, most in the belly, nothing at the
 # tendons (t = position along the muscle's long axis). Values in mm, by Atlas group.
 INF={"peito_superior":23,"peito":20,"ombro_lateral":27,"ombro":25,"biceps":24,"braquial":12,"triceps":23,"antebraco":13,"trapezio_superior":23,"trapezio":17,"infraespinhal":12,"redondo":12,"DORSAL":21,
- "serratil":8,"ABDOMEN":7,"obliquos":1,"gluteo":12,"abdutores":7,"adutores":18,"quad_vasto_lateral":24,"quad_vasto_medial":22,"quad":15,"isquio":15,
- "panturrilha_gastro":2,"panturrilha_soleo":9}
+ "serratil":8,"ABDOMEN":7,"obliquos":1,"gluteo":8,"abdutores":4,"adutores":9,"quad_vasto_lateral":10,"quad_vasto_medial":6,"quad_reto_femoral":8,"quad":6,"isquio":7,
+ "panturrilha_gastro":0,"panturrilha_soleo":3}
 # where along the muscle (0 = lowest point, 1 = highest) the bulge peaks, and how wide it is: the outer quad "sweep" sits
 # low-mid, the inner quad "teardrop" just above the knee, the calf high (diamond, not a ball at the ankle)
-PEAK={"quad_vasto_lateral":(0.42,0.32),"quad_vasto_medial":(0.16,0.17),"quad_reto_femoral":(0.5,0.35),"panturrilha_gastro":(0.62,0.22),
- "panturrilha_soleo":(0.35,0.3),"isquio":(0.55,0.3),"adutores":(0.7,0.3)}
+PEAK={"quad_vasto_lateral":(0.6,0.35),"quad_vasto_medial":(0.22,0.15),"quad_reto_femoral":(0.62,0.35),"panturrilha_gastro":(0.62,0.22),
+ "panturrilha_soleo":(0.35,0.3),"isquio":(0.65,0.3),"adutores":(0.85,0.25)}
 def inflate(m,key,name):
   a=next((v for k,v in INF.items() if key.startswith(k)),0)
   if key=="deco":  # shin and front-of-thigh muscles fill out too, so the lower leg is not thin next to the calves
-    a=next((v for k,v in (("tibialis anterior",8),("fibularis",7),("extensor digitorum longus",6),("sartorius",5)) if k in name),0)
+    a=next((v for k,v in (("tibialis anterior",4),("fibularis",3),("extensor digitorum longus",3),("sartorius",3)) if k in name),0)
   if not a:return m
   V=m.vertices.copy();c=V.mean(0)
   # smooth normals over the neighbours first: raw normals of a decimated mesh are noisy and make the surface fold
@@ -67,7 +67,7 @@ for a,k,n in parts:
   m=trimesh.load(D+a+'.stl');m.merge_vertices()
   # skull, hands and feet show as bone; every other bone sits deep and only shows through gaps -> deep-tissue colour
   OSSO=r"frontal bone|occipital|sphenoid|temporal bone|parietal|zygomatic|nasal bone|maxilla|mandible|lacrimal|ethmoid|vomer|scaphoid|lunate|triquetr|pisiform|trapezium|trapezoid|capitate|hamate|metacarpal|phalanx|talus|calcaneus|navicular|cuboid|cuneiform|metatarsal|patella|tibia$"
-  if k=='b' and re.search(OSSO,n) and not re.search(r"patella|tibia$",n):continue
+  if k=='b' and re.search(OSSO,n) and not re.search(r"patella|tibia$",n) and (m.centroid[2]<1300 or abs(m.centroid[0])>200):continue
   key=('tend' if re.search(r"patella|tibia$|fibula$",n) else 'fundo') if k=='b' else next((v for p,v in MAP if re.search(p,n)),'deco')
   raw.append((key,n,m));area+=m.area if k=='m' else 0
 # --- skin only where there is no muscle to show (owner: the skull, bony hands and feet looked odd): head, front of the
@@ -82,11 +82,11 @@ def crop(mask,name,tgt,taper=None):
     v,f=fs.simplify(s.vertices.astype(np.float32),s.faces.astype(np.int32),target_reduction=1-tgt/len(s.faces));s=trimesh.Trimesh(v,f,process=True)
   raw.append(('pele',name,s))
 x,y,z=SKc[:,0],SKc[:,1],SKc[:,2]
-crop((z>1437)|((z>1392)&(y>-70)),"skinhead",9000)   # and the back of the neck up under the skull
+
 crop((z>1330)&(z<=1437)&(np.abs(x)<44)&(y<-118),"skinneck",700)
 for sd,sx in(("right",-1),("left",1)):
-  wc=np.array([sx*250,-88,816.0]);crop((np.linalg.norm(SKc-wc,axis=1)<150)&(z<824)&(x*sx>197),"skinhand "+sd,2600)
-  crop((z<100)&(x*sx>0),"skinfoot "+sd,2600,(100,60,0.36))
+  crop((z<872)&(z>560)&(x*sx>201),"skinhand "+sd,4200,(872,70,0.42))
+  crop((z<150)&(x*sx>0),"skinfoot "+sd,3200,(150,95,0.5))
 
 # ---- A-pose (owner): arms out to ~38 deg (from 11), legs out 6 deg. Bones and muscles of the limb turn rigidly
 # around the shoulder / hip joint; muscles that cross the joint (deltoid, pec, lat, teres, infraspinatus, glutes,

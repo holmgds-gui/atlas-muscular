@@ -1,7 +1,7 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
-   in index.html; the model is 3d/corpo-2.glb (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
-   Atlas muscle keys, A-pose, Classic Physique build, skin on head/hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
+   in index.html; the model is 3d/corpo-3.glb (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
+   Atlas muscle keys, A-pose, Classic Physique upper body, proportional legs, skull, skin on hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
    the 2D figure shows for the rest (groups, cardio), and a tap here is passed back to the same code as a tap in 2D.
 
@@ -144,7 +144,7 @@ export function mount(box, api){
 
   (async()=>{
     let buf;
-    try{const r=await fetch(new URL("./corpo-2.glb",import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||3600000;
+    try{const r=await fetch(new URL("./corpo-3.glb",import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||3600000;
       if(r.body&&r.body.getReader){const rd=r.body.getReader(),ch=[];let got=0;
         for(;;){const {done,value}=await rd.read();if(done)break;ch.push(value);got+=value.length;api.progress(Math.min(1,got/tot))}
         buf=await new Blob(ch).arrayBuffer()}else buf=await r.arrayBuffer()}
@@ -175,8 +175,8 @@ export function mount(box, api){
     at(k){const o=parts[k];if(!o)return null;const bb=new THREE.Box3().setFromObject(o),c=bb.getCenter(new THREE.Vector3());c.z=curV==="back"?bb.min.z:bb.max.z;c.x=bb.min.x+(bb.max.x-bb.min.x)*0.3;
       c.project(camera);const r=canvas.getBoundingClientRect();return {x:r.left+(c.x+1)/2*r.width,y:r.top+(1-c.y)/2*r.height}},
     /* for screenshots: look from an angle (deg, 0 = front), distance (m) and height (0..1 of the body) */
-    look(deg,dist,yf){const a=THREE.MathUtils.degToRad(deg),y=yf==null?CY:BB.min.y+(BB.max.y-BB.min.y)*yf,d=dist||fitD();
-      controls.target.set(0,y,0);camera.position.set(Math.sin(a)*d,y+0.03,Math.cos(a)*d);need=true},
+    look(deg,dist,yf,xo){const a=THREE.MathUtils.degToRad(deg),y=yf==null?CY:BB.min.y+(BB.max.y-BB.min.y)*yf,d=dist||fitD(),x=xo||0;
+      controls.target.set(x,y,0);camera.position.set(x+Math.sin(a)*d,y+0.03,Math.cos(a)*d);need=true},
     color(k){const o=parts[k];return o?"#"+o.material.color.getHexString():null},
     dispose(){alive=false;renderer.setAnimationLoop(null);ro.disconnect();mo.disconnect();mq.removeEventListener("change",onMq);controls.dispose();renderer.dispose();canvas.remove();tip.remove()}
   };
