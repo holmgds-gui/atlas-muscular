@@ -1,6 +1,6 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
-   in index.html; the model is 3d/corpo-3.glb (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
+   in index.html; the model is 3d/corpo-4.glb (+ joint marks 3d/juntas-1.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
    Atlas muscle keys, A-pose, Classic Physique upper body, proportional legs, skull, skin on hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
    the 2D figure shows for the rest (groups, cardio), and a tap here is passed back to the same code as a tap in 2D.
@@ -21,25 +21,31 @@ export function mount(box, api){
   const controls=new OrbitControls(camera,canvas);
   /* zoom goes toward the finger, two fingers also move the body, the point it turns around stays inside the body */
   controls.enableDamping=true;controls.dampingFactor=0.1;controls.enablePan=true;controls.screenSpacePanning=true;controls.zoomToCursor=true;
-  controls.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};controls.minDistance=0.35;controls.maxDistance=9;controls.rotateSpeed=0.85;
-  controls.minPolarAngle=0.25;controls.maxPolarAngle=Math.PI-0.25;
-  let ready=false,BB=new THREE.Box3(new THREE.Vector3(-.4,0,-.2),new THREE.Vector3(.4,1.7,.2)),CY=0.9,need=true,alive=true,curV="front";
+  controls.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};controls.minDistance=0.3;controls.maxDistance=9;controls.rotateSpeed=0.85;
+  /* owner: never straight from above or below (at most ~35° above and ~30° below the horizon) */
+  controls.minPolarAngle=THREE.MathUtils.degToRad(55);controls.maxPolarAngle=THREE.MathUtils.degToRad(120);
+  let CLOUD=null,ready=false,BB=new THREE.Box3(new THREE.Vector3(-.4,0,-.2),new THREE.Vector3(.4,1.7,.2)),CY=0.9,need=true,alive=true,curV="front";
   scene.add(new THREE.HemisphereLight(0xffffff,0x9aa0a8,1.25));
   const key=new THREE.DirectionalLight(0xffffff,1.6);key.position.set(0.6,0.8,1);camera.add(key);
   const rim=new THREE.DirectionalLight(0xffffff,0.45);rim.position.set(-1,0.3,-0.6);camera.add(rim);scene.add(camera);
 
   const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-  const C={};const readColors=()=>{for(const [k,v] of [["m","--v3-m"],["mlo","--v3-mlo"],["bone","--v3-bone"],["sep","--v3-sep"],["fib","--v3-fib"],["base","--v3-base"],["hov","--v3-hov"],["target","--target"],["syn","--syn"]])C[k]=new THREE.Color(css(v)||"#888");
+  const C={};const readColors=()=>{for(const [k,v] of [["m","--v3-m"],["mlo","--v3-mlo"],["bone","--v3-bone"],["sep","--v3-sep"],["fib","--v3-fib"],["base","--v3-base"],["hov","--v3-hov"],["target","--target"],["syn","--syn"],["art","--fig-art"],["art2","--fig-art2"],["surf","--surface"],["thi","--target-hi"]])C[k]=new THREE.Color(css(v)||"#888");
     C.sepA=parseFloat(css("--v3-sepa"))||.45};readColors();
 
-  const parts={},pickables=[],meshes=[];let state={},hov=null;
+  const parts={},pickables=[],meshes=[];let state={},hov=null,hovJ=null;
+  const jScene=new THREE.Scene(),jMarks=[],jFills=[];jScene.visible=false;
+  const ringG=new THREE.RingGeometry(0.62,1,40),dotG=new THREE.CircleGeometry(0.64,40);
+  function addJoints(JT){for(const [j,pts] of Object.entries(JT))for(const p of pts){const g=new THREE.Group();g.position.set(p[0],p[1],p[2]);
+    const mk=(geo,o)=>{const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({depthTest:false,depthWrite:false,transparent:true}));m.renderOrder=o;g.add(m);return m};
+    const fill=mk(dotG,10),ring=mk(ringG,11);fill.userData.j=j;g.userData={j,fill,ring};jMarks.push(g);jFills.push(fill);jScene.add(g)}paint()}
   const ro=new ResizeObserver(()=>{resize();need=true});ro.observe(box);
   let lastSz=null;
   function resize(){const r=box.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();need=true;
     /* the box changed shape (small figure in the corner, sheet up/down): fit the whole body again, keeping the side it is seen from */
     if(lastSz&&ready&&(Math.abs(r.width/lastSz[0]-1)>.15||Math.abs(r.height/lastSz[1]-1)>.15)){const dir=camera.position.clone().sub(controls.target).normalize();
       controls.target.set(0,CY,0);camera.position.copy(controls.target).add(dir.multiplyScalar(fitD()))}
-    lastSz=[r.width,r.height]}
+    lastSz=[r.width,r.height];if(ready)controls.maxDistance=fitD()*1.3}   /* owner: it cannot be pushed far away */
   const reduce=()=>document.documentElement.classList.contains("noanim")||matchMedia("(prefers-reduced-motion: reduce)").matches;
   let BW=1.2,BH=1.7;
   /* the whole body fits the box with a small margin, whatever its shape */
@@ -53,10 +59,14 @@ export function mount(box, api){
     (function step(){if(!alive)return;const k=Math.min(1,(performance.now()-t0)/550),e=1-Math.pow(1-k,3),ang=fa+da*e,dd=fd+(d-fd)*e;
       camera.position.set(Math.sin(ang)*dd,from.y+(to.y-from.y)*e,Math.cos(ang)*dd);controls.target.lerpVectors(ft,tt,e);need=true;if(k<1)requestAnimationFrame(step)})()}
 
-  function paint(){for(const [k,o] of Object.entries(parts)){const s=state[k]||{};
-    const c=s.on?C.target:s.syn?C.syn:k==="osso"?C.bone:k==="fundo"||k==="base"?C.base:k==="deco"||k==="tend"?C.mlo:k==="pele"?C.m:s.c?(s.dim?new THREE.Color(s.c).lerp(C.m,.75):new THREE.Color(s.c)):(k===hov?C.hov:C.m);
+  function paint(){const art=!!state.__art;
+    for(const [k,o] of Object.entries(parts)){const s=art?{}:state[k]||{};
+    const c=art?(/^(osso|fundo|base|pele|tend)$/.test(k)?C.art:C.art2):s.on?C.target:s.syn?C.syn:k==="osso"?C.bone:k==="fundo"||k==="base"?C.base:k==="deco"||k==="tend"?C.mlo:k==="pele"?C.m:s.c?(s.dim?new THREE.Color(s.c).lerp(C.m,.75):new THREE.Color(s.c)):(k===hov?C.hov:C.m);
     if(o.userData.fu)o.userData.fu.value.copy(C.fib);baseU.value.copy(C.base);
-    o.material.color.copy(c);o.material.emissive.copy(s.on?C.target:s.syn?C.syn:new THREE.Color(0));o.material.emissiveIntensity=s.on||s.syn?0.18:0}need=true}
+    o.material.color.copy(c);o.material.emissive.copy(s.on?C.target:s.syn?C.syn:new THREE.Color(0));o.material.emissiveIntensity=s.on||s.syn?0.18:0}
+    /* Articulações: the joint marks (ring + dot, like the 2D) show only in that mode; the chosen joint is red */
+    jScene.visible=art;for(const j of jMarks){const on=state.__j===j.userData.j;j.userData.fill.material.color.copy(on?C.target:(j.userData.j===hovJ?C.syn:C.surf));j.userData.ring.material.color.copy(on?C.thi:C.syn)}
+    need=true}
 
   /* separation lines: every mesh is drawn once more with its own id into an off-screen buffer; a full-screen pass draws a
      thin dark line wherever neighbouring pixels have different ids (where muscles meet, at bones, around the outline) */
@@ -88,7 +98,9 @@ export function mount(box, api){
     for(const o of meshes){o.userData.mat=o.material;o.material=o.userData.idm}
     renderer.setRenderTarget(idT);renderer.setClearColor(0x000000,1);renderer.clear();renderer.render(scene,camera);renderer.setRenderTarget(null);renderer.setClearColor(0x000000,0);
     for(const o of meshes)o.material=o.userData.mat;
-    renderer.autoClear=false;renderer.render(sepScene,sepCam);renderer.autoClear=true}
+    renderer.autoClear=false;renderer.render(sepScene,sepCam);
+    if(jScene.visible){const s=camera.position.distanceTo(controls.target)*0.0085+0.004;for(const g of jMarks){g.quaternion.copy(camera.quaternion);g.scale.setScalar(s)}renderer.render(jScene,camera)}
+    renderer.autoClear=true}
 
   /* hand-drawn fibre strokes along each muscle (uv.x across the fibres, uv.y along them), fading out when far away;
      the inside of a muscle seen through a gap is painted a flat deep colour so the body reads as solid */
@@ -112,6 +124,11 @@ export function mount(box, api){
 
   /* tap vs drag; a double tap zooms on that spot */
   const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();let down=null,lastHit=null,lastTap={t:0,x:0,y:0};
+  function pickJ(x,y){const r=canvas.getBoundingClientRect();ndc.set(((x-r.left)/r.width)*2-1,-((y-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);
+    for(const g of jMarks){g.updateMatrixWorld(true)}
+    /* a finger is wide: a mark counts as tapped within ~1.6× its size */
+    let best=null,bd=Infinity;for(const g of jMarks){const p=g.position.clone().project(camera),dx=(p.x-ndc.x)*r.width/2,dy=(p.y-ndc.y)*r.height/2,d=Math.hypot(dx,dy);
+      const rad=Math.max(16,g.scale.x/ (camera.position.distanceTo(g.position)*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)))*r.height/2*1.6);if(d<rad&&d<bd){bd=d;best=g.userData.j}}return best}
   function pick(x,y){const r=canvas.getBoundingClientRect();ndc.set(((x-r.left)/r.width)*2-1,-((y-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);
     const hs=ray.intersectObjects(pickables,false),h=hs[0];lastHit=h?h.point:null;if(!h||!h.face)return null;
     const front=x=>x.face&&x.face.normal.clone().transformDirection(x.object.matrixWorld).dot(ray.ray.direction)<0;  /* the inside of a muscle seen through a gap is not a tap on it */
@@ -129,11 +146,14 @@ export function mount(box, api){
   canvas.addEventListener("pointerup",e=>{if(!down)return;const moved=Math.hypot(e.clientX-down.x,e.clientY-down.y),dt=performance.now()-down.t;down=null;
     if(moved>7||dt>500)return;
     if(api.covered()){api.tap(null);return}
-    const k=pick(e.clientX,e.clientY),now=performance.now();
+    if(state.__art){const j=pickJ(e.clientX,e.clientY);if(j){api.joint(j);return}}
+    const k=state.__art?null:pick(e.clientX,e.clientY),now=performance.now();
     if(now-lastTap.t<330&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<30){lastTap.t=0;focusAt(lastHit);return}
     lastTap={t:now,x:e.clientX,y:e.clientY};api.tap(k&&!/^(osso|fundo|base|deco|tend|pele)$/.test(k)?k:null)});
   const tip=document.createElement("div");tip.className="v3tip";tip.hidden=true;box.appendChild(tip);
-  canvas.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse"||e.buttons)return;const k=pick(e.clientX,e.clientY),nm=k&&api.name(k);const nk=nm?k:null;
+  canvas.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse"||e.buttons)return;
+    if(state.__art){const j=pickJ(e.clientX,e.clientY);if(j!==hovJ){hovJ=j;paint();canvas.style.cursor=j?"pointer":"grab"}tip.hidden=!j;if(j){const r=box.getBoundingClientRect();tip.textContent=api.jname(j);tip.style.left=(e.clientX-r.left)+"px";tip.style.top=(e.clientY-r.top)+"px"}return}
+    const k=pick(e.clientX,e.clientY),nm=k&&api.name(k);const nk=nm?k:null;
     if(nk!==hov){hov=nk;paint();canvas.style.cursor=nk?"pointer":"grab"}
     if(nm){const r=box.getBoundingClientRect();tip.hidden=false;tip.textContent=nm;tip.style.left=(e.clientX-r.left)+"px";tip.style.top=(e.clientY-r.top)+"px"}else tip.hidden=true});
   canvas.addEventListener("pointerleave",()=>{tip.hidden=true;if(hov){hov=null;paint()}});
@@ -144,7 +164,8 @@ export function mount(box, api){
 
   (async()=>{
     let buf;
-    try{const r=await fetch(new URL("./corpo-3.glb",import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||3600000;
+    fetch(new URL("./juntas-1.json",import.meta.url)).then(r=>r.json()).then(j=>{if(alive)addJoints(j)}).catch(()=>{});
+    try{const r=await fetch(new URL("./corpo-4.glb",import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||3600000;
       if(r.body&&r.body.getReader){const rd=r.body.getReader(),ch=[];let got=0;
         for(;;){const {done,value}=await rd.read();if(done)break;ch.push(value);got+=value.length;api.progress(Math.min(1,got/tot))}
         buf=await new Blob(ch).arrayBuffer()}else buf=await r.arrayBuffer()}
@@ -158,13 +179,23 @@ export function mount(box, api){
         o.userData.idm=new THREE.ShaderMaterial({uniforms:{id:{value:meshes.length+1},sd:{value:/^(osso|fundo|base|pele|tend)$/.test(k)?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
         lay(o.material,k);lay(o.userData.idm,k);meshes.push(o)});
       scene.add(g.scene);const b=new THREE.Box3().setFromObject(g.scene),H=b.max.y-b.min.y;CY=b.min.y+H*0.5;BB=b.clone().expandByScalar(0.05);BH=H;BW=b.max.x-b.min.x;
+      /* a light cloud of points on the body: the camera is kept a little away from it, so zooming never goes inside */
+      {const P=[];g.scene.updateMatrixWorld(true);const v=new THREE.Vector3();
+        for(const o of ms){const a=o.geometry.attributes.position,st=Math.max(1,Math.floor(a.count/260));for(let i=0;i<a.count;i+=st){v.fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);P.push(v.x,v.y,v.z)}}
+        CLOUD=new Float32Array(P)}
       ready=true;resize();view(curV,false);paint();api.ready()},()=>api.fail())})();
 
   renderer.setAnimationLoop(()=>{if(!box.offsetParent)return;   /* hidden (2D or another tab): no drawing */
     controls.enabled=!api.covered();
     if(controls.update())need=true;
     const t=controls.target,c=t.clone().clamp(BB.min,BB.max);if(!c.equals(t)){camera.position.add(c.clone().sub(t));t.copy(c);need=true}
-    if(need){need=false;draw()}});
+    if(need){keepOut();need=false;draw()}});
+  /* owner: zoom must not go inside the body — if the camera gets closer than ~13 cm to the surface, it backs off */
+  const camP=new THREE.Vector3(),awayV=new THREE.Vector3();
+  function keepOut(){if(!CLOUD)return;const R=0.13,R2=R*R;
+    for(let it=0;it<4;it++){const p=camera.position;let m=Infinity;
+      for(let i=0;i<CLOUD.length;i+=3){const dx=CLOUD[i]-p.x,dy=CLOUD[i+1]-p.y,dz=CLOUD[i+2]-p.z,d=dx*dx+dy*dy+dz*dz;if(d<m)m=d}
+      if(m>=R2)return;awayV.copy(p).sub(controls.target);const L=awayV.length()||1;awayV.multiplyScalar((R-Math.sqrt(m)+0.01)/L);p.add(awayV)}}
 
   return {
     sync(s){state=s||{};paint()},
@@ -177,6 +208,12 @@ export function mount(box, api){
     /* for screenshots: look from an angle (deg, 0 = front), distance (m) and height (0..1 of the body) */
     look(deg,dist,yf,xo){const a=THREE.MathUtils.degToRad(deg),y=yf==null?CY:BB.min.y+(BB.max.y-BB.min.y)*yf,d=dist||fitD(),x=xo||0;
       controls.target.set(x,y,0);camera.position.set(x+Math.sin(a)*d,y+0.03,Math.cos(a)*d);need=true},
+    /* for tests: put the camera somewhere (relative to the target) and read where it ended up */
+    place(x,y,z){camera.position.set(controls.target.x+x,controls.target.y+y,controls.target.z+z);need=true},
+    cam(){const o=camera.position.clone().sub(controls.target),p=camera.position;let m=Infinity;
+      if(CLOUD)for(let i=0;i<CLOUD.length;i+=3)m=Math.min(m,Math.hypot(CLOUD[i]-p.x,CLOUD[i+1]-p.y,CLOUD[i+2]-p.z));
+      return {dist:o.length(),polar:THREE.MathUtils.radToDeg(Math.acos(o.y/o.length())),surf:m,max:controls.maxDistance}},
+    jointAt(j){const g=jMarks.find(x=>x.userData.j===j);if(!g)return null;const c=g.position.clone().project(camera),r=canvas.getBoundingClientRect();return {x:r.left+(c.x+1)/2*r.width,y:r.top+(1-c.y)/2*r.height,c:"#"+g.userData.fill.material.color.getHexString()}},
     color(k){const o=parts[k];return o?"#"+o.material.color.getHexString():null},
     dispose(){alive=false;renderer.setAnimationLoop(null);ro.disconnect();mo.disconnect();mq.removeEventListener("change",onMq);controls.dispose();renderer.dispose();canvas.remove();tip.remove()}
   };

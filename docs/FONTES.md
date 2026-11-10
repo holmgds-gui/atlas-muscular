@@ -262,7 +262,7 @@ Não entraram (não achei lista de exercícios confiável): Iris Kyle, Lee Haney
 
 ### Boneco 3D (botão "3D" no Atlas, versão 0.11; físico Classic Physique na 0.12)
 
-- Modelo: [BodyParts3D](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/), © The Database Center for Life Science (DBCLS), licença [CC BY-SA 2.1 Japão](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html). O arquivo `3d/corpo-3.glb` é uma obra derivada (peças simplificadas, agrupadas pelos músculos do Atlas, infladas para um físico Classic Physique, postas em pose A, com a pele do próprio BodyParts3D só nas mãos, nos pés e na frente do pescoço; gerado por `tools/corpo3d/build.py`) e segue a mesma licença (CC BY-SA). O crédito aparece no canto do 3D no app.
+- Modelo: [BodyParts3D](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/), © The Database Center for Life Science (DBCLS), licença [CC BY-SA 2.1 Japão](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html). O arquivo `3d/corpo-4.glb` (e as posições das articulações em `3d/juntas-1.json`) é uma obra derivada (peças simplificadas, agrupadas pelos músculos do Atlas, infladas para um físico Classic Physique, postas em pose A, com a pele do próprio BodyParts3D só nas mãos, nos pés e na frente do pescoço; gerado por `tools/corpo3d/build.py`) e segue a mesma licença (CC BY-SA). O crédito aparece no canto do 3D no app.
 - Visualização: [three.js](https://threejs.org/) 0.160.0 (licença MIT), carregado do [jsDelivr](https://www.jsdelivr.com/package/npm/three) só quando o botão 3D é tocado.
 
 ## 6. Publicação e ferramentas

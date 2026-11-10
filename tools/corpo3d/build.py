@@ -1,7 +1,8 @@
 # Muscle Atlas 3D body (3d/corpo-N.glb). BodyParts3D (DBCLS, CC BY-SA 2.1 JP) -> muscles grouped by the Atlas keys,
 # A-pose, Classic Physique upper body with lighter, proportional legs (owner, nov/2026), skull kept, skin only on hands and feet.
 # Needs: pip install trimesh fast_simplification scipy ; the BodyParts3D STL folder in BP3D_STL ; sel.tsv next to this file.
-# Run:  BP3D_STL=/path/to/stl/ python3 build.py  ->  corpo.glb ; then  npx @gltf-transform/cli quantize corpo.glb ../../3d/corpo-N.glb
+# Run:  BP3D_STL=/path/to/stl/ python3 build.py  ->  corpo.glb + juntas.json ; then  npx @gltf-transform/cli quantize corpo.glb ../../3d/corpo-N.glb
+#       and copy juntas.json to ../../3d/juntas-N.json (new names = phones fetch them again)
 import trimesh, numpy as np, fast_simplification as fs, re, sys, os
 D=os.environ.get("BP3D_STL","/home/claude/kevin-mattheus-moerman/bodyparts3d/assets/BodyParts3D_data/stl/")
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
@@ -21,12 +22,12 @@ MAP=[("clavicular part of .* pectoralis","peito_superior"),("sternocostal part o
 # Owner: "bem mais forte, musculoso que o normal". Push each muscle out along its normals, most in the belly, nothing at the
 # tendons (t = position along the muscle's long axis). Values in mm, by Atlas group.
 INF={"peito_superior":23,"peito":20,"ombro_lateral":27,"ombro":25,"biceps":24,"braquial":12,"triceps":23,"antebraco":13,"trapezio_superior":23,"trapezio":17,"infraespinhal":12,"redondo":12,"DORSAL":21,
- "serratil":8,"ABDOMEN":7,"obliquos":1,"gluteo":8,"abdutores":4,"adutores":9,"quad_vasto_lateral":10,"quad_vasto_medial":6,"quad_reto_femoral":8,"quad":6,"isquio":7,
- "panturrilha_gastro":0,"panturrilha_soleo":3}
+ "serratil":8,"ABDOMEN":7,"obliquos":1,"gluteo":10,"abdutores":4,"adutores":17,"quad_vasto_lateral":19,"quad_vasto_medial":9,"quad_reto_femoral":12,"quad":8,"isquio":10,
+ "panturrilha_gastro":11,"panturrilha_soleo":3}
 # where along the muscle (0 = lowest point, 1 = highest) the bulge peaks, and how wide it is: the outer quad "sweep" sits
 # low-mid, the inner quad "teardrop" just above the knee, the calf high (diamond, not a ball at the ankle)
-PEAK={"quad_vasto_lateral":(0.6,0.35),"quad_vasto_medial":(0.22,0.15),"quad_reto_femoral":(0.62,0.35),"panturrilha_gastro":(0.62,0.22),
- "panturrilha_soleo":(0.35,0.3),"isquio":(0.65,0.3),"adutores":(0.85,0.25)}
+PEAK={"quad_vasto_lateral":(0.55,0.3),"quad_vasto_medial":(0.2,0.14),"quad_reto_femoral":(0.6,0.33),"panturrilha_gastro":(0.74,0.17),
+ "panturrilha_soleo":(0.4,0.25),"isquio":(0.65,0.3),"adutores":(0.82,0.22)}
 def inflate(m,key,name):
   a=next((v for k,v in INF.items() if key.startswith(k)),0)
   if key=="deco":  # shin and front-of-thigh muscles fill out too, so the lower leg is not thin next to the calves
@@ -97,7 +98,7 @@ def jc(name,fn):
 SH={s:jc(s+" humerus",lambda v:v[v[:,2]>v[:,2].max()-35].mean(0)) for s in("right","left")}
 def hipc(v):t=v[v[:,2]>v[:,2].max()-45];return t[np.argsort(np.abs(t[:,0]))[:len(t)//2]].mean(0)
 HP={s:jc(s+" femur",hipc) for s in("right","left")}
-ARM_A,LEG_A=np.radians(27),np.radians(6)
+ARM_A,LEG_A=np.radians(27),np.radians(2)
 ARM_RIGID=r"skinhand|biceps brachii|brachialis|triceps|coracobrachialis|brachioradialis|flexor carpi|palmaris|flexor digitorum superficialis|pronator teres|extensor carpi|extensor digitorum$|extensor digiti minimi|anconeus|humerus|radius|ulna|scaphoid|lunate|triquetr|pisiform|trapezium|trapezoid|capitate|hamate|metacarpal"
 ARM_CROSS=r"pectoralis major|latissimus|teres major|teres minor|infraspinatus"
 TORSO_ONLY=r"skinhead|skinneck|rectus abdominis|external oblique|hip bone|sacrum|coccyx|vertebra|rib$|sternum|xiphoid|manubrium|serratus|trapezius|scapula|clavicle"
@@ -182,4 +183,24 @@ for key,L in meshes.items():
   mm=trimesh.util.concatenate(L);mm.vertices-=ctr;tot+=len(mm.faces)
   _=mm.vertex_normals
   sc.add_geometry(mm,node_name=key,geom_name=key)
+# ---- joints for the Articulações mode (3D): one point per joint and side, posed like the body, in the same metres/axes
+import json
+IDS={n:a for a,k,n in (l.rstrip("\n").split("\t") for l in open("sel.tsv"))}
+def bone(n):return trimesh.load(D+IDS[n]+".stl").vertices
+def J(p,n):
+  m=trimesh.Trimesh(np.array([p,p+[1,0,0],p+[0,1,0]],float),[[0,1,2]],process=False);q=pose(m,n).vertices[0]
+  return [round(q[0]/1000,4),round(q[2]/1000,4),round(-q[1]/1000,4)]
+mid=lambda *ns:np.vstack([bone(n) for n in ns]).mean(0)
+JT={"pescoco":[J(mid("fourth cervical vertebra","fifth cervical vertebra"),"vertebra")],
+  "toracica":[J(mid("sixth thoracic vertebra","seventh thoracic vertebra"),"vertebra")],
+  "lombar":[J(mid("third lumbar vertebra","fourth lumbar vertebra"),"vertebra")]}
+for sd in("right","left"):
+  hu=bone(sd+" humerus");ra=np.vstack([bone(sd+" radius"),bone(sd+" ulna")]);fe=bone(sd+" femur");ti=bone(sd+" tibia")
+  JT.setdefault("ombro",[]).append(J(SH[sd],"x"))
+  JT.setdefault("cotovelo",[]).append(J(hu[hu[:,2]<hu[:,2].min()+25].mean(0),"humerus"))
+  JT.setdefault("punho",[]).append(J(ra[ra[:,2]<ra[:,2].min()+18].mean(0),"radius"))
+  JT.setdefault("quadril",[]).append(J(HP[sd],"x"))
+  JT.setdefault("joelho",[]).append(J((fe[fe[:,2]<fe[:,2].min()+25].mean(0)+ti[ti[:,2]>ti[:,2].max()-25].mean(0))/2,"joint"))
+  JT.setdefault("tornozelo",[]).append(J(bone(sd+" talus").mean(0),"joint"))
+json.dump(JT,open("juntas.json","w"),separators=(",",":"));print("juntas",{k:len(v) for k,v in JT.items()})
 open("corpo.glb","wb").write(trimesh.exchange.gltf.export_glb(sc,include_normals=True));print('faces',tot,'nodes',len(meshes),'height',allv.max(0)[1]-allv.min(0)[1])

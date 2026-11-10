@@ -2,3 +2,4 @@ tests/out/
 node_modules/
 .DS_Store
 tools/corpo3d/corpo.glb
+tools/corpo3d/juntas.json
