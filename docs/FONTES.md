@@ -260,6 +260,11 @@ Não entraram (não achei lista de exercícios confiável): Iris Kyle, Lee Haney
 - Imagem de referência para a silhueta (só formato e detalhes, sem cores ou textos): [Toda Matéria](https://static.todamateria.com.br/upload/55/77/55771934478af-musculos-do-corpo-humano.jpg)
 - Ideia original do app, conversa no Gemini: [link compartilhado](https://share.gemini.google/a7ybw8rbXXQ6)
 
+### Boneco 3D (botão "3D" no Atlas, versão 0.11)
+
+- Modelo: [BodyParts3D](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/), © The Database Center for Life Science (DBCLS), licença [CC BY-SA 2.1 Japão](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html). O arquivo `3d/corpo-1.glb` é uma obra derivada (peças simplificadas, agrupadas pelos músculos do Atlas, infladas para um físico de fisiculturista e postas em pose A) e segue a mesma licença (CC BY-SA). O crédito aparece no canto do 3D no app.
+- Visualização: [three.js](https://threejs.org/) 0.160.0 (licença MIT), carregado do [jsDelivr](https://www.jsdelivr.com/package/npm/three) só quando o botão 3D é tocado.
+
 ## 6. Publicação e ferramentas
 
 - App publicado: https://holmgds-gui.github.io/atlas-muscular/

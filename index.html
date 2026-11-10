@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
 <title>Muscle Atlas</title>
 <meta name="description" content="Boneco anatômico clicável com exercícios ordenados por estudos de EMG.">
 <meta name="theme-color" content="#0E1115">
@@ -27,6 +28,7 @@ img{max-width:100%}
 :root{
   --bg:#E9ECEF; --surface:#F7F8F9; --ink:#1A1F26; --muted:#5B6470; --line:#CDD2D8;
   --skin:#D6DADF; --fig-skin:#CDD3DA; --fig-art:#DCE0E5; --fig-art2:#C9D0D7; --m:#AEB6C0; --m-hi:#C3CAD2; --m-lo:#97A0AB; --m-edge:#E9ECEF; --fiber:rgba(26,31,38,.13);
+  --v3-m:#AEB6C0; --v3-mlo:#9AA3AE; --v3-bone:#D3CFC6; --v3-sep:#5E6672; --v3-sepa:.42; --v3-fib:#6E7782; --v3-base:#8E97A2; --v3-hov:#C9CFD6;
   --target:#D3222A; --target-hi:#F04A50; --target-lo:#A0141B;
   --syn:#F08A24; --syn-soft:rgba(240,138,36,.55); --c-l:#EFCB5A; --c-m:#F08A24; --c-f:#D3222A;
   --gp-peito:#2F7FD8; --gp-ombros:#0E9C9C; --gp-bracos:#8A55D6; --gp-core:#C99A00; --gp-pernas:#2E9E5B; --gp-costas:#D0569A;
@@ -37,6 +39,7 @@ img{max-width:100%}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
   --skin:#1E242C; --fig-skin:#5E6976; --fig-art:#2F3741; --fig-art2:#3A444F; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
+  --v3-m:#5A6674; --v3-mlo:#46515E; --v3-bone:#6F6C66; --v3-sep:#0B0E12; --v3-sepa:.5; --v3-fib:#2A323C; --v3-base:#38414C; --v3-hov:#76838F;
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5); --c-l:#D9B85A; --c-m:#F59A3C; --c-f:#E8343B;
   --gp-peito:#4F9BEF; --gp-ombros:#2CC2BF; --gp-bracos:#A577F0; --gp-core:#E6BC2A; --gp-pernas:#44BF77; --gp-costas:#EA79B6;
@@ -44,6 +47,7 @@ img{max-width:100%}
 :root[data-theme="dark"]{
   --bg:#0E1115; --surface:#151A20; --ink:#E7EAEE; --muted:#8C95A1; --line:#262D36;
   --skin:#1E242C; --fig-skin:#5E6976; --fig-art:#2F3741; --fig-art2:#3A444F; --m:#46515E; --m-hi:#5A6674; --m-lo:#36404B; --m-edge:#151A20; --fiber:rgba(0,0,0,.28);
+  --v3-m:#5A6674; --v3-mlo:#46515E; --v3-bone:#6F6C66; --v3-sep:#0B0E12; --v3-sepa:.5; --v3-fib:#2A323C; --v3-base:#38414C; --v3-hov:#76838F;
   --target:#E8343B; --target-hi:#FF6268; --target-lo:#A8161D;
   --syn:#F59A3C; --syn-soft:rgba(245,154,60,.5); --c-l:#D9B85A; --c-m:#F59A3C; --c-f:#E8343B;
   --gp-peito:#4F9BEF; --gp-ombros:#2CC2BF; --gp-bracos:#A577F0; --gp-core:#E6BC2A; --gp-pernas:#44BF77; --gp-costas:#EA79B6;
@@ -276,6 +280,20 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .legend .lt{background:var(--target)} .legend .ls{background:var(--syn)}
 .canvas{flex:1;min-height:0;position:relative}
 #fig{width:100%;height:100%;display:block;touch-action:none;user-select:none;-webkit-user-select:none}
+/* 3D body (owner): a "3D" button in the bottom corner of the figure; the 3D view sits on top of the 2D one */
+.b3d{position:absolute;right:max(12px,env(safe-area-inset-right,0px));bottom:12px;z-index:3;min-width:48px;height:44px;padding:0 12px;border-radius:14px;border:1px solid var(--line);
+  background:var(--surface);color:var(--ink);font-family:var(--f-display);font-weight:700;font-size:18px;letter-spacing:.06em;box-shadow:0 2px 10px rgba(0,0,0,.18);cursor:pointer}
+.b3d[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.v3{position:absolute;inset:0;z-index:2}.v3[hidden]{display:none}
+.v3 .v3c{display:block;width:100%;height:100%;outline:none;touch-action:none}
+.v3load{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:10px;font-size:14px;color:var(--muted);text-align:center;padding:16px}
+.v3load .v3bar{width:180px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}.v3load .v3bar i{display:block;height:100%;width:0;background:var(--target);transition:width .2s}
+.v3note{position:absolute;left:12px;top:8px;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:3px 9px;pointer-events:none}
+.v3cred{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:8px;font-size:10px;color:var(--muted);opacity:.8;text-decoration:none}
+.v3hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:12px;color:var(--muted);pointer-events:none;white-space:nowrap}
+.v3tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--bg);font-size:12px;font-weight:600;padding:4px 8px;border-radius:6px;transform:translate(-50%,-140%);white-space:nowrap}
+#tab-atlas.is3d #hint,#tab-atlas.is3d .zoom{display:none}#tab-atlas.is3d #fig{visibility:hidden}
+@media (max-width:900px){#tab-atlas.covered .b3d,#tab-atlas.covered .v3cred,#tab-atlas.covered .v3hint,#tab-atlas.covered .v3note{display:none}}
 .hint{position:absolute;left:max(16px,env(safe-area-inset-left,0px));bottom:10px;font-size:12px;color:var(--muted);pointer-events:none}
 
 /* figure */
@@ -291,7 +309,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .bfold{fill:none;stroke:var(--fold);stroke-width:2.4;stroke-linecap:round;pointer-events:none}
 .seg.sex button{display:inline-grid;place-items:center;padding:6px 14px}
 .seg.sex svg{width:19px;height:19px;display:block;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
-@media (max-width:900px){#zIn,#zOut{display:none}}
+@media (max-width:900px){.zoom{display:none!important}}
 .mode-art .skin,.mode-art .ext,.mode-art .tend{fill:var(--fig-art)}
 .mode-art .dm{fill:var(--fig-art2);stroke:var(--fig-art)}
 .mode-art .hair,.mode-art .breast,.mode-art .bfold{opacity:.6}
@@ -806,6 +824,9 @@ button.brand:hover{background:var(--chip)}
       <div class="canvas">
         <svg id="fig" preserveAspectRatio="xMidYMid meet" aria-label="Boneco com músculos e articulações clicáveis"></svg>
         <div class="hint" id="hint">Toque num músculo · pinça para zoom · arraste para mover</div>
+        <div class="v3" id="v3" hidden data-notr><div class="v3load" id="v3load" hidden></div><div class="v3note" id="v3note" hidden></div><div class="v3hint" id="v3hint"></div>
+          <a class="v3cred" href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" target="_blank" rel="noopener">BodyParts3D · CC BY-SA</a></div>
+        <button class="b3d" id="b3d" type="button" aria-pressed="false" data-notr>3D</button>
       </div>
     </section>
     <aside class="panel">
@@ -2210,6 +2231,7 @@ function setView(v,keepZoom){
   const vt=document.getElementById("vTgl");if(vt){const nx=nextView(v);vt.textContent=v==="front"?tx("Frente","Front","Frente"):v==="back"?tx("Costas","Back","Espalda"):tx("Ambos","Both","Ambos");
     const nl=nx==="front"?tx("frente","front","frente"):nx==="back"?tx("costas","back","espalda"):tx("ambos","both","ambos");vt.title=vt.ariaLabel=tx(`Vista: toque para ver ${nl}`,`View: tap to see ${nl}`,`Vista: toca para ver ${nl}`)}
   VG.front.style.display=(v==="back")?"none":"";VG.back.style.display=(v==="front")?"none":"";
+  if(typeof V3!=="undefined"&&V3&&v3on)V3.view(v);
   if(!keepZoom){vb=[...BOX[v]];applyVB()}
 }
 function toSvg(cx,cy){const p=svg.createSVGPoint();p.x=cx;p.y=cy;return p.matrixTransform(svg.getScreenCTM().inverse())}
@@ -2230,7 +2252,7 @@ document.getElementById("vTgl").addEventListener("click",()=>setView(nextView(vi
 document.getElementById("zIn").onclick=()=>zoomAt(1.4);
 document.getElementById("zOut").onclick=()=>zoomAt(1/1.4);
 document.getElementById("zReset").onclick=()=>{vb=[...BOX[view]];applyVB()};
-svg.addEventListener("wheel",e=>{e.preventDefault();if(document.getElementById("tab-atlas").classList.contains("covered"))return;zoomAt(e.deltaY<0?1.15:1/1.15,e.clientX,e.clientY)},{passive:false});
+svg.addEventListener("wheel",e=>{e.preventDefault();if(isCovered())return;zoomAt(e.deltaY<0?1.15:1/1.15,e.clientX,e.clientY)},{passive:false});
 
 const ptrs=new Map();let gesture=null;
 svg.addEventListener("pointerdown",e=>{
@@ -2242,7 +2264,7 @@ svg.addEventListener("pointerdown",e=>{
 });
 svg.addEventListener("pointermove",e=>{
   if(!ptrs.has(e.pointerId)||!gesture)return;
-  if(document.getElementById("tab-atlas").classList.contains("covered"))return;
+  if(isCovered())return;
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   const scale=vb[2]/svg.getBoundingClientRect().width*Math.max(1,(svg.getBoundingClientRect().width/svg.getBoundingClientRect().height)/(vb[2]/vb[3]));
   if(gesture.type!=="pinch"&&ptrs.size===1){
@@ -2262,7 +2284,7 @@ function endPtr(e){
   if(!ptrs.has(e.pointerId))return;
   ptrs.delete(e.pointerId);
   if(gesture&&gesture.type==="tap"&&ptrs.size===0){
-    if(gesture.target||document.getElementById("tab-atlas").classList.contains("covered"))onFigTap(gesture.target||svg);
+    if(gesture.target||isCovered())onFigTap(gesture.target||svg);
   }
   if(ptrs.size===0)gesture=null;
   else if(ptrs.size===1&&gesture&&gesture.type==="pinch"){const p=[...ptrs.values()][0];gesture={type:"pan",sx:p.x,sy:p.y,vb0:[...vb]}}
@@ -2273,7 +2295,8 @@ svg.addEventListener("dblclick",e=>{e.preventDefault()});
    preventing touchmove keeps Safari from zooming or moving the page while the figure zooms. */
 let tg=null;
 const tpts=e=>[...e.touches].map(t=>({x:t.clientX,y:t.clientY}));
-const isCovered=()=>document.getElementById("tab-atlas").classList.contains("covered");
+/* "covered" (small figure in the corner) only exists on the phone; on the computer the class may be set but the layout is the same */
+const isCovered=()=>document.getElementById("tab-atlas").classList.contains("covered")&&matchMedia("(max-width:900px)").matches;
 svg.addEventListener("touchstart",e=>{const P=tpts(e);
   if(P.length===1)tg={type:"tap",sx:P[0].x,sy:P[0].y,target:e.target.closest("[data-j],[data-m]"),vb0:[...vb]};
   else if(P.length===2){e.preventDefault();const [a,b]=P;tg={type:"pinch",d0:Math.hypot(a.x-b.x,a.y-b.y)||1,vb0:[...vb],mid:{x:(a.x+b.x)/2,y:(a.y+b.y)/2}}}},{passive:false});
@@ -2282,7 +2305,10 @@ svg.addEventListener("touchmove",e=>{if(!tg)return;e.preventDefault();if(isCover
     if(tg.type==="pan"){const k=svgUnitsPerPx(tg.vb0);vb=[tg.vb0[0]-dx*k,tg.vb0[1]-dy*k,vb[2],vb[3]];clampVB();applyVB()}}
   else if(tg.type==="pinch"&&P.length===2){const [a,b]=P;vb=[...tg.vb0];applyVB();zoomAt(Math.hypot(a.x-b.x,a.y-b.y)/tg.d0,tg.mid.x,tg.mid.y)}},{passive:false});
 svg.addEventListener("touchend",e=>{if(!tg)return;const P=tpts(e);
-  if(!P.length){if(tg.type==="tap"){e.preventDefault();if(tg.target||isCovered())onFigTap(tg.target||svg)}tg=null}
+  if(!P.length){if(tg.type==="tap"){e.preventDefault();const now=Date.now(),z=vb[2]<BOX[view][2]-.5;
+      /* the ⤢ button left the phone (owner): a double tap brings the figure back to its full size */
+      if(z&&now-(svg._lt||0)<320){svg._lt=0;vb=[...BOX[view]];applyVB();tg=null;return}svg._lt=now;
+      if(tg.target||isCovered())onFigTap(tg.target||svg)}tg=null}
   else if(P.length===1&&tg.type==="pinch")tg={type:"pan",sx:P[0].x,sy:P[0].y,vb0:[...vb]}},{passive:false});
 svg.addEventListener("touchcancel",()=>{tg=null});
 
@@ -2441,7 +2467,7 @@ document.querySelectorAll("#modeSw [data-step]").forEach(b=>b.addEventListener("
     if(Math.abs(dx)<40||Math.abs(dx)<Math.abs(dy))return;const i=MODES.indexOf(curMode());
     if(E===1&&dx<0&&i===MODES.length-1){buzz();setMode(MODES[0])}else if(E===-1&&dx>0&&i===0){buzz();setMode(MODES[MODES.length-1])}},{passive:true})})();
 addEventListener("resize",()=>msCenter(curMode(),false));
-function syncModes(){const m=curMode();document.querySelectorAll("[data-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===m)));
+function syncModes(){const m=curMode();if(typeof v3ui==="function"){if(m==="art"&&v3on)set3D(false);else v3ui()}document.querySelectorAll("[data-mode]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.mode===m)));
   const mi=MODES.indexOf(m);document.querySelectorAll("#modeSw .ms-dots i").forEach((d,i)=>d.classList.toggle("on",i===mi));
   document.querySelectorAll("#modeSw [data-step]").forEach(b=>{b.disabled=false});
   msCenter(m,true);
@@ -2460,7 +2486,7 @@ function sexTgl(){const b=document.getElementById("sexTgl");if(!b)return;b.inner
 function setSex(x){
   sex=x;try{localStorage.setItem("atlas-sex",x)}catch(e){}
   document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===x));sexTgl();
-  buildFigure();setView(view,true);paint();
+  buildFigure();setView(view,true);paint();if(typeof v3ui==="function")v3ui();
 }
 document.getElementById("sexTgl").addEventListener("click",()=>setSex(sex==="m"?"f":"m"));sexTgl();
 document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===sex));
@@ -2472,7 +2498,7 @@ function onFigTap(t){
   if(build){if(t.dataset&&t.dataset.m)buildToggle(t.dataset.m);return}
   if(grp){const m=t.dataset&&t.dataset.m;if(m&&TOB[m]){grpHi=grpHi===m?null:m;grpOpen=radOf(TOB[m]);paint();render();
     const b=$("body").querySelector(`[data-gm="${m}"]`);b&&b.scrollIntoView({block:"nearest"})}return}
-  if($("tab-atlas").classList.contains("covered")){peek=true;render();return}
+  if(isCovered()){peek=true;render();return}
   if(!t.dataset)return;
   if(t.dataset.j)return selectJoint(t.dataset.j,true);
   if(model==="bas")return selectGroup(TOB[t.dataset.m],true);
@@ -2516,6 +2542,39 @@ function paint(){
   }
   members.forEach(m=>document.querySelectorAll(`[data-m="${m}"]`).forEach(g=>g.classList.add("on")));
 }
+
+/* ---- 3D body (owner, nov/2026: button "3D" in the bottom corner of the figure). The viewer (3d/v3.js, Three.js) is
+   loaded only on the first tap. The 2D figure stays the source of truth: after every paint() the 3D copies which muscles
+   are red/orange (and the group colours in Grupos), and a tap in 3D goes through onFigTap() like a tap in 2D.
+   Owner's choices: tap works like 2D; with ♀ the 3D stays male with a note; Músculos, Grupos and Cardio (Articulações
+   goes back to 2D). */
+var v3on=false,V3=null,v3busy=false;   /* var: setView()/syncModes() may run before this line */
+function v3state(){const s={},gp=svg.classList.contains("grp");
+  svg.querySelectorAll("[data-m]").forEach(g=>{const k=g.dataset.m,o=s[k]||(s[k]={});if(g.classList.contains("on"))o.on=true;if(g.classList.contains("syn"))o.syn=true;
+    /* Grupos: the group colour straight from its variable (the 2D fill is mid-transition right after a change);
+       when one group/muscle is highlighted the others are dimmed, like the 2D */
+    if(gp&&!o.c&&g.dataset.gp){o.c=getComputedStyle(document.documentElement).getPropertyValue("--gp-"+g.dataset.gp).trim();o.dim=svg.classList.contains("ghl")&&!g.classList.contains("ghi")}});return s}
+function v3sync(){if(V3&&v3on)V3.sync(v3state())}
+{const p0=paint;paint=function(){p0.apply(this,arguments);v3sync()}}
+function v3ui(){const a=$("tab-atlas"),b=$("b3d"),art=model==="art";b.hidden=art;
+  b.textContent=v3on?"2D":"3D";b.setAttribute("aria-pressed",String(v3on));b.title=b.ariaLabel=v3on?tx("Voltar para o boneco 2D","Back to the 2D figure","Volver al muñeco 2D"):tx("Ver o boneco em 3D","See the figure in 3D","Ver el muñeco en 3D");
+  a.classList.toggle("is3d",v3on);$("v3").hidden=!v3on;
+  $("v3note").hidden=!(v3on&&sex==="f");$("v3note").textContent=tx("Modelo 3D masculino","Male 3D model","Modelo 3D masculino");
+  $("v3hint").textContent=tx("Arraste para girar · toque num músculo","Drag to turn · tap a muscle","Arrastra para girar · toca un músculo")}
+async function set3D(on){if(on&&model==="art")on=false;v3on=on;v3ui();if(!on)return;buzz();
+  if(V3){V3.view(view==="back"?"back":"front");v3sync();return}
+  if(v3busy)return;v3busy=true;const L=$("v3load");L.hidden=false;
+  L.innerHTML=`<span>${tx("Carregando o corpo 3D…","Loading the 3D body…","Cargando el cuerpo 3D…")}</span><span class="v3bar"><i id="v3bar"></i></span><small>${tx("Só na primeira vez (3 MB)","Only the first time (3 MB)","Solo la primera vez (3 MB)")}</small>`;
+  const fail=()=>{L.hidden=false;L.innerHTML=`<span>${tx("Não deu para carregar o 3D. Confira a internet e toque em 3D de novo.","Couldn't load the 3D body. Check the internet and tap 3D again.","No se pudo cargar el 3D. Revisa internet y toca 3D otra vez.")}</span>`;
+    if(V3){V3.dispose();V3=null}v3busy=false;v3on=false;v3ui();$("v3").hidden=false;setTimeout(()=>{if(!v3on){$("v3").hidden=true;L.hidden=true}},3500)};
+  try{const mod=await import("./3d/v3.js");
+    V3=mod.mount($("v3"),{covered:isCovered,name:k=>M[k]?M[k].n:"",
+      tap:k=>{if(isCovered()){peek=true;render();return}if(!k)return;const g=svg.querySelector(`[data-m="${k}"]`);if(g)onFigTap(g);else if(M[k])selectMuscle(k,true)},
+      progress:x=>{const b=$("v3bar");if(b)b.style.width=Math.round(x*100)+"%"},
+      ready:()=>{L.hidden=true;v3busy=false;if(V3){V3.view(view==="back"?"back":"front");v3sync()}},fail})}
+  catch(e){fail()}}
+$("b3d").addEventListener("click",()=>set3D(!v3on));
+$("v3").addEventListener("pointerdown",()=>{$("v3hint").hidden=true});   /* the hint goes away once the body is touched */
 
 function chips(){
   const all=[["all","Todos"],...Object.entries(EQ)];
