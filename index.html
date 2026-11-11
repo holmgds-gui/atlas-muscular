@@ -4962,6 +4962,15 @@ function rankAbout(){return `<details class="about"><summary>Como o ranking func
 /* the ranking lives at the top of Progresso › Força; renderRank re-renders that view keeping the scroll */
 function renderRank(){const sc=$("tab-prog"),y=sc.scrollTop;renderKg();sc.scrollTop=y}
 function rankAfter(D){const b=$("rkFigBox");if(b)fig3(b,p3Rank(D.gs),p3RankInfo(D.gs),()=>rankFig(D.gs))}
+/* owner (0.19): order of "Nível por grupo" — strongest on top by default; also weakest first (strongest at the end),
+   A–Z and the body order. The exercises inside each group follow the same strength order. */
+let rkSort=LS.get("atlas-rksort","strong");
+const RK_SORTS=[["strong",()=>tx("Mais forte primeiro","Strongest first","Más fuerte primero")],["weak",()=>tx("Mais fraco primeiro","Weakest first","Más débil primero")],
+  ["az",()=>tx("A–Z","A–Z","A–Z")],["body",()=>tx("Ordem do corpo","Body order","Orden del cuerpo")]];
+function rkSorted(gs){const L=gs.slice(),nm=x=>BASIC[x.g].n,ex=(a,b)=>rkSort==="weak"?a.s-b.s:b.s-a.s;
+  if(rkSort==="az")L.sort((a,b)=>nm(a).localeCompare(nm(b),LOC,{sensitivity:"base"}));
+  else if(rkSort!=="body")L.sort((a,b)=>ex(a,b)||nm(a).localeCompare(nm(b),LOC));
+  return L.map(x=>({...x,ex:rkSort==="body"||rkSort==="az"?x.ex:x.ex.slice().sort(ex)}))}
 function rankHTML(D){
   const has=D.list.length>0,lv=has?rLv(D.all):-1;
   const hero=has?`<div class="rk-hero"><span class="rk-eyebrow">Nível geral</span><b class="rk-big" style="${lv===RLV.length-1?`background-image:${RHERO[lv]};color:transparent`:`color:${RHERO[lv]}`}">${RLV[lv][0]}</b>
@@ -4987,7 +4996,8 @@ function rankHTML(D){
   ${form}
   ${has?`<div class="card"><div id="rkFigBox"></div><div class="rk-legend" role="list" aria-label="Cores dos níveis">${RLV.map((x,i)=>`<span role="listitem"><i style="background:${rBg(i)}"></i>${x[0]}</span>`).join("")}<span role="listitem"><i style="background:var(--m)"></i>Sem dados</span></div></div>`:""}
   <div class="card"><div class="row between"><h3 class="section-t" style="margin:0">Nível por grupo</h3>${has?`<span class="muted-s" style="margin:0">mais forte que</span>`:""}</div>
-    ${has?D.gs.map(x=>`<details class="pg rk-g"${rOpen===x.g?" open":""} data-rg2="${x.g}"><summary><span class="pg-n">${BASIC[x.g].n}${rChip(x.s)}${x.ex.length<2?`<small class="rk-low">pouca informação</small>`:""}</span>${rBar(x.s)}<b>${rPct(x.s)}%</b></summary>
+    ${has&&D.gs.length>1?`<label class="fsort" style="margin:2px 0 4px">${tx("Ordem","Order","Orden")}<select data-rksort aria-label="${tx("Ordem dos grupos","Group order","Orden de los grupos")}">${RK_SORTS.map(([k,n])=>`<option value="${k}"${rkSort===k?" selected":""}>${n()}</option>`).join("")}</select></label>`:""}
+    ${has?rkSorted(D.gs).map(x=>`<details class="pg rk-g"${rOpen===x.g?" open":""} data-rg2="${x.g}"><summary><span class="pg-n">${BASIC[x.g].n}${rChip(x.s)}${x.ex.length<2?`<small class="rk-low">pouca informação</small>`:""}</span>${rBar(x.s)}<b>${rPct(x.s)}%</b></summary>
       <div class="rk-exs">${x.ex.map(o=>`<div class="rk-ex"><div class="row between" style="flex-wrap:nowrap;align-items:flex-start"><span class="rk-exn">${esc(o.name)}<small>${rSetTxt(o)}</small></span>${rChip(o.s)}</div>
         ${rBar(o.s)}<small class="rk-next">${rNeed(o)}</small>
         ${o.man.length?`<div class="rk-man">${o.man.map(m=>`<span>Digitado: ${fkg(m.kg)} kg × ${m.r} <button class="lnk" data-rdel="${esc(m.id)}">apagar</button></span>`).join("")}</div>`:""}</div>`).join("")}
@@ -4996,6 +5006,7 @@ function rankHTML(D){
     <button class="btn primary" data-ract="add">+ Digitar uma carga</button></div>
   ${D.noStd.length?`<p class="muted" style="font-size:13px">Sem padrão de força (não entram): ${D.noStd.map(esc).join(", ")}.</p>`:""}`;
 }
+$("progBody").addEventListener("change",e=>{const t=e.target.closest("[data-rksort]");if(!t)return;rkSort=t.value;LS.set("atlas-rksort",rkSort);renderRank();buzz()});
 $("progBody").addEventListener("click",e=>{
   const sx=e.target.closest("[data-rsex]");if(sx){setSex(sx.dataset.rsex);return renderRank()}
   const a=e.target.closest("[data-ract]");

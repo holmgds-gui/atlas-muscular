@@ -31,9 +31,10 @@ const keys=await p.evaluate(()=>V3.keys().length);console.log(' partes 3D',keys)
 // owner: limits — not too far, never inside the body, never straight from above/below
 const lim=async(x,y,z)=>{await p.evaluate(([x,y,z])=>V3.place(x,y,z),[x,y,z]);await p.waitForTimeout(250);return p.evaluate(()=>V3.cam())};
 let c=await lim(0,0,30);console.log(' longe',JSON.stringify(c));if(c.dist>c.max+0.01)bad++;
-c=await lim(0,0,0.02);console.log(' dentro',JSON.stringify(c));if(c.surf<0.12)bad++;
-c=await lim(0,3,0.01);console.log(' de cima',JSON.stringify(c));if(c.polar<54)bad++;
-c=await lim(0,-3,0.01);console.log(' de baixo',JSON.stringify(c));if(c.polar>121)bad++;
+c=await lim(0,0,0.02);console.log(' dentro',JSON.stringify(c));if(c.surf<0.12||c.dist<c.min-0.01)bad++;   // 0.19: not too close either
+c=await lim(0,3,0.01);console.log(' de cima',JSON.stringify(c));if(c.polar<71)bad++;   // 0.19: 72–108°
+c=await lim(0,-3,0.01);console.log(' de baixo',JSON.stringify(c));if(c.polar>109)bad++;
+c=await (async()=>{await p.evaluate(()=>{V3.look(0);});await p.waitForTimeout(300);return p.evaluate(()=>V3.cam())})();console.log(' limites',JSON.stringify({min:c.min,max:c.max}));if(!(c.min>0.6&&c.max<c.min*3))bad++;
 await p.evaluate(()=>V3.view('front'));await p.waitForTimeout(800);
 // tap the chest in 3D → same as 2D
 const pt=await p.evaluate(()=>V3.at('peito_medial'));await p.touchscreen.tap(pt.x,pt.y);await p.waitForTimeout(500);

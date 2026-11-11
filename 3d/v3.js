@@ -35,7 +35,7 @@ export function mount(box, api){
   controls.enableDamping=true;controls.dampingFactor=0.1;controls.enablePan=true;controls.screenSpacePanning=true;controls.zoomToCursor=true;
   controls.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};controls.minDistance=0.3;controls.maxDistance=9;controls.rotateSpeed=0.85;
   /* owner: never straight from above or below (at most ~35° above and ~30° below the horizon) */
-  controls.minPolarAngle=THREE.MathUtils.degToRad(55);controls.maxPolarAngle=THREE.MathUtils.degToRad(120);
+  controls.minPolarAngle=THREE.MathUtils.degToRad(72);controls.maxPolarAngle=THREE.MathUtils.degToRad(108);   /* owner 0.19: closer to level (was 55–120°) */
   let CLOUD=null,ready=false,BB=new THREE.Box3(new THREE.Vector3(-.4,0,-.2),new THREE.Vector3(.4,1.7,.2)),CY=0.9,need=true,alive=true,curV="front";
   scene.add(new THREE.HemisphereLight(0xffffff,0x9aa0a8,1.25));
   const key=new THREE.DirectionalLight(0xffffff,1.6);key.position.set(0.6,0.8,1);camera.add(key);
@@ -66,7 +66,9 @@ export function mount(box, api){
     /* the box changed shape (small figure in the corner, sheet up/down): fit the whole body again, keeping the side it is seen from */
     if(lastSz&&ready&&(Math.abs(r.width/lastSz[0]-1)>.15||Math.abs(r.height/lastSz[1]-1)>.15)){const dir=camera.position.clone().sub(controls.target).normalize();
       controls.target.set(0,CY,0);camera.position.copy(controls.target).add(dir.multiplyScalar(fitD()))}
-    lastSz=[r.width,r.height];if(ready)controls.maxDistance=fitD()*1.3}   /* owner: it cannot be pushed far away */
+    lastSz=[r.width,r.height];if(ready)lims()}
+  /* owner (0.14, tighter in 0.19): not far away (1.1× the framing, was 1.3×) and not too close (0.5×, was 0.3 m) */
+  function lims(){const f=fitD();controls.maxDistance=f*1.1;controls.minDistance=f*0.5}
   const reduce=()=>document.documentElement.classList.contains("noanim")||matchMedia("(prefers-reduced-motion: reduce)").matches;
   let BW=1.2,BH=1.7;
   /* the whole body fits the box with a small margin, whatever its shape */
@@ -205,14 +207,15 @@ export function mount(box, api){
       {const P=[];g.scene.updateMatrixWorld(true);const v=new THREE.Vector3();
         for(const o of ms){const a=o.geometry.attributes.position,st=Math.max(1,Math.floor(a.count/260));for(let i=0;i<a.count;i+=st){v.fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);P.push(v.x,v.y,v.z)}}
         CLOUD=new Float32Array(P)}
-      const first=!ready;ready=true;if(first){resize();view(curV,false)}else{controls.maxDistance=fitD()*1.3;need=true}paint();readyRes&&readyRes();api.ready()}}
+      const first=!ready;ready=true;if(first){resize();view(curV,false)}else{lims();need=true}paint();readyRes&&readyRes();api.ready()}}
   let readyRes=null;const readyP=new Promise(r=>readyRes=r);
   load(api.sex?api.sex():"m");
 
   renderer.setAnimationLoop(()=>{if(!box.offsetParent)return;   /* hidden (2D or another tab): no drawing */
     controls.enabled=!api.covered();
     if(controls.update())need=true;
-    const t=controls.target,c=t.clone().clamp(BB.min,BB.max);if(!c.equals(t)){camera.position.add(c.clone().sub(t));t.copy(c);need=true}
+    /* the point it turns around stays near the middle of the body (owner 0.19: "mais centralizado") */
+    const t=controls.target,c=t.clone().clamp(BB.min,BB.max);c.x=Math.max(-BW*0.2,Math.min(BW*0.2,c.x));c.z=Math.max(-0.08,Math.min(0.08,c.z));if(!c.equals(t)){camera.position.add(c.clone().sub(t));t.copy(c);need=true}
     if(need){keepOut();need=false;draw()}});
   /* owner: zoom must not go inside the body — if the camera gets closer than ~13 cm to the surface, it backs off */
   const camP=new THREE.Vector3(),awayV=new THREE.Vector3();
@@ -246,7 +249,7 @@ export function mount(box, api){
     place(x,y,z){camera.position.set(controls.target.x+x,controls.target.y+y,controls.target.z+z);need=true},
     cam(){const o=camera.position.clone().sub(controls.target),p=camera.position;let m=Infinity;
       if(CLOUD)for(let i=0;i<CLOUD.length;i+=3)m=Math.min(m,Math.hypot(CLOUD[i]-p.x,CLOUD[i+1]-p.y,CLOUD[i+2]-p.z));
-      return {dist:o.length(),polar:THREE.MathUtils.radToDeg(Math.acos(o.y/o.length())),surf:m,max:controls.maxDistance}},
+      return {dist:o.length(),polar:THREE.MathUtils.radToDeg(Math.acos(o.y/o.length())),surf:m,max:controls.maxDistance,min:controls.minDistance}},
     jointAt(j){const g=jMarks.find(x=>x.userData.j===j);if(!g)return null;const c=g.position.clone().project(camera),r=canvas.getBoundingClientRect();return {x:r.left+(c.x+1)/2*r.width,y:r.top+(1-c.y)/2*r.height,c:"#"+g.userData.fill.material.color.getHexString()}},
     color(k){const o=parts[k];return o?"#"+o.material.color.getHexString():null},
     dispose(){alive=false;renderer.setAnimationLoop(null);ro.disconnect();mo.disconnect();mq.removeEventListener("change",onMq);controls.dispose();renderer.dispose();canvas.remove();tip.remove()}
