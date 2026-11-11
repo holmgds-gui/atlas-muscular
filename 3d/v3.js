@@ -182,7 +182,7 @@ export function mount(box, api){
   canvas.addEventListener("pointerleave",()=>{tip.hidden=true;if(hov){hov=null;paint()}});
   controls.addEventListener("change",()=>{need=true});
 
-  const mo=new MutationObserver(()=>{readColors();paint()});mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class"]});
+  const mo=new MutationObserver(()=>{readColors();paint()});mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class","style"]});
   const mq=matchMedia("(prefers-color-scheme: dark)"),onMq=()=>{readColors();paint()};mq.addEventListener("change",onMq);
 
   const FILES={m:["./corpo-6.glb","./juntas-2.json"],f:["./corpo-f-3.glb","./juntas-f-2.json"]};let loadN=0;
