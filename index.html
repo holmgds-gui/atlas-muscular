@@ -464,6 +464,8 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .wx-h{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .wx-h > div:first-child{min-width:0}
 .wx-n{font-weight:600;font-size:16px;line-height:1.25}
+.fsort{display:flex;align-items:center;gap:8px;margin:0 0 10px;font-size:13px;color:var(--muted)}
+.fsort select{flex:1;max-width:240px;height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font:inherit;font-size:14px}
 .last{font-size:13px;color:var(--muted);background:var(--bg);border-radius:8px;padding:7px 10px;line-height:1.4}
 .last b{color:var(--ink);font-weight:600}
 .sets{display:grid;gap:6px}
@@ -3216,11 +3218,28 @@ function fiHTML(p,it,j){
   return `<div class="fi"><div class="fi-top">${head}${acts}</div><div class="fi-row">
     <label class="fl">Séries<input class="inp" inputmode="numeric" ${at} data-f="sets" value="${esc(it.sets)}"></label>
     <label class="fl">Reps<input class="inp" ${at} data-f="reps" value="${esc(it.reps)}"></label></div></div>`}
+/* owner (0.19): order of My workouts — kept between visits. "Do meu jeito" = the order they were made in. The creation
+   time comes from the id (uid() starts with Date.now() in base 36), so old workouts sort too. */
+let fSort=LS.get("atlas-fsort","mine");
+const F_SORTS=[["mine",()=>tx("Do meu jeito","My order","A mi manera")],["az",()=>tx("A–Z","A–Z","A–Z")],["new",()=>tx("Mais novos","Newest","Más nuevos")],
+  ["old",()=>tx("Mais antigos","Oldest","Más antiguos")],["last",()=>tx("Feitos recentemente","Recently done","Hechos recientemente")],
+  ["most",()=>tx("Mais feitos","Most done","Más hechos")],["ex",()=>tx("Mais exercícios","Most exercises","Más ejercicios")]];
+const planT=p=>{const t=parseInt(String(p.id).slice(0,8),36);return isFinite(t)?t:0};
+function sortedPlans(){const L=plans.slice(),nm=p=>(p.name||"").trim().toLocaleLowerCase(LOC),az=(a,b)=>nm(a).localeCompare(nm(b),LOC,{sensitivity:"base"});
+  if(fSort==="mine")return L;
+  if(fSort==="az")return L.sort((a,b)=>(!nm(a))-(!nm(b))||az(a,b));
+  if(fSort==="new")return L.sort((a,b)=>planT(b)-planT(a));
+  if(fSort==="old")return L.sort((a,b)=>planT(a)-planT(b));
+  if(fSort==="ex")return L.sort((a,b)=>b.items.length-a.items.length||az(a,b));
+  const st={};for(const w of workouts)if(w.planId&&w.done!==false){const x=st[w.planId]||(st[w.planId]={n:0,d:""});x.n++;if(w.date>x.d)x.d=w.date}
+  if(fSort==="last")return L.sort((a,b)=>((st[b.id]||{}).d||"").localeCompare((st[a.id]||{}).d||"")||az(a,b));
+  return L.sort((a,b)=>((st[b.id]||{}).n||0)-((st[a.id]||{}).n||0)||az(a,b))}
 function renderFicha(){
   if(fView==="prontos")return renderProntos();
   const d=todayIdx();
   let h=`<div class="page-h"><h2>${tx("Treinos","Workouts","Entrenos")}<button class="help" data-help="ficha" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2>${fvSeg()}</div>`;
-  h+=plans.map(p=>{const open=openPlan===p.id;
+  if(plans.length>1)h+=`<label class="fsort">${tx("Ordem","Order","Orden")}<select data-fsort aria-label="${tx("Ordem dos treinos","Workout order","Orden de los entrenos")}">${F_SORTS.map(([k,n])=>`<option value="${k}"${fSort===k?" selected":""}>${n()}</option>`).join("")}</select></label>`;
+  h+=sortedPlans().map(p=>{const open=openPlan===p.id;
     return `<section class="card plan" data-pid="${p.id}">
       <button class="plan-h" data-act="toggle" data-pid="${p.id}" aria-expanded="${open}"><span><span class="wx-n">${esc(p.name||"Treino sem nome")}</span><span class="muted-s">${daysTxt(p)} · ${plural(p.items.length,"exercício")}</span></span><span class="chev" aria-hidden="true">${open?"Fechar":"Editar"}</span></button>
       ${open?`<input class="inp title-inp" data-pf="name" data-pid="${p.id}" value="${esc(p.name)}" placeholder="Nome, ex.: Peito e tríceps" aria-label="Nome do treino">
@@ -3235,6 +3254,7 @@ function renderFicha(){
   $("fichaBody").innerHTML=h;
 }
 const planOf=el=>plans.find(x=>x.id===el.dataset.pid);
+$("fichaBody").addEventListener("change",e=>{const t=e.target.closest("[data-fsort]");if(!t)return;fSort=t.value;LS.set("atlas-fsort",fSort);renderFicha();buzz()});
 $("fichaBody").addEventListener("input",e=>{
   const t=e.target,pl=planOf(t);if(!pl)return;
   if(t.dataset.pf==="name"){pl.name=t.value;const n=t.closest(".plan").querySelector(".plan-h .wx-n");if(n)n.textContent=t.value||"Treino sem nome"}
