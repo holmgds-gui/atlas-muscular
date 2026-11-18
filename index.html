@@ -5161,7 +5161,7 @@ function instInfo(){
    for people who open Configurações or are signed in. On the 1st sign-in what is on the device goes up to the account
    and what is in the account comes down (joined, no duplicates). Tests use the Firebase emulator: localStorage
    "atlas-fbtest" = a demo config. */
-const FB_CFG={apiKey:"AIzaSyBhqpE1wiLkpe53LYkWxHUGMsl3Cn1hVhE",authDomain:"muscle-atlas-e1a56.firebaseapp.com",projectId:"muscle-atlas-e1a56",storageBucket:"muscle-atlas-e1a56.firebasestorage.app",messagingSenderId:"208854980129",appId:"1:208854980129:web:fdbee4660f2c6cc40f3560"};   // the app's Firebase project (public by design: the Firestore rules protect each person's data)
+const FB_CFG={apiKey:"AIzaSyBhqpE1wiLkpe53LYkWxHUGMsl3Cn1hVhE",authDomain:"holmgds-gui.github.io",projectId:"muscle-atlas-e1a56",storageBucket:"muscle-atlas-e1a56.firebasestorage.app",messagingSenderId:"208854980129",appId:"1:208854980129:web:fdbee4660f2c6cc40f3560"};   // the app's Firebase project (public by design: the Firestore rules protect each person's data)
 let SYNC=null,syncP=null,syncUser=LS.get("atlas-sync",null),syncSt=syncUser?"load":"off",syncErr="",syncLater=false;
 const syncCfg=()=>{try{const t=localStorage.getItem("atlas-fbtest");if(t)return JSON.parse(t)}catch(e){}return FB_CFG};
 const syncEmu=()=>{try{return localStorage.getItem("atlas-fbtest")!==null}catch(e){return false}};
