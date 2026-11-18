@@ -102,7 +102,7 @@ export async function start(appApi){
   try{db=F.initializeFirestore(fapp,{localCache:F.persistentLocalCache({tabManager:F.persistentMultipleTabManager()})})}
   catch(e){db=F.initializeFirestore(fapp,{})}
   if(app.emu){A.connectAuthEmulator(auth,"http://127.0.0.1:9099",{disableWarnings:true});F.connectFirestoreEmulator(db,"127.0.0.1",8080)}
-  A.getRedirectResult(auth).catch(e=>app.status("err",e&&e.code));
+  A.getRedirectResult(auth).catch(e=>app.status("err",e&&e.code)).finally(()=>{try{localStorage.removeItem("atlas-sync-redir")}catch(e){}});
   A.onAuthStateChanged(auth,u=>{
     user=u;
     if(u){app.user({uid:u.uid,name:u.displayName||"",email:u.email||"",photo:u.photoURL||""});listen();setSt(status())}
@@ -117,7 +117,7 @@ export async function signIn(){
   const p=new A.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});
   try{await A.signInWithPopup(auth,p)}
   catch(e){const c=e&&e.code||"";
-    if(/popup-blocked|operation-not-supported|web-storage-unsupported/.test(c))return A.signInWithRedirect(auth,p);
+    if(/popup-blocked|operation-not-supported|web-storage-unsupported/.test(c)){try{localStorage.setItem("atlas-sync-redir","1")}catch(x){}return A.signInWithRedirect(auth,p)}
     if(!/popup-closed|cancelled-popup/.test(c))throw e}
 }
 /* tests only (emulator): log in with a made-up Google account */

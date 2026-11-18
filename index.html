@@ -5571,7 +5571,7 @@ else if(!LS.get("atlas-intro",0)){
 }
 if(matchMedia("(max-width:900px)").matches)q.placeholder="Buscar";
 matchMedia("(max-width:900px)").addEventListener("change",()=>setView(view));
-if(syncUser&&syncCfg())syncLoad();   // signed in before: connect to the account
+if((syncUser||localStorage.getItem("atlas-sync-redir"))&&syncCfg())syncLoad();   // signed in before (or coming back from Google's sign-in page): connect to the account
 </script>
 <script>
 if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{
