@@ -83,6 +83,8 @@ header{position:relative}
 .gear:hover,.gear[aria-current="page"]{background:var(--chip);color:var(--ink)}
 #instBtn{color:var(--target)}#instBtn[hidden]{display:none}@media (max-width:480px){#instBtn{display:none}}   /* no room on the phone: there it stays in Configurações */
 .cf-steps{margin:6px 0 6px;padding-left:20px;display:grid;gap:4px}.cf-row .cf-l small b{font-size:inherit;font-weight:700;color:var(--ink);display:inline}.cf-inst{margin-bottom:18px}
+.g-btn{display:inline-flex;align-items:center;gap:8px;white-space:nowrap}.g-ico{width:18px;height:18px;flex:none}
+.sync-st{font-weight:600}.sync-st[data-st="ok"]{color:#2FA866}.sync-st[data-st="err"]{color:var(--danger)}
 .in-ico{width:18px;height:18px;vertical-align:-4px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 /* Hoje › Ao vivo */
 .hview{margin:4px 0 12px}
@@ -2330,8 +2332,10 @@ svg.addEventListener("touchcancel",()=>{tg=null});
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
+/* the keys that go to the account when the person is signed in (0.23; see sync.js) */
+const SYNCK=new Set(["atlas-workouts","atlas-plans","atlas-rank","atlas-conf","atlas-ach"]);
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
-          set(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true}catch(e){return false}}};
+          set(k,v){try{localStorage.setItem(k,JSON.stringify(v));if(SYNCK.has(k)&&self.__sd)self.__sd();return true}catch(e){return false}}};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 /* app settings (Configurações). Some are saved but not active yet; see renderConf. */
 const CONF_DEF={name:"",age:null,height:null,exp:"",theme:"auto",accent:"",fs:"m",noanim:false,lang:null,unit:"kg",sets:3,reps:"8-12",rest:90,goal:0,remind:false,rdays:[0,2,4],rtime:"18:00",sound:true,vibe:true,fig:"3d"};
@@ -5090,6 +5094,58 @@ function instInfo(){
   if(!ff)st.push(after);
   return {k:"pc",ff,st};
 }
+/* ---------------------------------------------------------- conta e sincronização (owner, 0.23: login com Google,
+   Firebase). Optional: without an account everything stays on the device, as before. sync.js (and Firebase) only load
+   for people who open Configurações or are signed in. On the 1st sign-in what is on the device goes up to the account
+   and what is in the account comes down (joined, no duplicates). Tests use the Firebase emulator: localStorage
+   "atlas-fbtest" = a demo config. */
+const FB_CFG=null;   // the app's Firebase project (public by design: the Firestore rules protect each person's data)
+let SYNC=null,syncP=null,syncUser=LS.get("atlas-sync",null),syncSt=syncUser?"load":"off",syncErr="",syncLater=false;
+const syncCfg=()=>{try{const t=localStorage.getItem("atlas-fbtest");if(t)return JSON.parse(t)}catch(e){}return FB_CFG};
+const syncEmu=()=>{try{return localStorage.getItem("atlas-fbtest")!==null}catch(e){return false}};
+self.__sd=()=>{if(SYNC)SYNC.dirty()};
+function syncLoad(){if(!syncCfg())return Promise.resolve(null);
+  return syncP||(syncP=import("./sync.js").then(m=>m.start(SYNC_APP).then(()=>{SYNC=m;return m})).catch(e=>{console.warn("sync",e);syncP=null;syncSt="err";syncErr="load";syncStEl();return null}))}
+function syncRedraw(){
+  const a=document.activeElement;
+  if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)){if(!syncLater){syncLater=true;a.addEventListener("blur",()=>{syncLater=false;setTimeout(syncRedraw,60)},{once:true})}return}
+  try{if(tab==="ficha")renderFicha();else if(tab==="treino")renderTreino();else if(tab==="prog")renderProg();else if(tab==="conf")renderConf();else if(tab==="ach")renderAch()}catch(e){console.warn(e)}}
+const SYNC_APP={
+  get cfg(){return syncCfg()},get emu(){return syncEmu()},
+  data(){const c={...CONF};delete c.lang;return {w:workouts,p:plans,k:{rank,conf:c,ach}}},
+  mergeK(id,l,r){   // 1st sign-in of a device: the account's values first, nothing lost from either side
+    if(id==="rank"){const man=[...(r.man||[])];(l.man||[]).forEach(x=>{if(!man.some(y=>y.id===x.id))man.push(x)});return {...l,...r,bw:r.bw||l.bw,man}}
+    if(id==="ach")return {...l,...r,seen:[...new Set([...(r.seen||[]),...(l.seen||[])])],lvMax:Math.max(r.lvMax??-1,l.lvMax??-1),shared:!!(r.shared||l.shared)};
+    const o={...l};for(const k in r)if(r[k]!==""&&r[k]!=null)o[k]=r[k];return o},
+  apply(D){workouts=D.w;plans=D.p;
+    if(D.k.rank&&typeof D.k.rank==="object"){rank=D.k.rank;if(!Array.isArray(rank.man))rank.man=[]}
+    if(D.k.ach&&typeof D.k.ach==="object"){ach=D.k.ach;if(!Array.isArray(ach.seen))ach.seen=[];if(!(ach.lvMax>=0))ach.lvMax=-1}
+    if(D.k.conf&&typeof D.k.conf==="object"){const f=CONF.fig;CONF={...CONF_DEF,...D.k.conf,lang:CONF.lang};applyConf();if(CONF.fig!==f)try{applyFig()}catch(e){}}
+    saveW();savePlans();saveRank();saveAch();saveConf();syncRedraw()},
+  user(u){const was=!!syncUser;syncUser=u;LS.set("atlas-sync",u);if(u&&syncSt==="off")syncSt="load";if(tab==="conf")renderConf();
+    if(u&&!was)toast(tx("Conectado como ","Signed in as ","Conectado como ")+(u.name||u.email))},
+  status(s,code){if(s==="first"){toast(tx("Pronto: seus treinos estão na sua conta","Done: your workouts are in your account","Listo: tus entrenos están en tu cuenta"));return}
+    syncSt=s;syncErr=s==="err"?(code||""):"";syncStEl()}
+};
+function syncStTxt(){return syncSt==="ok"?tx("✓ Sincronizado","✓ Synced","✓ Sincronizado"):syncSt==="sync"?tx("Enviando…","Sending…","Enviando…")
+  :syncSt==="offline"?tx("Sem internet: envia quando voltar","Offline: sends when you're back online","Sin internet: se envía cuando vuelva")
+  :syncSt==="err"?tx("Não foi possível sincronizar","Couldn't sync","No se pudo sincronizar")+(syncErr?` (${syncErr.replace(/^[a-z-]+\//,"")})`:"")
+  :tx("Conectando…","Connecting…","Conectando…")}
+function syncStEl(){const e=$("syncSt");if(e){e.textContent=syncStTxt();e.dataset.st=syncSt}}
+const GICON=`<svg class="g-ico" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.8c4.3-4 6.9-9.9 6.9-17.2z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.8-5.8l-7.4-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.2 0-11.5-4.1-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>`;
+function cfAcct(conf){
+  if(!syncCfg())return cfRow("Conta e sincronização","Entrar com uma conta e salvar na nuvem, para usar em outro celular.",`<button class="btn" disabled>Entrar</button>`,true);
+  if(!SYNC)setTimeout(syncLoad,0);   // load Firebase now, so the tap on "Entrar" can open Google's window right away
+  if(!syncUser)return cfRow(tx("Conta e sincronização","Account and sync","Cuenta y sincronización"),
+    tx("Entre com o Google para ter os mesmos treinos no celular e no PC. É opcional: sem conta, tudo fica só neste aparelho.","Sign in with Google to have the same workouts on your phone and computer. It's optional: without an account everything stays on this device.","Entra con Google para tener los mismos entrenos en el celular y en la PC. Es opcional: sin cuenta, todo queda solo en este dispositivo."),
+    `<button class="btn g-btn" data-cact="login">${GICON}${tx("Entrar com Google","Sign in with Google","Entrar con Google")}</button>`,false,1);
+  const u=syncUser;
+  return cfRow(esc(u.name||u.email||"Google"),`${esc(u.email||"")}<br><span id="syncSt" class="sync-st" data-st="${syncSt}">${syncStTxt()}</span>`,`<button class="btn" data-cact="logout">${tx("Sair","Sign out","Salir")}</button>`)
+    +cfRow(tx("Apagar minha conta","Delete my account","Borrar mi cuenta"),tx("Apaga seus dados da nuvem e a conta. O que está neste aparelho continua.","Deletes your cloud data and the account. What's on this device stays.","Borra tus datos de la nube y la cuenta. Lo que está en este dispositivo se queda."),`<button class="btn danger" data-cact="delAcct">${tx("Apagar","Delete","Borrar")}</button>`)
+    +conf("delAcct",tx("Apagar a conta e tudo que está na nuvem? Não dá para desfazer. Os dados deste aparelho continuam.","Delete the account and everything in the cloud? This can't be undone. Data on this device stays.","¿Borrar la cuenta y todo lo que está en la nube? No se puede deshacer. Los datos de este dispositivo se quedan."),tx("Apagar conta","Delete account","Borrar cuenta"));
+}
+function syncLogin(){const go=m=>m?m.signIn().catch(e=>toast(tx("Não deu para entrar: ","Couldn't sign in: ","No se pudo entrar: ")+((e&&e.code)||"").replace(/^auth\//,""))):toast(tx("Sem conexão com o servidor","Can't reach the server","Sin conexión con el servidor"));
+  if(SYNC)return go(SYNC);syncLoad().then(go)}
 function cfInst(){
   const I=instInfo(),btn=`<button class="btn primary" data-cact="install"${inPrompt?"":" hidden"}>${tx("Instalar","Install","Instalar")}</button>`;
   if(I.k!=="pc")return cfRow(tx("Instalar o app","Install the app","Instalar la app"),I.k==="ios"?tx("No Safari: Compartilhar › Adicionar à Tela de Início.","In Safari: Share › Add to Home Screen.","En Safari: Compartir › Agregar a pantalla de inicio."):tx("No Chrome: menu ⋮ › Instalar app.","In Chrome: ⋮ menu › Install app.","En Chrome: menú ⋮ › Instalar aplicación."),btn);
@@ -5102,6 +5158,10 @@ function renderConf(){
   $("confBody").innerHTML=`<div class="page-h"><h2>Configurações<button class="help" data-help="conf" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2>${c.name?`<p class="lead">Olá, ${esc(c.name)}!</p>`:""}</div>
 
   ${STANDALONE?"":`<div class="card cf cf-inst">${cfInst()}</div>`}
+  <h3 class="section-t">Conta</h3>
+  <div class="card cf">
+    ${cfAcct(conf)}
+  </div>
   <h3 class="section-t">Perfil</h3>
   <div class="card cf">
     ${cfRow("Nome ou apelido","Aparece na aba Hoje.",`<input class="inp cf-in" data-cfin="name" maxlength="30" value="${esc(c.name)}" placeholder="Seu nome">`)}
@@ -5138,10 +5198,6 @@ function renderConf(){
     ${cfRow("Vibração","",cfSw("vibe",c.vibe),false)}
   </div>
 
-  <h3 class="section-t">Conta</h3>
-  <div class="card cf">
-    ${cfRow("Conta e sincronização","Entrar com uma conta e salvar na nuvem, para usar em outro celular.",`<button class="btn" disabled>Entrar</button>`,true)}
-  </div>
 
   <h3 class="section-t">Seus dados</h3>
   <div class="card cf">
@@ -5177,6 +5233,10 @@ $("confBody").addEventListener("click",e=>{
   const d=e.target.closest("[data-cfday]");if(d){const i=+d.dataset.cfday,a=CONF.rdays;CONF.rdays=a.includes(i)?a.filter(x=>x!==i):[...a,i].sort();saveConf();return renderConf()}
   const a=e.target.closest("[data-cact]");if(!a)return;const k=a.dataset.cact;
   if(k==="install")return doInstall();
+  if(k==="login")return syncLogin();
+  if(k==="logout"){if(!SYNC)return;a.disabled=true;SYNC.signOut().then(()=>{LS.set("atlas-sync",null);location.reload()}).catch(()=>{a.disabled=false});return}
+  if(k==="delAcct!"){if(!SYNC)return;a.disabled=true;SYNC.deleteAccount().then(()=>{LS.set("atlas-sync",null);toast(tx("Conta apagada","Account deleted","Cuenta borrada"));setTimeout(()=>location.reload(),900)})
+    .catch(e=>{a.disabled=false;toast(tx("Não deu para apagar: ","Couldn't delete: ","No se pudo borrar: ")+((e&&e.code)||""))});return}
   if(k==="export")return exportBackup();
   if(k==="import")return $("importFile").click();
   if(k==="doImport"){plans=pendingImport.plans;workouts=pendingImport.workouts;if(pendingImport.rank){rank=pendingImport.rank;saveRank()}
@@ -5184,9 +5244,10 @@ $("confBody").addEventListener("click",e=>{
     pendingImport=null;openW=null;savePlans();saveW();toast("Backup importado");return renderConf()}
   if(k==="noImport"){pendingImport=null;return renderConf()}
   if(k==="cancel"){cfConfirm=null;return renderConf()}
-  if(["delHist","delMan","delAll"].includes(k)){cfConfirm=k;return renderConf()}
+  if(["delHist","delMan","delAll","delAcct"].includes(k)){cfConfirm=k;return renderConf()}
   if(k==="delHist!"){workouts=[];saveW();openW=null}
   if(k==="delMan!"){rank.man=[];saveRank()}
+  if(k==="delAll!"&&SYNC&&syncUser&&!a.dataset.out){a.dataset.out=1;SYNC.signOut().finally(()=>a.click());return}   // signed in: leave the account first (the cloud copy stays)
   if(k==="delAll!"){try{Object.keys(localStorage).filter(x=>x.startsWith("atlas-")).forEach(x=>localStorage.removeItem(x))}catch(_){}location.reload();return}
   if(k.endsWith("!")){cfConfirm=null;toast("Apagado");return renderConf()}
   if(k==="intro"){openIntro();return}
@@ -5406,6 +5467,7 @@ else if(!LS.get("atlas-intro",0)){
 }
 if(matchMedia("(max-width:900px)").matches)q.placeholder="Buscar";
 matchMedia("(max-width:900px)").addEventListener("change",()=>setView(view));
+if(syncUser&&syncCfg())syncLoad();   // signed in before: connect to the account
 </script>
 <script>
 if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{
