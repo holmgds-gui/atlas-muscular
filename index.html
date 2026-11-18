@@ -582,7 +582,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .in-skip{border:0;background:none;color:var(--muted);font-weight:600;font-size:15px;padding:8px 6px}
 .in-track{flex:1;min-height:0;display:flex;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;scroll-behavior:smooth}
 .in-track::-webkit-scrollbar{display:none}
-.in-s{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:6px 24px 10px;box-sizing:border-box;overflow-y:auto;text-align:center}
+.in-s{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:14px;padding:6px 24px 10px;box-sizing:border-box;overflow-y:auto;text-align:center}
 .in-s h2{margin:0;font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1.05;letter-spacing:.01em}
 .in-s p{margin:0;max-width:36ch;font-size:15.5px;line-height:1.45;color:var(--muted)}
 .in-s p b{color:var(--ink);font-weight:600}
@@ -604,6 +604,45 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .in-bot .btn{min-height:48px;font-size:16px;border-radius:12px}
 .in-back{flex:none}.in-next{flex:1}
 .in-inst{width:100%;max-width:340px;min-height:46px}
+/* install demo (owner, 0.25: "ensine a colocar o app na tela de início"): a little drawn phone/computer that plays the
+   steps in a loop — tap Share, Add to Home Screen, the icon appears — in sync with the numbered list below it */
+.ins-demo{position:relative;flex:none;overflow:hidden;background:var(--bg);border:3px solid var(--ink);border-radius:26px;box-shadow:0 10px 26px rgba(0,0,0,.16);width:150px;height:236px;cursor:pointer}
+.ins-demo.pc{width:252px;height:164px;border-radius:12px;border-width:2px}
+.ins-f{position:absolute;inset:0;opacity:0;transition:opacity .35s}
+.ins-demo[data-f="0"] .f0,.ins-demo[data-f="1"] .f1,.ins-demo[data-f="2"] .f2{opacity:1}
+.ins-pg{position:absolute;left:10px;right:10px;top:34px;display:grid;gap:7px;justify-items:center}
+.ins-pg img{width:42px;height:42px;border-radius:11px}.ins-pg i{display:block;height:7px;width:100%;border-radius:4px;background:var(--chip)}.ins-pg i:nth-child(3){width:70%}
+.ins-bar{position:absolute;left:0;right:0;bottom:0;height:34px;display:flex;align-items:center;justify-content:space-around;padding:0 6px;background:var(--surface);border-top:1px solid var(--line);color:var(--muted)}
+.ins-bar.top{top:0;bottom:auto;border-top:0;border-bottom:1px solid var(--line)}
+.ins-url{flex:1;margin:0 5px;height:18px;border-radius:9px;background:var(--chip);font-size:7.5px;line-height:18px;color:var(--muted);text-align:center;overflow:hidden;white-space:nowrap}
+.ins-ic{display:grid;place-items:center;width:22px;height:22px;border-radius:7px}.ins-ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ins-hl{color:var(--target);background:color-mix(in srgb,var(--target) 16%,transparent);box-shadow:0 0 0 2px var(--target)}
+.ins-sheet{position:absolute;left:6px;right:6px;bottom:6px;border-radius:14px;background:var(--surface);border:1px solid var(--line);padding:5px;display:grid;gap:3px;box-shadow:0 -6px 16px rgba(0,0,0,.12)}
+.ins-sheet.menu{bottom:auto;top:30px;left:auto;right:6px;width:112px}
+.ins-row{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:8px;font-size:8.5px;line-height:1.15;text-align:left;color:var(--ink)}
+.ins-row svg{width:12px;height:12px;flex:none;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ins-row.ins-hl{font-weight:700}
+.ins-home{position:absolute;inset:0;padding:30px 12px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px 10px;align-content:start;background:linear-gradient(160deg,color-mix(in srgb,var(--target) 22%,var(--bg)),var(--bg))}
+.ins-home i{display:block;aspect-ratio:1;border-radius:9px;background:var(--chip)}
+.ins-app{display:grid;justify-items:center;gap:3px;font-size:7.5px;color:var(--ink);font-weight:600}
+.ins-app img{width:100%;aspect-ratio:1;border-radius:9px;box-shadow:0 0 0 2px var(--target)}
+.ins-demo[data-f="2"] .ins-app img{animation:insPop .6s cubic-bezier(.3,1.6,.5,1)}
+@keyframes insPop{0%{transform:scale(0)}100%{transform:scale(1)}}
+.ins-tap{position:absolute;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:color-mix(in srgb,var(--target) 35%,transparent);border:2px solid var(--target);pointer-events:none;transition:left .35s,top .35s,opacity .2s;animation:insTap 1.2s ease-in-out infinite}
+@keyframes insTap{0%,100%{transform:scale(.8);opacity:.9}50%{transform:scale(1.15);opacity:.5}}
+.ins-dlg{position:absolute;left:50%;top:52%;transform:translate(-50%,-50%);width:150px;border-radius:10px;background:var(--surface);border:1px solid var(--line);box-shadow:0 8px 22px rgba(0,0,0,.2);padding:8px;display:grid;gap:6px;font-size:8.5px;color:var(--ink);text-align:left}
+.ins-dlg .hd{display:flex;align-items:center;gap:6px;font-weight:700}.ins-dlg .hd img{width:20px;height:20px;border-radius:5px}
+.ins-dlg .bt{display:flex;justify-content:flex-end;gap:5px}.ins-dlg .bt span{padding:3px 8px;border-radius:6px;background:var(--chip)}.ins-dlg .bt span.ins-hl{background:var(--target);color:#fff}
+.ins-win{position:absolute;left:14px;right:14px;top:10px;bottom:30px;border-radius:8px;border:1px solid var(--line);background:var(--surface);overflow:hidden}
+.ins-win .tb{display:flex;align-items:center;gap:5px;height:16px;padding:0 6px;font-size:7.5px;font-weight:700;color:var(--ink);background:var(--chip)}.ins-win .tb img{width:10px;height:10px;border-radius:2px}
+.ins-task{position:absolute;left:0;right:0;bottom:0;height:22px;display:flex;justify-content:center;align-items:center;gap:7px;background:var(--surface);border-top:1px solid var(--line)}
+.ins-task i{width:14px;height:14px;border-radius:4px;background:var(--chip)}.ins-task img{width:16px;height:16px;border-radius:4px;box-shadow:0 0 0 2px var(--target)}
+.in-s:has(.ins-demo){gap:10px}.in-s:has(.ins-demo) h2{font-size:26px}.in-s:has(.ins-demo)>p:not(.in-note){display:none}
+.in-s:has(.ins-demo) .in-steps{gap:7px}.in-s:has(.ins-demo) .in-steps li{padding:7px 10px;font-size:14px}.in-s:has(.ins-demo) .in-note{padding:7px 10px;font-size:12.5px!important}
+@media (max-height:700px){.ins-demo{width:124px;height:194px;border-radius:22px}.ins-demo .ins-pg{top:26px}}
+.in-steps li.on{border-color:var(--target);box-shadow:0 0 0 1px var(--target)}
+.in-steps li[data-f]{cursor:pointer}
+.noanim .ins-f,.noanim .ins-tap{transition:none;animation:none}.noanim .ins-demo .ins-app img{animation:none}
 /* ---- exercise variations ---- */
 .vars{grid-column:2 / span 2;display:grid;gap:8px;margin-top:8px;padding-top:8px;border-top:1px solid var(--line)}
 .vax{display:grid;gap:4px}
@@ -5403,6 +5442,40 @@ function goPage(i,dir){const p=PAGES[pageAt(i)];if(!p)return;
    (sem "Instale"). Quem já tem dados não vê. Rever: Configurações › Apresentação ou ?intro na URL.
    Prints em intro/<idioma>-<tema>-<tela>.webp, gerados por tools/intro-shots.js. */
 let inI=0,inN=0;
+/* the drawn install demo: k = "ios" | "and" | "pc"; three frames cycled by inDemoTick(); tap points per frame */
+const INS_TAP={ios:[".f0 .ins-hl",".f1 .ins-row.ins-hl",".f2 .ins-app img"],and:[".f0 .ins-hl",".f1 .ins-row.ins-hl",".f2 .ins-app img"],pc:[".f0 .ins-hl",".f1 .bt .ins-hl",".f2 .ins-task img"]};
+function insDemo(k){
+  const ic=d=>`<span class="ins-ic">${d}</span>`,sv=p=>`<svg viewBox="0 0 24 24">${p}</svg>`;
+  const SH=sv('<path d="M12 15V3M8 7l4-4 4 4M6 11H5a1 1 0 0 0-1 1v8a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-8a1 1 0 0 0-1-1h-1"/>'),
+    ADD=sv('<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>'),COPY=sv('<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/>'),
+    STAR=sv('<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>'),DOTS=sv('<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>'),
+    VDOTS=sv('<circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/>'),BACK=sv('<path d="M15 5l-7 7 7 7"/>'),
+    TAB=sv('<path d="M5 5h14v14H5z"/>'),INST=sv('<rect x="3" y="4" width="18" height="13" rx="2"/><path d="M12 7.5v6M9 10.5l3 3 3-3M8 21h8"/>'),PLUS=sv('<path d="M12 5v14M5 12h14"/>');
+  const url=`<span class="ins-url">holmgds-gui.github.io</span>`,page=`<div class="ins-pg"><img src="icon-192.png" alt=""><i></i><i></i><i></i></div>`;
+  const home=`<div class="ins-home">${"<i></i>".repeat(4)}<span class="ins-app"><img src="icon-192.png" alt="">Muscle Atlas</span>${"<i></i>".repeat(4)}</div>`;
+  let f0,f1,f2;
+  if(k==="ios"){
+    f0=`${page}<div class="ins-bar">${ic(BACK)}${url}<span class="ins-ic ins-hl">${SH}</span>${ic(DOTS)}</div>`;
+    f1=`${page}<div class="ins-sheet"><div class="ins-row">${COPY}${tx("Copiar","Copy","Copiar")}</div><div class="ins-row">${STAR}${tx("Adicionar aos Favoritos","Add to Favorites","Agregar a favoritos")}</div><div class="ins-row ins-hl">${ADD}${tx("Adicionar à Tela de Início","Add to Home Screen","Agregar a pantalla de inicio")}</div></div>`;
+    f2=home}
+  else if(k==="and"){
+    f0=`<div class="ins-bar top">${url}<span class="ins-ic ins-hl">${VDOTS}</span></div>${page}`;
+    f1=`<div class="ins-bar top">${url}${ic(VDOTS)}</div>${page}<div class="ins-sheet menu"><div class="ins-row">${PLUS}${tx("Nova guia","New tab","Nueva pestaña")}</div><div class="ins-row">${STAR}${tx("Favoritos","Bookmarks","Favoritos")}</div><div class="ins-row ins-hl">${INST}${tx("Instalar app","Install app","Instalar aplicación")}</div></div>`;
+    f2=home}
+  else{
+    const bar=hl=>`<div class="ins-bar top">${ic(BACK)}${url}<span class="ins-ic${hl?" ins-hl":""}">${INST}</span></div>`;
+    f0=`${bar(1)}<div class="ins-pg" style="top:40px"><img src="icon-192.png" alt="" style="width:34px;height:34px"><i></i><i></i></div>`;
+    f1=`${bar(0)}<div class="ins-pg" style="top:40px;opacity:.35"><img src="icon-192.png" alt="" style="width:34px;height:34px"><i></i></div><div class="ins-dlg"><div class="hd"><img src="icon-192.png" alt="">${tx("Instalar app?","Install app?","¿Instalar aplicación?")}</div><span>Muscle Atlas</span><div class="bt"><span>${tx("Cancelar","Cancel","Cancelar")}</span><span class="ins-hl">${tx("Instalar","Install","Instalar")}</span></div></div>`;
+    f2=`<div class="ins-win"><div class="tb"><img src="icon-192.png" alt="">Muscle Atlas</div><div class="ins-pg" style="top:24px"><img src="icon-192.png" alt="" style="width:30px;height:30px"><i></i></div></div><div class="ins-task"><i></i><i></i><img src="icon-192.png" alt=""><i></i></div>`}
+  return `<div class="ins-demo${k==="pc"?" pc":""}" id="insDemo" data-k="${k}" data-f="0" aria-hidden="true"><div class="ins-f f0">${f0}</div><div class="ins-f f1">${f1}</div><div class="ins-f f2">${f2}</div><span class="ins-tap"></span></div>`}
+let insT=0;
+function insShow(f){const d=$("insDemo");if(!d)return;d.dataset.f=f;const k=d.dataset.k;
+  const tap=d.querySelector(".ins-tap"),el=d.querySelector((INS_TAP[k]||[])[f]);let xy=null;
+  if(el){const r=el.getBoundingClientRect(),o=d.getBoundingClientRect(),z=o.width/d.offsetWidth||1;xy=[(r.left-o.left+r.width/2)/z-3,(r.top-o.top+r.height/2)/z-3]}   // -3: the frame's border
+  if(xy){tap.style.left=xy[0]+"px";tap.style.top=xy[1]+"px";tap.style.opacity=1}else tap.style.opacity=0;
+  document.querySelectorAll(".in-steps li[data-f]").forEach(li=>li.classList.toggle("on",+li.dataset.f===f))}
+function insStart(){clearInterval(insT);if(!$("insDemo"))return;insShow(0);if(CONF.noanim)return;
+  insT=setInterval(()=>{const d=$("insDemo");if(!d||$("intro").hidden){clearInterval(insT);return}insShow((+d.dataset.f+1)%3)},2400)}
 function introSlides(){
   const ua=navigator.userAgent,ios=/iPad|iPhone|iPod/.test(ua)||(navigator.platform==="MacIntel"&&navigator.maxTouchPoints>1),
     and=/Android/i.test(ua),notSafari=ios&&/CriOS|FxiOS|EdgiOS|OPiOS|GSA|Instagram|FBAN|FBAV|Line|WhatsApp|Snapchat|TikTok/i.test(ua);
@@ -5425,9 +5498,13 @@ function introSlides(){
       tx("Escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>","Choose <b>Install app</b> or <b>Add to Home screen</b>","Elige <b>Instalar aplicación</b> o <b>Añadir a pantalla de inicio</b>"),
       tx("Abra o Muscle Atlas pelo ícone novo","Open Muscle Atlas from the new icon","Abre Muscle Atlas desde el ícono nuevo")
     ]:instInfo().st;
+    const I=!ios&&!and?instInfo():null,dk=ios?"ios":and?"and":(I&&!I.ff&&!(/Safari\//.test(ua)&&!/Chrome|Chromium|Edg|OPR/.test(ua))?"pc":"");
+    /* which frame each step shows: the last 3 steps of a phone are tap → choose → open; on the PC the first is install, the next the menu path */
+    const fr=i=>!dk?null:dk==="pc"?(i===0?0:i===steps.length-1?2:null):(i-(steps.length-3));
     S.push(`<h2>${ios||and?tx("Instale no celular","Install it on your phone","Instálalo en tu celular"):tx("Instale no computador","Install it on your computer","Instálalo en tu computadora")}</h2>
       <p>${ios||and?tx("Fica com ícone na tela de início, abre em tela cheia e funciona sem internet.","It gets a home-screen icon, opens full screen and works offline.","Tendrás un ícono en la pantalla de inicio, se abre en pantalla completa y funciona sin internet."):tx("Fica com ícone no computador, abre numa janela própria e funciona sem internet.","It gets an icon on your computer, opens in its own window and works offline.","Tendrás un ícono en la computadora, se abre en su propia ventana y funciona sin internet.")}</p>
-      <ol class="in-steps">${steps.map(s=>`<li><span>${s}</span></li>`).join("")}</ol>
+      ${dk?insDemo(dk):""}
+      <ol class="in-steps">${steps.map((s,i)=>{const f=fr(i);return `<li${f!=null&&f>=0&&f<=2?` data-f="${f}"`:""}><span>${s}</span></li>`}).join("")}</ol>
       <button class="btn primary in-inst" id="inInst"${inPrompt?"":" hidden"}>${tx("Instalar agora","Install now","Instalar ahora")}</button>
       <p class="in-note">${ios?tx("No iPhone, o app instalado começa do zero: instale <b>antes</b> de anotar seus treinos. ","On iPhone the installed app starts fresh: install it <b>before</b> logging workouts. ","En iPhone la app instalada empieza de cero: instálala <b>antes</b> de anotar tus entrenos. "):""}${tx("Seus dados ficam só neste aparelho.","Your data stays on this device only.","Tus datos se quedan solo en este dispositivo.")}</p>`);
   }
@@ -5460,11 +5537,15 @@ function openIntro(){
 }
 function inUpd(){
   [...$("inBars").children].forEach((b,i)=>b.classList.toggle("on",i<=inI));
+  const sl=$("inTrack").children[inI],dm=$("insDemo");if(dm&&sl&&sl.contains(dm)){if(!inUpd.dm)insStart();inUpd.dm=1}else{inUpd.dm=0;clearInterval(insT)}
   $("inBack").hidden=inI===0;
   $("inNext").textContent=inI===inN-1?tx("Começar","Get started","Empezar"):tx("Próximo","Next","Siguiente");
 }
 function inGo(i){i=Math.max(0,Math.min(inN-1,i));const t=$("inTrack");t.scrollTo({left:i*t.clientWidth,behavior:CONF.noanim?"auto":"smooth"});inI=i;inUpd()}
 function closeIntro(){LS.set("atlas-intro",1);$("intro").hidden=true}
+/* install demo: tapping a step shows its picture (and stops the loop); tapping the picture goes to the next one */
+$("inTrack").addEventListener("click",e=>{const li=e.target.closest(".in-steps li[data-f]");if(li){clearInterval(insT);insShow(+li.dataset.f);return}
+  const d=e.target.closest("#insDemo");if(d){clearInterval(insT);insShow((+d.dataset.f+1)%3)}});
 $("inTrack").addEventListener("scroll",()=>{const t=$("inTrack"),i=Math.round(t.scrollLeft/Math.max(1,t.clientWidth));if(i!==inI){inI=i;inUpd()}},{passive:true});
 $("inNext").addEventListener("click",()=>inI>=inN-1?closeIntro():inGo(inI+1));
 $("inBack").addEventListener("click",()=>inGo(inI-1));
