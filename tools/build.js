@@ -55,6 +55,26 @@ for(const [id,m] of Object.entries(M)){
 // new families placed at the end of lists (biomechanics)
 const NEW=[["abdomen_supra","vup"],["abdomen_infra","vup"],["lombar_eretores","rackpull"],["trapezio_superior","rackpull"]];
 for(const [mid,fid] of NEW){const f=FB[fid];out[mid].x.push([ref(f,f.d),"B"]);after++;usedFam.add(fid)}
+/* 0.24 (owner): new exercises and variations, each placed after the last entry with the same or stronger evidence
+   (H > E > B); [muscle, family, selection, evidence, note?]; an entry of the same card in that list is replaced */
+const RK={H:0,E:1,B:2};
+const NEW2=[
+  ["dorsal_superior","pulldown",{},"E","Muyor 2022: dorsal e tríceps foram os mais ativos"],["dorsal_inferior","pulldown",{},"E"],["redondo_maior","pulldown",{},"E"],
+  ["trapezio_superior","remalta",{w:"tr"},"E","pegada aberta: mais trapézio (McAllister 2013)"],["trapezio_medio","remalta",{w:"tr"},"E"],
+  ["abdomen_supra","deadbug",{},"E"],["abdomen_infra","deadbug",{},"E"],["obliquos","deadbug",{},"E"],
+  ["abdomen_supra","hollow",{},"B"],["abdomen_infra","hollow",{},"B"],["abdomen_supra","escalador",{},"B"],["abdomen_infra","escalador",{},"B"],
+  ["trapezio_medio","kelso",{},"B"],["romboides","kelso",{},"B"]];
+for(const [mid,fid,sel0,ev,note] of NEW2){const f=FB[fid];const sel={...f.d,...sel0};const r=resolve(f,sel);
+  if(!r.p.includes(RC[mid])&&!r.s.includes(RC[mid])){errs.push(`novo ${fid} não envolve ${mid}`);continue}
+  const xs=out[mid].x,sk=splitKey(f,sel);
+  const old=xs.findIndex(e=>{const [id,rest]=e[0].split("|");if(id!==fid)return false;const s2={...f.d};(rest||"").split(",").forEach(kv=>{const [k,v]=kv.split("=");s2[k]=v});return splitKey(f,s2)===sk});
+  if(old>=0)xs.splice(old,1);
+  let at=0;xs.forEach((e,i)=>{if(RK[e[1]]<=RK[ev])at=i+1});
+  xs.splice(at,0,note?[ref(f,sel),ev,note]:[ref(f,sel),ev]);after++;usedFam.add(fid)}
+/* the studies behind those additions, in each muscle's source list (keys of SRC in index.html) */
+const SADD={dorsal_superior:"muyor22",dorsal_inferior:"muyor22",redondo_maior:"muyor22",trapezio_superior:"mcallister13",trapezio_medio:"mcallister13",
+  peito_superior:"muyor23",peito_medial:"muyor23",abdomen_supra:"souza01",abdomen_infra:"souza01",obliquos:"souza01"};
+for(const m in SADD)if(!out[m].s.includes(SADD[m]))out[m]={...out[m],s:[...out[m].s,SADD[m]]};
 for(const f of F){if(!usedFam.has(f.id))errs.push("família sem lista: "+f.id);f.eq0=eq0[f.id]||(f.ax.find(a=>a[0]==="e")?null:"C")}
 if(errs.length){console.log("ERROS:\n"+errs.join("\n"));process.exit(1)}
 // combos count

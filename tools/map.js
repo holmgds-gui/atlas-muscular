@@ -2,7 +2,7 @@
 module.exports={
 "Incline barbell bench press":["supino",{b:"in",e:"ba"}],"Incline dumbbell press":["supino",{b:"in",e:"ha"}],"Incline Smith machine press":["supino",{b:"in",e:"sm"}],
 "Incline chest press machine":["supino",{b:"in",e:"ma"}],"Reverse-grip bench press":["supino",{e:"ba",g:"su"}],"Flat barbell bench press":["supino",{e:"ba"}],"Barbell bench press":["supino",{e:"ba"}],
-"Flat dumbbell bench press":["supino",{e:"ha"}],"Hammer chest press":["supino",{e:"ma"}],"Seated chest press":["supino",{e:"ma"}],"Smith machine bench press":["supino",{e:"sm"}],
+"Flat dumbbell bench press":["supino",{e:"ha"}],"Hammer chest press":["supino",{e:"ma"}],"Seated chest press":["supino",{e:"ms"}],"Smith machine bench press":["supino",{e:"sm"}],
 "Decline barbell bench press":["supino",{b:"de",e:"ba"}],"Decline dumbbell press":["supino",{b:"de",e:"ha"}],"Decline chest press machine":["supino",{b:"de",e:"ma"}],"Close-grip bench press":["supino",{e:"ba",w:"fe"}],
 "Incline dumbbell fly":["crucifixo",{b:"in",e:"ha"}],"Incline cable fly":["crucifixo",{b:"in",e:"po"}],"Low-to-high cable fly":["crucifixo",{b:"in",e:"po"}],"Pec deck":["crucifixo",{b:"re",e:"ma"}],
 "Bent-forward cable crossover":["crucifixo",{b:"de",e:"po"}],"Flat dumbbell fly":["crucifixo",{b:"re",e:"ha"}],"Mid-pulley cable fly":["crucifixo",{b:"re",e:"po"}],"High-to-low cable crossover":["crucifixo",{b:"de",e:"po"}],"Decline dumbbell fly":["crucifixo",{b:"de",e:"ha"}],

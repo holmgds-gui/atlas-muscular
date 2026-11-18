@@ -43,6 +43,10 @@ Os links marcados com 🔎 levam a uma busca no PubMed: o estudo é conhecido, m
 | `serner` | Serner et al. 2014, *Br J Sports Med*: exercícios de adutores | [BJSM](https://bjsm.bmj.com/content/48/14/1108) |
 | `ridao` | Rodríguez-Ridao et al. 2020, *IJERPH*: inclinação do banco no supino | [PubMed 33049982](https://pubmed.ncbi.nlm.nih.gov/33049982/) · [PMC](https://pmc.ncbi.nlm.nih.gov/articles/PMC7579505/) |
 | `coratella` | Coratella et al. 2020, *IJERPH*: variações de elevação lateral | [IDEAS/RePEc](https://ideas.repec.org/a/gam/jijerp/v17y2020i17p6015-d400749.html) |
+| `muyor22` | Muyor, López-Miñarro e Alacid 2022, *Applied Sciences* 12(21):11138: pullover × pulldown com braços estendidos (no pulldown, dorsal e tríceps foram os mais ativos) — Pulldown, 0.24 | [Repositório UM](https://digitum.um.es/entities/publication/ef7df07d-cfcb-49eb-a134-843acdc608f4) |
+| `mcallister13` | McAllister et al. 2013, *JSCR* 27(1):181-7: pegada da remada alta (mais aberta = mais deltoide e trapézio, menos bíceps) — Remada alta para trapézio, 0.24 | [PubMed 22362088](https://pubmed.ncbi.nlm.nih.gov/22362088/) |
+| `muyor23` | Muyor, Rodríguez-Ridao e Oliva-Lozano 2023, *J Hum Kinet* 87:23-34: supino reto × supino sentado na máquina (ativação parecida; pegada neutra um pouco mais peitoral superior) — Supino sentado, 0.24 | [JHK](https://jhk.termedia.pl/Comparison-of-Muscle-Activity-between-the-Horizontal-Bench-Press-and-the-Seated-Chest,161468,0,2.html) |
+| `souza01` | Souza, Baker e Powers 2001, *Arch Phys Med Rehabil* 82(11):1551-7: dead bug e quatro apoios (reto abdominal e oblíquos parecidos, sobem com a dificuldade) — Dead bug, 0.24 | [PubMed 11689975](https://pubmed.ncbi.nlm.nih.gov/11689975/) |
 
 ### Efeito das variações (notas dos botões)
 
@@ -53,6 +57,8 @@ Os links marcados com 🔎 levam a uma busca no PubMed: o estudo é conhecido, m
 | Padovan, Coratella et al., *J Hum Kinet* | Remada baixa: pegada fechada favorece o dorsal; aberta, trapézio e deltoide | [JHK](https://johk.pl/?p=9499) |
 | Rodríguez-Ridao et al. 2020 | Supino: inclinação do banco muda a parte do peitoral | ver `ridao` acima |
 | Maeo 2021/2022, Kinoshita 2023, Larsen 2024, Kubo 2019, Kassiano 2025 | Flexora sentado × deitado, tríceps acima da cabeça, panturrilha em pé × sentado, encosto da extensora, profundidade do agachamento, rosca inclinada × Scott | ver tabela de crescimento acima |
+
+Canoinha (hollow), escalador, encolhimento Kelso e seal row (0.24) não têm estudo de EMG direto que valha a pena citar: entram com o selo Biomecânica, pela mecânica do movimento, e o "Como fazer" vem das mesmas referências de execução da seção 4b. A rosca inclinada passou a se chamar "Rosca 45 (banco inclinado)", o nome de academia (o estudo continua o de Kassiano 2025).
 
 As demais notas (pegada neutra, pés altos/baixos no leg press, tronco à frente na abdutora, joelho dobrado no coice etc.) vêm da mecânica do movimento.
 
