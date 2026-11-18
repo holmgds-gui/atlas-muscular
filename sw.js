@@ -1,8 +1,8 @@
-const CACHE="atlas-v0.25";
+const CACHE="atlas-v0.26";
 /* the 3D body and Three.js are big and rarely change: they live in their own cache that survives app updates
    (a new model gets a new file name, corpo-7.glb / corpo-f-4.glb, and a new cache name, which drops the old model) */
 const C3D="atlas-3d-7";
-const CORE=["./","./index.html","./manifest.webmanifest","./icon-180.png","./icon-192.png","./icon-512.png","./how/pt.json","./how/en.json","./how/es.json","./sync.js"];
+const CORE=["./","./index.html","./manifest.webmanifest","./icon-180.png","./icon-192.png","./icon-512.png","./icon-mask-512.png","./logo.png","./logo-m.png","./how/pt.json","./how/en.json","./how/es.json","./sync.js"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()))});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE&&k!==C3D).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener("fetch",e=>{

@@ -24,9 +24,9 @@ const S=()=>p.evaluate(()=>{const cs=e=>e&&getComputedStyle(e);const r=getComput
   const d=document.createElement("button");d.className="btn danger";document.body.appendChild(d);const dc=cs(d).color;d.remove();
   return {t:r.getPropertyValue('--target').trim().toLowerCase(),k1:r.getPropertyValue('--k1').trim().toLowerCase(),syn:r.getPropertyValue('--syn').trim().toLowerCase(),
     title:cs(document.querySelector(".brand h1 b")).color,tab:cs(document.querySelector('.btabs button[aria-current="page"]'))?.color,
-    logo:cs(document.querySelector("#lgR stop")).stopColor,danger:dc}});
+    logo:getComputedStyle(document.querySelector(".brand .logo"),"::after").display,danger:dc}});
 let s=await S();console.log(th,'roxo',JSON.stringify(s));
-if(s.t!==want||s.k1!==want||hex(s.title)!==want||hex(s.danger)!==red||hex(s.logo)==="#f45a60")bad++;
+if(s.t!==want||s.k1!==want||hex(s.title)!==want||hex(s.danger)!==red||s.logo!=="block")bad++;
 // Atlas 2D: the chosen muscle is purple
 await p.evaluate(()=>{setTab("atlas");set3D(false)});await p.waitForTimeout(300);
 await p.evaluate(()=>selectMuscle("peito_medial"));await p.waitForTimeout(300);
