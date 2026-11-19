@@ -21,6 +21,9 @@
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}
 body{margin:0}
 [hidden]{display:none!important}
+/* motion (owner, 0.31: "mais suave e smooth, como os apps de iPhone/Samsung"): one set of curves for the whole app.
+   --ios = iOS sheet/page curve (fast start, long soft landing); --spring = small overshoot for presses and snaps. */
+:root{--ios:cubic-bezier(.32,.72,0,1);--spring:cubic-bezier(.34,1.32,.64,1);--out:cubic-bezier(.22,1,.36,1)}
 img{max-width:100%}
 </style>
 <style>
@@ -190,7 +193,7 @@ details.how b{font-size:13px;color:var(--muted)}
 }
 .sh-grab{display:none}
 @media (max-width:900px){.sh-grab{display:flex;justify-content:center;padding:8px 0 0;touch-action:none}.sh-grab i{width:42px;height:5px;border-radius:3px;background:var(--line)}
-  .sheet{transition:transform .2s ease}.sheet.dragging{transition:none}}
+  .sheet{transition:transform .45s var(--ios)}.sheet.dragging{transition:none}}
 .modesw{display:grid;grid-template-columns:40px minmax(0,1fr) 40px;align-items:center;background:var(--chip);border-radius:12px;padding:4px 0 7px;width:320px;max-width:100%}
 .ms-track{position:relative;display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;overscroll-behavior-x:contain;touch-action:pan-x;
   -webkit-mask-image:linear-gradient(90deg,transparent,#000 24%,#000 76%,transparent);mask-image:linear-gradient(90deg,transparent,#000 24%,#000 76%,transparent)}
@@ -252,10 +255,12 @@ a.btn{display:inline-flex;align-items:center;text-decoration:none;color:inherit}
 .sw i::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .15s}
 .sw input:checked+i{background:var(--accent,var(--target))}.sw input:checked+i::after{transform:translateX(18px)}
 .sw input:disabled+i{opacity:.45}.sw input:focus-visible+i{outline:2px solid var(--focus);outline-offset:2px}
-.cin{animation:cardIn .36s cubic-bezier(.2,.8,.3,1) both}@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
-@media (hover:none){.btn,.ex,.btabs button,.wk{transition:transform .12s ease}.btn:active,.ex:active,.btabs button:active,.wk:active{transform:scale(.96)}}
-.view.sw-l{animation:swL .28s cubic-bezier(.2,.8,.3,1)}.view.sw-r{animation:swR .28s cubic-bezier(.2,.8,.3,1)}
-@keyframes swL{from{transform:translateX(45%);opacity:.2}to{transform:none;opacity:1}}@keyframes swR{from{transform:translateX(-45%);opacity:.2}to{transform:none;opacity:1}}
+.cin{animation:cardIn .5s var(--ios) both}@keyframes cardIn{from{opacity:0;transform:translateY(14px) scale(.985)}to{opacity:1;transform:none}}
+@media (hover:none){.btn,.ex,.btabs button,.wk,.tgl,.ib,.chip,.plist button,.alist button{transition:transform .45s var(--spring),background-color .2s,color .2s,border-color .2s,box-shadow .2s,opacity .2s}
+  .btn:active,.ex:active,.btabs button:active,.wk:active,.tgl:active,.ib:active,.chip:active,.plist button:active,.alist button:active{transform:scale(.96);transition-duration:.12s,.2s,.2s,.2s,.2s,.2s;transition-timing-function:var(--out)}
+  .ex:active,.plist button:active,.alist button:active{transform:scale(.98)}}
+.view.sw-l{animation:swL .46s var(--ios)}.view.sw-r{animation:swR .46s var(--ios)}
+@keyframes swL{from{transform:translateX(var(--swf,100%))}to{transform:none}}@keyframes swR{from{transform:translateX(calc(-1 * var(--swf,100%)))}to{transform:none}}
 html.noanim *,html.noanim *::before,html.noanim *::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}
 @media (max-width:400px){header{gap:8px}.gear{width:34px;margin-right:-4px}.sbtn{margin-right:0}.sfield input{padding-right:6px}}
 .results{position:absolute;left:0;right:0;top:calc(100% - 2px);background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.18);max-height:60vh;overflow:auto;z-index:20}
@@ -277,7 +282,7 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
 /* owner: the tab bars slide — a thumb under the chosen option that moves on tap and follows the finger when dragged */
 .seg{position:relative;touch-action:pan-y}.seg button{position:relative;z-index:1;transition:color .2s}
-.seg .seg-th{position:absolute;top:3px;left:0;height:calc(100% - 6px);border-radius:8px;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.15);z-index:0;pointer-events:none;transition:transform .28s cubic-bezier(.3,.8,.3,1),width .28s cubic-bezier(.3,.8,.3,1)}
+.seg .seg-th{position:absolute;top:3px;left:0;height:calc(100% - 6px);border-radius:8px;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,.15);z-index:0;pointer-events:none;transition:transform .42s var(--ios),width .42s var(--ios)}
 .seg.has-th button[aria-pressed="true"]{background:none;box-shadow:none}
 .seg.sdrag .seg-th{transition:none;box-shadow:0 2px 8px rgba(0,0,0,.25)}.seg.sdrag button{color:var(--muted)}.seg.sdrag button.snear{color:var(--ink)}
 .zoom{display:inline-flex;gap:4px}
@@ -536,6 +541,12 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
   .toast{bottom:calc(76px + env(safe-area-inset-bottom,0px))}
 }
 @media (min-width:901px){.modal{align-items:center}.sheet{border-radius:16px}}
+.modal{transition:background-color .28s ease}.modal:not([hidden]){animation:mBg .3s ease}@keyframes mBg{from{background-color:transparent}}
+.modal:not([hidden]) .sheet{animation:shUp .5s var(--ios)}@keyframes shUp{from{transform:translateY(100%)}}
+.modal.closing{background-color:transparent;pointer-events:none}.modal.closing .sheet{transition:transform .3s cubic-bezier(.4,0,.8,.6)!important;transform:translateY(105%)!important}
+@media (min-width:901px){.modal:not([hidden]) .sheet{animation:shPop .32s var(--out)}@keyframes shPop{from{transform:translateY(14px) scale(.97);opacity:0}}
+  .modal.closing .sheet{transition:transform .2s ease-in,opacity .2s ease-in!important;transform:translateY(10px) scale(.97)!important;opacity:0}}
+.toast{animation:toastIn .45s var(--ios)}@keyframes toastIn{from{transform:translateX(-50%) translateY(24px) scale(.96);opacity:0}}
 
 /* phone: figure fills the screen until something is picked */
 @media (max-width:900px){
@@ -2947,23 +2958,25 @@ $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.conta
   const noanim=()=>document.documentElement.classList.contains("noanim");
   P.addEventListener("touchstart",e=>{g=null;if(e.touches.length>1||!matchMedia("(max-width:900px)").matches)return;
     if(e.target.closest("input,select,textarea,.chips,.vopts,.ms-track,.seg")||(B.contains(e.target)&&B.scrollTop>0))return;
-    g={y0:e.touches[0].clientY,x0:e.touches[0].clientX,lock:null,dy:0,t:e.target}},{passive:true});
+    g={y0:e.touches[0].clientY,x0:e.touches[0].clientX,lock:null,dy:0,t:e.target,ly:e.touches[0].clientY,lt:Date.now(),v:0}},{passive:true});
   P.addEventListener("touchmove",e=>{if(!g||e.touches.length>1)return;const dy=e.touches[0].clientY-g.y0,dx=e.touches[0].clientX-g.x0;
     if(!g.lock){if(Math.hypot(dx,dy)<10)return;
       /* inside the list, only a pull down from the very top moves the sheet; pushing up just scrolls the list */
       if(Math.abs(dx)>Math.abs(dy)||(B.contains(g.t)&&dy<0&&A.classList.contains("covered"))){g.lock="no";return}
       g.lock="v";g.els=A.classList.contains("covered")?[P.querySelector(".p-head"),B]:[P];g.els.forEach(x=>{x.style.transition="none";x.classList.add("pdrag")})}
-    if(g.lock!=="v")return;e.preventDefault();g.dy=dy;const m=can(dy<0?"up":"down")?dy:dy*.25;g.els.forEach(x=>{x.style.transform=`translateY(${m}px)`;x.style.setProperty("--pd",Math.max(0,-m)+"px")})},{passive:false});
-  const end=()=>{if(!g)return;const G=g;g=null;if(G.lock!=="v")return;const dy=G.dy,d=dy<0?"up":"down";
-    if(Math.abs(dy)<45||!can(d)){G.els.forEach(x=>{x.style.transition="transform .26s cubic-bezier(.3,.8,.3,1)";x.style.transform="";
-      setTimeout(()=>{x.style.transition="";x.classList.remove("pdrag")},270)});return}
+    if(g.lock!=="v")return;e.preventDefault();g.dy=dy;{const y=e.touches[0].clientY,now=Date.now();g.v=(y-g.ly)/Math.max(1,now-g.lt);g.ly=y;g.lt=now}
+    const m=can(dy<0?"up":"down")?dy:rubber(dy,90);g.els.forEach(x=>{x.style.transform=`translateY(${m}px)`;x.style.setProperty("--pd",Math.max(0,-m)+"px")})},{passive:false});
+  const end=()=>{if(!g)return;const G=g;g=null;if(G.lock!=="v")return;const dy=G.dy,d=dy<0?"up":"down",v=Date.now()-G.lt>100?0:G.v;
+    const flick=Math.abs(dy)>14&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dy);
+    if((Math.abs(dy)<45&&!flick)||!can(d)){G.els.forEach(x=>{x.style.transition="transform .45s var(--ios)";x.style.transform="";
+      setTimeout(()=>{x.style.transition="";x.classList.remove("pdrag")},460)});return}
     const head=P.querySelector(".p-head"),before=head.getBoundingClientRect().top;
     G.els.forEach(x=>{x.style.transition="none";x.style.transform="";x.classList.remove("pdrag")});
     buzz();sheetMove(d,dy>innerHeight*.4);
     const off=before-head.getBoundingClientRect().top;if(Math.abs(off)<3||noanim())return;
     const t=[head];if(B.offsetParent&&A.classList.contains("covered"))t.push(B);
     t.forEach(x=>{x.style.transition="none";x.style.transform=`translateY(${off}px)`});void head.offsetWidth;
-    t.forEach(x=>{x.style.transition="transform .34s cubic-bezier(.2,.8,.3,1)";x.style.transform=""});setTimeout(()=>t.forEach(x=>x.style.transition=""),360)};
+    t.forEach(x=>{x.style.transition="transform .48s var(--ios)";x.style.transform=""});setTimeout(()=>t.forEach(x=>x.style.transition=""),500)};
   P.addEventListener("touchend",end,{passive:true});P.addEventListener("touchcancel",end,{passive:true})})();
 
 /* ---------------------------------------------------------- search */
@@ -3041,13 +3054,28 @@ $("plist").addEventListener("click",e=>{
   if(e.target.closest("[data-padd]")){const f=FAMBY[pickOpen];const cb=pickCb;closeModals();if(cb)cb(vName(f,pickSel),mkRef(f,pickSel))}
 });
 function closeModals(){document.querySelectorAll(".modal").forEach(m=>m.hidden=true);pickCb=null}
-/* every bottom sheet closes by dragging it down from its top (phone) */
+/* iOS-like rubber band: the further you pull past the end, the harder it gets (d = how far it can stretch at most) */
+const rubber=(x,d)=>Math.sign(x)*(1-1/(Math.abs(x)*.55/d+1))*d;
+const noAnim=()=>document.documentElement.classList.contains("noanim");
+/* sheets slide down when closed (owner, 0.31: smoother): every "m.hidden=true" in the app goes through this setter,
+   which plays the closing slide and only then hides; while closing, .hidden already reads true */
+document.querySelectorAll(".modal").forEach(m=>{let tm=0;
+  Object.defineProperty(m,"hidden",{configurable:true,get(){return this.hasAttribute("hidden")||this.classList.contains("closing")},
+    set(v){clearTimeout(tm);
+      if(!v){this.classList.remove("closing");const sh=this.querySelector(".sheet");if(sh){sh.style.transition="";sh.style.transform=""}this.removeAttribute("hidden");return}
+      if(this.hasAttribute("hidden"))return;
+      if(noAnim()||!this.offsetParent){this.classList.remove("closing");this.setAttribute("hidden","");return}
+      this.classList.add("closing");tm=setTimeout(()=>{this.setAttribute("hidden","");this.classList.remove("closing");const sh=this.querySelector(".sheet");if(sh){sh.style.transition="";sh.style.transform=""}},matchMedia("(min-width:901px)").matches?200:300)}})});
+/* every bottom sheet closes by dragging it down from its top (phone): it follows the finger, pulling up only
+   stretches a little, and a long pull or a quick flick down closes it (from where the finger left it) */
 document.querySelectorAll(".modal .sheet").forEach(sh=>{const g=document.createElement("div");g.className="sh-grab";g.innerHTML="<i></i>";g.setAttribute("aria-hidden","true");sh.prepend(g);
-  let y0=null;const on=e=>e.target.closest(".sh-grab,.sheet-h")&&!e.target.closest("button,input");
-  sh.addEventListener("touchstart",e=>{if(e.touches.length>1||!on(e))return;y0=e.touches[0].clientY;sh.classList.add("dragging")},{passive:true});
-  sh.addEventListener("touchmove",e=>{if(y0==null)return;const d=e.touches[0].clientY-y0,dy=d<0?Math.max(-24,d*.2):d;sh.style.transform=`translateY(${dy}px)`},{passive:true});
-  sh.addEventListener("touchend",e=>{if(y0==null)return;const dy=e.changedTouches[0].clientY-y0;y0=null;sh.classList.remove("dragging");sh.style.transform="";
-    if(dy>70){const m=sh.closest(".modal");if(m.querySelector("[data-close]"))m.querySelector("[data-close]").click();else closeModals()}},{passive:true})});
+  let y0=null,ly=0,lt=0,v=0;const on=e=>e.target.closest(".sh-grab,.sheet-h")&&!e.target.closest("button,input");
+  sh.addEventListener("touchstart",e=>{if(e.touches.length>1||!on(e))return;y0=ly=e.touches[0].clientY;lt=Date.now();v=0;sh.classList.add("dragging")},{passive:true});
+  sh.addEventListener("touchmove",e=>{if(y0==null)return;const y=e.touches[0].clientY,d=y-y0,now=Date.now();v=(y-ly)/Math.max(1,now-lt);ly=y;lt=now;
+    sh.style.transform=`translateY(${d<0?rubber(d,40):d}px)`},{passive:true});
+  sh.addEventListener("touchend",e=>{if(y0==null)return;const dy=e.changedTouches[0].clientY-y0,vv=Date.now()-lt>100?0:v;y0=null;sh.classList.remove("dragging");
+    if(dy>sh.offsetHeight*.3||dy>110||(dy>20&&vv>.5)){const m=sh.closest(".modal");if(m.querySelector("[data-close]"))m.querySelector("[data-close]").click();else closeModals();return}
+    sh.style.transform=""},{passive:true})});
 /* page help: the small + next to each page title */
 const HELP={
   atlas:["Atlas",`<p>O boneco mostra os músculos. Toque num músculo para ele ficar vermelho e ver a lista de exercícios para ele, do que mais estimula para o que menos estimula.</p>
@@ -5417,7 +5445,7 @@ function goPage(i,dir){const p=PAGES[pageAt(i)];if(!p)return;
 /* the page follows the finger (owner: "página segue o dedo"); lifting past ~30% of the width, or a quick flick,
    finishes the move (the page leaves to that side and the next one comes in from the other); otherwise it springs
    back. The pages are a ring (owner: "ciclo infinito"): after Força comes Atlas, and before Atlas comes Força. */
-(()=>{let s=null;
+(()=>{let s=null,swT=0;
   const skip=t=>{if(t.closest("input,select,textarea,.seg,.stage,.ms-track,.modesw,.zwrap,.kg-hit,.chips,.vopts,.lv-tips,.fi-drag,[data-noswipe]"))return true;
     for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.scrollWidth>n.clientWidth+2){const o=getComputedStyle(n).overflowX;if(o==="auto"||o==="scroll")return true}}
     return false};
@@ -5432,13 +5460,15 @@ function goPage(i,dir){const p=PAGES[pageAt(i)];if(!p)return;
     if(s.lock!=="h")return;e.preventDefault();
     const now=Date.now();s.v=(x-s.lx)/Math.max(1,now-s.lt);s.lx=x;s.lt=now;
     const has=PAGES.length>1,w=innerWidth;s.dx=dx;
-    const m=has?dx:dx*.25;s.el.style.transition="none";s.el.style.transform=`translateX(${m}px)`;s.el.style.opacity=has?String(1-Math.min(.5,Math.abs(dx)/w)):""},{passive:false});
+    clearTimeout(swT);const m=has?dx:rubber(dx,w*.25);s.el.style.transition="none";s.el.style.transform=`translateX(${m}px)`},{passive:false});
   const end=()=>{if(!s)return;const {el,dx,i,lock}=s,v=Date.now()-s.lt>100?0:s.v;s=null;if(lock!=="h"){reset(el);return}
     const d=dx<0?1:-1,go=PAGES.length>1&&(Math.abs(dx)>innerWidth*.3||(Math.abs(dx)>40&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dx)));
-    if(!go){el.style.transition="transform .25s cubic-bezier(.3,.8,.3,1),opacity .25s";el.style.transform="";el.style.opacity="";setTimeout(()=>reset(el),260);return}
-    if(document.documentElement.classList.contains("noanim")){reset(el);return goPage(i+d,d)}
-    el.style.transition="transform .16s ease-in,opacity .16s ease-in";el.style.transform=`translateX(${-d*innerWidth*.6}px)`;el.style.opacity="0";
-    buzz();setTimeout(()=>{reset(el);goPage(i+d,d);pageEnter()},160)};
+    if(!go){el.style.transition="transform .45s var(--ios)";el.style.transform="";clearTimeout(swT);swT=setTimeout(()=>reset(el),460);return}
+    if(noAnim()){reset(el);return goPage(i+d,d)}
+    /* the page keeps going at the finger's speed (no pause), then the next one glides in from the other side */
+    const W=innerWidth,left=W-Math.abs(dx),ms=Math.round(Math.max(110,Math.min(220,left/Math.max(1.6,Math.abs(v)))));
+    el.style.transition=`transform ${ms}ms cubic-bezier(.25,.6,.6,1)`;el.style.transform=`translateX(${-d*W}px)`;
+    buzz();setTimeout(()=>{reset(el);goPage(i+d,d)},ms)};
   document.addEventListener("touchend",end,{passive:true});document.addEventListener("touchcancel",end,{passive:true});
 })();
 
