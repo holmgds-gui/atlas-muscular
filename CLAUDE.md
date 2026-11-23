@@ -59,6 +59,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 | `sync.js` | Conta e sincronização com o Firebase (login com Google + Firestore), carregado só por quem usa |
 | `sw.js` | Service worker (offline). `const CACHE="atlas-vX.Y"` (a versão mostrada no app, ex.: 0.8) |
 | `manifest.webmanifest`, `icon-*.png`, `logo.png`, `logo-m.png` | Instalação como app e logo do topo |
+| `design2.css`, `design2.js` | Design novo "Arena" em teste (só com `?design=novo`) |
 | `tools/desktop/`, `.github/workflows/desktop.yml` | App para Windows (Electron) e o workflow que gera e publica o `MuscleAtlas-Setup.exe` |
 | `README.md` | Descrição curta para quem abre o repositório |
 | `docs/` | Histórico e fontes |
@@ -132,6 +133,8 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
   - Cargas: `pView` (`mus`/`kg`), `loadData()` agrupa por exercício e dia (série mais pesada e força estimada de Epley, kg × (1 + reps/30)), `renderKg()` e `drawKg()` (SVG à mão com tooltip ao tocar). Só treinos feitos contam. Cores `--k1` (vermelho, linha cheia) e `--k2` (azul, tracejada), validadas para daltonismo nos dois temas.
 
 ## Decisões já tomadas (não desfazer sem perguntar)
+
+- **Design novo "Arena" em teste** (pedido do dono, 23/11/2026, 0.33; escolhas: escuro e esportivo, manter o vermelho, endereço de teste, pode mudar tudo; o design antigo fica de backup no ramo `design-classico`): fica em `design2.css` + `design2.js`, carregados só quando `localStorage` `atlas-design` = `"novo"` (o script no fim do `<head>` lê `?design=novo` / `?design=classico` e põe a classe `html.d2`). Todo seletor começa com `html.d2`, então o clássico não muda. Link de teste: `https://holmgds-gui.github.io/atlas-muscular/?design=novo`; no app instalado: Configurações › Aparência › **Design novo (teste)** › Experimentar; no design novo, o 1º cartão das Configurações tem "Voltar ao clássico". Ideia: placar de transmissão esportiva — títulos e números em Barlow Condensed 900 itálico, "corte" vermelho inclinado (antes dos títulos, aba ativa, pontinhos), holofote vermelho no topo, cartões pretos (`--surface` #111317) com borda fina, barra de abas flutuante de vidro, pílula clara nas barras de abas, botão principal vermelho com brilho, piso quadriculado + plataforma vermelha sob o boneco do Atlas, ponto "ao vivo" piscando, números que contam ao abrir a página (`.ach-n`, `.pstat b`, só dentro de `.cin`), títulos que encolhem para caber (`fit()`). Tema claro e escuro. **Se o dono aprovar**: passar o conteúdo para o `index.html` (ou carregar sempre) e tirar o botão de teste; **se não gostar**: apagar `design2.*`, o script do `<head>` e a linha "Design novo (teste)".
 
 - **"Volte a tela padrão"** (combinado com o dono em 10/11/2026): a limpeza visual (v77: seletor de modos que se arrasta, filtros dos Treinos prontos numa janela, Hoje recolhido, Montar pelo boneco em Meus treinos, sem parágrafos de topo) foi publicada em teste. Se o dono disser "volte a tela padrão" (ou parecido), volte a interface para como estava no commit `8468119` (v76, antes da limpeza; a limpeza está nos commits `4456bdb` e `9ab98a6`, ramo `limpeza-visual`), mantendo qualquer coisa nova feita depois que não seja dessa limpeza, suba o cache e publique.
 

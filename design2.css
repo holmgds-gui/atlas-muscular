@@ -1,0 +1,245 @@
+/* Muscle Atlas — design novo "Arena" (pedido do dono, nov/2026: escuro e esportivo, vermelho, mudar tudo).
+   Só é carregado com ?design=novo (fica salvo em localStorage "atlas-design"); ?design=classico volta.
+   Tudo aqui vale só em html.d2, então o design clássico (index.html) não muda.
+   Ideias: placar de transmissão esportiva (números grandes em itálico condensado, rótulos pequenos espaçados),
+   holofote vermelho no topo da tela, "corte" diagonal vermelho como marca (títulos, aba ativa, botões),
+   cartões pretos com borda fina, barra de abas flutuante de vidro, toque que afunda e brilha. */
+@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Barlow:wght@400;500;600;700&display=swap");
+
+/* ---------- tokens ---------- */
+html.d2{
+  --bg:#EEEDE9; --surface:#FFFFFF; --surface2:#F6F5F2; --ink:#0C0D10; --muted:#60656D; --faint:#9A9EA5; --line:#E1DFD9; --line2:#D3D0C9;
+  --chip:#ECEAE5; --focus:#E61E2D;
+  --target:#E61E2D; --target-hi:#FF4A57; --target-lo:#A30E19; --danger:#D61F2C; --k1:#E61E2D;
+  --glow:0 10px 30px -12px rgba(230,30,45,.55); --lift:0 1px 0 rgba(255,255,255,.9) inset, 0 1px 2px rgba(12,13,16,.05), 0 8px 24px -16px rgba(12,13,16,.25);
+  --hdr:rgba(238,237,233,.78); --nav:rgba(255,255,255,.82); --spot:rgba(230,30,45,.10); --gridl:rgba(12,13,16,.05);
+  --r-card:20px; --r-btn:14px;
+  --f-display:"Barlow Condensed","Arial Narrow",system-ui,sans-serif;
+  --f-body:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme: dark){html.d2:not([data-theme="light"]){
+  --bg:#07080A; --surface:#111317; --surface2:#181B20; --ink:#F4F5F7; --muted:#8C939E; --faint:#5C626C; --line:#1F2329; --line2:#2C3138;
+  --chip:#181B20; --focus:#FF5A66;
+  --target:#FF2D3D; --target-hi:#FF5C69; --target-lo:#B30F1C; --danger:#FF3A47; --k1:#FF3B49;
+  --glow:0 12px 34px -12px rgba(255,45,61,.6); --lift:0 1px 0 rgba(255,255,255,.04) inset, 0 12px 30px -18px rgba(0,0,0,.9);
+  --hdr:rgba(7,8,10,.72); --nav:rgba(22,24,29,.78); --spot:rgba(255,45,61,.16); --gridl:rgba(255,255,255,.035);
+  --m:#3A424C; --m-hi:#4B5460; --m-lo:#2C333B; --skin:#171A1F; --fig-skin:#4E5763;
+  --v3-m:#56606C; --v3-mlo:#414A55; --v3-base:#3C4550;
+}}
+html.d2[data-theme="dark"]{
+  --bg:#07080A; --surface:#111317; --surface2:#181B20; --ink:#F4F5F7; --muted:#8C939E; --faint:#5C626C; --line:#1F2329; --line2:#2C3138;
+  --chip:#181B20; --focus:#FF5A66;
+  --target:#FF2D3D; --target-hi:#FF5C69; --target-lo:#B30F1C; --danger:#FF3A47; --k1:#FF3B49;
+  --glow:0 12px 34px -12px rgba(255,45,61,.6); --lift:0 1px 0 rgba(255,255,255,.04) inset, 0 12px 30px -18px rgba(0,0,0,.9);
+  --hdr:rgba(7,8,10,.72); --nav:rgba(22,24,29,.78); --spot:rgba(255,45,61,.16); --gridl:rgba(255,255,255,.035);
+  --m:#3A424C; --m-hi:#4B5460; --m-lo:#2C333B; --skin:#171A1F; --fig-skin:#4E5763;
+  --v3-m:#56606C; --v3-mlo:#414A55; --v3-base:#3C4550;
+}
+
+/* ---------- base ---------- */
+html.d2 body{background:radial-gradient(120% 46% at 50% -8%,var(--spot),transparent 64%),var(--bg);background-attachment:fixed;font-size:15px;letter-spacing:.005em;-webkit-font-smoothing:antialiased}
+html.d2 .app{background:transparent}
+html.d2 ::selection{background:color-mix(in srgb,var(--target) 35%,transparent)}
+html.d2 :focus-visible{outline:2px solid var(--focus);outline-offset:2px;border-radius:8px}
+
+/* ---------- header: vidro escuro, marca compacta ---------- */
+html.d2 header{background:var(--hdr);-webkit-backdrop-filter:blur(18px) saturate(1.5);backdrop-filter:blur(18px) saturate(1.5);border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);padding-block:9px;z-index:30}
+html.d2 .brand h1{font-weight:900;font-style:italic;font-size:23px;letter-spacing:.02em}
+html.d2 .brand h1 b{font-weight:900}
+html.d2 .gear,html.d2 .sbtn,html.d2 #achBtn{border-radius:12px}
+html.d2 .gear:hover,html.d2 .gear[aria-current="page"]{background:var(--surface2)}
+html.d2 .sfield{background:transparent}
+html.d2 .sfield input{background:var(--surface2);border-color:var(--line2);border-radius:14px;padding-block:11px}
+html.d2 .htabs{gap:2px;background:var(--surface2);border:1px solid var(--line);border-radius:14px;padding:3px}
+html.d2 .htabs button{border-radius:11px;font-weight:700;font-size:14px;letter-spacing:.1em;padding:8px 14px;transition:color .2s,background-color .25s}
+html.d2 .htabs button[aria-current="page"]{background:var(--ink);color:var(--bg)}
+
+/* ---------- títulos: itálico condensado gigante + corte vermelho ---------- */
+html.d2 .page-h{position:relative}
+html.d2 .page-h h2{font-weight:900;font-style:italic;font-size:var(--d2-h,44px);white-space:nowrap;line-height:.92;letter-spacing:-.005em;text-transform:uppercase;display:flex;align-items:center}
+html.d2 .page-h h2::before{content:"";flex:none;width:7px;height:.78em;margin-right:12px;background:var(--target);transform:skewX(-14deg);border-radius:1px;box-shadow:0 0 18px color-mix(in srgb,var(--target) 70%,transparent)}
+html.d2 .page-h h2 .help{font-style:normal;transform:translateY(-2px);color:var(--faint)}
+html.d2 .lead{font-size:14px;color:var(--muted);margin-top:8px}
+html.d2 .section-t{font-family:var(--f-display);font-weight:700;font-size:12px;letter-spacing:.2em;color:var(--muted);display:flex;align-items:center;gap:8px;margin-top:22px}
+html.d2 .section-t::before{content:"";width:12px;height:3px;background:var(--target);transform:skewX(-20deg);flex:none}
+
+/* ---------- cartões ---------- */
+html.d2 .card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:16px;box-shadow:var(--lift)}
+html.d2 .lv-pick,html.d2 .ach,html.d2 .ex{border-radius:16px}
+
+/* ---------- botões ---------- */
+html.d2 .btn{background:var(--surface2);border:1px solid var(--line2);border-radius:var(--r-btn);padding:11px 16px;min-height:44px;font-family:var(--f-display);font-weight:700;font-size:15.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);transition:transform .45s var(--spring),background-color .2s,border-color .2s,box-shadow .25s}
+html.d2 .btn:hover{border-color:color-mix(in srgb,var(--ink) 25%,var(--line2))}
+html.d2 .btn.primary{position:relative;overflow:hidden;background:linear-gradient(180deg,var(--target-hi),var(--target) 55%,var(--target-lo) 140%);border-color:transparent;color:#fff;box-shadow:var(--glow),inset 0 1px 0 rgba(255,255,255,.25)}
+html.d2 .btn.primary::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,transparent 30%,rgba(255,255,255,.28) 45%,transparent 60%);transform:translateX(-120%);transition:transform .7s var(--out);pointer-events:none}
+html.d2 .btn.primary:hover::after{transform:translateX(120%)}
+html.d2 .btn.danger{background:color-mix(in srgb,var(--danger) 12%,var(--surface2));border-color:color-mix(in srgb,var(--danger) 45%,transparent);color:var(--danger)}
+html.d2 .btn:disabled{opacity:.45}
+html.d2 .ib{border-radius:12px}
+html.d2 .tgl{background:var(--surface2);border:1px solid var(--line2);border-radius:12px;font-weight:700;font-size:14px;letter-spacing:.1em}
+html.d2 .xbtn{border-radius:12px}
+html.d2 .help{color:var(--faint)}
+
+/* toque: afunda rápido, volta com mola; o principal brilha */
+@media (hover:none){
+  html.d2 .btn:active,html.d2 .tgl:active,html.d2 .ib:active{transform:scale(.95)}
+  html.d2 .btn.primary:active{box-shadow:0 4px 18px -6px rgba(255,45,61,.8),inset 0 1px 0 rgba(255,255,255,.2)}
+  html.d2 .card[data-act]:active,html.d2 .ex:active,html.d2 .lv-pick:active{transform:scale(.98)}
+}
+
+/* ---------- barras de abas (seg): trilho escuro, pílula clara ---------- */
+html.d2 .seg{background:color-mix(in srgb,var(--bg) 70%,var(--surface2));border:1px solid var(--line);border-radius:14px;padding:4px}
+html.d2 .seg button{font-weight:700;font-size:13.5px;letter-spacing:.12em;border-radius:10px;padding:8px 14px;color:var(--muted)}
+html.d2 .seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg);box-shadow:none}
+html.d2 .seg .seg-th{top:4px;height:calc(100% - 8px);border-radius:10px;background:var(--ink);box-shadow:0 6px 16px -8px rgba(0,0,0,.6)}
+html.d2 .seg:has(.seg-th) button[aria-pressed="true"]{background:none;color:var(--bg)}
+html.d2 .seg.sdrag button.snear{color:var(--bg)}
+html.d2 .seg.sdrag button{color:var(--muted)}
+
+/* chips */
+html.d2 .chips button{background:var(--surface2);border-color:var(--line2);font-weight:600;padding:7px 14px;color:var(--muted)}
+html.d2 .chips button[aria-pressed="true"]{background:color-mix(in srgb,var(--target) 16%,var(--surface2));border-color:var(--target);color:var(--ink)}
+html.d2 .tag{border-radius:7px;font-family:var(--f-display);font-weight:700;letter-spacing:.08em;text-transform:uppercase;font-size:10.5px}
+html.d2 .tag:not(.hyp):not(.emg):not(.bio):not(.stat){background:var(--surface);border:1px solid var(--line)}
+html.d2 .tag.hyp{background:var(--target);box-shadow:0 0 12px -2px color-mix(in srgb,var(--target) 70%,transparent)}
+html.d2 .pill{font-family:var(--f-display);font-weight:800;letter-spacing:.1em;text-transform:uppercase;border-radius:6px;transform:skewX(-8deg);display:inline-block}
+
+/* campos */
+html.d2 .inp,html.d2 select.inp,html.d2 select{background:var(--surface2);border:1px solid var(--line2);border-radius:12px;padding:10px 12px;color:var(--ink);transition:border-color .2s,box-shadow .2s}
+html.d2 .inp:focus,html.d2 select:focus{outline:none;border-color:var(--target);box-shadow:0 0 0 3px color-mix(in srgb,var(--target) 22%,transparent)}
+
+/* ---------- barra de baixo: ilha flutuante de vidro ---------- */
+@media (max-width:900px){
+  html.d2 .btabs{margin:0 12px calc(8px + env(safe-area-inset-bottom,0px));border:1px solid color-mix(in srgb,var(--line2) 80%,transparent);border-radius:24px;background:var(--nav);-webkit-backdrop-filter:blur(22px) saturate(1.6);backdrop-filter:blur(22px) saturate(1.6);box-shadow:0 14px 40px -14px rgba(0,0,0,.65);padding:4px;position:relative;z-index:20}
+  html.d2 .btabs button{position:relative;padding:8px 0 7px;border-radius:19px;font-weight:700;font-size:11.5px;letter-spacing:.12em;color:var(--faint);transition:color .25s}
+  html.d2 .btabs button svg{transition:transform .45s var(--spring)}
+  html.d2 .btabs button[aria-current="page"]{color:var(--ink);background:color-mix(in srgb,var(--target) 14%,transparent)}
+  html.d2 .btabs button[aria-current="page"] svg{color:var(--target);transform:translateY(-1px) scale(1.08)}
+  html.d2 .btabs button[aria-current="page"]::after{content:"";position:absolute;top:3px;left:50%;width:16px;height:3px;margin-left:-8px;background:var(--target);border-radius:2px;transform:skewX(-20deg);box-shadow:0 0 10px var(--target)}
+  html.d2 .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+}
+html.d2 .toast{background:var(--ink);color:var(--bg);border-radius:14px;font-weight:600;box-shadow:0 18px 40px -14px rgba(0,0,0,.7)}
+
+/* ---------- janelas de baixo ---------- */
+html.d2 .modal{background:rgba(0,0,0,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px)}
+html.d2 .sheet{background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:28px 28px 0 0;box-shadow:0 -20px 60px -20px rgba(0,0,0,.7)}
+@media (min-width:901px){html.d2 .sheet{border-radius:24px;border-bottom:1px solid var(--line)}}
+html.d2 .sh-grab i,html.d2 .p-grab i{background:var(--line2)!important;width:40px!important;height:5px!important;border-radius:3px!important}
+html.d2 .sheet-h h3,html.d2 .sheet-h b{font-family:var(--f-display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:24px;letter-spacing:.01em}
+
+/* ---------- Atlas: holofote e piso de laboratório ---------- */
+html.d2 #tab-atlas .stage{position:relative;background:
+  radial-gradient(60% 42% at 50% 92%,color-mix(in srgb,var(--target) 22%,transparent),transparent 70%),
+  radial-gradient(80% 60% at 50% 40%,color-mix(in srgb,var(--ink) 5%,transparent),transparent 70%)}
+html.d2 #tab-atlas .stage::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:0;
+  background-image:linear-gradient(var(--gridl) 1px,transparent 1px),linear-gradient(90deg,var(--gridl) 1px,transparent 1px);background-size:28px 28px;
+  -webkit-mask-image:radial-gradient(70% 60% at 50% 60%,#000 20%,transparent 75%);mask-image:radial-gradient(70% 60% at 50% 60%,#000 20%,transparent 75%)}
+html.d2 #tab-atlas .stage>*{position:relative;z-index:1}
+html.d2 .panel{background:transparent}
+html.d2 .p-head{border-bottom-color:var(--line)}
+@media (max-width:900px){
+  html.d2 #tab-atlas .panel{background:var(--surface);border-top:1px solid var(--line);border-radius:26px 26px 0 0;box-shadow:0 -18px 40px -22px rgba(0,0,0,.8)}
+}
+html.d2 .ms-track button{font-weight:900;font-style:italic;font-size:22px;letter-spacing:.06em}
+html.d2 .ms-track button[aria-pressed="true"]{color:var(--ink);text-shadow:0 0 24px color-mix(in srgb,var(--target) 45%,transparent)}
+html.d2 .ms-dots i.on{width:16px;border-radius:3px;transform:skewX(-20deg)}
+html.d2 .ms-dots i{transition:width .35s var(--spring),background .2s}
+html.d2 .p-name,html.d2 #pName,html.d2 .p-head h2{font-family:var(--f-display);font-weight:800;font-style:italic;text-transform:uppercase;letter-spacing:.01em}
+
+/* cartões de exercício: número de ranking em itálico */
+html.d2 .ex{background:var(--surface2);border-color:var(--line);padding:14px 14px}
+html.d2 .rank{font-weight:900;font-style:italic;font-size:34px;color:var(--faint)}
+html.d2 .ex[data-i="0"] .rank{color:var(--target);text-shadow:0 0 22px color-mix(in srgb,var(--target) 50%,transparent)}
+html.d2 .ex-n{font-weight:700;font-size:15.5px}
+html.d2 .ex.sel{border-color:var(--syn);box-shadow:inset 0 0 0 1px var(--syn),0 16px 36px -20px color-mix(in srgb,var(--syn) 70%,transparent)}
+
+/* ---------- Hoje: semana como placar ---------- */
+html.d2 .wkgrid{gap:5px}
+html.d2 .wk{background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:8px 3px}
+html.d2 .wk b{font-weight:800;font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+html.d2 .wk.did{background:linear-gradient(180deg,color-mix(in srgb,var(--target) 30%,var(--surface2)),color-mix(in srgb,var(--target) 12%,var(--surface2)));border-color:color-mix(in srgb,var(--target) 55%,transparent)}
+html.d2 .wk.today{box-shadow:inset 0 0 0 1.5px var(--target),0 0 18px -6px var(--target)}
+html.d2 .wk.sel{box-shadow:inset 0 0 0 2px var(--ink)}
+html.d2 .wk.today.sel{box-shadow:inset 0 0 0 2px var(--target),0 0 20px -4px var(--target)}
+
+/* ---------- Ao vivo: cronômetro de transmissão ---------- */
+html.d2 .lv-clock{font-weight:900;font-style:italic;font-size:46px;letter-spacing:-.01em}
+html.d2 .lv-big{font-weight:900;font-style:italic;font-size:54px}
+html.d2 .card.lv-top{background:linear-gradient(120deg,color-mix(in srgb,var(--target) 18%,var(--surface)) 0%,var(--surface) 60%);border-color:color-mix(in srgb,var(--target) 35%,var(--line))}
+html.d2 .lv-bar{height:8px;border-radius:4px;background:var(--surface2)}
+html.d2 .lv-bar i{background:linear-gradient(90deg,var(--target-lo),var(--target),var(--target-hi));box-shadow:0 0 12px var(--target)}
+html.d2 .lv-inps .inp{font-family:var(--f-display);font-weight:800;font-style:italic;font-size:34px;border-radius:16px;padding:12px}
+html.d2 .lv-sug{background:var(--surface2);border:1px solid var(--line);border-radius:12px}
+html.d2 .lv-setn{font-weight:800;letter-spacing:.16em}
+html.d2 .lv-name{font-family:var(--f-display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:28px;line-height:1}
+html.d2 .restpill{border-radius:999px!important;box-shadow:var(--glow)!important;font-family:var(--f-display);font-weight:700;letter-spacing:.04em}
+html.d2 .lv-pick b{font-family:var(--f-display);font-weight:900;font-style:italic;font-size:24px}
+/* "AO VIVO" pisca como transmissão */
+html.d2 .d2-live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--target);margin-right:6px;box-shadow:0 0 0 0 var(--target);animation:d2pulse 1.6s infinite}
+@keyframes d2pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--target) 70%,transparent)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
+
+/* ---------- Progresso / Força / Conquistas: números de placar ---------- */
+html.d2 .rk-hero{border-radius:24px;background:
+  radial-gradient(90% 120% at 100% 0%,color-mix(in srgb,var(--target) 34%,transparent),transparent 60%),
+  linear-gradient(160deg,#16181D,#0B0C0F);border:1px solid rgba(255,255,255,.07);box-shadow:0 24px 50px -24px rgba(0,0,0,.9)}
+html.d2 .rk-lvl,html.d2 .rk-hero .rk-lv,html.d2 .rk-hero b{font-style:italic}
+html.d2 .ach-n{font-weight:900;font-style:italic;font-size:60px;letter-spacing:-.01em}
+html.d2 .ach{background:var(--surface2);border-color:var(--line)}
+html.d2 .ach.ok,html.d2 .ach.on{border-color:color-mix(in srgb,var(--target) 45%,var(--line));background:linear-gradient(160deg,color-mix(in srgb,var(--target) 16%,var(--surface2)),var(--surface2) 60%)}
+html.d2 .ach-bar{height:5px;background:var(--bg)}
+html.d2 .ach-bar i{background:var(--target)}
+html.d2 .ach-sec{font-family:var(--f-display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:20px;letter-spacing:.02em}
+html.d2 .d2-num{font-family:var(--f-display);font-weight:900;font-style:italic;font-variant-numeric:tabular-nums}
+
+/* Configurações */
+html.d2 .cf-row{border-color:var(--line)}
+html.d2 .cf-l b{font-weight:700}
+
+/* entrada das páginas: sobe + desfoca de leve */
+html.d2 .cin{animation:d2in .62s var(--ios) both}
+@keyframes d2in{from{opacity:0;transform:translateY(18px) scale(.985);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+html.d2 .page-h h2{animation:d2title .7s var(--ios) both}
+@keyframes d2title{from{opacity:0;transform:translateX(-14px) skewX(-6deg)}to{opacity:1;transform:none}}
+html.noanim.d2 .cin,html.noanim.d2 .page-h h2,html.noanim.d2 .d2-live{animation:none}
+@media (prefers-reduced-motion:reduce){html.d2 .cin,html.d2 .page-h h2,html.d2 .d2-live{animation:none}}
+
+/* aviso do design de teste (Configurações) */
+html.d2 .d2-test{display:flex;gap:12px;align-items:center;justify-content:space-between;background:linear-gradient(120deg,color-mix(in srgb,var(--target) 20%,var(--surface)),var(--surface) 70%);border:1px solid color-mix(in srgb,var(--target) 40%,var(--line));border-radius:var(--r-card);padding:14px 16px;margin:0 0 16px}
+html.d2 .d2-test b{font-family:var(--f-display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:18px;letter-spacing:.02em;display:block}
+html.d2 .d2-test small{color:var(--muted);font-size:13px;display:block;margin-top:2px}
+html.d2 .d2-test .btn{flex:none;font-size:13px;padding:8px 12px;min-height:38px;white-space:nowrap}
+@media (max-width:420px){html.d2 .d2-test{flex-direction:column;align-items:stretch}html.d2 .d2-test .btn{align-self:flex-start}}
+
+/* ---------- nomes de treino como camisa de time ---------- */
+html.d2 .wx-n{font-family:var(--f-display);font-weight:800;font-style:italic;text-transform:uppercase;font-size:22px;line-height:1.02;letter-spacing:.01em}
+html.d2 .muted-s{font-size:12.5px;line-height:1.4}
+html.d2 .tcard{position:relative;overflow:hidden}
+html.d2 .tcard.isdone{border-color:color-mix(in srgb,var(--target) 45%,var(--line))}
+html.d2 .tcard.isdone::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--target);box-shadow:0 0 16px var(--target)}
+html.d2 .tcard.isdone::after{content:"✓";position:absolute;right:-6px;bottom:-26px;font:italic 900 120px/1 var(--f-display);color:color-mix(in srgb,var(--target) 10%,transparent);pointer-events:none}
+html.d2 .eyebrow{font-weight:800;letter-spacing:.18em;display:inline-flex;align-items:center;gap:7px}
+html.d2 .eyebrow::before{content:"";width:10px;height:3px;background:currentColor;transform:skewX(-20deg)}
+html.d2 .wk b{font-size:12px;letter-spacing:.02em}
+html.d2 .wk span{font-size:10.5px}
+html.d2 .pill.soft{transform:none}
+html.d2 .chev{color:var(--muted)}
+html.d2 .plan-h .wx-n{font-size:24px}
+html.d2 .more-w>summary{font-family:var(--f-display);font-weight:700;letter-spacing:.1em;text-transform:uppercase;font-size:14px}
+
+/* ---------- placar (Progresso, Conquistas) ---------- */
+html.d2 .pstat{gap:0}
+html.d2 .pstat>div{position:relative;padding:4px 12px;background:none;border-radius:0}
+html.d2 .pstat>div+div::before{content:"";position:absolute;left:0;top:8%;bottom:8%;width:1px;background:var(--line2);transform:skewX(-14deg)}
+html.d2 .pstat b{font-family:var(--f-display);font-weight:900;font-style:italic;font-size:38px;line-height:.95;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+html.d2 .pstat span{font-family:var(--f-display);font-weight:700;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
+html.d2 .streak{font-family:var(--f-display);font-weight:800;letter-spacing:.04em}
+
+/* ---------- Atlas: plataforma giratória sob o boneco ---------- */
+html.d2 #tab-atlas .stage::after{content:"";position:absolute;left:50%;bottom:7%;width:min(62%,340px);aspect-ratio:4/1;transform:translateX(-50%);z-index:0;pointer-events:none;border-radius:50%;
+  background:radial-gradient(closest-side,color-mix(in srgb,var(--target) 26%,transparent),transparent 80%);
+  box-shadow:0 0 0 1px color-mix(in srgb,var(--target) 45%,transparent),0 0 0 9px color-mix(in srgb,var(--target) 7%,transparent),0 0 40px -6px color-mix(in srgb,var(--target) 70%,transparent);opacity:.9}
+@media (max-width:900px){html.d2 #tab-atlas.covered .stage::after,html.d2 #tab-atlas.covered .stage::before{display:none}}
+html.d2 .lv-top .eyebrow::before{width:8px;height:8px;border-radius:50%;transform:none;background:var(--target);animation:d2pulse 1.6s infinite}
+/* apresentação (1ª vez) */
+html.d2 #intro{background:radial-gradient(120% 50% at 50% -5%,var(--spot),transparent 60%),var(--bg)}
+html.d2 #intro h2{font-family:var(--f-display);font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:.01em}

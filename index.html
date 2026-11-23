@@ -836,6 +836,9 @@ button.brand:hover{background:var(--chip)}
 .rfig{max-height:min(56vh,480px)}
 @media (max-width:430px){.rk-big{font-size:44px}}
 </style>
+<script>/* design novo "Arena" em teste (nov/2026): ?design=novo liga, ?design=classico desliga; fica salvo neste aparelho */
+try{const q=new URLSearchParams(location.search).get("design");if(q==="novo")localStorage.setItem("atlas-design","novo");else if(q==="classico")localStorage.removeItem("atlas-design");
+  if(localStorage.getItem("atlas-design")==="novo"){document.documentElement.classList.add("d2");document.write('<link rel="stylesheet" href="design2.css"><script defer src="design2.js"><\/script>')}}catch(e){}</script>
 </head>
 <body>
 <div class="app" id="app">
@@ -5274,6 +5277,7 @@ function renderConf(){
     ${cfRow("Tamanho da letra","",cfSeg("fs",[["s","Pequena"],["m","Normal"],["l","Grande"]],c.fs,"Tamanho da letra"),false,1)}
     ${cfRow(tx("Boneco do Atlas","Atlas figure","Muñeco del Atlas"),tx("Com 2D e 3D, um botão no canto do boneco troca entre os dois.","With 2D and 3D, a button in the corner of the figure switches between them.","Con 2D y 3D, un botón en la esquina del muñeco cambia entre los dos."),cfSeg("fig",[["2d",tx("Só 2D","2D only","Solo 2D")],["3d",tx("Só 3D","3D only","Solo 3D")],["both",tx("2D e 3D","2D and 3D","2D y 3D")]],c.fig,tx("Boneco do Atlas","Atlas figure","Muñeco del Atlas")),false,1)}
     ${cfRow("Reduzir animações","Desliga as transições.",cfSw("noanim",c.noanim))}
+    ${document.documentElement.classList.contains("d2")?"":cfRow(tx("Design novo (teste)","New design (test)","Diseño nuevo (prueba)"),tx("Experimente o design Arena. Dá para voltar ao clássico aqui mesmo.","Try the Arena design. You can go back to the classic one right here.","Prueba el diseño Arena. Puedes volver al clásico aquí mismo."),`<button class="btn" data-cact="design2">${tx("Experimentar","Try it","Probar")}</button>`)}
     ${cfRow("Idioma","",`<select class="inp cf-in" data-cfsel="lang" data-notr><option value="pt"${LANG==="pt"?" selected":""}>Português</option><option value="en"${LANG==="en"?" selected":""}>English</option><option value="es"${LANG==="es"?" selected":""}>Español</option></select>`)}
   </div>
 
@@ -5346,6 +5350,7 @@ $("confBody").addEventListener("click",e=>{
   if(k==="delAll!"){try{Object.keys(localStorage).filter(x=>x.startsWith("atlas-")).forEach(x=>localStorage.removeItem(x))}catch(_){}location.reload();return}
   if(k.endsWith("!")){cfConfirm=null;toast("Apagado");return renderConf()}
   if(k==="intro"){openIntro();return}
+  if(k==="design2"){try{localStorage.setItem("atlas-design","novo")}catch(e){}location.reload();return}
   if(k==="share"){const url="https://holmgds-gui.github.io/atlas-muscular/";
     if(navigator.share)navigator.share({title:"Muscle Atlas",text:L("App de academia: músculos, treinos e ranking de força"),url}).catch(()=>{});
     else if(navigator.clipboard)navigator.clipboard.writeText(url).then(()=>toast("Link copiado")).catch(()=>toast(url));
