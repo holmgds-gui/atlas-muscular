@@ -440,7 +440,7 @@ details.about p{margin:8px 0 0;line-height:1.45}
 .view{grid-row:2;grid-column:1;min-height:0}
 #swShade{grid-row:2;grid-column:1;background:#000;pointer-events:none;display:none;opacity:0}
 #tab-atlas .stage{position:relative;z-index:0}#tab-atlas{position:relative;z-index:0}#tab-atlas>.st-shade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:3}#tab-atlas .stage>.st-shade{position:absolute!important;inset:0;background:#000;opacity:0;pointer-events:none;z-index:6!important}
-#tab-atlas.idle.pre .p-body{display:block}#tab-atlas.pre .panel{flex:none;overflow:hidden;display:flex;flex-direction:column}#tab-atlas.pre .p-body{flex:1;min-height:0;overflow:hidden}
+#tab-atlas.idle.pre .p-body{display:grid}#tab-atlas.pre0 .panel{flex:none;overflow:hidden;display:flex;flex-direction:column}#tab-atlas.pre0 .p-body{flex:1;min-height:0;overflow:hidden}
 .view.sw-top{background:var(--bg);box-shadow:-12px 0 32px rgba(0,0,0,.28)}
 .view.sw-clone{pointer-events:none}
 .htabs{display:flex;gap:4px}
@@ -2981,15 +2981,19 @@ $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.conta
       if(Math.abs(dx)>Math.abs(dy)||(B.contains(g.t)&&dy<0&&A.classList.contains("covered"))){g.lock="no";return}
       g.lock="v";g.els=A.classList.contains("covered")?[P.querySelector(".p-head"),B]:[P];g.els.forEach(x=>{x.style.transition="none";x.classList.add("pdrag")});
       /* owner (0.38): pulling the sheet up over the big figure already shows the list, and the figure darkens behind */
-      if(!A.classList.contains("covered")&&!sheetHid&&!build&&!grp&&dy<0&&can("up")){g.pre=true;g.h0=P.offsetHeight;A.classList.add("pre")}}
+      /* any pull up over the big figure: the sheet grows with the finger (never a blank strip under it); from the hidden
+         sheet it comes back as it will be after (title), from the idle sheet the list is already there */
+      if(!A.classList.contains("covered")&&!build&&dy<0&&can("up")){g.pre=true;
+        if(sheetHid){g.unhid=true;A.classList.remove("hid")}else if(!grp&&A.classList.contains("idle"))A.classList.add("pre");
+        A.classList.add("pre0");g.h0=P.offsetHeight}}
     if(g.lock!=="v")return;e.preventDefault();g.dy=dy;{const y=e.touches[0].clientY,now=Date.now();g.v=(y-g.ly)/Math.max(1,now-g.lt);g.ly=y;g.lt=now}
     const m=can(dy<0?"up":"down")?dy:rubber(dy,90);g.els.forEach(x=>{x.style.transform=`translateY(${m}px)`;x.style.setProperty("--pd",g.pre?"0px":Math.max(0,-m)+"px")});
     if(g.pre){P.style.height=(g.h0+Math.max(0,-m))+"px";stDim(Math.min(.6,.6*Math.max(0,-m)/(A.clientHeight*.45)),false,true)}},{passive:false});
-  const unpre=()=>{A.classList.remove("pre");P.style.height=""};
+  const unpre=back=>{A.classList.remove("pre","pre0");P.style.height="";if(back&&g0unhid)A.classList.add("hid")};let g0unhid=false;
   const end=()=>{if(!g)return;const G=g;g=null;if(G.lock!=="v")return;const dy=G.dy,d=dy<0?"up":"down",v=Date.now()-G.lt>100?0:G.v;
     const flick=Math.abs(dy)>14&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dy);
     if((Math.abs(dy)<45&&!flick)||!can(d)){G.els.forEach(x=>{x.style.transition="transform .45s var(--ios)";x.style.transform="";
-      setTimeout(()=>{x.style.transition="";x.classList.remove("pdrag");if(G.pre)unpre()},460)});if(G.pre)stDim(0,true,true);return}
+      setTimeout(()=>{x.style.transition="";x.classList.remove("pdrag");if(G.pre){g0unhid=!!G.unhid;unpre(true)}},460)});if(G.pre)stDim(0,true,true);return}
     const head=P.querySelector(".p-head"),before=head.getBoundingClientRect().top;
     G.els.forEach(x=>{x.style.transition="none";x.style.transform="";x.classList.remove("pdrag")});if(G.pre){unpre();stDim(0,true,true)}
     buzz();sheetMove(d,dy>innerHeight*.4);

@@ -182,9 +182,11 @@ html.d2 .d2-live{display:inline-block;width:8px;height:8px;border-radius:50%;bac
 @keyframes d2pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--target) 70%,transparent)}70%{box-shadow:0 0 0 9px transparent}100%{box-shadow:0 0 0 0 transparent}}
 
 /* ---------- Progresso / Força / Conquistas: números de placar ---------- */
+/* nível geral (0.40, pedido do dono): brilho vermelho mais suave e comprido, e o fundo só dentro da borda
+   (antes o vermelho passava por baixo da borda e aparecia um fio vermelho na beirada) */
 html.d2 .rk-hero{border-radius:24px;background:
-  radial-gradient(90% 120% at 100% 0%,color-mix(in srgb,var(--target) 34%,transparent),transparent 60%),
-  linear-gradient(160deg,#16181D,#0B0C0F);border:1px solid rgba(255,255,255,.07);box-shadow:0 24px 50px -24px rgba(0,0,0,.9)}
+  radial-gradient(150% 170% at 100% 0%,color-mix(in srgb,var(--target) 30%,transparent) 0%,color-mix(in srgb,var(--target) 19%,transparent) 22%,color-mix(in srgb,var(--target) 10%,transparent) 44%,color-mix(in srgb,var(--target) 4%,transparent) 64%,transparent 82%),
+  linear-gradient(160deg,#16181D,#0B0C0F);background-clip:padding-box;border:1px solid #1F2228;box-shadow:0 24px 50px -24px rgba(0,0,0,.9)}
 html.d2 .rk-lvl,html.d2 .rk-hero .rk-lv,html.d2 .rk-hero b{font-style:italic}
 html.d2 .ach-n{font-weight:900;font-style:italic;font-size:60px;letter-spacing:-.01em}
 html.d2 .ach{background:var(--surface2);border-color:var(--line)}
