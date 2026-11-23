@@ -39,7 +39,10 @@ Atlas 2D e 3D (♂/♀, quatro modos: Músculos, Grupos, Articulações e Cardio
 - [x] Nada mais aparece como "em breve" (0.42).
 - [x] Three.js e fontes dentro do app (0.43).
 - [ ] Treinos dos famosos: tirar os nomes reais ou deixar genéricos (risco de direito de imagem na revisão).
-- [ ] Criar o projeto Capacitor (iOS + Android) com os arquivos do site.
+- [x] Projeto Capacitor (0.44): pasta `app/`, pacote `com.muscleatlas.app`, workflow `App Android` gera .aab/.apk (Actions › App Android › artefatos).
+- [ ] Dono: pôr os 4 segredos no GitHub (Settings › Secrets › Actions): KEYSTORE_B64, KEYSTORE_PASS, KEY_ALIAS=upload, KEY_PASS (= KEYSTORE_PASS). A chave foi entregue a ele.
+- [ ] Firebase: adicionar app Android `com.muscleatlas.app` com o SHA-1 da chave de envio e, depois do 1º envio, o SHA-1 da "chave de assinatura do app" do Play Console; baixar `google-services.json` e pôr em base64 no segredo GOOGLE_SERVICES_B64.
+- [ ] iOS: `npx cap add ios`, GoogleService-Info.plist, build no Mac do GitHub Actions (precisa da conta Apple).
 - [ ] iOS: montar no Mac (ou no Mac grátis do GitHub Actions), assinar e enviar pela App Store Connect.
 - [ ] Android: gerar o .aab assinado e guardar a chave de assinatura com segurança.
 - [ ] Play: teste fechado com pelo menos 12 pessoas por 14 dias (conta pessoal nova) antes de publicar para todos.
