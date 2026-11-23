@@ -79,13 +79,6 @@
   const reveal=()=>document.querySelectorAll(".card.cin").forEach(c=>{const tb=c.closest("[id^='tab-']");const h=tb&&tb.querySelector(".page-h");if(!h||h.dataset.d2r)return;
     h.dataset.d2r="1";if(calm())return;h.classList.add("d2rv");setTimeout(()=>h.classList.remove("d2rv"),900)});
 
-  /* aviso nas Configurações: você está no design de teste + voltar */
-  const banner=()=>{const b=document.getElementById("confBody");if(!b||b.querySelector(".d2-test"))return;const h=b.querySelector(".page-h");if(!h)return;
-    const d=document.createElement("div");d.className="d2-test";d.setAttribute("data-notr","");
-    d.innerHTML=`<div><b>${T("Design novo · teste","New design · test","Diseño nuevo · prueba")}</b><small>${T("Você está vendo o design Arena. Ele fica só neste aparelho até ser aprovado.","You're seeing the Arena design. It stays on this device until it's approved.","Estás viendo el diseño Arena. Queda solo en este dispositivo hasta que se apruebe.")}</small></div><button class="btn" type="button">${T("Voltar ao clássico","Back to classic","Volver al clásico")}</button>`;
-    d.querySelector("button").onclick=()=>{try{localStorage.removeItem("atlas-design")}catch(e){}location.href=location.pathname+"?design=classico"};
-    h.after(d)};
-
   /* ponto vermelho piscando em "Ao vivo" */
   const live=()=>{document.querySelectorAll('[data-hv="live"]').forEach(btn=>{if(btn.querySelector(".d2-live")||!/^\s*●/.test(btn.textContent))return;
     const t=btn.textContent.replace(/^[●•\s]+/,"");btn.innerHTML=`<i class="d2-live" aria-hidden="true"></i>${t}`})};
@@ -168,7 +161,7 @@
   const fit=()=>document.querySelectorAll(".page-h h2").forEach(h=>{if(!h.offsetParent)return;const box=h.clientWidth;if(!box)return;
     h.style.removeProperty("--d2-h");let f=44;while(h.scrollWidth>box&&f>26){f-=2;h.style.setProperty("--d2-h",f+"px")}if(f<44)h.style.setProperty("--d2-h",Math.max(26,f-2)+"px")});
   addEventListener("resize",()=>requestAnimationFrame(fit));
-  let raf=0;const run=()=>{raf=0;banner();live();icons();fit();reveal();checks();pill();document.querySelectorAll(COUNT).forEach(countUp);document.querySelectorAll(SUBTLE).forEach(subtle);document.querySelectorAll(SWAP).forEach(swap)};
+  let raf=0;const run=()=>{raf=0;live();icons();fit();reveal();checks();pill();document.querySelectorAll(COUNT).forEach(countUp);document.querySelectorAll(SUBTLE).forEach(subtle);document.querySelectorAll(SWAP).forEach(swap)};
   new MutationObserver(()=>{if(!raf)raf=requestAnimationFrame(run)}).observe(document.body,{childList:true,subtree:true,characterData:true,attributes:true,attributeFilter:["class"]});
   run();
 })();

@@ -25,15 +25,18 @@ Atlas 2D e 3D (♂/♀, quatro modos: Músculos, Grupos, Articulações e Cardio
 
 ## "Em breve" (aparece mas não funciona)
 
-- [ ] Unidade de peso (kg / lb): fazer funcionar ou esconder.
-- [ ] Lembrete de treino (dias e hora): fazer funcionar (notificação; no iPhone só com o app instalado e permissão) ou esconder.
+- [x] Unidade de peso (kg / lb): funciona desde a 0.42.
+- [x] Lembrete de treino: escondido na 0.42 (decisão do dono).
+- [ ] Lembrete de treino no app das lojas: notificação local do Capacitor (`@capacitor/local-notifications`), com os dias e a hora que já existem no `CONF` (`remind`, `rdays`, `rtime`); mostrar a linha só no app nativo.
 
 ## Obrigatório para as lojas
 
-- [ ] Decidir o design: Arena ou clássico (e apagar o outro).
+- [x] Design: Arena é o padrão desde a 0.42 (clássico no ramo `design-classico`).
+- [ ] Refazer os prints da apresentação (`node tools/intro-shots.js`) no design Arena.
+- [ ] Apagar o código do clássico que o Arena sobrescreve (opcional, deixa o app mais leve).
 - [ ] Política de privacidade e página de suporte (publicar no GitHub Pages e pôr o link no app e nas lojas).
 - [ ] "Entrar com Apple" (a Apple exige quando o app tem login com Google).
-- [ ] Tirar ou esconder tudo que está "em breve".
+- [x] Nada mais aparece como "em breve" (0.42).
 - [ ] Colocar dentro do app o boneco 3D (three.js) e as fontes, que hoje vêm da internet, para funcionar sem internet desde a primeira abertura.
 - [ ] Treinos dos famosos: tirar os nomes reais ou deixar genéricos (risco de direito de imagem na revisão).
 - [ ] Criar o projeto Capacitor (iOS + Android) com os arquivos do site.

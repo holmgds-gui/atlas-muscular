@@ -12,9 +12,10 @@ for(const th of ['light','dark']){const ctx=await b.newContext({viewport:{width:
 if(TD)await ctx.route("https://cdn.jsdelivr.net/npm/three@0.160.0/**",r=>{const f=path.join(TD,new URL(r.request().url()).pathname.replace("/npm/three@0.160.0/",""));
   fs.existsSync(f)?r.fulfill({path:f,contentType:"application/javascript"}):r.abort()});
 const p=await ctx.newPage();p.setDefaultTimeout(120000);await p.addInitScript(()=>{try{localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="both";localStorage.setItem("atlas-conf",JSON.stringify(c))}}}catch(e){}});
-p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error'&&!/ERR_TUNNEL|fonts\.g/.test(m.text()))errs.push(m.text())});
+p.on('pageerror',e=>errs.push(e.message));p.on('console',m=>{if(m.type()==='error'&&!/ERR_TUNNEL|ERR_FAILED|fonts\.g/.test(m.text()))errs.push(m.text())});
 await p.goto(BASE);await p.waitForTimeout(700);
 const red=await p.evaluate(()=>getComputedStyle(document.documentElement).getPropertyValue('--target').trim().toLowerCase());
+const dng=await p.evaluate(()=>{const d=document.createElement('button');d.className='btn danger';document.body.appendChild(d);const c=getComputedStyle(d).color;d.remove();return c});   // the 'danger' red stays as it was (it may differ from --target, e.g. in Arena)
 // choose purple in Configurações
 await p.evaluate(()=>setTab("conf"));await p.waitForTimeout(300);
 await p.tap('[data-cf="accent"][data-v="#8B5CF6"]');await p.waitForTimeout(300);
@@ -26,7 +27,7 @@ const S=()=>p.evaluate(()=>{const cs=e=>e&&getComputedStyle(e);const r=getComput
     title:cs(document.querySelector(".brand h1 b")).color,tab:cs(document.querySelector('.btabs button[aria-current="page"]'))?.color,
     logo:getComputedStyle(document.querySelector(".brand .logo"),"::after").display,danger:dc}});
 let s=await S();console.log(th,'roxo',JSON.stringify(s));
-if(s.t!==want||s.k1!==want||hex(s.title)!==want||hex(s.danger)!==red||s.logo!=="block")bad++;
+if(s.t!==want||s.k1!==want||hex(s.title)!==want||hex(s.danger)!==hex(dng)||s.logo!=="block")bad++;
 // Atlas 2D: the chosen muscle is purple
 await p.evaluate(()=>{setTab("atlas");set3D(false)});await p.waitForTimeout(300);
 await p.evaluate(()=>selectMuscle("peito_medial"));await p.waitForTimeout(300);
