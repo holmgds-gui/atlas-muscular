@@ -536,7 +536,7 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 
 @media (max-width:900px){
   .htabs{display:none}
-  .btabs{display:grid;grid-row:3;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--surface);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
+  .btabs{touch-action:none;display:grid;grid-row:3;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line);background:var(--surface);padding-left:env(safe-area-inset-left,0px);padding-right:env(safe-area-inset-right,0px)}
   .btabs button{display:grid;justify-items:center;gap:2px;padding:7px 0 6px;font-size:13px}
   .btabs svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
   .btabs button[aria-current="page"]{color:var(--accent,var(--target))}
@@ -5423,6 +5423,20 @@ function setTab(t){
 function renderAch(){$("achBody").innerHTML=`<div class="page-h"><h2>${tx("Conquistas","Achievements","Logros")}<button class="help" data-help="ach" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2></div>`+achHTML()}
 $("achBtn").addEventListener("click",()=>setTab("ach"));
 document.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>{if(tab!==b.dataset.tab)buzz();setTab(b.dataset.tab);pageEnter()}));
+/* bottom bar: slide the finger along it to pick a page (owner, 0.39). The tab under the finger lights up as it passes
+   (same look as the chosen one, with a light buzz); lifting the finger opens that page. A plain tap works as before. */
+(()=>{const bar=document.querySelector(".btabs");if(!bar)return;let d=null;
+  const bs=()=>[...bar.querySelectorAll("[data-tab]")],at=x=>bs().find(b=>{const r=b.getBoundingClientRect();return x>=r.left&&x<r.right});
+  const show=b=>bs().forEach(x=>x.setAttribute("aria-current",x===b?"page":"false"));
+  bar.addEventListener("touchstart",e=>{d=e.touches.length===1?{x0:e.touches[0].clientX,y0:e.touches[0].clientY,on:false,cur:null}:null},{passive:true});
+  bar.addEventListener("touchmove",e=>{if(!d)return;const x=e.touches[0].clientX,dx=x-d.x0,dy=e.touches[0].clientY-d.y0;
+    if(!d.on){if(Math.abs(dx)<10)return;if(Math.abs(dy)>Math.abs(dx)){d=null;return}d.on=true;bar.classList.add("bdrag")}
+    e.preventDefault();const b=at(Math.max(bar.getBoundingClientRect().left+1,Math.min(bar.getBoundingClientRect().right-1,x)));
+    if(b&&b!==d.cur){d.cur=b;show(b);buzz()}},{passive:false});
+  const end=()=>{if(!d)return;const D=d;d=null;bar.classList.remove("bdrag");if(!D.on)return;
+    if(D.cur){if(D.cur.dataset.tab!==tab){setTab(D.cur.dataset.tab);pageEnter()}else show(bs().find(b=>b.dataset.tab===tab))}};
+  bar.addEventListener("touchend",e=>{const on=d&&d.on;end();if(on)e.preventDefault()},{passive:false});
+  bar.addEventListener("touchcancel",()=>{if(d&&d.on){d=null;bar.classList.remove("bdrag");show(bs().find(b=>b.dataset.tab===tab))}else d=null},{passive:true})})();
 /* light animation: when a page or sub-page opens, its cards rise in one after the other (not on every redraw) */
 function pageEnter(){if(document.documentElement.classList.contains("noanim"))return;const el=$("tab-"+tab);if(!el||tab==="atlas")return;
   el.querySelectorAll(".card").forEach((c,i)=>{if(i>7||c.classList.contains("cin"))return;c.style.animationDelay=i*40+"ms";c.classList.add("cin");
