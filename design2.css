@@ -4,7 +4,7 @@
    Ideias: placar de transmissão esportiva (números grandes em itálico condensado, rótulos pequenos espaçados),
    holofote vermelho no topo da tela, "corte" diagonal vermelho como marca (títulos, aba ativa, botões),
    cartões pretos com borda fina, barra de abas flutuante de vidro, toque que afunda e brilha. */
-@import url("https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700;1,800;1,900&family=Barlow:wght@400;500;600;700&display=swap");
+/* fontes: fonts/fonts.css (dentro do app desde a 0.43) */
 
 /* ---------- tokens ---------- */
 html.d2{

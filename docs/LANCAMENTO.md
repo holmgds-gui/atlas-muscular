@@ -34,10 +34,10 @@ Atlas 2D e 3D (♂/♀, quatro modos: Músculos, Grupos, Articulações e Cardio
 - [x] Design: Arena é o padrão desde a 0.42 (clássico no ramo `design-classico`).
 - [ ] Refazer os prints da apresentação (`node tools/intro-shots.js`) no design Arena.
 - [ ] Apagar o código do clássico que o Arena sobrescreve (opcional, deixa o app mais leve).
-- [ ] Política de privacidade e página de suporte (publicar no GitHub Pages e pôr o link no app e nas lojas).
+- [x] Política de privacidade e página de suporte (0.43): https://holmgds-gui.github.io/atlas-muscular/privacidade.html e https://holmgds-gui.github.io/atlas-muscular/suporte.html (link nas Configurações; usar nas lojas).
 - [ ] "Entrar com Apple" (a Apple exige quando o app tem login com Google).
 - [x] Nada mais aparece como "em breve" (0.42).
-- [ ] Colocar dentro do app o boneco 3D (three.js) e as fontes, que hoje vêm da internet, para funcionar sem internet desde a primeira abertura.
+- [x] Three.js e fontes dentro do app (0.43).
 - [ ] Treinos dos famosos: tirar os nomes reais ou deixar genéricos (risco de direito de imagem na revisão).
 - [ ] Criar o projeto Capacitor (iOS + Android) com os arquivos do site.
 - [ ] iOS: montar no Mac (ou no Mac grátis do GitHub Actions), assinar e enviar pela App Store Connect.

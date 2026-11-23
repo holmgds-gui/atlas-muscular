@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}</script>
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
 <title>Muscle Atlas</title>
 <meta name="description" content="Boneco anatômico clicável com exercícios ordenados por estudos de EMG.">
 <meta name="theme-color" content="#0E1115">
@@ -14,9 +14,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-180.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}
 body{margin:0}
@@ -5369,6 +5367,7 @@ function renderConf(){
     ${cfRow(tx("Apresentação","Welcome tour","Presentación"),tx("As telas de boas-vindas que explicam o app.","The welcome screens that explain the app.","Las pantallas de bienvenida que explican la app."),`<button class="btn" data-cact="intro">${tx("Ver","View","Ver")}</button>`)}
     ${cfRow("Compartilhar o app","Mande o link para os amigos.",`<button class="btn" data-cact="share">Compartilhar</button>`)}
     ${cfRow("Sugestões e avaliação","Abre uma página no GitHub para mandar ideias ou problemas.",`<a class="btn" href="https://github.com/holmgds-gui/atlas-muscular/issues/new" target="_blank" rel="noopener">Enviar</a>`)}
+    ${cfRow(tx("Privacidade e suporte","Privacy and support","Privacidad y soporte"),tx("O que o app guarda e como falar com a gente.","What the app keeps and how to reach us.","Qué guarda la app y cómo contactarnos."),`<a class="btn" href="privacidade.html?lang=${LANG}" target="_blank" rel="noopener">${tx("Privacidade","Privacy","Privacidad")}</a> <a class="btn" href="suporte.html?lang=${LANG}" target="_blank" rel="noopener">${tx("Suporte","Support","Soporte")}</a>`)}
     ${cfRow("Fontes dos estudos","Todos os artigos e links usados no app.",`<a class="btn" href="https://github.com/holmgds-gui/atlas-muscular/blob/main/docs/FONTES.md" target="_blank" rel="noopener">Ver</a>`)}
     ${cfRow("Versão",`<span id="cfVer">—</span>`,"")}
   </div>`;

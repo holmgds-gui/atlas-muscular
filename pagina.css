@@ -1,0 +1,20 @@
+/* páginas simples do Muscle Atlas (privacidade, suporte), no visual Arena */
+:root{--bg:#07080A;--surface:#111317;--text:#F4F5F7;--muted:#9AA3AE;--line:rgba(255,255,255,.09);--red:#FF2D3D;color-scheme:dark}
+@media (prefers-color-scheme:light){:root{--bg:#EEEDE9;--surface:#fff;--text:#14161A;--muted:#5E6672;--line:rgba(0,0,0,.1);--red:#E61E2D;color-scheme:light}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:400 16px/1.6 Barlow,system-ui,sans-serif}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;max-width:760px;margin:0 auto;padding:16px}
+.brand{display:flex;align-items:center;gap:8px;color:var(--text);text-decoration:none}
+.brand b{font:italic 900 24px "Barlow Condensed",sans-serif;letter-spacing:.01em}.brand i{color:var(--red)}
+.lang{display:flex;gap:4px}.lang a{color:var(--muted);text-decoration:none;font:700 13px "Barlow Condensed",sans-serif;letter-spacing:.1em;padding:6px 9px;border-radius:9px;border:1px solid var(--line)}
+.lang a.on{color:var(--text);border-color:var(--red)}
+main{max-width:760px;margin:0 auto;padding:0 16px 48px}
+section{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:22px 20px}
+h1{font:italic 900 40px/1.05 "Barlow Condensed",sans-serif;text-transform:uppercase;margin:4px 0 6px}
+h1::before{content:"";display:inline-block;width:9px;height:.8em;background:var(--red);transform:skewX(-14deg);margin-right:12px;vertical-align:-.05em}
+h2{font:800 20px "Barlow Condensed",sans-serif;text-transform:uppercase;letter-spacing:.04em;margin:26px 0 4px}
+h3{font:700 17px Barlow,sans-serif;margin:18px 0 2px}
+p,li{color:var(--text)}ul{padding-left:20px}
+.up{color:var(--muted);font-size:14px}
+a{color:var(--red)}
+.btn{display:inline-block;background:var(--red);color:#fff;text-decoration:none;font:800 16px "Barlow Condensed",sans-serif;letter-spacing:.06em;text-transform:uppercase;padding:12px 18px;border-radius:14px}
