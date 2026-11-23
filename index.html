@@ -437,7 +437,10 @@ details.about p{margin:8px 0 0;line-height:1.45}
 
 /* ---- sections, tabs, pages ---- */
 .app{grid-template-rows:auto minmax(0,1fr) auto}
-.view{grid-row:2;min-height:0}
+.view{grid-row:2;grid-column:1;min-height:0}
+#swShade{grid-row:2;grid-column:1;background:#000;pointer-events:none;display:none;opacity:0}
+.view.sw-top{background:var(--bg);box-shadow:-12px 0 32px rgba(0,0,0,.28)}
+.view.sw-clone{pointer-events:none}
 .htabs{display:flex;gap:4px}
 .htabs button,.btabs button{border:0;background:none;color:var(--muted);font-family:var(--f-display);font-weight:600;letter-spacing:.08em;text-transform:uppercase}
 .htabs button{padding:7px 12px;border-radius:8px;font-size:15px}
@@ -5450,42 +5453,68 @@ const PAGES=[["atlas"],["ficha","meus"],["ficha","prontos"],["treino","reg"],["t
 function pageIdx(){const s=tab==="ficha"?fView:tab==="treino"?hView:tab==="prog"?(pView==="kg"?"kg":"mus"):null;
   return PAGES.findIndex(p=>p[0]===tab&&(p.length===1||p[1]===s))}
 const pageAt=i=>(i+PAGES.length)%PAGES.length;
-function goPage(i,dir){const p=PAGES[pageAt(i)];if(!p)return;
+function goPage(i,dir,still){const p=PAGES[pageAt(i)];if(!p)return;
   if(p[0]==="ficha"){fView=p[1];LS.set("atlas-fview",fView)}
   if(p[0]==="treino"){hView=p[1];LS.set("atlas-hview",hView)}
   if(p[0]==="prog"){pView=p[1];LS.set("atlas-pview",pView)}
   if(p[0]===tab){if(tab==="ficha")renderFicha();else if(tab==="treino"){openW=null;renderTreino()}else renderProg()}
   else setTab(p[0]);
-  const el=$("tab-"+p[0]);if(p[0]==="atlas")return;el.scrollTop=0;
+  const el=$("tab-"+p[0]);if(p[0]==="atlas")return;el.scrollTop=0;if(still)return;   // still: the drag already showed it sliding in
   el.classList.remove("sw-l","sw-r");void el.offsetWidth;el.classList.add(dir>0?"sw-l":"sw-r");
   setTimeout(()=>el.classList.remove("sw-l","sw-r"),300)}
 /* the page follows the finger (owner: "página segue o dedo"); lifting past ~30% of the width, or a quick flick,
-   finishes the move (the page leaves to that side and the next one comes in from the other); otherwise it springs
-   back. The pages are a ring (owner: "ciclo infinito"): after Força comes Atlas, and before Atlas comes Força. */
-(()=>{let s=null,swT=0;
+   finishes the move; otherwise it springs back. The pages are a ring (owner: "ciclo infinito"): after Força comes Atlas.
+   iPhone style (owner, 0.36: "a próxima página já aparece junto, como no iPhone"): going forward, the next page comes in
+   on top from the right following the finger while the current one slides left at ~30% and darkens; going back, the
+   current page slides off to the right on top and the previous one appears underneath. A page of another tab is that
+   tab's real element; a page of the same tab (Meus treinos ↔ Treinos prontos, Registro ↔ Ao vivo, Músculos ↔ Força)
+   is a copy made on the spot (its 3D figure appears when the finger lets go). */
+(()=>{let s=null,anim=0;
   const skip=t=>{if(t.closest("input,select,textarea,.seg,.stage,.ms-track,.modesw,.zwrap,.kg-hit,.chips,.vopts,.lv-tips,.fi-drag,[data-noswipe]"))return true;
     for(let n=t;n&&n!==document.body;n=n.parentElement){if(n.scrollWidth>n.clientWidth+2){const o=getComputedStyle(n).overflowX;if(o==="auto"||o==="scroll")return true}}
     return false};
-  const reset=el=>{el.style.transition="";el.style.transform="";el.style.opacity=""};
-  document.addEventListener("touchstart",e=>{s=null;
-    if(e.touches.length>1||!matchMedia("(max-width:900px)").matches||pageIdx()<0)return;
+  const VW={ficha:["fView",()=>fView,v=>fView=v,()=>renderFicha()],treino:["hView",()=>hView,v=>hView=v,()=>{openW=null;renderTreino()}],prog:["pView",()=>pView,v=>pView=v,()=>renderProg()]};
+  let shade=null;const shadeEl=()=>{if(!shade){shade=document.createElement("div");shade.id="swShade";shade.setAttribute("aria-hidden","true");$("tab-atlas").parentNode.appendChild(shade)}return shade};
+  const st=(el,x,z,tr)=>{el.style.transition=tr||"none";el.style.transform=x?`translateX(${x}px)`:"";if(z!=null)el.style.zIndex=z};
+  const clean=el=>{if(!el)return;el.style.transition="";el.style.transform="";el.style.zIndex="";el.classList.remove("sw-top")};
+  /* get the neighbour page ready, d = 1 next / -1 previous */
+  const prep=d=>{const cur=$("tab-"+tab),P=PAGES[pageAt(s.i+d)],o={d,cur,P};
+    if(P[0]!==tab){const el=$("tab-"+P[0]);o.el=el;o.real=true;
+      if(VW[P[0]]){const v=VW[P[0]];o.prev=v[1]();v[2](P[1]);v[3]()}
+      el.hidden=false;el.scrollTop=0}
+    else{const v=VW[tab],prev=v[1](),y=cur.scrollTop;v[2](P[1]);v[3]();
+      const c=cur.cloneNode(true);c.classList.add("sw-clone");c.querySelectorAll("canvas").forEach(x=>x.remove());
+      v[2](prev);v[3]();cur.scrollTop=y;cur.after(c);c.scrollTop=0;o.el=c}
+    const sh=shadeEl();sh.style.display="block";sh.style.opacity="0";
+    if(d>0){st(cur,0,1);sh.style.zIndex=2;o.el.classList.add("sw-top");st(o.el,innerWidth,3)}
+    else{st(o.el,-innerWidth*.3,1);sh.style.zIndex=2;cur.classList.add("sw-top");st(cur,0,3)}
+    return o};
+  const unprep=(o,keep)=>{if(!o)return;clean(o.cur);clean(o.el);if(shade){shade.style.display="none";shade.style.transition=""}
+    if(o.real){if(!keep){o.el.hidden=true;if(o.prev!=null)VW[o.P[0]][2](o.prev)}}else o.el.remove()};
+  /* lay out both pages for a finger at dx (forward: dx<0, back: dx>0) */
+  const lay=(o,dx,tr)=>{const W=innerWidth,p=Math.min(1,Math.abs(dx)/W);
+    if(o.d>0){st(o.el,W+dx,null,tr);st(o.cur,dx*.3,null,tr);shade.style.transition=tr?tr.replace("transform","opacity"):"none";shade.style.opacity=(.28*p).toFixed(3)}
+    else{st(o.cur,dx,null,tr);st(o.el,(dx-W)*.3,null,tr);shade.style.transition=tr?tr.replace("transform","opacity"):"none";shade.style.opacity=(.28*(1-p)).toFixed(3)}};
+  document.addEventListener("touchstart",e=>{if(s&&s.o)return;s=null;
+    if(e.touches.length>1||!matchMedia("(max-width:900px)").matches||pageIdx()<0||Date.now()<anim)return;
     const t=e.target;if(!t.closest||!t.closest("#tab-"+tab)||t.closest(".modal")||skip(t))return;
-    s={x:e.touches[0].clientX,y:e.touches[0].clientY,t:Date.now(),lock:null,el:$("tab-"+tab),i:pageIdx(),dx:0,v:0,lt:Date.now(),lx:e.touches[0].clientX}},{passive:true});
-  document.addEventListener("touchmove",e=>{if(!s)return;if(e.touches.length>1){reset(s.el);s=null;return}
+    s={x:e.touches[0].clientX,y:e.touches[0].clientY,lock:null,i:pageIdx(),dx:0,v:0,lt:Date.now(),lx:e.touches[0].clientX,o:null}},{passive:true});
+  document.addEventListener("touchmove",e=>{if(!s)return;if(e.touches.length>1){unprep(s.o);s=null;return}
     const x=e.touches[0].clientX,dx=x-s.x,dy=e.touches[0].clientY-s.y;
     if(!s.lock){if(Math.hypot(dx,dy)<10)return;s.lock=Math.abs(dx)>Math.abs(dy)*1.5?"h":"v"}
     if(s.lock!=="h")return;e.preventDefault();
-    const now=Date.now();s.v=(x-s.lx)/Math.max(1,now-s.lt);s.lx=x;s.lt=now;
-    const has=PAGES.length>1,w=innerWidth;s.dx=dx;
-    clearTimeout(swT);const m=has?dx:rubber(dx,w*.25);s.el.style.transition="none";s.el.style.transform=`translateX(${m}px)`},{passive:false});
-  const end=()=>{if(!s)return;const {el,dx,i,lock}=s,v=Date.now()-s.lt>100?0:s.v;s=null;if(lock!=="h"){reset(el);return}
-    const d=dx<0?1:-1,go=PAGES.length>1&&(Math.abs(dx)>innerWidth*.3||(Math.abs(dx)>40&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dx)));
-    if(!go){el.style.transition="transform .45s var(--ios)";el.style.transform="";clearTimeout(swT);swT=setTimeout(()=>reset(el),460);return}
-    if(noAnim()){reset(el);return goPage(i+d,d)}
-    /* the page keeps going at the finger's speed (no pause), then the next one glides in from the other side */
-    const W=innerWidth,left=W-Math.abs(dx),ms=Math.round(Math.max(110,Math.min(220,left/Math.max(1.6,Math.abs(v)))));
-    el.style.transition=`transform ${ms}ms cubic-bezier(.25,.6,.6,1)`;el.style.transform=`translateX(${-d*W}px)`;
-    buzz();setTimeout(()=>{reset(el);goPage(i+d,d)},ms)};
+    const now=Date.now();s.v=(x-s.lx)/Math.max(1,now-s.lt);s.lx=x;s.lt=now;s.dx=dx;
+    const d=dx<0?1:-1;if(!s.o||s.o.d!==d){unprep(s.o);s.o=prep(d)}
+    lay(s.o,dx)},{passive:false});
+  const end=()=>{if(!s)return;const {dx,i,lock,o}=s,v=Date.now()-s.lt>100?0:s.v;s=null;if(lock!=="h"||!o){unprep(o);return}
+    const d=o.d,go=Math.abs(dx)>innerWidth*.3||(Math.abs(dx)>40&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dx));
+    const W=innerWidth;
+    if(noAnim()){unprep(o,go);if(go)goPage(i+d,d,true);return}
+    if(!go){const ms=380,tr=`transform ${ms}ms var(--ios)`;lay(o,0,tr);anim=Date.now()+ms;setTimeout(()=>unprep(o),ms+20);return}
+    /* finish at the finger's speed, then make it the real page */
+    const left=W-Math.abs(dx),ms=Math.round(Math.max(160,Math.min(300,left/Math.max(1.4,Math.abs(v))))),tr=`transform ${ms}ms cubic-bezier(.2,.7,.3,1)`;
+    lay(o,-d*W,tr);anim=Date.now()+ms;buzz();
+    setTimeout(()=>{if(o.real){unprep(o,true);goPage(i+d,d,true)}else{goPage(i+d,d,true);unprep(o,true)}},ms)};
   document.addEventListener("touchend",end,{passive:true});document.addEventListener("touchcancel",end,{passive:true});
 })();
 
