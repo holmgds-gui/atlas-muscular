@@ -2994,13 +2994,17 @@ $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.conta
     const flick=Math.abs(dy)>14&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dy);
     if((Math.abs(dy)<45&&!flick)||!can(d)){G.els.forEach(x=>{x.style.transition="transform .45s var(--ios)";x.style.transform="";
       setTimeout(()=>{x.style.transition="";x.classList.remove("pdrag");if(G.pre){g0unhid=!!G.unhid;unpre(true)}},460)});if(G.pre)stDim(0,true,true);return}
-    const head=P.querySelector(".p-head"),before=head.getBoundingClientRect().top;
+    /* FLIP (owner 0.41: no jump on letting go): the title, the list and the figure glide from where they were to their new place */
+    const head=P.querySelector(".p-head"),ST=A.querySelector(".stage"),rH=head.getBoundingClientRect(),rB=B.offsetParent?B.getBoundingClientRect():null,rS=ST.getBoundingClientRect();
     G.els.forEach(x=>{x.style.transition="none";x.style.transform="";x.classList.remove("pdrag")});if(G.pre){unpre();stDim(0,true,true)}
-    buzz();sheetMove(d,dy>innerHeight*.4);
-    const off=before-head.getBoundingClientRect().top;if(Math.abs(off)<3||noanim())return;
-    const t=[head];if(B.offsetParent&&A.classList.contains("covered"))t.push(B);
-    t.forEach(x=>{x.style.transition="none";x.style.transform=`translateY(${off}px)`});void head.offsetWidth;
-    t.forEach(x=>{x.style.transition="transform .48s var(--ios)";x.style.transform=""});setTimeout(()=>t.forEach(x=>x.style.transition=""),500)};
+    buzz();sheetMove(d,dy>innerHeight*.4);if(noanim())return;
+    const t=[];const oH=rH.top-head.getBoundingClientRect().top;if(Math.abs(oH)>=3)t.push([head,`translateY(${oH}px)`]);
+    if(rB&&B.offsetParent){const nb=B.getBoundingClientRect(),oB=rB.top-nb.top;if(Math.abs(oB)>=3)t.push([B,`translateY(${oB}px)`])}
+    const nS=ST.getBoundingClientRect();if(nS.width>20&&rS.width>20&&(Math.abs(nS.width-rS.width)>8||Math.abs(nS.top-rS.top)>8)){
+      const k=rS.height/nS.height,tx=rS.left+rS.width/2-nS.left-nS.width*k/2;t.push([ST,`translate(${tx}px,${rS.top-nS.top}px) scale(${k})`]);ST.style.transformOrigin="0 0"}   // same scale both ways: the figure never looks stretched
+    if(!t.length)return;
+    t.forEach(([x,tr])=>{x.style.transition="none";x.style.transform=tr});void head.offsetWidth;
+    t.forEach(([x])=>{x.style.transition="transform .5s var(--ios)";x.style.transform=""});setTimeout(()=>t.forEach(([x])=>{x.style.transition="";x.style.transformOrigin=""}),520)};
   P.addEventListener("touchend",end,{passive:true});P.addEventListener("touchcancel",end,{passive:true})})();
 
 /* ---------------------------------------------------------- search */
