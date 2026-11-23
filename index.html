@@ -5207,7 +5207,9 @@ const cfSw=(key,on,dis)=>`<label class="sw"><input type="checkbox" data-cfsw="${
 /* ---------------------------------------------------------- install (owner, 0.22: "quero instalar no PC")
    Chrome/Edge (PC and Android) send beforeinstallprompt: then the app shows its own "Instalar" button — in the header
    (#instBtn), in Configurações › Instalar o app and in the welcome tour. Other browsers get the steps for their menu. */
-const STANDALONE=!!window.muscleDesktop||matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: window-controls-overlay)").matches||navigator.standalone===true;
+/* app das lojas (Capacitor, 0.44): o mesmo site dentro de um app Android/iPhone */
+const NATIVE=!!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform());
+const STANDALONE=NATIVE||!!window.muscleDesktop||matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: window-controls-overlay)").matches||navigator.standalone===true;
 /* iPhone, app instalado (owner 0.37, iOS 26): the page is drawn from the very top of the screen (status bar
    "black-translucent"), but the window height comes out shorter by the status bar, so the bottom bar sat ~47 px too
    high with an empty strip under it. When that happens, the page takes the real screen height. */
@@ -5371,7 +5373,8 @@ function renderConf(){
     ${cfRow("Fontes dos estudos","Todos os artigos e links usados no app.",`<a class="btn" href="https://github.com/holmgds-gui/atlas-muscular/blob/main/docs/FONTES.md" target="_blank" rel="noopener">Ver</a>`)}
     ${cfRow("Versão",`<span id="cfVer">—</span>`,"")}
   </div>`;
-  if("caches" in window)caches.keys().then(k=>{const v=k.filter(x=>/^atlas-v[\d.]+$/.test(x)).sort().pop();const el=$("cfVer");if(el&&v)el.textContent=v.replace("atlas-v","")}).catch(()=>{});
+  if(NATIVE)fetch("sw.js").then(r=>r.text()).then(t=>{const m=t.match(/atlas-v([\d.]+)/),el=$("cfVer");if(el&&m)el.textContent=m[1]}).catch(()=>{});   // app das lojas: sem service worker, lê o número do sw.js
+  else if("caches" in window)caches.keys().then(k=>{const v=k.filter(x=>/^atlas-v[\d.]+$/.test(x)).sort().pop();const el=$("cfVer");if(el&&v)el.textContent=v.replace("atlas-v","")}).catch(()=>{});
 }
 function cfSet(k,v){CONF[k]=v;saveConf();applyConf()}
 $("confBody").addEventListener("click",e=>{
@@ -5719,7 +5722,7 @@ matchMedia("(max-width:900px)").addEventListener("change",()=>setView(view));
 if((syncUser||localStorage.getItem("atlas-sync-redir"))&&syncCfg())syncLoad();   // signed in before (or coming back from Google's sign-in page): connect to the account
 </script>
 <script>
-if("serviceWorker" in navigator){addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{
+if("serviceWorker" in navigator&&!NATIVE){addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")r.update().catch(()=>{})});
 }).catch(()=>{}))}
 </script>

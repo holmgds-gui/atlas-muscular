@@ -1,0 +1,11 @@
+{
+  "appId": "com.muscleatlas.app",
+  "appName": "Muscle Atlas",
+  "webDir": "www",
+  "backgroundColor": "#07080A",
+  "android": { "backgroundColor": "#07080A" },
+  "ios": { "backgroundColor": "#07080A", "contentInset": "never" },
+  "plugins": {
+    "FirebaseAuthentication": { "skipNativeAuth": false, "providers": ["google.com"] }
+  }
+}

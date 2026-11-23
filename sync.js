@@ -112,8 +112,14 @@ export async function start(appApi){
   document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")push()});
 }
 
+const nativeAuth=()=>{const C=window.Capacitor;return C&&C.isNativePlatform&&C.isNativePlatform()&&C.Plugins&&C.Plugins.FirebaseAuthentication||null};
 /* Entrar com Google: janela do Google; se o navegador não deixar abrir janela, vai pela página inteira */
 export async function signIn(){
+  /* app das lojas (Capacitor): o Google não deixa entrar por janela dentro do app, então o login é o nativo do celular
+     (@capacitor-firebase/authentication) e o token dele entra no Firebase da página, que segue sincronizando igual */
+  const FA=nativeAuth();
+  if(FA){const r=await FA.signInWithGoogle();const t=r&&r.credential&&r.credential.idToken;if(!t)return;
+    return A.signInWithCredential(auth,A.GoogleAuthProvider.credential(t))}
   const p=new A.GoogleAuthProvider();p.setCustomParameters({prompt:"select_account"});
   try{await A.signInWithPopup(auth,p)}
   catch(e){const c=e&&e.code||"";
@@ -126,7 +132,7 @@ export function testLogin(json){return A.signInWithCredential(auth,A.GoogleAuthP
 /* Sair: os dados continuam neste aparelho; a cópia local da nuvem é apagada */
 export async function signOut(){await push();stop();try{if(navigator.onLine)await Promise.race([F.waitForPendingWrites(db),new Promise(r=>setTimeout(r,4000))])}catch(e){}
   try{localStorage.removeItem(bKey())}catch(e){}
-  await A.signOut(auth);try{await F.terminate(db);await F.clearIndexedDbPersistence(db)}catch(e){}}
+  await A.signOut(auth);try{const FA=nativeAuth();if(FA)await FA.signOut()}catch(e){}try{await F.terminate(db);await F.clearIndexedDbPersistence(db)}catch(e){}}
 
 /* Apagar minha conta: apaga tudo da nuvem e a conta; os dados deste aparelho ficam */
 export async function deleteAccount(){

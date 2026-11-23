@@ -1,0 +1,49 @@
+# App Android (Capacitor): gera o .aab (para a Play Store) e o .apk (para instalar direto/testar).
+# Roda sozinho quando a versão do app muda (sw.js) ou pelo botão "Run workflow".
+# Segredos (Settings › Secrets and variables › Actions): KEYSTORE_B64 (chave de envio em base64), KEYSTORE_PASS,
+# KEY_ALIAS, KEY_PASS e GOOGLE_SERVICES_B64 (google-services.json do Firebase, para o login com Google).
+name: App Android
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ["sw.js", "app/**", ".github/workflows/android.yml"]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: 21 }
+      - name: Versão
+        run: |
+          echo "VERSION_NAME=$(grep -o 'atlas-v[0-9.]*' sw.js | head -1 | sed 's/atlas-v//')" >> $GITHUB_ENV
+          echo "VERSION_CODE=$((100 + ${{ github.run_number }}))" >> $GITHUB_ENV
+      - name: Arquivos do app
+        working-directory: app
+        run: npm ci && node build-www.js && npx cap sync android
+      - name: Chave e Firebase
+        working-directory: app/android/app
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+          GOOGLE_SERVICES_B64: ${{ secrets.GOOGLE_SERVICES_B64 }}
+        run: |
+          if [ -n "$KEYSTORE_B64" ]; then echo "$KEYSTORE_B64" | base64 -d > upload.jks; echo "com chave"; else echo "SEM chave: o .aab sai sem assinatura"; fi
+          if [ -n "$GOOGLE_SERVICES_B64" ]; then echo "$GOOGLE_SERVICES_B64" | base64 -d > google-services.json; else echo "sem google-services.json: o login com Google não funciona neste build"; fi
+      - name: Gerar
+        working-directory: app/android
+        env:
+          KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.KEY_PASS }}
+        run: chmod +x gradlew && ./gradlew --no-daemon bundleRelease assembleRelease assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MuscleAtlas-android-${{ env.VERSION_NAME }}-${{ env.VERSION_CODE }}
+          path: |
+            app/android/app/build/outputs/bundle/release/*.aab
+            app/android/app/build/outputs/apk/release/*.apk
+            app/android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
