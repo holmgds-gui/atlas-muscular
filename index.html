@@ -439,6 +439,8 @@ details.about p{margin:8px 0 0;line-height:1.45}
 .app{grid-template-rows:auto minmax(0,1fr) auto}
 .view{grid-row:2;grid-column:1;min-height:0}
 #swShade{grid-row:2;grid-column:1;background:#000;pointer-events:none;display:none;opacity:0}
+#tab-atlas .stage{position:relative;z-index:0}#tab-atlas{position:relative;z-index:0}#tab-atlas>.st-shade{position:absolute;inset:0;background:#000;opacity:0;pointer-events:none;z-index:3}#tab-atlas .stage>.st-shade{position:absolute!important;inset:0;background:#000;opacity:0;pointer-events:none;z-index:6!important}
+#tab-atlas.idle.pre .p-body{display:block}#tab-atlas.pre .panel{flex:none;overflow:hidden;display:flex;flex-direction:column}#tab-atlas.pre .p-body{flex:1;min-height:0;overflow:hidden}
 .view.sw-top{background:var(--bg);box-shadow:-12px 0 32px rgba(0,0,0,.28)}
 .view.sw-clone{pointer-events:none}
 .htabs{display:flex;gap:4px}
@@ -2568,6 +2570,10 @@ function msCenter(m,smooth){const b=msT.querySelector(`[data-mode="${m}"]`);clea
 msT.addEventListener("scroll",()=>{if(msLock){clearTimeout(msTm);msTm=setTimeout(()=>{msLock=false},160);return}clearTimeout(msTm);msTm=setTimeout(()=>{if(!msT.clientWidth)return;const c=msT.scrollLeft+msT.clientWidth/2;let best=null,bd=1e9;
   msT.querySelectorAll("[data-mode]").forEach(b=>{const d=Math.abs(b.offsetLeft+b.offsetWidth/2-c);if(d<bd){bd=d;best=b}});
   if(best&&best.dataset.mode!==curMode())setMode(best.dataset.mode);else msCenter(curMode(),true)},130)},{passive:true});
+/* owner (0.38): while the strip is dragged, the figure darkens toward the half-way point and clears again on the new mode */
+{let msDimT=0;msT.addEventListener("scroll",()=>{if(msLock||!msT.clientWidth)return;const c=msT.scrollLeft+msT.clientWidth/2,bs=[...msT.querySelectorAll("[data-mode]")];
+  let bd=1e9,w=1;bs.forEach(b=>{const d=Math.abs(b.offsetLeft+b.offsetWidth/2-c);if(d<bd){bd=d;w=b.offsetWidth}});
+  stDim(Math.min(.6,1.2*bd/Math.max(1,w)));clearTimeout(msDimT);msDimT=setTimeout(()=>stDim(0,true),170)},{passive:true})}
 document.querySelectorAll("#modeSw [data-step]").forEach(b=>b.addEventListener("click",()=>{const n=MODES.length;setMode(MODES[(MODES.indexOf(curMode())+(+b.dataset.step)+n)%n])}));
 /* owner: "ciclo infinito" — at Cardio, pulling further goes round to Músculos (and the other way) */
 (()=>{let t=null;msT.addEventListener("touchstart",e=>{const max=msT.scrollWidth-msT.clientWidth;t={x:e.touches[0].clientX,y:e.touches[0].clientY,end:msT.scrollLeft>=max-3?1:msT.scrollLeft<=3?-1:0}},{passive:true});
@@ -2944,6 +2950,10 @@ function renderCardio(body){
 $("listBtn").onclick=()=>{listOpen=!listOpen;updateIdle()};
 $("peekBtn").onclick=()=>{peek=!peek;render()};
 $("eqBtn").onclick=()=>{eqOpen=!eqOpen;render()};
+/* a dark veil over the Atlas figure (0 = none … 1 = black); used while a sheet or the modes strip moves over it */
+function stDim(v,anim,all){const st=all?$("tab-atlas"):document.querySelector("#tab-atlas .stage");if(!st)return;let sh=st.querySelector(":scope > .st-shade");
+  if(!sh){sh=document.createElement("div");sh.className="st-shade";sh.setAttribute("aria-hidden","true");st.appendChild(sh)}
+  sh.style.transition=anim&&!document.documentElement.classList.contains("noanim")?"opacity .4s var(--ios)":"none";sh.style.opacity=String(v)}
 /* phone: the panel is a sheet. Up = open the list (or bring it back over the figure); down = close it / show the figure big */
 function sheetMove(d,far){const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null);
   if(d==="up"){if(sheetHid){sheetHid=false;return render()}if(peek){peek=false;return render()}if(grp){if(!grpUp){grpUp=true;updateIdle()}return}if(!sel&&!listOpen&&!build){listOpen=true;updateIdle()}return}
@@ -2969,15 +2979,19 @@ $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.conta
     if(!g.lock){if(Math.hypot(dx,dy)<10)return;
       /* inside the list, only a pull down from the very top moves the sheet; pushing up just scrolls the list */
       if(Math.abs(dx)>Math.abs(dy)||(B.contains(g.t)&&dy<0&&A.classList.contains("covered"))){g.lock="no";return}
-      g.lock="v";g.els=A.classList.contains("covered")?[P.querySelector(".p-head"),B]:[P];g.els.forEach(x=>{x.style.transition="none";x.classList.add("pdrag")})}
+      g.lock="v";g.els=A.classList.contains("covered")?[P.querySelector(".p-head"),B]:[P];g.els.forEach(x=>{x.style.transition="none";x.classList.add("pdrag")});
+      /* owner (0.38): pulling the sheet up over the big figure already shows the list, and the figure darkens behind */
+      if(!A.classList.contains("covered")&&!sheetHid&&!build&&!grp&&dy<0&&can("up")){g.pre=true;g.h0=P.offsetHeight;A.classList.add("pre")}}
     if(g.lock!=="v")return;e.preventDefault();g.dy=dy;{const y=e.touches[0].clientY,now=Date.now();g.v=(y-g.ly)/Math.max(1,now-g.lt);g.ly=y;g.lt=now}
-    const m=can(dy<0?"up":"down")?dy:rubber(dy,90);g.els.forEach(x=>{x.style.transform=`translateY(${m}px)`;x.style.setProperty("--pd",Math.max(0,-m)+"px")})},{passive:false});
+    const m=can(dy<0?"up":"down")?dy:rubber(dy,90);g.els.forEach(x=>{x.style.transform=`translateY(${m}px)`;x.style.setProperty("--pd",g.pre?"0px":Math.max(0,-m)+"px")});
+    if(g.pre){P.style.height=(g.h0+Math.max(0,-m))+"px";stDim(Math.min(.6,.6*Math.max(0,-m)/(A.clientHeight*.45)),false,true)}},{passive:false});
+  const unpre=()=>{A.classList.remove("pre");P.style.height=""};
   const end=()=>{if(!g)return;const G=g;g=null;if(G.lock!=="v")return;const dy=G.dy,d=dy<0?"up":"down",v=Date.now()-G.lt>100?0:G.v;
     const flick=Math.abs(dy)>14&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dy);
     if((Math.abs(dy)<45&&!flick)||!can(d)){G.els.forEach(x=>{x.style.transition="transform .45s var(--ios)";x.style.transform="";
-      setTimeout(()=>{x.style.transition="";x.classList.remove("pdrag")},460)});return}
+      setTimeout(()=>{x.style.transition="";x.classList.remove("pdrag");if(G.pre)unpre()},460)});if(G.pre)stDim(0,true,true);return}
     const head=P.querySelector(".p-head"),before=head.getBoundingClientRect().top;
-    G.els.forEach(x=>{x.style.transition="none";x.style.transform="";x.classList.remove("pdrag")});
+    G.els.forEach(x=>{x.style.transition="none";x.style.transform="";x.classList.remove("pdrag")});if(G.pre){unpre();stDim(0,true,true)}
     buzz();sheetMove(d,dy>innerHeight*.4);
     const off=before-head.getBoundingClientRect().top;if(Math.abs(off)<3||noanim())return;
     const t=[head];if(B.offsetParent&&A.classList.contains("covered"))t.push(B);
@@ -3076,12 +3090,15 @@ document.querySelectorAll(".modal").forEach(m=>{let tm=0;
    stretches a little, and a long pull or a quick flick down closes it (from where the finger left it) */
 document.querySelectorAll(".modal .sheet").forEach(sh=>{const g=document.createElement("div");g.className="sh-grab";g.innerHTML="<i></i>";g.setAttribute("aria-hidden","true");sh.prepend(g);
   let y0=null,ly=0,lt=0,v=0;const on=e=>e.target.closest(".sh-grab,.sheet-h")&&!e.target.closest("button,input");
-  sh.addEventListener("touchstart",e=>{if(e.touches.length>1||!on(e))return;y0=ly=e.touches[0].clientY;lt=Date.now();v=0;sh.classList.add("dragging")},{passive:true});
+  /* owner (0.38): while the sheet is pulled down, the dark background behind it lightens with the finger */
+  let M=null,a0=.45;
+  sh.addEventListener("touchstart",e=>{if(e.touches.length>1||!on(e))return;y0=ly=e.touches[0].clientY;lt=Date.now();v=0;sh.classList.add("dragging");
+    M=sh.closest(".modal");const c=getComputedStyle(M).backgroundColor.match(/[\d.]+/g);a0=c&&c.length>3?+c[3]:.45;M.style.transition="none"},{passive:true});
   sh.addEventListener("touchmove",e=>{if(y0==null)return;const y=e.touches[0].clientY,d=y-y0,now=Date.now();v=(y-ly)/Math.max(1,now-lt);ly=y;lt=now;
-    sh.style.transform=`translateY(${d<0?rubber(d,40):d}px)`},{passive:true});
-  sh.addEventListener("touchend",e=>{if(y0==null)return;const dy=e.changedTouches[0].clientY-y0,vv=Date.now()-lt>100?0:v;y0=null;sh.classList.remove("dragging");
-    if(dy>sh.offsetHeight*.3||dy>110||(dy>20&&vv>.5)){const m=sh.closest(".modal");if(m.querySelector("[data-close]"))m.querySelector("[data-close]").click();else closeModals();return}
-    sh.style.transform=""},{passive:true})});
+    sh.style.transform=`translateY(${d<0?rubber(d,40):d}px)`;M.style.backgroundColor=`rgba(0,0,0,${(a0*(1-Math.max(0,Math.min(1,d/(sh.offsetHeight*.7))))).toFixed(3)})`},{passive:true});
+  sh.addEventListener("touchend",e=>{if(y0==null)return;const dy=e.changedTouches[0].clientY-y0,vv=Date.now()-lt>100?0:v;y0=null;sh.classList.remove("dragging");const m=M;m.style.transition="";
+    if(dy>sh.offsetHeight*.3||dy>110||(dy>20&&vv>.5)){m.style.backgroundColor="rgba(0,0,0,0)";setTimeout(()=>{m.style.backgroundColor=""},420);if(m.querySelector("[data-close]"))m.querySelector("[data-close]").click();else closeModals();return}
+    m.style.backgroundColor="";sh.style.transform=""},{passive:true})});
 /* page help: the small + next to each page title */
 const HELP={
   atlas:["Atlas",`<p>O boneco mostra os músculos. Toque num músculo para ele ficar vermelho e ver a lista de exercícios para ele, do que mais estimula para o que menos estimula.</p>
@@ -5442,8 +5459,14 @@ document.querySelectorAll(".seg").forEach(segInit);
     if(!d.on){if(Math.abs(dx)<8)return;if(Math.abs(dy)>Math.abs(dx)){d=null;return}d.on=true;d.g.classList.add("sdrag")}
     const max=d.g.clientWidth-d.th.offsetWidth-3,raw=d.s+dx,o=raw>max?raw-max:raw<3?raw-3:0,x=Math.max(3,Math.min(max,raw))+Math.sign(o)*Math.min(28,Math.abs(o)*.35),c=x+d.th.offsetWidth/2;
     /* pulled past the end = goes round to the other end (owner: "ciclo infinito") */d.over=o>30?1:o<-30?-1:0;d.th.style.transform=`translateX(${x}px)`;
+    /* a sub-page tab bar (2 pages): the page beside comes in with the pill, like the side swipe */
+    if(d.pg===undefined){const bs=[...d.g.querySelectorAll(":scope > button")];d.pg=bs.length===2&&bs.every(b=>b.dataset.fv||b.dataset.hv||b.dataset.pv)&&window.swApi?bs:null;
+      if(d.pg){const on=d.pg.findIndex(b=>b.getAttribute("aria-pressed")==="true");d.pd=on===0?1:-1;d.span=Math.abs((d.pg[1].offsetLeft+d.pg[1].offsetWidth/2)-(d.pg[0].offsetLeft+d.pg[0].offsetWidth/2))||1;
+        if(on<0||!swApi.open(d.pd))d.pg=null}}
+    if(d.pg){d.f=Math.max(0,Math.min(1,Math.max((x-d.s)*d.pd/d.span,Math.abs(o)*2/d.span)));swApi.move(-d.pd*d.f*innerWidth)}   // pulled past the end also goes to the other page (ring)
     d.g.querySelectorAll(":scope > button").forEach(b=>b.classList.toggle("snear",c>=b.offsetLeft&&c<b.offsetLeft+b.offsetWidth))},{passive:true});
-  const end=()=>{if(!d)return;const {g,th,on,over}=d;d=null;if(!on)return;g.classList.remove("sdrag");g.querySelectorAll(".snear").forEach(b=>b.classList.remove("snear"));
+  const end=()=>{if(!d)return;const {g,th,on,over,pg,f}=d;d=null;if(!on)return;g.classList.remove("sdrag");g.querySelectorAll(".snear").forEach(b=>b.classList.remove("snear"));
+    if(pg){const go=(f||0)>.5;th.style.transition="";if(!go)segPlace(g);swApi.close(go);block=Date.now();return}
     const x=new DOMMatrix(getComputedStyle(th).transform).m41,c=x+th.offsetWidth/2;
     const bs=[...g.querySelectorAll(":scope > button")].filter(b=>b.offsetWidth);
     const near=bs.reduce((a,t)=>Math.abs(t.offsetLeft+t.offsetWidth/2-c)<Math.abs(a.offsetLeft+a.offsetWidth/2-c)?t:a);
@@ -5489,19 +5512,20 @@ function goPage(i,dir,still){const p=PAGES[pageAt(i)];if(!p)return;
     if(P[0]!==tab){const el=$("tab-"+P[0]);o.el=el;o.real=true;
       if(VW[P[0]]){const v=VW[P[0]];o.prev=v[1]();v[2](P[1]);v[3]()}
       el.hidden=false;el.scrollTop=0}
-    else{const v=VW[tab],prev=v[1](),y=cur.scrollTop;v[2](P[1]);v[3]();
-      const c=cur.cloneNode(true);c.classList.add("sw-clone");c.querySelectorAll("canvas").forEach(x=>x.remove());
-      v[2](prev);v[3]();cur.scrollTop=y;cur.after(c);c.scrollTop=0;o.el=c}
+    else{/* same tab: the new sub-page is drawn into an empty copy of this page put just before it (so the lookups by id
+         find the copy); this page is not redrawn while the finger is on it (a removed touch target stops the touch) */
+      const v=VW[tab],prev=v[1](),c=cur.cloneNode(false);c.removeAttribute("id");c.appendChild(cur.firstElementChild.cloneNode(false));c.classList.add("sw-clone");cur.before(c);
+      v[2](P[1]);v[3]();v[2](prev);c.scrollTop=0;o.el=c}
     const sh=shadeEl();sh.style.display="block";sh.style.opacity="0";
     if(d>0){st(cur,0,1);sh.style.zIndex=2;o.el.classList.add("sw-top");st(o.el,innerWidth,3)}
     else{st(o.el,-innerWidth*.3,1);sh.style.zIndex=2;cur.classList.add("sw-top");st(cur,0,3)}
     return o};
   const unprep=(o,keep)=>{if(!o)return;clean(o.cur);clean(o.el);if(shade){shade.style.display="none";shade.style.transition=""}
-    if(o.real){if(!keep){o.el.hidden=true;if(o.prev!=null)VW[o.P[0]][2](o.prev)}}else o.el.remove()};
+    if(o.real){if(!keep){o.el.hidden=true;if(o.prev!=null)VW[o.P[0]][2](o.prev)}}else{o.el.remove();if(!keep&&tab==="prog")renderProg()}};   // prog: its 3D figure moved into the copy
   /* lay out both pages for a finger at dx (forward: dx<0, back: dx>0) */
   const lay=(o,dx,tr)=>{const W=innerWidth,p=Math.min(1,Math.abs(dx)/W);
-    if(o.d>0){st(o.el,W+dx,null,tr);st(o.cur,dx*.3,null,tr);shade.style.transition=tr?tr.replace("transform","opacity"):"none";shade.style.opacity=(.28*p).toFixed(3)}
-    else{st(o.cur,dx,null,tr);st(o.el,(dx-W)*.3,null,tr);shade.style.transition=tr?tr.replace("transform","opacity"):"none";shade.style.opacity=(.28*(1-p)).toFixed(3)}};
+    if(o.d>0){st(o.el,W+dx,null,tr);st(o.cur,dx*.3,null,tr);shade.style.transition=tr?tr.replace("transform","opacity"):"none";shade.style.opacity=(.6*p).toFixed(3)}
+    else{st(o.cur,dx,null,tr);st(o.el,(dx-W)*.3,null,tr);shade.style.transition=tr?tr.replace("transform","opacity"):"none";shade.style.opacity=(.6*(1-p)).toFixed(3)}};
   document.addEventListener("touchstart",e=>{if(s&&s.o)return;s=null;
     if(e.touches.length>1||!matchMedia("(max-width:900px)").matches||pageIdx()<0||Date.now()<anim)return;
     const t=e.target;if(!t.closest||!t.closest("#tab-"+tab)||t.closest(".modal")||skip(t))return;
@@ -5513,15 +5537,20 @@ function goPage(i,dir,still){const p=PAGES[pageAt(i)];if(!p)return;
     const now=Date.now();s.v=(x-s.lx)/Math.max(1,now-s.lt);s.lx=x;s.lt=now;s.dx=dx;
     const d=dx<0?1:-1;if(!s.o||s.o.d!==d){unprep(s.o);s.o=prep(d)}
     lay(s.o,dx)},{passive:false});
-  const end=()=>{if(!s)return;const {dx,i,lock,o}=s,v=Date.now()-s.lt>100?0:s.v;s=null;if(lock!=="h"||!o){unprep(o);return}
-    const d=o.d,go=Math.abs(dx)>innerWidth*.3||(Math.abs(dx)>40&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dx));
-    const W=innerWidth;
+  const finish=(o,i,dx,v,go)=>{const d=o.d,W=innerWidth;
     if(noAnim()){unprep(o,go);if(go)goPage(i+d,d,true);return}
     if(!go){const ms=380,tr=`transform ${ms}ms var(--ios)`;lay(o,0,tr);anim=Date.now()+ms;setTimeout(()=>unprep(o),ms+20);return}
     /* finish at the finger's speed, then make it the real page */
     const left=W-Math.abs(dx),ms=Math.round(Math.max(160,Math.min(300,left/Math.max(1.4,Math.abs(v))))),tr=`transform ${ms}ms cubic-bezier(.2,.7,.3,1)`;
     lay(o,-d*W,tr);anim=Date.now()+ms;buzz();
-    setTimeout(()=>{if(o.real){unprep(o,true);goPage(i+d,d,true)}else{goPage(i+d,d,true);unprep(o,true)}},ms)};
+    setTimeout(()=>{unprep(o,true);goPage(i+d,d,true)},ms)};
+  const end=()=>{if(!s)return;const {dx,i,lock,o}=s,v=Date.now()-s.lt>100?0:s.v;s=null;if(lock!=="h"||!o){unprep(o);return}
+    finish(o,i,dx,v,Math.abs(dx)>innerWidth*.3||(Math.abs(dx)>40&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dx)))};
+  /* the sub-page tabs on top (Meus treinos | Treinos prontos …) drive the same move when their pill is dragged (owner, 0.38) */
+  window.swApi={open(d){if(s||!matchMedia("(max-width:900px)").matches||pageIdx()<0||Date.now()<anim)return false;
+      s={i:pageIdx(),lock:"ext",o:null,dx:0};s.o=prep(d);return true},
+    move(dx){if(s&&s.lock==="ext"){s.dx=dx;lay(s.o,dx)}},
+    close(go){if(!s||s.lock!=="ext")return;const {o,i,dx}=s;s=null;finish(o,i,dx,0,go)}};
   document.addEventListener("touchend",end,{passive:true});document.addEventListener("touchcancel",end,{passive:true});
 })();
 
