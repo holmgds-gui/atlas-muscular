@@ -1,0 +1,36 @@
+{
+  "name": "muscle-atlas-desktop",
+  "productName": "Muscle Atlas",
+  "version": "1.0.0",
+  "description": "Muscle Atlas para Windows: abre o app (holmgds-gui.github.io/atlas-muscular) numa janela própria",
+  "main": "main.js",
+  "author": "holmgds-gui",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis --publish never"
+  },
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "io.github.holmgds-gui.muscleatlas",
+    "productName": "Muscle Atlas",
+    "copyright": "Muscle Atlas",
+    "directories": { "output": "dist" },
+    "files": ["main.js", "preload.js", "icon.png"],
+    "win": { "icon": "icon.ico", "target": ["nsis"] },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Muscle Atlas",
+      "installerIcon": "icon.ico",
+      "uninstallerIcon": "icon.ico",
+      "artifactName": "MuscleAtlas-Setup.exe"
+    }
+  }
+}

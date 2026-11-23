@@ -1,0 +1,33 @@
+# Builds the Windows app (tools/desktop) and publishes MuscleAtlas-Setup.exe as a GitHub release.
+# Runs when a tag "desktop-v*" is pushed (or by hand in Actions). Stable download link:
+# https://github.com/holmgds-gui/atlas-muscular/releases/latest/download/MuscleAtlas-Setup.exe
+name: App para Windows
+on:
+  push:
+    tags: ["desktop-v*"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: tools/desktop
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+      - run: npx electron-builder --win nsis --publish never
+      - name: Publicar o .exe
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          case "$TAG" in desktop-v*) ;; *) TAG="desktop-$(date +%Y%m%d-%H%M)";; esac
+          gh release create "$TAG" "dist/MuscleAtlas-Setup.exe" --title "Muscle Atlas para Windows" --latest \
+            --notes "Instalador do Muscle Atlas para Windows. Baixe o MuscleAtlas-Setup.exe e abra. Se aparecer 'O Windows protegeu o computador', clique em 'Mais informações' e depois em 'Executar assim mesmo'." \
+            || gh release upload "$TAG" "dist/MuscleAtlas-Setup.exe" --clobber
