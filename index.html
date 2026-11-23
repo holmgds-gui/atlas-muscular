@@ -4421,7 +4421,7 @@ function achHTML(){const S=checkAch(true),got=ACH.filter(a=>achOk(a,S)).length;
     else if(isFinite(t)&&t>1)pr=`<span class="ach-bar"><i style="width:${Math.min(100,v/t*100).toFixed(0)}%"></i></span><em>${Math.min(v,t).toLocaleString(LOC)}/${t.toLocaleString(LOC)}</em>`;
     return `<div class="ach${ok?" ok":""}"><span class="ach-i">${a.i}</span><b>${esc(achName(a))}</b>${hideD?"":`<small>${esc(achDesc(a,S))}</small>`}${pr}</div>`};
   return `<div class="card ach-top"><div class="ach-fire">🔥</div><div><b class="ach-n">${S.streak}</b><span>${tx(S.streak===1?"semana seguida":"semanas seguidas",S.streak===1?"week in a row":"weeks in a row",S.streak===1?"semana seguida":"semanas seguidas")}</span>
-      <small>${tx(`3 treinos por semana · esta semana: ${Math.min(S.thisWeek,3)} de 3 · melhor sequência: ${S.best}`,`3 workouts a week · this week: ${Math.min(S.thisWeek,3)} of 3 · best streak: ${S.best}`,`3 entrenos por semana · esta semana: ${Math.min(S.thisWeek,3)} de 3 · mejor racha: ${S.best}`)}</small></div></div>
+      <small>${tx(`3 treinos por semana · esta semana: ${Math.min(S.thisWeek,3).toLocaleString(LOC)} de 3 · melhor sequência: ${S.best}`,`3 workouts a week · this week: ${Math.min(S.thisWeek,3).toLocaleString(LOC)} of 3 · best streak: ${S.best}`,`3 entrenos por semana · esta semana: ${Math.min(S.thisWeek,3).toLocaleString(LOC)} de 3 · mejor racha: ${S.best}`)}</small></div></div>
     <div class="pstat"><div><b>${nTr(S.n)}</b><span>${tx("Treinos","Workouts","Entrenos")}</span></div><div><b>${S.prs}</b><span>${tx("Recordes","Records","Récords")}</span></div><div><b>${got}/${ACH.length}</b><span>${tx("Conquistas","Achievements","Logros")}</span></div></div>
     <div class="row" style="margin:4px 0 12px"><button class="btn" data-share="ach">📤 ${tx("Compartilhar","Share","Compartir")}</button></div>
     ${ACH_SEC.map(([c,i,n])=>{const L=ACH.filter(a=>a.c===c),k=L.filter(a=>achOk(a,S)).length,D=L.map(a=>achDesc(a,S)),same=D.every(d=>d===D[0]);
@@ -4445,10 +4445,12 @@ async function makeCard(kind){
   const F=(w,s)=>`${w} ${s}px "Barlow Condensed","Arial Narrow",system-ui,sans-serif`,FB=(w,s)=>`${w} ${s}px Barlow,system-ui,sans-serif`;
   const text=(t,x,y,font,col,al="left")=>{g.font=font;g.fillStyle=col;g.textAlign=al;g.fillText(t,x,y)};
   /* header: logo + name */
-  try{const ld=u=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u});const li=await ld("logo.png");g.drawImage(li,60,60,140,140);   // logo (0.26)
-    if(CONF.accent){const mi=await ld("logo-m.png"),t=document.createElement("canvas");t.width=t.height=140;const tg=t.getContext("2d");tg.drawImage(mi,0,0,140,140);tg.globalCompositeOperation="source-in";
-      const cs=getComputedStyle(document.documentElement),gr=tg.createLinearGradient(0,0,0,140);gr.addColorStop(0,cs.getPropertyValue("--logo-hi").trim()||"#F45A60");gr.addColorStop(1,cs.getPropertyValue("--logo-lo").trim()||"#B3161E");tg.fillStyle=gr;tg.fillRect(0,0,140,140);
-      g.save();g.globalCompositeOperation="color";g.drawImage(t,60,60);g.restore()}}catch(e){}
+  const logo=async(x,y,z)=>{try{const ld=u=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=u});const li=await ld("logo.png");g.drawImage(li,x,y,z,z);   // logo (0.26)
+    if(CONF.accent){const mi=await ld("logo-m.png"),t=document.createElement("canvas");t.width=t.height=z;const tg=t.getContext("2d");tg.drawImage(mi,0,0,z,z);tg.globalCompositeOperation="source-in";
+      const cs=getComputedStyle(document.documentElement),gr=tg.createLinearGradient(0,0,0,z);gr.addColorStop(0,cs.getPropertyValue("--logo-hi").trim()||"#F45A60");gr.addColorStop(1,cs.getPropertyValue("--logo-lo").trim()||"#B3161E");tg.fillStyle=gr;tg.fillRect(0,0,z,z);
+      g.save();g.globalCompositeOperation="color";g.drawImage(t,x,y);g.restore()}}catch(e){}};
+  const d2=window.d2Card&&document.documentElement.classList.contains("d2");   // design Arena (design2.js) draws its own card
+  if(!d2)await logo(60,60,140);
   text("MUSCLE",210,160,F(700,72),"#E7EAEE");g.font=F(700,72);const AC=CONF.accent?accMix(CONF.accent,"#ffffff",.15):"#FF4A5C";   // owner 0.21: the accent colour on the cards too
   text("ATLAS",210+g.measureText("MUSCLE ").width,160,F(700,72),AC);
   let title="",sub="",fig=null,st3=null,stats=[],lines=[],accent=AC;
@@ -4459,13 +4461,18 @@ async function makeCard(kind){
     sub=D.all!=null?tx(`Mais forte que ~${rPct(D.all)}% de quem treina`,`Stronger than ~${rPct(D.all)}% of lifters`,`Más fuerte que ~${rPct(D.all)}% de quienes entrenan`):"";
     fig=rankFig(D.gs).querySelector("svg");st3=p3Rank(D.gs);accent=lv===RLV.length-1?"#C9CFD6":RHERO[lv];
     lines=[[RLV[lv][0].toUpperCase(),accent,F(700,150)],...D.gs.slice().sort((a,b)=>b.s-a.s).slice(0,3).map(x=>[`${BASIC[x.g].n}: ${RLV[rLv(x.s)][0]}`,"#C9CFD6",F(600,52)])]}
-  else if(kind==="workout"){const w=workouts.find(x=>x.id===liveSumW)||workouts.filter(x=>x.done!==false&&x.items&&x.items.length).sort((a,b)=>a.date<b.date?1:-1)[0];if(!w)return null;const m=musOf(w),prs=workoutPRs(w);
+  else if(kind==="workout"){const L=workouts.filter(x=>x.done!==false&&x.items&&x.items.length).sort((a,b)=>a.date<b.date?1:-1);   // newest strength workout first (a cardio-only one only if there is nothing else)
+    const w=workouts.find(x=>x.id===liveSumW)||L.find(x=>x.items.some(it=>!isC(it)))||L[0];if(!w)return null;const m=musOf(w),prs=workoutPRs(w);
     title=w.title||tx("Treino","Workout","Entreno");sub=fmtLong(fromIso(w.date));fig=progFig(m.mus,BANDS.day).querySelector("svg");st3=p3Prog(m.mus,BANDS.day);
     stats=[[w.dur?mmss(w.dur):"—",tx("duração","duration","duración")],[m.sets,tx("séries","sets","series")],[prs.length,tx("recordes","records","récords")]];
     lines=prs.slice(0,3).map(p=>[`• ${p.name}: ${fkg(p.kg)} kg × ${p.r}`,"#E7EAEE",FB(600,40)])}
   else if(kind==="ach"){const S=achStats();title=tx("Minhas conquistas","My achievements","Mis logros");sub=tx(`${S.streak} semanas seguidas 🔥`,`${S.streak} weeks in a row 🔥`,`${S.streak} semanas seguidas 🔥`);
     const got=ACH.filter(a=>achOk(a,S));stats=[[S.n,tx("treinos","workouts","entrenos")],[S.prs,tx("recordes","records","récords")],[got.length,tx("conquistas","achievements","logros")]];
     lines=got.slice(-6).reverse().map(a=>[`${a.i} ${achName(a)}`,"#E7EAEE",FB(600,46)])}
+  if(d2){let fi=null;if(fig){const c3=st3?await p3shot(st3):null;fi=c3?{img:c3,ar:c3.height/c3.width}:await figImg(fig)}
+    const S=kind==="ach"?achStats():null;
+    await window.d2Card(g,{W,H,kind,title,sub,fig:fi,stats,lines,accent,AC,logo,hero:S?[S.streak,tx(S.streak===1?"semana seguida":"semanas seguidas",S.streak===1?"week in a row":"weeks in a row",S.streak===1?"semana seguida":"semanas seguidas")]:null});
+    return await new Promise(r=>c.toBlob(r,"image/png"))}
   text(title.toUpperCase(),W/2,330,F(700,96),"#FFFFFF","center");if(sub)text(sub,W/2,400,FB(500,44),"#AEB6C0","center");
   let y=460;
   if(fig){const c3=st3?await p3shot(st3):null;const {img,ar}=c3?{img:c3,ar:c3.height/c3.width}:await figImg(fig);const fw=kind==="rank"?860:980,fh=fw*ar;g.drawImage(img,(W-fw)/2,y,fw,fh);y+=fh+40}

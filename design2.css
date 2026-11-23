@@ -115,6 +115,11 @@ html.d2 .inp:focus,html.d2 select:focus{outline:none;border-color:var(--target);
   html.d2 .btabs button svg{transition:transform .45s var(--spring)}
   html.d2 .btabs button[aria-current="page"]{color:var(--ink);background:color-mix(in srgb,var(--target) 14%,transparent)}
   html.d2 .btabs button[aria-current="page"] svg{color:var(--target);transform:translateY(-1px) scale(1.08)}
+  html.d2 .btabs svg.d2i{width:24px;height:24px;stroke-width:2.1;stroke-linecap:square;stroke-linejoin:miter}
+  html.d2 .btabs svg.d2i .f{fill:currentColor;fill-opacity:0;transition:fill-opacity .25s}
+  html.d2 .btabs button[aria-current="page"] svg.d2i .f{fill-opacity:1}
+  html.d2 .btabs button[aria-current="page"] svg.d2i .k{stroke:var(--surface)}
+  html.d2 .btabs button[aria-current="page"] svg.d2i{filter:drop-shadow(0 0 6px color-mix(in srgb,var(--target) 55%,transparent))}
   html.d2 .btabs button[aria-current="page"]::after{content:"";position:absolute;top:3px;left:50%;width:16px;height:3px;margin-left:-8px;background:var(--target);border-radius:2px;transform:skewX(-20deg);box-shadow:0 0 10px var(--target)}
   html.d2 .toast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
 }
@@ -198,9 +203,12 @@ html.d2 .cf-l b{font-weight:700}
 /* entrada das páginas: sobe + desfoca de leve */
 html.d2 .cin{animation:d2in .62s var(--ios) both}
 @keyframes d2in{from{opacity:0;transform:translateY(18px) scale(.985);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
-html.d2 .page-h h2{animation:d2title .7s var(--ios) both}
-@keyframes d2title{from{opacity:0;transform:translateX(-14px) skewX(-6deg)}to{opacity:1;transform:none}}
-html.noanim.d2 .cin,html.noanim.d2 .page-h h2,html.noanim.d2 .d2-live{animation:none}
+/* Texts reveal (transitions.dev): título entra deslizando com desfoque e o resto do topo sobe 40 ms depois — só quando a página abre */
+html.d2 .page-h.d2rv h2{animation:d2title .5s cubic-bezier(.22,1,.36,1) both}
+html.d2 .page-h.d2rv > :not(h2){animation:d2rise .5s cubic-bezier(.22,1,.36,1) 40ms both}
+@keyframes d2title{from{opacity:0;transform:translateX(-14px) skewX(-6deg);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+@keyframes d2rise{from{opacity:0;transform:translateY(12px);filter:blur(3px)}to{opacity:1;transform:none;filter:none}}
+html.noanim.d2 .cin,html.noanim.d2 .page-h h2,html.noanim.d2 .page-h > *,html.noanim.d2 .d2-live{animation:none}
 @media (prefers-reduced-motion:reduce){html.d2 .cin,html.d2 .page-h h2,html.d2 .d2-live{animation:none}}
 
 /* aviso do design de teste (Configurações) */
@@ -243,3 +251,66 @@ html.d2 .lv-top .eyebrow::before{width:8px;height:8px;border-radius:50%;transfor
 /* apresentação (1ª vez) */
 html.d2 #intro{background:radial-gradient(120% 50% at 50% -5%,var(--spot),transparent 60%),var(--bg)}
 html.d2 #intro h2{font-family:var(--f-display);font-weight:900;font-style:italic;text-transform:uppercase;letter-spacing:.01em}
+
+/* ---- lapidação (0.34) ---- */
+/* janelas: a fileira de chips não pode encolher (no seletor de exercício ela ficava cortada) */
+html.d2 .sheet .chips{flex-shrink:0;padding-top:2px;padding-bottom:10px}
+/* botões com explicação embaixo: só a 1ª linha em caixa alta */
+html.d2 .addm .btn small,html.d2 .btn small{font-family:var(--f-body,inherit);text-transform:none;letter-spacing:0;font-weight:500;font-size:13px}
+/* Ao vivo › escolher um treino: nome no estilo placar */
+html.d2 .lv-pick .pn{font-family:var(--f-display);font-weight:900;font-style:italic;font-size:21px;letter-spacing:.01em;text-transform:uppercase;line-height:1.05}
+html.d2 .lv-pick .ps{margin-top:3px}
+
+/* ---- transições do transitions.dev (0.34) ---- */
+/* Spinning counter: tambores dos números de placar */
+html.d2 .t-reel,html.d2 .t-reel span{font-size:inherit!important;font-weight:inherit!important;font-style:inherit!important;letter-spacing:inherit!important;color:inherit!important;text-transform:none!important;margin:0!important;padding:0!important}
+html.d2 .t-reel{display:inline-flex!important;align-items:center;height:1.05em;font-variant-numeric:tabular-nums;vertical-align:baseline}
+html.d2 .t-reel-col{position:relative;display:inline-block!important;height:1.05em;line-height:1.05em}
+html.d2 .t-reel-sizer{visibility:hidden}
+html.d2 .t-reel-digit{position:absolute!important;inset:0;display:flex!important;align-items:center;justify-content:center;will-change:transform,filter,opacity}
+html.d2 .t-reel-sep{display:inline-block!important;height:1.05em;line-height:1.05em}
+/* Number subtle change: relógio e descanso */
+html.d2 #lvClock,html.d2 #restBig{font-variant-numeric:tabular-nums}
+html.d2 .d2s{position:relative;display:inline-block}
+html.d2 .d2s::before{content:attr(data-o);position:absolute;inset:0;text-align:center;pointer-events:none;opacity:0}
+html.d2 .d2sn .d2s{animation:d2sIn 455ms cubic-bezier(.22,1,.36,1) both}
+html.d2 .d2sn .d2s::before{animation:d2sOut 455ms cubic-bezier(.22,1,.36,1) both}
+@keyframes d2sIn{from{transform:translateY(calc(.14em * var(--d2dir,1)));opacity:0;filter:blur(.042em)}}
+@keyframes d2sOut{from{opacity:1;transform:none;filter:none}to{transform:translateY(calc(.14em * var(--d2dir,1) * -1));opacity:0;filter:blur(.042em)}}
+/* o ::before vai junto com o dígito novo; compensa o movimento dele para o antigo sair do lugar certo */
+html.d2 .d2sn .d2s::before{animation-name:d2sOut2}
+@keyframes d2sOut2{from{opacity:1;transform:translateY(calc(.14em * var(--d2dir,1) * -1));filter:none}to{transform:translateY(calc(.14em * var(--d2dir,1) * -1));opacity:0;filter:blur(.042em)}}
+/* Text states swap: botões que trocam de texto */
+html.d2 .d2sw{animation:d2sw .3s ease-in-out}
+@keyframes d2sw{0%{opacity:1;filter:none;transform:none}40%{opacity:0;filter:blur(2px);transform:translateY(-4px)}41%{transform:translateY(4px)}100%{opacity:1;filter:none;transform:none}}
+/* Success check: visto que se desenha na série feita e no fim do treino */
+html.d2 .lv-sets button{position:relative}
+html.d2 .d2chk{position:absolute;top:-7px;right:-7px;width:20px;height:20px;padding:3px;border-radius:50%;background:var(--target);box-shadow:0 0 12px color-mix(in srgb,var(--target) 60%,transparent);fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;
+  animation:d2chkIn .5s cubic-bezier(.22,1,.36,1) both,d2chkBob .5s cubic-bezier(.34,1.35,.64,1) both}
+html.d2 .d2chk path{stroke-dasharray:24;stroke-dashoffset:24;animation:d2chkDraw .5s cubic-bezier(.22,1,.36,1) 80ms forwards}
+@keyframes d2chkIn{from{opacity:0;transform:rotate(80deg);filter:blur(8px)}to{opacity:1;transform:none;filter:none}}
+@keyframes d2chkBob{from{translate:0 12px}to{translate:0 0}}
+@keyframes d2chkDraw{to{stroke-dashoffset:0}}
+html.d2 .lv-trophy .d2chk.big{position:static;display:block;width:64px;height:64px;padding:12px;margin:0 auto;stroke-width:2.6}
+html.d2 .lv-trophy .d2chk.big{animation:d2chkIn .5s cubic-bezier(.22,1,.36,1) both,d2chkBobB .5s cubic-bezier(.34,1.35,.64,1) both}
+@keyframes d2chkBobB{from{translate:0 40px}to{translate:0 0}}
+html.d2 .d2pop{animation:d2pop .45s cubic-bezier(.34,1.35,.64,1)}
+@keyframes d2pop{0%{transform:scale(.92)}100%{transform:none}}
+/* Toast: entra subindo com desfoque e sai encolhendo com desfoque (mais rápido que a entrada) */
+html.d2 .toast{animation:d2toast .35s cubic-bezier(.22,1,.36,1) both}
+html.d2 .toast.d2out{animation:d2toastOut .25s cubic-bezier(.22,1,.36,1) both}
+@keyframes d2toast{from{opacity:0;transform:translateX(-50%) translateY(16px) scale(.97);filter:blur(2px)}to{opacity:1;transform:translateX(-50%);filter:none}}
+@keyframes d2toastOut{to{opacity:0;transform:translateX(-50%) translateY(16px) scale(.97);filter:blur(2px)}}
+/* Accordion: as sanfonas (<details>) abrem e fecham crescendo, com o conteúdo aparecendo com desfoque
+   (navegadores sem suporte abrem de uma vez, como antes) */
+html.d2 details{interpolate-size:allow-keywords}
+html.d2 details::details-content{height:0;overflow:clip;opacity:0;filter:blur(2px);transition:height .25s cubic-bezier(.22,1,.36,1),opacity .25s cubic-bezier(.22,1,.36,1),filter .25s cubic-bezier(.22,1,.36,1),content-visibility .25s allow-discrete}
+html.d2 details[open]::details-content{height:auto;opacity:1;filter:none}
+@media (prefers-reduced-motion:reduce){html.d2 .t-reel-digit{filter:none!important}html.d2 .d2sn .d2s,html.d2 .d2sn .d2s::before,html.d2 .d2sw,html.d2 .d2chk,html.d2 .d2chk path,html.d2 .toast,html.d2 .d2pop{animation:none!important}html.d2 .d2chk path{stroke-dashoffset:0}html.d2 details::details-content{transition:none}}
+html.noanim.d2 .d2chk,html.noanim.d2 .d2chk path,html.noanim.d2 .toast,html.noanim.d2 .d2sw{animation:none}html.noanim.d2 .d2chk path{stroke-dashoffset:0}html.noanim.d2 details::details-content{transition:none}
+/* Força › evolução das cargas: nomes longos de exercício ocupavam 3 linhas */
+html.d2 .kg-h .wx-n{font-size:17.5px;line-height:1.08;letter-spacing:.01em}
+html.d2 #restPill{transition:opacity .25s,transform .35s var(--ios)}
+html.d2.d2-hidepill #restPill{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(12px)}
+/* descanso: o número grande vai embaixo do rótulo (ficava ao lado, subindo para fora do cartão) */
+html.d2 .lv-rest .lv-big{display:block;margin-top:6px;line-height:.95}
