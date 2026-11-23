@@ -12,10 +12,14 @@ if(loc==='pt-BR'){const r=await p.evaluate(()=>{const out=[];let n=0;
     for(const [k,v] of Object.entries(ov)){const ax=f.ax.find(a=>a[0]===k);if(!ax)out.push(w.id+' '+id+': eixo '+k);else if(!ax[3].some(o=>o.k===v))out.push(w.id+' '+id+': '+k+'='+v)}}
     const it=rtItems(w);if(it.some(x=>!exInfo(x.name,x.ref)))out.push(w.id+': exInfo');}
   return {n,progs:RF_P.length,b:RT.filter(w=>w.pg&&w.lv==="b").length,a:RT.filter(w=>w.pg&&w.lv==="a").length,out}});
+  const cov=await p.evaluate(()=>RT_GORD.filter(g=>BASIC[g]).flatMap(g=>["b","a"].filter(l=>!RT.some(w=>w.lv===l&&rtTrains(w,g))).map(l=>g+' '+l)));
+  console.log('músculos sem treino',cov);if(cov.length)bad++;
+  const nm=await p.evaluate(()=>{const t=JSON.stringify(RF_P.map(p=>[p.n,p.d,p.w.map(w=>w[2])]));return ["Arnold","Nippard","Cbum","Olympia","Reddit","Platz","Heath","Coleman","Cutler","Yates","Mentzer","Zane","Reeves","Rippetoe","StrongLifts","Greyskull","GZCL","PHUL","PHAT","Wendler","Texas","Madcow","Heavy Duty","Blood","Strong Curves","Golden Six","Bailey","Gillon","Mattos","Contreras"].filter(x=>t.includes(x))});
+  console.log('nomes de pessoas/marcas',nm);if(nm.length)bad++;
   console.log('famosos',r.n,'programas',r.progs,'iniciante',r.b,'avançado',r.a);if(r.out.length){bad++;console.log('PROBLEMAS',r.out)}}
 await p.evaluate(()=>setTab('ficha'));await p.tap('[data-fv="prontos"]');await p.waitForTimeout(200);
 await p.evaluate(()=>{rtSrc='fam';renderFicha()});await p.waitForTimeout(200);
-const c=await p.evaluate(()=>({sec:document.querySelectorAll('.rt-pg').length,app:document.querySelectorAll('.rt-sp:not(.rt-pg)').length,wm:[...document.querySelectorAll('.rt-wm')].slice(0,3).map(x=>x.textContent)}));
+const c=await p.evaluate(()=>({sec:document.querySelectorAll('.rt-pg').length,app:document.querySelectorAll('.rt-sp:not(.rt-pg)').length,grp:[...document.querySelectorAll('.rt-grp>summary b')].map(x=>x.textContent)}));
 console.log(loc,'b fam',c);if(c.app||!c.sec)bad++;
 await p.screenshot({path:`${OUT}/${loc}-fam-0.png`});
 await p.tap('[data-rtlv="a"]');await p.waitForTimeout(200);

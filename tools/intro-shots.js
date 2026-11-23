@@ -66,9 +66,9 @@ for(const lang of (process.env.LANGS||"pt,en,es").split(","))for(const theme of 
   // 2b. Atlas › Cardio: lista e um cardio aberto (músculos no boneco)
   await p.evaluate(()=>{curEx=null;setMode("cd");cdInt="m";cdMin=30;cdSel="run";paint();render()});await p.waitForTimeout(1500);await shot("cardio");
   await p.evaluate(()=>{cdOn=false;cdSel=null;peek=false;render()});
-  // 3. Treinos prontos: um treino dos famosos aberto
-  await p.evaluate(()=>{fView="prontos";rtMus=null;rtTp="";rtSrc="fam";rtLv="b";const w=RT.find(w=>w.src&&w.lv==="b")||RT.find(w=>w.src);rtLv=w.lv;rtOpen=w.id;setTab("ficha")});await p.waitForTimeout(400);
-  await p.evaluate(()=>{const o=document.querySelector(".rt-w.open");let c=o;while(c&&!(c.querySelector&&c.querySelector(".rt-wm"))&&c.parentElement)c=c.parentElement;(c||o).setAttribute("data-shot","1")});await top("[data-shot]");await shot("prontos");
+  // 3. Treinos prontos: "Qual treino é para mim?" respondido (3 dias, iniciante, ganhar músculo)
+  await p.evaluate(()=>{fView="prontos";rtMus=null;rtTp="";rtSrc="";rtLv="b";rtQ={d:3,g:"h"};rtQi=0;rtOpen=null;setTab("ficha")});await p.waitForTimeout(400);
+  await p.evaluate(()=>{document.querySelector(".rt-q .rt-qq:nth-of-type(3)")?.setAttribute("data-shot","1")||document.querySelector(".rt-q").setAttribute("data-shot","1")});await top("[data-shot]");await shot("prontos");
   // 4. Ao vivo: começa o Superior A e faz uma série
   await p.evaluate(()=>{setTab("treino")});await p.waitForTimeout(200);
   await p.click('[data-hv="live"]');await p.waitForTimeout(200);

@@ -225,11 +225,11 @@ Séries por músculo em cada treino seguem as faixas do Progresso (dia: até ~11
   - Viana et al. 2019, *Br J Sports Med* ([doi:10.1136/bjsports-2018-099928](https://doi.org/10.1136/bjsports-2018-099928)): treino intervalado deu perda de gordura total um pouco maior (~28%) que o contínuo.
   - Músculos de cada cardio: biomecânica geral do movimento (remo: ~60% da força vem das pernas, segundo guias de técnica de remo indoor).
 
-## 4e. Treinos dos famosos (Treinos › Treinos prontos › Fonte: Dos famosos)
+## 4e. Programas conhecidos (Treinos › Treinos prontos › De onde vem: Programas conhecidos)
 
-Pedido do dono: muitos treinos de livros, sites, YouTube, Mr. Olympia e atletas mulheres, com o nome no canto. São 30 programas (90 treinos: 25 iniciante, 65 avançado). Tudo foi adaptado aos exercícios do app (ex.: power clean e kroc row viraram terra e serrote); onde a fonte só listou os exercícios, as séries e repetições são sugestão do app e o cartão avisa (`est`).
+Pedido do dono: muitos treinos de livros, sites, YouTube, Mr. Olympia e atletas mulheres. Até a 0.44 o nome da pessoa aparecia no canto; **desde a 0.45 (decisão do dono, por causa da revisão das lojas) os nomes de pessoas e de marcas saíram do app** e cada programa tem um nome genérico (ex.: "Seis exercícios clássicos", "Força 5×5 (A e B)") e um objetivo (`go`). A tabela abaixo guarda de onde cada um veio (chave `k` no código). Tudo foi adaptado aos exercícios do app (ex.: power clean e kroc row viraram terra e serrote); onde a fonte só listou os exercícios, as séries e repetições são sugestão do app e o cartão avisa (`est`).
 
-| Nome no canto | Programa | Onde foi conferido |
+| Origem (`k`) | Programa original | Onde foi conferido |
 |---|---|---|
 | Mehdi · StrongLifts | StrongLifts 5×5 | [stronglifts.com/5x5](https://stronglifts.com/5x5/) |
 | Mark Rippetoe | Starting Strength (livro, 3ª ed.) | [startingstrength.com](https://startingstrength.com/) |
@@ -260,6 +260,18 @@ Pedido do dono: muitos treinos de livros, sites, YouTube, Mr. Olympia e atletas 
 | Phil Heath | Braços | fitnessvolt.com |
 
 Não entraram (não achei lista de exercícios confiável): Iris Kyle, Lee Haney, Andrea Shaw, e os brasileiros Renato Cariani e Leandro Twin.
+
+**Novos na 0.45** (pedido do dono: força, glúteos e pernas, rápidos; criados pelo app a partir destas fontes):
+
+| `k` | Nome no app | Base |
+|---|---|---|
+| f3b | Força 3 dias: 2 básicos por dia | estrutura do *5/3/1 for Beginners* (2 básicos por dia, 3 séries + 5×5 "first set last", empurrar/puxar/perna-abdômen), resumo em [thefitness.wiki](https://thefitness.wiki/routines/5-3-1-for-beginners/) |
+| pb4 | Powerbuilding 4 dias | superior/inferior pesado + volume (mesma ideia do PHUL), faixas de repetição dos estudos da seção 4c |
+| gl2, gl3, ppg | Glúteos 2× por semana; Glúteos e pernas 3 dias; Posterior e glúteos | elevação pélvica e agachamento dão crescimento parecido do glúteo (Plotkin et al. 2023, [PMC10593473](https://pmc.ncbi.nlm.nih.gov/articles/PMC10593473/)); abdução para o glúteo médio; frequência 2×/semana |
+| q20 | O mínimo que funciona | Iversen et al. 2021, *No Time to Lift?* ([PMC8449772](https://pmc.ncbi.nlm.nih.gov/articles/PMC8449772)): perna + empurrar + puxar, ≥4 séries por músculo na semana, 6–15 RM |
+| q30, q40 | Corpo inteiro em 30 min; Superior/inferior em 40 min | mesma revisão: superséries de músculos diferentes cortam o tempo pela metade sem perder volume; compostos pesados fora das superséries |
+
+Também na 0.45: um treino de cada músculo nos dois níveis em "Um músculo por dia" (novos: Trapézio, Lombar, Adutores e Antebraço e pegada), escolhendo exercícios bem colocados nas listas do Atlas.
 
 ## 5. Desenho do boneco
 

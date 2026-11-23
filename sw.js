@@ -1,4 +1,4 @@
-const CACHE="atlas-v0.44";
+const CACHE="atlas-v0.45";
 /* the 3D body and Three.js are big and rarely change: they live in their own cache that survives app updates
    (a new model gets a new file name, corpo-7.glb / corpo-f-4.glb, and a new cache name, which drops the old model) */
 const C3D="atlas-3d-7";   // 0.43: Three.js now comes from the app itself (vendor/three); same cache name so the models are not downloaded again

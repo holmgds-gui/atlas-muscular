@@ -21,7 +21,7 @@ Lista de afazeres combinada com o dono em 23/11/2026 (versão 0.41). Nada disto 
 
 ## O que já existe no app
 
-Atlas 2D e 3D (♂/♀, quatro modos: Músculos, Grupos, Articulações e Cardio), variações de exercício, "Como fazer" em pt/en/es, Meus treinos, Treinos prontos e dos famosos, Montar pelo boneco, Hoje (Registro e Ao vivo, com timer de descanso, sons, vibração, sugestão de carga e recordes), cardio, Progresso (mapa de calor, radar, cardio), Força (ranking em 9 níveis e evolução das cargas), ~90 conquistas, cartões para Stories, conta Google com sincronização, backup, três idiomas, design clássico e Arena (teste), app de Windows (.exe) e funcionamento sem internet depois de abrir uma vez.
+Atlas 2D e 3D (♂/♀, quatro modos: Músculos, Grupos, Articulações e Cardio), variações de exercício, "Como fazer" em pt/en/es, Meus treinos, Treinos prontos (com "Qual treino é para mim?") e programas conhecidos, Montar pelo boneco, Hoje (Registro e Ao vivo, com timer de descanso, sons, vibração, sugestão de carga e recordes), cardio, Progresso (mapa de calor, radar, cardio), Força (ranking em 9 níveis e evolução das cargas), ~90 conquistas, cartões para Stories, conta Google com sincronização, backup, três idiomas, design clássico e Arena (teste), app de Windows (.exe) e funcionamento sem internet depois de abrir uma vez.
 
 ## "Em breve" (aparece mas não funciona)
 
@@ -38,7 +38,7 @@ Atlas 2D e 3D (♂/♀, quatro modos: Músculos, Grupos, Articulações e Cardio
 - [ ] "Entrar com Apple" (a Apple exige quando o app tem login com Google).
 - [x] Nada mais aparece como "em breve" (0.42).
 - [x] Three.js e fontes dentro do app (0.43).
-- [ ] Treinos dos famosos: tirar os nomes reais ou deixar genéricos (risco de direito de imagem na revisão).
+- [x] Treinos dos famosos: nomes genéricos desde a 0.45 (sem pessoas nem marcas).
 - [x] Projeto Capacitor (0.44): pasta `app/`, pacote `com.muscleatlas.app`, workflow `App Android` gera .aab/.apk (Actions › App Android › artefatos).
 - [ ] Dono: pôr os 4 segredos no GitHub (Settings › Secrets › Actions): KEYSTORE_B64, KEYSTORE_PASS, KEY_ALIAS=upload, KEY_PASS (= KEYSTORE_PASS). A chave foi entregue a ele.
 - [ ] Firebase: adicionar app Android `com.muscleatlas.app` com o SHA-1 da chave de envio e, depois do 1º envio, o SHA-1 da "chave de assinatura do app" do Play Console; baixar `google-services.json` e pôr em base64 no segredo GOOGLE_SERVICES_B64.
