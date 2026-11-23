@@ -5158,7 +5158,7 @@ const cfSw=(key,on,dis)=>`<label class="sw"><input type="checkbox" data-cfsw="${
 /* ---------------------------------------------------------- install (owner, 0.22: "quero instalar no PC")
    Chrome/Edge (PC and Android) send beforeinstallprompt: then the app shows its own "Instalar" button — in the header
    (#instBtn), in Configurações › Instalar o app and in the welcome tour. Other browsers get the steps for their menu. */
-const STANDALONE=matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: window-controls-overlay)").matches||navigator.standalone===true;
+const STANDALONE=!!window.muscleDesktop||matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: window-controls-overlay)").matches||navigator.standalone===true;
 let inPrompt=null;
 function instSync(){const on=!!inPrompt&&!STANDALONE;const h=$("instBtn");if(h)h.hidden=!on;const b=$("inInst");if(b)b.hidden=!on;
   document.querySelectorAll("[data-cact='install']").forEach(x=>x.hidden=!on)}
@@ -5236,6 +5236,11 @@ function cfAcct(conf){
 }
 function syncLogin(){const go=m=>m?m.signIn().catch(e=>toast(tx("Não deu para entrar: ","Couldn't sign in: ","No se pudo entrar: ")+((e&&e.code)||"").replace(/^auth\//,""))):toast(tx("Sem conexão com o servidor","Can't reach the server","Sin conexión con el servidor"));
   if(SYNC)return go(SYNC);syncLoad().then(go)}
+/* Windows app (.exe, tools/desktop, built by .github/workflows/desktop.yml): stable link to the newest installer */
+const WIN_EXE="https://github.com/holmgds-gui/atlas-muscular/releases/latest/download/MuscleAtlas-Setup.exe";
+function cfWin(){if(!/Windows/.test(navigator.userAgent))return "";
+  return cfRow(tx("App para Windows","Windows app","App para Windows"),tx("Baixe o instalador (.exe), abra e pronto: o Muscle Atlas fica no menu Iniciar e na área de trabalho. Se o Windows avisar \"O Windows protegeu o computador\", clique em <b>Mais informações</b> › <b>Executar assim mesmo</b>.","Download the installer (.exe), open it and you're done: Muscle Atlas goes to the Start menu and the desktop. If Windows says \"Windows protected your PC\", click <b>More info</b> › <b>Run anyway</b>.","Descarga el instalador (.exe), ábrelo y listo: Muscle Atlas queda en el menú Inicio y en el escritorio. Si Windows avisa \"Windows protegió tu PC\", haz clic en <b>Más información</b> › <b>Ejecutar de todas formas</b>."),
+    `<a class="btn primary" href="${WIN_EXE}" rel="noopener">${tx("Baixar .exe","Download .exe","Descargar .exe")}</a>`,false,1)}
 function cfInst(){
   const I=instInfo(),btn=`<button class="btn primary" data-cact="install"${inPrompt?"":" hidden"}>${tx("Instalar","Install","Instalar")}</button>`;
   if(I.k!=="pc")return cfRow(tx("Instalar o app","Install the app","Instalar la app"),I.k==="ios"?tx("No Safari: Compartilhar › Adicionar à Tela de Início.","In Safari: Share › Add to Home Screen.","En Safari: Compartir › Agregar a pantalla de inicio."):tx("No Chrome: menu ⋮ › Instalar app.","In Chrome: ⋮ menu › Install app.","En Chrome: menú ⋮ › Instalar aplicación."),btn);
@@ -5247,7 +5252,7 @@ function renderConf(){
   const conf=(k,txt,btn)=>cfConfirm===k?`<div class="confirm"><span>${txt}</span><button class="btn danger" data-cact="${k}!">${btn}</button><button class="btn" data-cact="cancel">Cancelar</button></div>`:"";
   $("confBody").innerHTML=`<div class="page-h"><h2>Configurações<button class="help" data-help="conf" aria-label="Sobre esta página" title="Sobre esta página">+</button></h2>${c.name?`<p class="lead">Olá, ${esc(c.name)}!</p>`:""}</div>
 
-  ${STANDALONE?"":`<div class="card cf cf-inst">${cfInst()}</div>`}
+  ${STANDALONE?"":`<div class="card cf cf-inst">${cfInst()}${instInfo().k==="pc"?cfWin():""}</div>`}
   <h3 class="section-t">Conta</h3>
   <div class="card cf">
     ${cfAcct(conf)}
