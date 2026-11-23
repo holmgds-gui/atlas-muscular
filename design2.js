@@ -105,8 +105,11 @@
   window.d2Card=async(g,o)=>{const {W,H}=o,RED="#FF2D3D",INK="#F4F5F7",MUT="#8C95A1",PAN="#111317",LINE="rgba(255,255,255,.09)";
     const C=(w,s)=>`italic ${w} ${s}px "Barlow Condensed","Arial Narrow",sans-serif`,B=(w,s)=>`${w} ${s}px Barlow,system-ui,sans-serif`;
     try{await Promise.all([document.fonts.load(C(900,100)),document.fonts.load(C(700,40)),document.fonts.load(B(600,40)),document.fonts.load(B(500,30))])}catch(e){}
+    /* alguns navegadores desenham a fonte itálica reta no canvas: testa com um "I" e, se sair reto, inclina na mão */
+    const slant=(()=>{try{const t=document.createElement("canvas");t.width=t.height=80;const q=t.getContext("2d");q.font=C(900,64);q.fillText("I",20,66);
+      const d=q.getImageData(0,0,80,80).data,left=y=>{for(let x=0;x<80;x++)if(d[(y*80+x)*4+3]>128)return x;return -1};const a=left(24),b=left(62);return a>=0&&b>=0&&a-b<3}catch(e){return false}})();
     const sp=v=>{try{g.letterSpacing=v}catch(e){}};
-    const txt=(t,x,y,f,c,al="left",ls="0px")=>{g.font=f;g.fillStyle=c;g.textAlign=al;sp(ls);g.fillText(t,x,y);sp("0px")};
+    const txt=(t,x,y,f,c,al="left",ls="0px")=>{g.font=f;g.fillStyle=c;g.textAlign=al;sp(ls);if(slant&&f.startsWith("italic")){g.save();g.translate(x,y);g.transform(1,0,-.2,1,0,0);g.fillText(t,0,0);g.restore()}else g.fillText(t,x,y);sp("0px")};
     const fitF=(t,w,max,min,wt=900)=>{let s=max;g.font=C(wt,s);while(g.measureText(t).width>w&&s>min){s-=4;g.font=C(wt,s)}return s};
     const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
     const slash=(x,y,w,h,c,k=h*.36)=>{g.fillStyle=c;g.beginPath();g.moveTo(x+k,y);g.lineTo(x+w+k,y);g.lineTo(x+w,y+h);g.lineTo(x,y+h);g.closePath();g.fill()};

@@ -314,3 +314,5 @@ html.d2 #restPill{transition:opacity .25s,transform .35s var(--ios)}
 html.d2.d2-hidepill #restPill{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(12px)}
 /* descanso: o número grande vai embaixo do rótulo (ficava ao lado, subindo para fora do cartão) */
 html.d2 .lv-rest .lv-big{display:block;margin-top:6px;line-height:.95}
+/* seletores com altura fixa (Ordem dos treinos, ordem do Nível por grupo): o padding de cima/baixo cortava o texto */
+html.d2 .fsort select,html.d2 .rksort select,html.d2 select[data-fsort],html.d2 select[data-rksort]{padding-top:0;padding-bottom:0;height:38px}
