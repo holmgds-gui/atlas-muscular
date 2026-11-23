@@ -90,15 +90,15 @@
   const live=()=>{document.querySelectorAll('[data-hv="live"]').forEach(btn=>{if(btn.querySelector(".d2-live")||!/^\s*●/.test(btn.textContent))return;
     const t=btn.textContent.replace(/^[●•\s]+/,"");btn.innerHTML=`<i class="d2-live" aria-hidden="true"></i>${t}`})};
 
-  /* ícones Arena da barra de baixo: traço grosso, cantos retos e formas inclinadas como o "corte" vermelho;
-     na aba ativa a forma principal fica cheia (classe .f) e os detalhes de dentro (.k) ficam vazados */
+  /* ícones Arena da barra de baixo: Phosphor Icons (MIT, phosphoricons.com) — traço grosso (bold) normal e
+     cheio (fill) na aba ativa. Pedido do dono (0.35): o ícone desenhado à mão estava estranho. */
   const ICO={
-    atlas:'<circle class="f" cx="12" cy="4.3" r="2.1"/><path class="f" d="M5.8 8.2h12.4l-3 6.6H8.8z"/><path d="M5.8 8.2 3.4 13.8M18.2 8.2l2.4 5.6M9.6 14.8l-1 6.4M14.4 14.8l1 6.4"/>',
-    ficha:'<path class="f" d="M5.5 5h13v16h-13z"/><path class="f" d="M9 3h6v3.6H9z"/><path class="k" d="M8.6 11h6.8M8.6 14.4h6.8M8.6 17.8h4"/>',
-    treino:'<path class="f" d="M2.6 9.2h3v5.6h-3zM5.6 6.6h3v10.8h-3zM18.4 9.2h3v5.6h-3zM15.4 6.6h3v10.8h-3z"/><path d="M8.6 12h6.8"/>',
-    prog:'<path class="f" d="M3.2 20.5 5.4 15h3.2l-2.2 5.5zM9.4 20.5 12.4 11h3.2l-3 9.5zM15.6 20.5 19.4 4.5h3.2l-3.8 16z"/>'};
+    atlas:"<g class=\"o\"><path d=\"M235.4,86.85A23.55,23.55,0,0,0,212,68H150.59a36,36,0,1,0-45.18,0H44A24,24,0,0,0,34,113.79l.19.09,47.63,21L61.76,211a24,24,0,0,0,12.11,30.74A23.77,23.77,0,0,0,84,244a24,24,0,0,0,21.52-13.29L128,191.91l22.51,38.8A24,24,0,0,0,194.24,211l-20-76.15,47.63-21,.19-.09A23.55,23.55,0,0,0,235.4,86.85ZM128,28a12,12,0,1,1-12,12A12,12,0,0,1,128,28Zm27.16,89a12,12,0,0,0-6.77,14L171.26,218a11.87,11.87,0,0,0,.73,2c-.15-.32-.32-.64-.5-.95L138.38,162a12,12,0,0,0-20.76,0L84.51,219.05c-.18.31-.35.63-.5.95a11.87,11.87,0,0,0,.73-2l22.87-86.92a12,12,0,0,0-6.77-14L44,92H212Z\"/></g><g class=\"a\"><path d=\"M100,36a28,28,0,1,1,28,28A28,28,0,0,1,100,36ZM227.6,92.57A15.7,15.7,0,0,0,212,80H44a16,16,0,0,0-6.7,30.53l.06,0,53.89,23.73-21.92,83.3a16,16,0,0,0,7.9,20.91A15.83,15.83,0,0,0,84,240a16,16,0,0,0,14.44-9.06L128,180l29.58,51a16,16,0,0,0,29.07-13.35l-21.92-83.3,54-23.76A15.7,15.7,0,0,0,227.6,92.57Z\"/></g>",
+    ficha:"<g class=\"o\"><path d=\"M172,164a12,12,0,0,1-12,12H96a12,12,0,0,1,0-24h64A12,12,0,0,1,172,164Zm-12-52H96a12,12,0,0,0,0,24h64a12,12,0,0,0,0-24Zm60-64V216a20,20,0,0,1-20,20H56a20,20,0,0,1-20-20V48A20,20,0,0,1,56,28H90.53a51.88,51.88,0,0,1,74.94,0H200A20,20,0,0,1,220,48ZM100.29,60h55.42a28,28,0,0,0-55.42,0ZM196,52H178.59A52.13,52.13,0,0,1,180,64v8a12,12,0,0,1-12,12H88A12,12,0,0,1,76,72V64a52.13,52.13,0,0,1,1.41-12H60V212H196Z\"/></g><g class=\"a\"><path d=\"M200,32H163.74a47.92,47.92,0,0,0-71.48,0H56A16,16,0,0,0,40,48V216a16,16,0,0,0,16,16H200a16,16,0,0,0,16-16V48A16,16,0,0,0,200,32Zm-72,0a32,32,0,0,1,32,32H96A32,32,0,0,1,128,32Zm32,128H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Zm0-32H96a8,8,0,0,1,0-16h64a8,8,0,0,1,0,16Z\"/></g>",
+    treino:"<g class=\"o\"><path d=\"M244,116V88a20,20,0,0,0-20-20H208V64a20,20,0,0,0-20-20H164a20,20,0,0,0-20,20v52H112V64A20,20,0,0,0,92,44H68A20,20,0,0,0,48,64v4H32A20,20,0,0,0,12,88v28a12,12,0,0,0,0,24v28a20,20,0,0,0,20,20H48v4a20,20,0,0,0,20,20H92a20,20,0,0,0,20-20V140h32v52a20,20,0,0,0,20,20h24a20,20,0,0,0,20-20v-4h16a20,20,0,0,0,20-20V140a12,12,0,0,0,0-24ZM36,164V92H48v72Zm52,24H72V68H88Zm96,0H168V68h16Zm36-24H208V92h12Z\"/></g><g class=\"a\"><path d=\"M200,64V192a16,16,0,0,1-16,16H168a16,16,0,0,1-16-16V136H104v56a16,16,0,0,1-16,16H72a16,16,0,0,1-16-16V64A16,16,0,0,1,72,48H88a16,16,0,0,1,16,16v56h48V64a16,16,0,0,1,16-16h16A16,16,0,0,1,200,64ZM36,72H32A16,16,0,0,0,16,88v32H8.27A8.18,8.18,0,0,0,0,127.47,8,8,0,0,0,8,136h8v32a16,16,0,0,0,16,16h4a4,4,0,0,0,4-4V76A4,4,0,0,0,36,72Zm220,55.47a8.18,8.18,0,0,0-8.25-7.47H240V88a16,16,0,0,0-16-16h-4a4,4,0,0,0-4,4V180a4,4,0,0,0,4,4h4a16,16,0,0,0,16-16V136h8A8,8,0,0,0,256,127.47Z\"/></g>",
+    prog:"<g class=\"o\"><path d=\"M224,196h-4V40a12,12,0,0,0-12-12H152a12,12,0,0,0-12,12V76H96A12,12,0,0,0,84,88v36H48a12,12,0,0,0-12,12v60H32a12,12,0,0,0,0,24H224a12,12,0,0,0,0-24ZM164,52h32V196H164Zm-56,48h32v96H108ZM60,148H84v48H60Z\"/></g><g class=\"a\"><path d=\"M232,208a8,8,0,0,1-8,8H32a8,8,0,0,1,0-16h8V136a8,8,0,0,1,8-8H72a8,8,0,0,1,8,8v64H96V88a8,8,0,0,1,8-8h32a8,8,0,0,1,8,8V200h16V40a8,8,0,0,1,8-8h40a8,8,0,0,1,8,8V200h8A8,8,0,0,1,232,208Z\"/></g>"};
   const icons=()=>document.querySelectorAll(".btabs button[data-tab]").forEach(b=>{const s=b.querySelector("svg"),k=b.dataset.tab;
-    if(!s||s.dataset.d2||!ICO[k])return;s.dataset.d2="1";s.classList.add("d2i");s.innerHTML=ICO[k]});
+    if(!s||s.dataset.d2==="2"||!ICO[k])return;s.dataset.d2="2";s.classList.add("d2i");s.setAttribute("viewBox","0 0 256 256");s.innerHTML=ICO[k]});
 
   /* cartão para Stories no estilo Arena (1080 × 1920): holofote vermelho, título em itálico condensado com o "corte",
      boneco sobre a plataforma, placar com os números e linhas em faixas. O index.html calcula os dados e chama isto. */
@@ -127,8 +127,7 @@
     if(sub){slash(64,y-24,44,8,acc);txt(sub.toUpperCase(),124,y-12,C(700,36),MUT,"left","5px");y+=24}
     const T=o.title.toUpperCase(),fs=fitF(T,W-64-130,150,84),sh=fs*.74,tx0=64+18+sh*.22+26;slash(64,y+fs*.14,18,sh,acc,sh*.22);txt(T,tx0,y+fs*.86,C(900,fs),INK);y+=fs+30;
     /* número herói (conquistas: semanas seguidas) */
-    if(o.hero){g.save();g.shadowColor="rgba(255,45,61,.55)";g.shadowBlur=60;txt(String(o.hero[0]),W/2,y+330,C(900,380),INK,"center");g.restore();
-      txt("🔥",W/2+g.measureText(String(o.hero[0])).width/2+40,y+150,B(600,110),INK,"left");
+    if(o.hero){g.save();g.shadowColor="rgba(255,45,61,.28)";g.shadowBlur=18;txt(String(o.hero[0]),W/2,y+330,C(900,380),INK,"center");g.restore();
       txt(o.hero[1].toUpperCase(),W/2,y+410,C(800,48),acc,"center","8px");y+=470}
     /* boneco sobre a plataforma */
     if(o.fig){/* espaço que sobra para o boneco: tira o placar, as linhas e o rodapé */
@@ -139,17 +138,14 @@
       let bot=1;try{const cv=document.createElement("canvas"),sw=120,shh=Math.max(1,Math.round(sw*o.fig.ar));cv.width=sw;cv.height=shh;const cg=cv.getContext("2d");cg.drawImage(o.fig.img,0,0,sw,shh);
         const d=cg.getImageData(0,0,sw,shh).data;let last=shh-1;outer:for(let yy=shh-1;yy>=0;yy--){for(let xx=0;xx<sw;xx++)if(d[(yy*sw+xx)*4+3]>40){last=yy;break outer}}bot=(last+1)/shh}catch(e){}
       const fy=y+10,base=fy+fh*bot-6;
-      /* piso quadriculado em perspectiva + plataforma vermelha */
+      /* piso quadriculado em perspectiva (sem o círculo vermelho, como no Atlas) */
       g.save();g.beginPath();g.rect(0,base-120,W,240);g.clip();g.strokeStyle="rgba(255,255,255,.06)";g.lineWidth=2;
       for(let i=-12;i<=12;i++){g.beginPath();g.moveTo(W/2+i*40,base-110);g.lineTo(W/2+i*150,base+130);g.stroke()}
       for(let j=0;j<6;j++){const yy=base-110+Math.pow(j/5,1.6)*240;g.beginPath();g.moveTo(0,yy);g.lineTo(W,yy);g.stroke()}g.restore();
-      r=g.createRadialGradient(W/2,base,10,W/2,base,fw*.42);r.addColorStop(0,"rgba(255,45,61,.55)");r.addColorStop(.6,"rgba(255,45,61,.12)");r.addColorStop(1,"rgba(255,45,61,0)");
-      g.save();g.translate(W/2,base);g.scale(1,.2);g.translate(-W/2,-base);g.fillStyle=r;g.beginPath();g.arc(W/2,base,fw*.42,0,Math.PI*2);g.fill();
-      g.strokeStyle="rgba(255,60,75,.75)";g.lineWidth=10;g.beginPath();g.arc(W/2,base,fw*.3,0,Math.PI*2);g.stroke();g.restore();
       g.drawImage(o.fig.img,(W-fw)/2,fy,fw,fh);y=Math.max(base+70,fy+fh*bot+60)}
     /* ranking: nome do nível grande, com brilho da cor do nível */
     let lines=o.lines.slice();
-    if(o.kind==="rank"&&lines.length){const [t,col]=lines[0];lines=lines.slice(1);const s=fitF(t,W-160,210,110);g.save();g.shadowColor=col;g.shadowBlur=50;txt(t,W/2,y+s*.8,C(900,s),col,"center");g.restore();
+    if(o.kind==="rank"&&lines.length){const [t,col]=lines[0];lines=lines.slice(1);const s=fitF(t,W-160,210,110);g.save();g.shadowColor=col+"55";g.shadowBlur=14;txt(t,W/2,y+s*.8,C(900,s),col,"center");g.restore();
       txt(o.sub.toUpperCase(),W/2,y+s*.8+64,C(700,34),MUT,"center","4px");y+=s*.8+110}
     /* placar */
     if(o.stats.length){const px=64,pw=W-128,ph=250,n=o.stats.length,cw=pw/n;rr(px,y,pw,ph,30);g.fillStyle=PAN;g.fill();g.strokeStyle=LINE;g.lineWidth=2;g.stroke();
