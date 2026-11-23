@@ -320,6 +320,4 @@ html.d2 #searchBox{order:3;margin-left:0}
 html.d2 #instBtn{order:4}
 html.d2 #gearBtn{order:5}
 @media (max-width:900px){html.d2 #achBtn{margin-left:auto}}
-/* iPhone com o app instalado: no iOS 26 a altura da página às vezes sai menor que a tela e sobra uma faixa vazia embaixo
-   da barra de abas; a altura "grande" da tela (lvh) cobre a tela toda */
-@media (display-mode:standalone){html.d2,html.d2 body{height:100lvh;overflow:hidden}}
+/* (altura do app instalado no iPhone: corrigida no index.html, fitIOS) */

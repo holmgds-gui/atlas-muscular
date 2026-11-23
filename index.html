@@ -5172,6 +5172,13 @@ const cfSw=(key,on,dis)=>`<label class="sw"><input type="checkbox" data-cfsw="${
    Chrome/Edge (PC and Android) send beforeinstallprompt: then the app shows its own "Instalar" button — in the header
    (#instBtn), in Configurações › Instalar o app and in the welcome tour. Other browsers get the steps for their menu. */
 const STANDALONE=!!window.muscleDesktop||matchMedia("(display-mode: standalone)").matches||matchMedia("(display-mode: window-controls-overlay)").matches||navigator.standalone===true;
+/* iPhone, app instalado (owner 0.37, iOS 26): the page is drawn from the very top of the screen (status bar
+   "black-translucent"), but the window height comes out shorter by the status bar, so the bottom bar sat ~47 px too
+   high with an empty strip under it. When that happens, the page takes the real screen height. */
+(function fitIOS(){if(navigator.standalone!==true)return;const de=document.documentElement;
+  const fix=()=>{const port=matchMedia("(orientation: portrait)").matches,H=port?Math.max(screen.width,screen.height):Math.min(screen.width,screen.height);
+    if(H-innerHeight>20&&H-innerHeight<80){de.style.height=H+"px";de.style.overflow="hidden"}else{de.style.height="";de.style.overflow=""}};
+  fix();addEventListener("resize",fix);addEventListener("orientationchange",()=>setTimeout(fix,300))})();
 let inPrompt=null;
 function instSync(){const on=!!inPrompt&&!STANDALONE;const h=$("instBtn");if(h)h.hidden=!on;const b=$("inInst");if(b)b.hidden=!on;
   document.querySelectorAll("[data-cact='install']").forEach(x=>x.hidden=!on)}
