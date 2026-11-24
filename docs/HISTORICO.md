@@ -200,6 +200,7 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 - **Versão 0.48 — menu do botão direito e boneco 3D firme** (pedidos do dono): botão direito no computador ou segurar o dedo no celular abre um menu com opções do lugar tocado (músculo, exercício, treino) e atalhos (abas, buscar, conquistas, configurações, tema, recarregar). O boneco 3D do Atlas para na hora em que solta o dedo, gira só para os lados e a pinça aproxima mais rápido.
 - **Versão 0.49**: o menu do botão direito não corta mais embaixo da tela (o tamanho era medido no começo da animação, encolhido); perto do fim da tela ele abre para cima do ponteiro, e no celular acima do dedo; sem o contorno vermelho no 1º item ao abrir com o mouse; ícones do menu redesenhados em linha, todos no mesmo estilo e na cor do texto (antes pretos/emoji).
 - **Versão 0.51**: o boneco 3D do Atlas volta a acompanhar o mouse/dedo para cima e para baixo, só um pouco (até 12° acima ou abaixo da horizontal); continua sem inércia.
+- **Versão 0.52**: no celular, ao arrastar a lista para baixo, o boneco pequeno do canto cresce junto com o dedo até o tamanho grande (2D e 3D); ao soltar ele continua dali, sem pulo.
 - Corrigido junto: séries só com a carga planejada não contam mais como feitas no Ao vivo, e a "Última vez" ignora séries sem repetições.
 
 ## 17. Perguntas que o dono fez (respostas resumidas)

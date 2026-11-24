@@ -3010,6 +3010,8 @@ function stDim(v,anim,all){const st=all?$("tab-atlas"):document.querySelector("#
   if(!sh){sh=document.createElement("div");sh.className="st-shade";sh.setAttribute("aria-hidden","true");st.appendChild(sh)}
   sh.style.transition=anim&&!document.documentElement.classList.contains("noanim")?"opacity .4s var(--ios)":"none";sh.style.opacity=String(v)}
 /* phone: the panel is a sheet. Up = open the list (or bring it back over the figure); down = close it / show the figure big */
+/* the element that holds the figure on screen right now: the 3D box or the 2D drawing */
+const figBoxEl=()=>{const v=$("v3");return v&&!v.hidden&&v.offsetParent?v:$("fig")};
 function sheetMove(d,far){const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null);
   if(d==="up"){if(sheetHid){sheetHid=false;return render()}if(peek){peek=false;return render()}if(grp){if(!grpUp){grpUp=true;updateIdle()}return}if(!sel&&!listOpen&&!build){listOpen=true;updateIdle()}return}
   if(build)return;
@@ -3040,22 +3042,38 @@ $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.conta
          sheet it comes back as it will be after (title), from the idle sheet the list is already there */
       if(!A.classList.contains("covered")&&!build&&dy<0&&can("up")){g.pre=true;
         if(sheetHid){g.unhid=true;A.classList.remove("hid")}else if(!grp&&A.classList.contains("idle"))A.classList.add("pre");
-        A.classList.add("pre0");g.h0=P.offsetHeight}}
+        A.classList.add("pre0");g.h0=P.offsetHeight}
+      /* owner (0.52): pulling the list down, the small figure in the corner grows with the finger toward its big size.
+         Its big place is measured by trying the next layout for a moment (no paint happens in between). */
+      if(A.classList.contains("covered")&&dy>0&&can("down")){const ST=A.querySelector(".stage"),F=figBoxEl(),a=ST.getBoundingClientRect(),aF=F.getBoundingClientRect(),sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null)||(grp?"grp":null),idle=A.classList.contains("idle");
+        A.classList.remove("covered");A.classList.toggle("idle",!sel);const bF=F.getBoundingClientRect();A.classList.add("covered");A.classList.toggle("idle",idle);
+        /* the figure itself (not the box around it, which also holds the buttons) goes from its small size to its big one */
+        if(aF.height>20&&bF.height>aF.height+20){const K=bF.height/aF.height,rx=aF.left+aF.width/2-a.left,ry=aF.top+aF.height/2-a.top;
+          g.grow={ST,F,K,D:Math.max(120,bF.bottom-aF.bottom),tx:bF.left+bF.width/2-a.left-K*rx,ty:bF.top+bF.height/2-a.top-K*ry};
+          ST.style.transition="none";ST.style.transformOrigin="0 0";ST.style.willChange="transform"}}}
     if(g.lock!=="v")return;e.preventDefault();g.dy=dy;{const y=e.touches[0].clientY,now=Date.now();g.v=(y-g.ly)/Math.max(1,now-g.lt);g.ly=y;g.lt=now}
     const m=can(dy<0?"up":"down")?dy:rubber(dy,90);g.els.forEach(x=>{x.style.transform=`translateY(${m}px)`;x.style.setProperty("--pd",g.pre?"0px":Math.max(0,-m)+"px")});
-    if(g.pre){P.style.height=(g.h0+Math.max(0,-m))+"px";stDim(Math.min(.6,.6*Math.max(0,-m)/(A.clientHeight*.45)),false,true)}},{passive:false});
+    if(g.pre){P.style.height=(g.h0+Math.max(0,-m))+"px";stDim(Math.min(.6,.6*Math.max(0,-m)/(A.clientHeight*.45)),false,true)}
+    if(g.grow){const G=g.grow,t=Math.max(0,Math.min(1,m/G.D)),k=1+(G.K-1)*t;G.ST.style.transform=`translate(${G.tx*t}px,${G.ty*t}px) scale(${k})`}},{passive:false});
   const unpre=back=>{A.classList.remove("pre","pre0");P.style.height="";if(back&&g0unhid)A.classList.add("hid")};let g0unhid=false;
   const end=()=>{if(!g)return;const G=g;g=null;if(G.lock!=="v")return;const dy=G.dy,d=dy<0?"up":"down",v=Date.now()-G.lt>100?0:G.v;
     const flick=Math.abs(dy)>14&&Math.abs(v)>.45&&Math.sign(v)===Math.sign(dy);
-    if((Math.abs(dy)<45&&!flick)||!can(d)){G.els.forEach(x=>{x.style.transition="transform .45s var(--ios)";x.style.transform="";
+    const gr=G.grow&&G.grow.ST;
+    if((Math.abs(dy)<45&&!flick)||!can(d)){if(gr){gr.style.transition="transform .45s var(--ios)";gr.style.transform="";setTimeout(()=>{gr.style.transition="";gr.style.transformOrigin="";gr.style.willChange=""},460)}
+      G.els.forEach(x=>{x.style.transition="transform .45s var(--ios)";x.style.transform="";
       setTimeout(()=>{x.style.transition="";x.classList.remove("pdrag");if(G.pre){g0unhid=!!G.unhid;unpre(true)}},460)});if(G.pre)stDim(0,true,true);return}
     /* FLIP (owner 0.41: no jump on letting go): the title, the list and the figure glide from where they were to their new place */
     const head=P.querySelector(".p-head"),ST=A.querySelector(".stage"),rH=head.getBoundingClientRect(),rB=B.offsetParent?B.getBoundingClientRect():null,rS=ST.getBoundingClientRect();
     G.els.forEach(x=>{x.style.transition="none";x.style.transform="";x.classList.remove("pdrag")});if(G.pre){unpre();stDim(0,true,true)}
+    const rF=gr?G.grow.F.getBoundingClientRect():null;
+    if(gr){gr.style.transform="";gr.style.transformOrigin="";gr.style.willChange=""}
     buzz();sheetMove(d,dy>innerHeight*.4);if(noanim())return;
     const t=[];const oH=rH.top-head.getBoundingClientRect().top;if(Math.abs(oH)>=3)t.push([head,`translateY(${oH}px)`]);
     if(rB&&B.offsetParent){const nb=B.getBoundingClientRect(),oB=rB.top-nb.top;if(Math.abs(oB)>=3)t.push([B,`translateY(${oB}px)`])}
-    const nS=ST.getBoundingClientRect();if(nS.width>20&&rS.width>20&&(Math.abs(nS.width-rS.width)>8||Math.abs(nS.top-rS.top)>8)){
+    const nS=ST.getBoundingClientRect();
+    if(gr){const nF=G.grow.F.getBoundingClientRect();if(nF.height>20){const k=rF.height/nF.height,cx=nF.left+nF.width/2-nS.left,cy=nF.top+nF.height/2-nS.top;
+      t.push([ST,`translate(${rF.left+rF.width/2-nS.left-k*cx}px,${rF.top+rF.height/2-nS.top-k*cy}px) scale(${k})`]);ST.style.transformOrigin="0 0"}}
+    else if(nS.width>20&&rS.width>20&&(Math.abs(nS.width-rS.width)>8||Math.abs(nS.top-rS.top)>8)){
       const k=rS.height/nS.height,tx=rS.left+rS.width/2-nS.left-nS.width*k/2;t.push([ST,`translate(${tx}px,${rS.top-nS.top}px) scale(${k})`]);ST.style.transformOrigin="0 0"}   // same scale both ways: the figure never looks stretched
     if(!t.length)return;
     t.forEach(([x,tr])=>{x.style.transition="none";x.style.transform=tr});void head.offsetWidth;
