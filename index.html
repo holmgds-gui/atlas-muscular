@@ -5830,10 +5830,16 @@ function goPage(i,dir,still){const p=PAGES[pageAt(i)];if(!p)return;
   function open(el,x,y){
     if(!$("intro").hidden||!$("login").hidden)return false;
     C.innerHTML=build(el,x,y);C.hidden=false;
-    const r=C.getBoundingClientRect(),W=innerWidth,H=innerHeight,touch=lp!=null;
-    let L=Math.min(x,W-r.width-8),T=touch?y-r.height-18:y;if(T<8)T=Math.min(y+18,H-r.height-8);if(T+r.height>H-8)T=H-r.height-8;L=Math.max(8,L);T=Math.max(8,T);
+    /* size without the opening animation (it starts scaled down, so getBoundingClientRect would be too small and the menu got cut
+       at the bottom of the screen); it opens below the pointer when it fits, otherwise above it, otherwise as high as it can */
+    const W=document.documentElement.clientWidth||innerWidth,H=(window.visualViewport&&visualViewport.height)||innerHeight,touch=lp!=null;
+    C.style.maxHeight=(H-16)+"px";const w=C.offsetWidth,h=C.offsetHeight;
+    let L=x+w+8>W?Math.max(8,x-w):x,T;
+    if(touch)T=y-h-18>=8?y-h-18:(y+18+h<=H-8?y+18:Math.max(8,H-h-8));
+    else T=y+h<=H-8?y:(y-h>=8?y-h:Math.max(8,H-h-8));
+    L=Math.max(8,Math.min(L,W-w-8));
     C.style.left=L+"px";C.style.top=T+"px";C.style.setProperty("--ox",(x-L)+"px");C.style.setProperty("--oy",(y-T)+"px");
-    openedAt=Date.now();const f=C.querySelector("button");if(f&&!touch)f.focus({preventScroll:true});return true}
+    openedAt=Date.now();return true}
   const native=el=>!!el.closest("input,textarea,select,[contenteditable],.ctx")||!!String(getSelection&&getSelection()||"").trim();
   document.addEventListener("contextmenu",e=>{if(native(e.target))return;e.preventDefault();if(Date.now()-openedAt<900&&!C.hidden)return;close();open(document.elementFromPoint(e.clientX,e.clientY)||e.target,e.clientX,e.clientY)});
   C.addEventListener("click",e=>{const b=e.target.closest("[data-cx]");if(!b)return;const f=acts[+b.dataset.cx];close();if(f)f()});
