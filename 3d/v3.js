@@ -36,9 +36,9 @@ export function mount(box, api){
   controls.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};controls.minDistance=0.3;controls.maxDistance=9;controls.rotateSpeed=0.85;
   /* owner: never straight from above or below (at most ~35° above and ~30° below the horizon) */
   controls.minPolarAngle=THREE.MathUtils.degToRad(72);controls.maxPolarAngle=THREE.MathUtils.degToRad(108);   /* owner 0.19: closer to level (was 55–120°) */
-  /* owner 0.48 (Atlas, "muito mole, solto"): firm — stops the moment the finger lifts (no inertia), only turns sideways
-     (no tilting up/down by accident; two fingers still move it up/down), and the pinch zooms a bit faster than the fingers */
-  if(api.firm){controls.enableDamping=false;controls.minPolarAngle=controls.maxPolarAngle=Math.PI/2;controls.zoomSpeed=1.35}
+  /* owner 0.48 (Atlas, "muito mole, solto"): firm — stops the moment the finger lifts (no inertia), turns sideways and only
+     a little up/down (±12°, owner 0.51), and the pinch zooms a bit faster than the fingers */
+  if(api.firm){controls.enableDamping=false;controls.minPolarAngle=THREE.MathUtils.degToRad(78);controls.maxPolarAngle=THREE.MathUtils.degToRad(102);controls.zoomSpeed=1.35}   /* 0.51: a little up/down (±12°) follows the mouse/finger again */
   let CLOUD=null,ready=false,BB=new THREE.Box3(new THREE.Vector3(-.4,0,-.2),new THREE.Vector3(.4,1.7,.2)),CY=0.9,need=true,alive=true,curV="front";
   scene.add(new THREE.HemisphereLight(0xffffff,0x9aa0a8,1.25));
   const key=new THREE.DirectionalLight(0xffffff,1.6);key.position.set(0.6,0.8,1);camera.add(key);
