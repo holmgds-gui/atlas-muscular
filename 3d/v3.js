@@ -36,6 +36,9 @@ export function mount(box, api){
   controls.touches={ONE:THREE.TOUCH.ROTATE,TWO:THREE.TOUCH.DOLLY_PAN};controls.minDistance=0.3;controls.maxDistance=9;controls.rotateSpeed=0.85;
   /* owner: never straight from above or below (at most ~35° above and ~30° below the horizon) */
   controls.minPolarAngle=THREE.MathUtils.degToRad(72);controls.maxPolarAngle=THREE.MathUtils.degToRad(108);   /* owner 0.19: closer to level (was 55–120°) */
+  /* owner 0.48 (Atlas, "muito mole, solto"): firm — stops the moment the finger lifts (no inertia), only turns sideways
+     (no tilting up/down by accident; two fingers still move it up/down), and the pinch zooms a bit faster than the fingers */
+  if(api.firm){controls.enableDamping=false;controls.minPolarAngle=controls.maxPolarAngle=Math.PI/2;controls.zoomSpeed=1.35}
   let CLOUD=null,ready=false,BB=new THREE.Box3(new THREE.Vector3(-.4,0,-.2),new THREE.Vector3(.4,1.7,.2)),CY=0.9,need=true,alive=true,curV="front";
   scene.add(new THREE.HemisphereLight(0xffffff,0x9aa0a8,1.25));
   const key=new THREE.DirectionalLight(0xffffff,1.6);key.position.set(0.6,0.8,1);camera.add(key);
@@ -162,7 +165,7 @@ export function mount(box, api){
   function focusAt(pt){if(!pt)return;const t0=performance.now(),ft=controls.target.clone(),fp=camera.position.clone(),dir=fp.clone().sub(ft).normalize();
     const nd=Math.max(controls.minDistance,Math.min(1.1,fp.distanceTo(ft)*0.5)),tp=pt.clone().add(dir.multiplyScalar(nd));
     (function step(){if(!alive)return;const k=Math.min(1,(performance.now()-t0)/420),e=1-Math.pow(1-k,3);controls.target.lerpVectors(ft,pt,e);camera.position.lerpVectors(fp,tp,e);need=true;if(k<1)requestAnimationFrame(step)})()}
-  canvas.addEventListener("pointerdown",e=>{down={x:e.clientX,y:e.clientY,t:performance.now()}});
+  canvas.addEventListener("pointerdown",e=>{if(e.button===2){down=null;return}down={x:e.clientX,y:e.clientY,t:performance.now()}});   // right button = the menu
   /* a tap opens the list right where the finger is: without this the browser's late "click" would land on the list
      and open the exercise under the finger */
   canvas.addEventListener("touchend",e=>{if(e.cancelable)e.preventDefault()},{passive:false});
@@ -226,6 +229,8 @@ export function mount(box, api){
 
   return {
     sync(s){state=s||{};paint()},
+    /* which muscle is under this screen point (menu do botão direito / segurar) */
+    pickAt(x,y){const k=ready?pick(x,y):null;return k&&!/^(osso|fundo|base|deco|tend|pele)$/.test(k)?k:null},
     view(v){view(v==="back"?"back":"front")},
     sex(s){return load(s)},
     whenReady(){return readyP},

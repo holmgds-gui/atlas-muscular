@@ -624,6 +624,16 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .lg-skip{color:var(--muted);font-size:15.5px;margin-top:4px;text-decoration:underline;text-underline-offset:3px}
 .lg-wait{display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--muted);font-size:15px}
 .lg-spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--target);animation:lgSpin .8s linear infinite}@keyframes lgSpin{to{transform:rotate(360deg)}}
+.ctx{position:fixed;z-index:95;min-width:220px;max-width:min(300px,calc(100vw - 16px));max-height:calc(100dvh - 16px);overflow-y:auto;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:14px;padding:6px;box-shadow:0 14px 40px rgba(0,0,0,.35);transform-origin:var(--ox,0) var(--oy,0);animation:ctxIn .16s var(--ios,ease-out)}
+@keyframes ctxIn{from{opacity:0;transform:scale(.92)}}
+.ctx h6{margin:4px 10px 2px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ctx button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:inherit;font:inherit;font-size:15px;text-align:left;padding:9px 10px;border-radius:9px;cursor:pointer}
+.ctx button:hover,.ctx button:focus-visible{background:var(--chip);outline:0}.ctx button.dg{color:var(--danger,#d33)}
+.ctx button .ci{width:20px;flex:none;text-align:center;opacity:.8}
+.ctx hr{border:0;border-top:1px solid var(--line);margin:5px 4px}
+.ctx .cnav{display:grid;grid-template-columns:repeat(4,1fr);gap:2px}.ctx .cnav button{flex-direction:column;gap:2px;font-size:11.5px;padding:7px 2px;text-align:center}.ctx .cnav button[aria-current]{color:var(--target)}
+.ctx .cnav svg{width:22px;height:22px}
+body{-webkit-touch-callout:none}.ex,.plan-h,.v3{-webkit-user-select:none;user-select:none}
 .intro{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(10,12,15,.55)}
 .in-box{position:relative;display:flex;flex-direction:column;width:100%;height:100%;background:var(--bg);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);box-sizing:border-box;overflow:hidden}
 @media (min-width:600px){.in-box{width:440px;height:min(860px,94vh);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}}
@@ -1010,6 +1020,7 @@ button.brand:hover{background:var(--chip)}
     <div class="in-bot"><button class="btn in-back" id="inBack"></button><button class="btn primary in-next" id="inNext"></button></div>
   </div>
 </div>
+<div class="ctx" id="ctx" role="menu" hidden data-notr></div>
 <div class="toast" id="toast" role="status" hidden></div>
 <div class="restpill" id="restPill" hidden><span id="restPillT"></span><button data-rp="plus" aria-label="+15 s">+15</button><button data-rp="stop" aria-label="Pular" title="Pular">✕</button></div>
 <input type="file" id="importFile" accept="application/json,.json" hidden>
@@ -2387,7 +2398,7 @@ svg.addEventListener("wheel",e=>{e.preventDefault();if(isCovered())return;zoomAt
 
 const ptrs=new Map();let gesture=null;
 svg.addEventListener("pointerdown",e=>{
-  if(e.pointerType==="touch")return;
+  if(e.pointerType==="touch"||e.button===2)return;   // right button = the menu, not a tap or a drag
   ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
   try{svg.setPointerCapture(e.pointerId)}catch(_){}
   if(ptrs.size===1){gesture={type:"tap",sx:e.clientX,sy:e.clientY,target:e.target.closest("[data-j],[data-m]"),vb0:[...vb],t:Date.now()}}
@@ -2436,7 +2447,8 @@ svg.addEventListener("touchmove",e=>{if(!tg)return;e.preventDefault();if(isCover
     if(tg.type==="pan"){const k=svgUnitsPerPx(tg.vb0);vb=[tg.vb0[0]-dx*k,tg.vb0[1]-dy*k,vb[2],vb[3]];clampVB();applyVB()}}
   else if(tg.type==="pinch"&&P.length===2){const [a,b]=P;vb=[...tg.vb0];applyVB();zoomAt(Math.hypot(a.x-b.x,a.y-b.y)/tg.d0,tg.mid.x,tg.mid.y)}},{passive:false});
 svg.addEventListener("touchend",e=>{if(!tg)return;const P=tpts(e);
-  if(!P.length){if(tg.type==="tap"){e.preventDefault();const now=Date.now(),z=vb[2]<BOX[view][2]-.5;
+  if(!P.length){if(tg.type==="tap"&&Date.now()-(window.__lpAt||0)<1500){e.preventDefault();tg=null;return}   // a long press opened the menu
+    if(tg.type==="tap"){e.preventDefault();const now=Date.now(),z=vb[2]<BOX[view][2]-.5;
       /* the ⤢ button left the phone (owner): a double tap brings the figure back to its full size */
       if(z&&now-(svg._lt||0)<320){svg._lt=0;vb=[...BOX[view]];applyVB();tg=null;return}svg._lt=now;
       if(tg.target||isCovered())onFigTap(tg.target||svg)}tg=null}
@@ -2726,7 +2738,7 @@ async function set3D(on,quiet){v3on=on;v3ui();if(!on)return;if(!quiet)buzz();
   const fail=()=>{L.hidden=false;L.innerHTML=`<span>${tx("Não deu para carregar o 3D. Confira a internet e toque em 3D de novo.","Couldn't load the 3D body. Check the internet and tap 3D again.","No se pudo cargar el 3D. Revisa internet y toca 3D otra vez.")}</span>`;
     if(V3){V3.dispose();V3=null}v3busy=false;v3on=false;v3ui();$("v3").hidden=false;setTimeout(()=>{if(!v3on){$("v3").hidden=true;L.hidden=true}},3500)};
   try{const mod=await import("./3d/v3.js");
-    V3=mod.mount($("v3"),{covered:isCovered,sex:()=>sex,name:k=>M[k]?M[k].n:"",jname:j=>JOINTS[j]?JOINTS[j].n:"",
+    V3=mod.mount($("v3"),{firm:true,covered:isCovered,sex:()=>sex,name:k=>M[k]?M[k].n:"",jname:j=>JOINTS[j]?JOINTS[j].n:"",
       joint:j=>{if(isCovered()){peek=true;render();return}const g=svg.querySelector(`.jt[data-j="${j}"]`);if(g)onFigTap(g);else selectJoint(j,true)},
       tap:k=>{if(isCovered()){peek=true;render();return}if(!k)return;const g=svg.querySelector(`[data-m="${k}"]`);if(g)onFigTap(g);else if(M[k])selectMuscle(k,true)},
       progress:x=>{const b=$("v3bar");if(b)b.style.width=Math.round(x*100)+"%"},
@@ -5769,6 +5781,75 @@ function goPage(i,dir,still){const p=PAGES[pageAt(i)];if(!p)return;
   document.addEventListener("touchend",end,{passive:true});document.addEventListener("touchcancel",end,{passive:true});
 })();
 
+
+/* ------------------------------------------------------------------ menu do botão direito (pedido do dono, 0.48)
+   Botão direito no computador ou segurar o dedo ~0,5 s no celular. O menu muda conforme onde tocou: músculo (2D ou 3D),
+   exercício do Atlas, treino de Meus treinos; embaixo, sempre, ir para as abas, buscar, conquistas, configurações, tema
+   e recarregar. Em campos de texto (e com texto selecionado) fica o menu normal do navegador. */
+(()=>{const C=$("ctx");let acts=[],openedAt=0,lp=null,eatClick=0;
+  const I=(ic,t,f,cls)=>{acts.push(f);return `<button role="menuitem" data-cx="${acts.length-1}"${cls?` class="${cls}"`:""}><span class="ci">${ic}</span>${t}</button>`};
+  const close=()=>{if(!C.hidden){C.hidden=true;C.innerHTML="";acts=[]}};
+  const live1=(name,items)=>{const w=startPlan({name,items});w.start=Date.now();live={wid:w.id,i:0,j:0};saveW();saveLive();hView="live";LS.set("atlas-hview",hView);setTab("treino")};
+  const goKg=name=>{pView="kg";setTab("prog");setTimeout(()=>{const i=kgList.findIndex(e=>e[0]===name);if(i<0){toast(tx("Ainda sem cargas anotadas desse exercício","No loads logged for this exercise yet","Aún sin cargas anotadas de este ejercicio"));return}
+    kgOpen=name;renderKg();const c=document.querySelector(`[data-kx="${i}"]`);if(c)c.scrollIntoView({block:"start"})},60)};
+  const atlasMus=k=>{setTab("atlas");if(cdOn||grp){cdOn=false;grp=false}selectMuscle(k)};
+  function muscleItems(k){if(!M[k])return "";const g=TOB[k],nm=model==="bas"&&g?BASIC[g].n:M[k].n;
+    return `<h6>${esc(nm)}</h6>`+I("☰",tx("Ver exercícios","See exercises","Ver ejercicios"),()=>atlasMus(k))
+      +I("ⓘ",tx("Como fazer o melhor exercício","How to do the best exercise","Cómo hacer el mejor ejercicio"),()=>{atlasMus(k);howOpen=true;curEx=null;selectExercise(0)})
+      +I("＋",tx("Montar treino com esse músculo","Build a workout with this muscle","Armar entreno con este músculo"),()=>{atlasMus(k);startBuild()})
+      +I("▦",tx("Ver no Progresso","See in Progress","Ver en Progreso"),()=>{pView="mus";setTab("prog")})}
+  function exItems(i){const x=filtered()[i];if(!x)return "";const nm=x[0],ref=x[6];
+    return `<h6>${esc(nm)}</h6>`+I("＋",tx("Adicionar a um treino","Add to a workout","Agregar a un entreno"),()=>openAddSheet(nm,ref))
+      +I("▶",tx("Treinar agora","Train now","Entrenar ahora"),()=>live1(nm,[planItem(nm,ref)]))
+      +I("ⓘ",tx("Como fazer","How to do it","Cómo hacerlo"),()=>{howOpen=true;curEx=null;selectExercise(i);setTimeout(()=>{const c=document.querySelector(`.ex[data-i="${i}"] details.how`);if(c){c.open=true;c.scrollIntoView({block:"nearest"})}},60)})
+      +I("⇄",tx("Trocar variação","Change variation","Cambiar variación"),()=>{curEx=null;selectExercise(i);setTimeout(()=>{const c=document.querySelector(`.ex[data-i="${i}"] .vars`);if(c)c.scrollIntoView({block:"nearest"})},60)})
+      +I("↗",tx("Ver evolução da carga","See load progress","Ver evolución de la carga"),()=>goKg(nm))}
+  function planItems(p){
+    return `<h6>${esc(p.name||tx("Treino sem nome","Untitled workout","Entreno sin nombre"))}</h6>`
+      +I("▶",tx("Treinar agora","Train now","Entrenar ahora"),()=>{const w=startPlan(p);w.start=Date.now();live={wid:w.id,i:0,j:0};saveW();saveLive();hView="live";LS.set("atlas-hview",hView);setTab("treino")})
+      +I("✓",tx("Marcar como feito hoje","Mark as done today","Marcar como hecho hoy"),()=>{const w=startPlan(p);w.done=true;saveW();buzz("ok");celebrate(w);toast(tx("Treino marcado como feito","Workout marked as done","Entreno marcado como hecho"))})
+      +I("⧉",tx("Duplicar","Duplicate","Duplicar"),()=>{const c=JSON.parse(JSON.stringify(p));c.id=uid();c.name=(p.name||tx("Treino","Workout","Entreno"))+tx(" (cópia)"," (copy)"," (copia)");plans.splice(plans.indexOf(p)+1,0,c);savePlans();openPlan=c.id;renderFicha();toast(tx("Treino duplicado","Workout duplicated","Entreno duplicado"))})
+      +I("✎",tx("Renomear","Rename","Renombrar"),()=>{openPlan=p.id;askDelPlan=null;renderFicha();const t=document.querySelector(`.plan[data-pid="${p.id}"] [data-pf="name"]`);if(t){t.scrollIntoView({block:"center"});t.focus();t.select()}})
+      +I("✕",tx("Apagar","Delete","Borrar"),()=>{openPlan=p.id;askDelPlan=p.id;renderFicha();const c=document.querySelector(`.plan[data-pid="${p.id}"] .confirm`);if(c)c.scrollIntoView({block:"center"})},"dg")}
+  function general(){const nav=[["atlas",tx("Atlas","Atlas","Atlas")],["ficha",tx("Treinos","Workouts","Entrenos")],["treino",tx("Hoje","Today","Hoy")],["prog",tx("Progresso","Progress","Progreso")]];
+    const ic=k=>{const b=document.querySelector(`.btabs [data-tab="${k}"] svg`);return b?b.outerHTML:""};
+    const dk=document.documentElement.dataset.theme==="dark"||(!document.documentElement.dataset.theme&&matchMedia("(prefers-color-scheme: dark)").matches);
+    return `<div class="cnav">${nav.map(([k,n])=>{acts.push(()=>{setTab(k);try{pageEnter()}catch(e){}});return `<button role="menuitem" data-cx="${acts.length-1}"${tab===k?' aria-current="page"':""}>${ic(k)}${n}</button>`}).join("")}</div>`
+      +I("⌕",tx("Buscar exercício","Search exercises","Buscar ejercicio"),()=>{setTab("atlas");openSearch()})
+      +I("🏆",tx("Conquistas","Achievements","Logros"),()=>setTab("ach"))
+      +I("⚙",tx("Configurações","Settings","Ajustes"),()=>setTab("conf"))
+      +I(dk?"☀":"☾",dk?tx("Tema claro","Light theme","Tema claro"):tx("Tema escuro","Dark theme","Tema oscuro"),()=>{CONF.theme=dk?"light":"dark";saveConf();applyConf();if(tab==="conf")renderConf()})
+      +I("↻",tx("Recarregar","Reload","Recargar"),()=>location.reload())}
+  function build(el,x,y){acts=[];let h="";
+    const m=el.closest("#fig [data-m]");
+    if(m)h=muscleItems(m.dataset.m);
+    else if(el.closest("#v3")&&el.tagName==="CANVAS"&&V3&&V3.pickAt){const k=V3.pickAt(x,y);if(k)h=muscleItems(k)}
+    if(!h){const ex=el.closest("#tab-atlas .ex[data-i]");if(ex)h=exItems(+ex.dataset.i)}
+    if(!h){const pl=el.closest("#fichaBody .plan[data-pid]");if(pl){const p=plans.find(q=>q.id===pl.dataset.pid);if(p)h=planItems(p)}}
+    return h+(h?"<hr>":"")+general()}
+  function open(el,x,y){
+    if(!$("intro").hidden||!$("login").hidden)return false;
+    C.innerHTML=build(el,x,y);C.hidden=false;
+    const r=C.getBoundingClientRect(),W=innerWidth,H=innerHeight,touch=lp!=null;
+    let L=Math.min(x,W-r.width-8),T=touch?y-r.height-18:y;if(T<8)T=Math.min(y+18,H-r.height-8);if(T+r.height>H-8)T=H-r.height-8;L=Math.max(8,L);T=Math.max(8,T);
+    C.style.left=L+"px";C.style.top=T+"px";C.style.setProperty("--ox",(x-L)+"px");C.style.setProperty("--oy",(y-T)+"px");
+    openedAt=Date.now();const f=C.querySelector("button");if(f&&!touch)f.focus({preventScroll:true});return true}
+  const native=el=>!!el.closest("input,textarea,select,[contenteditable],.ctx")||!!String(getSelection&&getSelection()||"").trim();
+  document.addEventListener("contextmenu",e=>{if(native(e.target))return;e.preventDefault();if(Date.now()-openedAt<900&&!C.hidden)return;close();open(document.elementFromPoint(e.clientX,e.clientY)||e.target,e.clientX,e.clientY)});
+  C.addEventListener("click",e=>{const b=e.target.closest("[data-cx]");if(!b)return;const f=acts[+b.dataset.cx];close();if(f)f()});
+  document.addEventListener("pointerdown",e=>{if(!C.hidden&&!e.target.closest(".ctx")&&Date.now()-openedAt>250)close()},true);
+  addEventListener("keydown",e=>{if(C.hidden)return;if(e.key==="Escape")close();else if(/Arrow(Down|Up)/.test(e.key)){e.preventDefault();const bs=[...C.querySelectorAll("button")],i=bs.indexOf(document.activeElement);bs[(i+(e.key==="ArrowDown"?1:-1)+bs.length)%bs.length].focus()}});
+  addEventListener("resize",close);addEventListener("scroll",close,true);
+  /* celular: segurar o dedo parado ~0,5 s (o iPhone não manda "contextmenu") */
+  const NOLP=".fi-drag,.seg,.btabs,#pGrab,.sh-grab,#modeSw,.kg-hit,.in-track,.modal,input,textarea,select";
+  document.addEventListener("touchstart",e=>{if(e.touches.length!==1||e.target.closest(NOLP)){lp=null;return}const t=e.touches[0],el=e.target;
+    clearTimeout(lp&&lp.t);lp={x:t.clientX,y:t.clientY,t:setTimeout(()=>{if(!lp)return;if(open(el,lp.x,lp.y)){buzz();eatClick=window.__lpAt=Date.now()}lp=null},520)}},{passive:true});
+  document.addEventListener("touchmove",e=>{if(!lp)return;const t=e.touches[0];if(Math.hypot(t.clientX-lp.x,t.clientY-lp.y)>10){clearTimeout(lp.t);lp=null}},{passive:true});
+  const end=()=>{if(lp){clearTimeout(lp.t);lp=null}};document.addEventListener("touchend",end,{passive:true});document.addEventListener("touchcancel",end,{passive:true});
+  /* the tap that ends the long press must not also press what was under the finger */
+  document.addEventListener("click",e=>{if(eatClick&&Date.now()-eatClick<700&&!e.target.closest(".ctx")){e.preventDefault();e.stopPropagation();eatClick=0}},true);
+  window.ctxClose=close;
+})();
 /* ------------------------------------------------------------------ apresentação (carrossel da 1ª vez)
    Aparece só na 1ª vez em cada aparelho/navegador (atlas-intro). No navegador tem a tela "Instale";
    no app instalado não. No iPhone o app instalado guarda os dados separado do Safari, então mostra de novo
