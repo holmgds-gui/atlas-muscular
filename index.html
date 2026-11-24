@@ -607,6 +607,23 @@ textarea.inp{min-height:60px;resize:vertical;font-family:var(--f-body);line-heig
 .cd-note{grid-column:2 / -1;margin:2px 0 0;font-size:13px;line-height:1.45;color:var(--muted)}
 .cd-info{font-size:13.5px;line-height:1.5;color:var(--muted)}.cd-info h4{margin:0 0 6px;color:var(--ink);font-size:15px}.cd-info p{margin:0 0 8px}
 /* ---- apresentação (carrossel da 1ª vez) ---- */
+.login .in-box{overflow-y:auto}
+.lg-s{display:flex;flex-direction:column;align-items:center;gap:14px;width:100%;max-width:400px;margin:auto;padding:28px 24px 22px;box-sizing:border-box;text-align:center}
+.lg-s h2{margin:2px 0 0;font-family:var(--f-display);font-weight:700;font-size:30px;line-height:1.05}
+.lg-s>p{margin:0;max-width:34ch;font-size:15.5px;line-height:1.45;color:var(--muted)}
+.lg-s .in-logo{width:92px;height:92px}.lg-s .in-word{font-size:34px}
+.lg-g{width:100%;min-height:50px;justify-content:center;font-size:16px;border-radius:12px;background:#fff;color:#1F1F1F;border:1px solid #DADCE0}
+.lg-or{display:flex;align-items:center;gap:10px;width:100%;color:var(--muted);font-size:13px}.lg-or::before,.lg-or::after{content:"";flex:1;height:1px;background:var(--line)}
+.em-form{display:grid;gap:10px;width:100%;text-align:left}
+.em-form input{width:100%;box-sizing:border-box;min-height:48px;font-size:16px;padding:0 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.em-form input:focus{outline:2px solid var(--target);outline-offset:-1px}
+.em-go{min-height:50px;font-size:16px;border-radius:12px}
+.em-msg{margin:0;font-size:14px;line-height:1.4;color:var(--danger,#d33);min-height:0}.em-msg:empty{display:none}.em-msg.ok{color:var(--ok,#2a9d5b)}
+.em-links{display:flex;flex-wrap:wrap;justify-content:space-between;gap:6px 14px}
+.em-links button,.lg-skip{border:0;background:none;color:var(--target);font:inherit;font-size:14.5px;font-weight:600;padding:8px 2px;cursor:pointer}
+.lg-skip{color:var(--muted);font-size:15.5px;margin-top:4px;text-decoration:underline;text-underline-offset:3px}
+.lg-wait{display:flex;flex-direction:column;align-items:center;gap:12px;color:var(--muted);font-size:15px}
+.lg-spin{width:34px;height:34px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--target);animation:lgSpin .8s linear infinite}@keyframes lgSpin{to{transform:rotate(360deg)}}
 .intro{position:fixed;inset:0;z-index:90;display:grid;place-items:center;background:rgba(10,12,15,.55)}
 .in-box{position:relative;display:flex;flex-direction:column;width:100%;height:100%;background:var(--bg);padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);box-sizing:border-box;overflow:hidden}
 @media (min-width:600px){.in-box{width:440px;height:min(860px,94vh);border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.35)}}
@@ -985,6 +1002,7 @@ button.brand:hover{background:var(--chip)}
     <div class="helpb" id="gBody"></div>
   </div>
 </div>
+<div class="intro login" id="login" hidden data-notr><div class="in-box" role="dialog" aria-modal="true" aria-labelledby="lgT"><div class="lg-s" id="lgBox"></div></div></div>
 <div class="intro" id="intro" hidden data-notr>
   <div class="in-box" role="dialog" aria-modal="true" aria-labelledby="inT0">
     <div class="in-top"><div class="in-bars" id="inBars" aria-hidden="true"></div><button class="in-skip" id="inSkip"></button></div>
@@ -5366,9 +5384,12 @@ const SYNC_APP={
     if(D.k.ach&&typeof D.k.ach==="object"){ach=D.k.ach;if(!Array.isArray(ach.seen))ach.seen=[];if(!(ach.lvMax>=0))ach.lvMax=-1}
     if(D.k.conf&&typeof D.k.conf==="object"){const f=CONF.fig;CONF={...CONF_DEF,...D.k.conf,lang:CONF.lang};applyConf();if(CONF.fig!==f)try{applyFig()}catch(e){}}
     saveW();savePlans();saveRank();saveAch();saveConf();syncRedraw()},
+  get lang(){return LANG},askPw(){return askPw()},
   user(u){const was=!!syncUser;syncUser=u;LS.set("atlas-sync",u);if(u&&syncSt==="off")syncSt="load";if(tab==="conf")renderConf();
-    if(u&&!was)toast(tx("Conectado como ","Signed in as ","Conectado como ")+(u.name||u.email))},
-  status(s,code){if(s==="first"){toast(tx("Pronto: seus treinos estão na sua conta","Done: your workouts are in your account","Listo: tus entrenos están en tu cuenta"));return}
+    if(u&&lgOn)lgWait();
+    if(u&&!was&&!lgOn)toast(tx("Conectado como ","Signed in as ","Conectado como ")+(u.name||u.email))},
+  status(s,code){if(s==="first"&&lgOn){lgDone();return}
+    if(s==="first"){toast(tx("Pronto: seus treinos estão na sua conta","Done: your workouts are in your account","Listo: tus entrenos están en tu cuenta"));return}
     syncSt=s;syncErr=s==="err"?(code||""):"";syncStEl()}
 };
 function syncStTxt(){return syncSt==="ok"?tx("✓ Sincronizado","✓ Synced","✓ Sincronizado"):syncSt==="sync"?tx("Enviando…","Sending…","Enviando…")
@@ -5377,12 +5398,73 @@ function syncStTxt(){return syncSt==="ok"?tx("✓ Sincronizado","✓ Synced","�
   :tx("Conectando…","Connecting…","Conectando…")}
 function syncStEl(){const e=$("syncSt");if(e){e.textContent=syncStTxt();e.dataset.st=syncSt}}
 const GICON=`<svg class="g-ico" viewBox="0 0 48 48" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.6 5.4 2.7 13.3l7.9 6.1C12.5 13.6 17.8 9.5 24 9.5z"/><path fill="#4285F4" d="M46.1 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.4c-.5 2.9-2.2 5.3-4.6 6.9l7.4 5.8c4.3-4 6.9-9.9 6.9-17.2z"/><path fill="#FBBC05" d="M10.6 28.6c-.5-1.4-.8-3-.8-4.6s.3-3.2.8-4.6l-7.9-6.1C1 16.6 0 20.2 0 24s1 7.4 2.7 10.7l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.8-5.8l-7.4-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.2 0-11.5-4.1-13.4-9.9l-7.9 6.1C6.6 42.6 14.6 48 24 48z"/></svg>`;
+
+/* ---- entrar com e-mail e senha + tela de login da 1ª vez (pedido do dono, 0.47; escolhas: opcional, Google + e-mail,
+   só na 1ª vez, antes do carrossel; se a conta já tem treinos, pula o carrossel) */
+function emForm(){return `<form class="em-form" data-mode="in" novalidate>
+  <input name="nm" type="text" autocomplete="name" placeholder="${tx("Seu nome","Your name","Tu nombre")}" hidden>
+  <input name="em" type="email" autocomplete="email" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="${tx("E-mail","Email","Correo")}">
+  <input name="pw" type="password" autocomplete="current-password" placeholder="${tx("Senha","Password","Contraseña")}">
+  <button class="btn primary em-go" type="submit">${tx("Entrar","Sign in","Entrar")}</button>
+  <p class="em-msg" role="alert"></p>
+  <div class="em-links"><button type="button" data-em="mode">${tx("Não tem conta? Criar conta","No account? Create one","¿No tienes cuenta? Crear cuenta")}</button><button type="button" data-em="reset">${tx("Esqueci a senha","Forgot password","Olvidé la contraseña")}</button></div>
+</form>`}
+function emErr(e){const c=((e&&e.code)||"").replace(/^auth\//,"");
+  if(/invalid-credential|wrong-password|user-not-found|invalid-login/.test(c))return tx("E-mail ou senha errados.","Wrong email or password.","Correo o contraseña incorrectos.");
+  if(c==="email-already-in-use")return tx("Esse e-mail já tem conta. Toque em \"Já tem conta? Entrar\".","This email already has an account. Tap \"Have an account? Sign in\".","Ese correo ya tiene cuenta. Toca \"¿Ya tienes cuenta? Entrar\".");
+  if(c==="weak-password")return tx("A senha precisa ter pelo menos 6 caracteres.","The password needs at least 6 characters.","La contraseña necesita al menos 6 caracteres.");
+  if(/invalid-email|missing-email/.test(c))return tx("Confira o e-mail.","Check the email.","Revisa el correo.");
+  if(c==="too-many-requests")return tx("Muitas tentativas. Espere um pouco e tente de novo.","Too many tries. Wait a bit and try again.","Demasiados intentos. Espera un poco e intenta de nuevo.");
+  if(c==="network-request-failed")return tx("Sem internet. Tente de novo quando conectar.","No internet. Try again when you're online.","Sin internet. Intenta de nuevo cuando te conectes.");
+  return tx("Não deu para entrar","Couldn't sign in","No se pudo entrar")+(c?` (${c})`:"")+".";}
+function emMode(f,m){f.dataset.mode=m;const up=m==="up";f.nm.hidden=!up;f.pw.autocomplete=up?"new-password":"current-password";
+  f.pw.placeholder=up?tx("Senha (6 ou mais caracteres)","Password (6+ characters)","Contraseña (6 o más caracteres)"):tx("Senha","Password","Contraseña");
+  f.querySelector(".em-go").textContent=up?tx("Criar conta","Create account","Crear cuenta"):tx("Entrar","Sign in","Entrar");
+  f.querySelector('[data-em="mode"]').textContent=up?tx("Já tem conta? Entrar","Have an account? Sign in","¿Ya tienes cuenta? Entrar"):tx("Não tem conta? Criar conta","No account? Create one","¿No tienes cuenta? Crear cuenta");
+  f.querySelector('[data-em="reset"]').hidden=up;emMsg(f,"");(up?f.nm:f.em).focus({preventScroll:true})}
+function emMsg(f,t,ok){const m=f.querySelector(".em-msg");m.textContent=t;m.classList.toggle("ok",!!ok)}
+document.addEventListener("click",e=>{const b=e.target.closest(".em-form [data-em]");if(!b)return;const f=b.form||b.closest("form");
+  if(b.dataset.em==="mode")return emMode(f,f.dataset.mode==="up"?"in":"up");
+  const em=f.em.value.trim();if(!/^\S+@\S+\.\S+$/.test(em)){emMsg(f,tx("Escreva seu e-mail acima e toque de novo.","Type your email above and tap again.","Escribe tu correo arriba y toca de nuevo."));f.em.focus();return}
+  syncLoad().then(m=>m?m.resetPw(em):Promise.reject({code:"network-request-failed"}))
+    .then(()=>emMsg(f,tx("Pronto: mandamos um link para "+em+" para criar uma senha nova (veja também o spam).","Done: we sent a link to "+em+" to set a new password (check spam too).","Listo: enviamos un enlace a "+em+" para crear una contraseña nueva (mira también el spam)."),1))
+    .catch(e=>emMsg(f,/user-not-found/.test(e&&e.code)?tx("Não achamos conta com esse e-mail.","No account with that email.","No hay cuenta con ese correo."):emErr(e)))});
+document.addEventListener("submit",e=>{const f=e.target.closest(".em-form");if(!f)return;e.preventDefault();
+  const up=f.dataset.mode==="up",em=f.em.value.trim(),pw=f.pw.value,nm=f.nm.value.trim();
+  if(!/^\S+@\S+\.\S+$/.test(em)){emMsg(f,tx("Confira o e-mail.","Check the email.","Revisa el correo."));f.em.focus();return}
+  if(pw.length<6){emMsg(f,tx("A senha precisa ter pelo menos 6 caracteres.","The password needs at least 6 characters.","La contraseña necesita al menos 6 caracteres."));f.pw.focus();return}
+  const go=f.querySelector(".em-go");go.disabled=true;emMsg(f,"");
+  syncLoad().then(m=>m?(up?m.signUpEmail(em,pw,nm):m.signInEmail(em,pw)):Promise.reject({code:"network-request-failed"}))
+    .then(()=>{if(f.closest("#gSheet"))closeModals()})
+    .catch(e=>emMsg(f,emErr(e))).finally(()=>{go.disabled=false})});
+/* pede a senha de novo (apagar conta de e-mail feita há muito tempo) */
+function askPw(){return new Promise(res=>{let done=false;const fin=v=>{if(!done){done=true;res(v)}};
+  openG(tx("Confirme sua senha","Confirm your password","Confirma tu contraseña"),`<form class="em-form pw-ask"><p class="muted">${tx("Por segurança, digite a senha da sua conta.","For safety, type your account password.","Por seguridad, escribe la contraseña de tu cuenta.")}</p><input name="pw" type="password" autocomplete="current-password" placeholder="${tx("Senha","Password","Contraseña")}"><button class="btn primary em-go" type="submit">${tx("Confirmar","Confirm","Confirmar")}</button></form>`);
+  const f=$("gBody").querySelector(".pw-ask");f.addEventListener("submit",e=>{e.preventDefault();e.stopPropagation();const v=f.pw.value;closeModals();fin(v)});
+  const t=setInterval(()=>{if($("gSheet").hidden){clearInterval(t);fin(null)}},400)})}
+let lgOn=false,lgT=0;
+function openLogin(wait){lgOn=true;syncLoad();
+  $("lgBox").innerHTML=`<img class="in-logo" src="icon-512.png" alt=""><div class="in-word">MUSCLE <b>ATLAS</b></div>
+    <h2 id="lgT">${tx("Entre na sua conta","Sign in to your account","Entra en tu cuenta")}</h2>
+    <p>${tx("Seus treinos ficam salvos e aparecem no celular e no computador. É opcional.","Your workouts are saved and show up on your phone and computer. It's optional.","Tus entrenos quedan guardados y aparecen en el celular y en la computadora. Es opcional.")}</p>
+    <div class="lg-wait" id="lgWait" hidden><span class="lg-spin"></span>${tx("Entrando e trazendo seus treinos…","Signing in and bringing your workouts…","Entrando y trayendo tus entrenos…")}</div>
+    <div class="lg-f" id="lgF" style="display:contents">
+      <button class="btn g-btn lg-g" data-lg="google">${GICON}${tx("Entrar com Google","Sign in with Google","Entrar con Google")}</button>
+      <div class="lg-or">${tx("ou com e-mail","or with email","o con correo")}</div>${emForm()}
+      <button class="lg-skip" data-lg="skip">${tx("Continuar sem conta","Continue without an account","Continuar sin cuenta")}</button></div>`;
+  $("login").hidden=false;if(wait||syncUser)lgWait()}
+function lgWait(){if(!lgOn)return;$("lgWait").hidden=false;$("lgF").style.display="none";clearTimeout(lgT);lgT=setTimeout(lgDone,12000)}
+function lgDone(){if(!lgOn)return;lgOn=false;clearTimeout(lgT);LS.set("atlas-login",1);$("login").hidden=true;
+  if(workouts.length||plans.length){LS.set("atlas-intro",1);try{syncRedraw()}catch(e){}}else openIntro()}
+$("login").addEventListener("click",e=>{const b=e.target.closest("[data-lg]");if(!b)return;
+  if(b.dataset.lg==="skip"){lgOn=false;LS.set("atlas-login",1);$("login").hidden=true;openIntro();return}
+  if(b.dataset.lg==="google")syncLogin()});
 function cfAcct(conf){
   if(!syncCfg())return cfRow("Conta e sincronização","Entrar com uma conta e salvar na nuvem, para usar em outro celular.",`<button class="btn" disabled>Entrar</button>`,true);
   if(!SYNC)setTimeout(syncLoad,0);   // load Firebase now, so the tap on "Entrar" can open Google's window right away
   if(!syncUser)return cfRow(tx("Conta e sincronização","Account and sync","Cuenta y sincronización"),
-    tx("Entre com o Google para ter os mesmos treinos no celular e no PC. É opcional: sem conta, tudo fica só neste aparelho.","Sign in with Google to have the same workouts on your phone and computer. It's optional: without an account everything stays on this device.","Entra con Google para tener los mismos entrenos en el celular y en la PC. Es opcional: sin cuenta, todo queda solo en este dispositivo."),
-    `<button class="btn g-btn" data-cact="login">${GICON}${tx("Entrar com Google","Sign in with Google","Entrar con Google")}</button>`,false,1);
+    tx("Entre com o Google ou com e-mail para ter os mesmos treinos no celular e no PC. É opcional: sem conta, tudo fica só neste aparelho.","Sign in with Google or email to have the same workouts on your phone and computer. It's optional: without an account everything stays on this device.","Entra con Google o con correo para tener los mismos entrenos en el celular y en la PC. Es opcional: sin cuenta, todo queda solo en este dispositivo."),
+    `<button class="btn g-btn" data-cact="login">${GICON}${tx("Entrar com Google","Sign in with Google","Entrar con Google")}</button><button class="btn" data-cact="emLogin">${tx("Entrar com e-mail","Sign in with email","Entrar con correo")}</button>`,false,1);
   const u=syncUser;
   return cfRow(esc(u.name||u.email||"Google"),`${esc(u.email||"")}<br><span id="syncSt" class="sync-st" data-st="${syncSt}">${syncStTxt()}</span>`,`<button class="btn" data-cact="logout">${tx("Sair","Sign out","Salir")}</button>`)
     +cfRow(tx("Apagar minha conta","Delete my account","Borrar mi cuenta"),tx("Apaga seus dados da nuvem e a conta. O que está neste aparelho continua.","Deletes your cloud data and the account. What's on this device stays.","Borra tus datos de la nube y la cuenta. Lo que está en este dispositivo se queda."),`<button class="btn danger" data-cact="delAcct">${tx("Apagar","Delete","Borrar")}</button>`)
@@ -5486,6 +5568,7 @@ $("confBody").addEventListener("click",e=>{
   const a=e.target.closest("[data-cact]");if(!a)return;const k=a.dataset.cact;
   if(k==="install")return doInstall();
   if(k==="login")return syncLogin();
+  if(k==="emLogin"){syncLoad();openG(tx("Entrar com e-mail","Sign in with email","Entrar con correo"),emForm());return}
   if(k==="logout"){if(!SYNC)return;a.disabled=true;SYNC.signOut().then(()=>{LS.set("atlas-sync",null);location.reload()}).catch(()=>{a.disabled=false});return}
   if(k==="delAcct!"){if(!SYNC)return;a.disabled=true;SYNC.deleteAccount().then(()=>{LS.set("atlas-sync",null);toast(tx("Conta apagada","Account deleted","Cuenta borrada"));setTimeout(()=>location.reload(),900)})
     .catch(e=>{a.disabled=false;toast(tx("Não deu para apagar: ","Couldn't delete: ","No se pudo borrar: ")+((e&&e.code)||""))});return}
@@ -5808,10 +5891,13 @@ addEventListener("keydown",e=>{if($("intro").hidden)return;if(e.key==="ArrowRigh
 addEventListener("resize",()=>{if(!$("intro").hidden)$("inTrack").scrollLeft=inI*$("inTrack").clientWidth});
 
 chips();setView(view);setModel(model);setTab(tab);
-if(/[?&]intro\b/.test(location.search))openIntro();
+if(/[?&]login\b/.test(location.search))openLogin();
+else if(/[?&]intro\b/.test(location.search))openIntro();
 else if(!LS.get("atlas-intro",0)){
   let used=false;try{used=!!(workouts.length||plans.length||rank.bw||rank.man.length||localStorage.getItem("atlas-conf"))}catch(_){}
-  if(used)LS.set("atlas-intro",1);else openIntro();
+  if(used)LS.set("atlas-intro",1);
+  else if(syncCfg()&&!LS.get("atlas-login",0)){let r=false;try{r=!!localStorage.getItem("atlas-sync-redir")}catch(_){}openLogin(r)}   // 1ª vez: login (opcional) antes do carrossel
+  else openIntro();
 }
 if(matchMedia("(max-width:900px)").matches)q.placeholder="Buscar";
 matchMedia("(max-width:900px)").addEventListener("change",()=>setView(view));

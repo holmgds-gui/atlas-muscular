@@ -126,6 +126,11 @@ export async function signIn(){
     if(/popup-blocked|operation-not-supported|web-storage-unsupported/.test(c)){try{localStorage.setItem("atlas-sync-redir","1")}catch(x){}return A.signInWithRedirect(auth,p)}
     if(!/popup-closed|cancelled-popup/.test(c))throw e}
 }
+/* Entrar com e-mail e senha (pedido do dono, 0.47): criar conta, entrar e "esqueci a senha" (o e-mail sai no idioma do app) */
+export function signInEmail(email,pw){return A.signInWithEmailAndPassword(auth,email,pw)}
+export async function signUpEmail(email,pw,name){const r=await A.createUserWithEmailAndPassword(auth,email,pw);
+  if(name){try{await A.updateProfile(r.user,{displayName:name});app.user({uid:r.user.uid,name,email:r.user.email||"",photo:""})}catch(e){}}return r}
+export function resetPw(email){auth.languageCode=app.lang||"pt";return A.sendPasswordResetEmail(auth,email)}
 /* tests only (emulator): log in with a made-up Google account */
 export function testLogin(json){return A.signInWithCredential(auth,A.GoogleAuthProvider.credential(json))}
 
@@ -140,7 +145,11 @@ export async function deleteAccount(){
   for(const c of ["w","p","k"]){const s=await F.getDocs(F.collection(db,"users",uid,c));
     for(let i=0;i<s.docs.length;i+=400){const b=F.writeBatch(db);s.docs.slice(i,i+400).forEach(d=>b.delete(d.ref));await b.commit()}}
   try{await user.delete()}
-  catch(e){if(e&&e.code==="auth/requires-recent-login"){await A.reauthenticateWithPopup(user,new A.GoogleAuthProvider());await auth.currentUser.delete()}else throw e}
+  catch(e){if(e&&e.code==="auth/requires-recent-login"){
+      // conta de e-mail: pede a senha de novo; conta Google: abre o Google de novo
+      if(user.providerData.some(p=>p.providerId==="password")){const pw=await app.askPw();if(!pw)throw e;await A.reauthenticateWithCredential(user,A.EmailAuthProvider.credential(user.email,pw))}
+      else await A.reauthenticateWithPopup(user,new A.GoogleAuthProvider());
+      await auth.currentUser.delete()}else throw e}
   try{localStorage.removeItem("atlas-sync-base-"+uid)}catch(e){}
   try{await F.terminate(db);await F.clearIndexedDbPersistence(db)}catch(e){}
 }
