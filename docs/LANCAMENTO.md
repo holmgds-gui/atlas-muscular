@@ -32,7 +32,7 @@ Atlas 2D e 3D (♂/♀, quatro modos: Músculos, Grupos, Articulações e Cardio
 ## Obrigatório para as lojas
 
 - [x] Design: Arena é o padrão desde a 0.42 (clássico no ramo `design-classico`).
-- [ ] Refazer os prints da apresentação (`node tools/intro-shots.js`) no design Arena.
+- [x] Refazer os prints da apresentação (`node tools/intro-shots.js`) no design Arena (0.46).
 - [ ] Apagar o código do clássico que o Arena sobrescreve (opcional, deixa o app mais leve).
 - [x] Política de privacidade e página de suporte (0.43): https://holmgds-gui.github.io/atlas-muscular/privacidade.html e https://holmgds-gui.github.io/atlas-muscular/suporte.html (link nas Configurações; usar nas lojas).
 - [ ] "Entrar com Apple" (a Apple exige quando o app tem login com Google).
@@ -41,14 +41,17 @@ Atlas 2D e 3D (♂/♀, quatro modos: Músculos, Grupos, Articulações e Cardio
 - [x] Treinos dos famosos: nomes genéricos desde a 0.45 (sem pessoas nem marcas).
 - [x] Projeto Capacitor (0.44): pasta `app/`, pacote `com.muscleatlas.app`, workflow `App Android` gera .aab/.apk (Actions › App Android › artefatos).
 - [ ] Dono: pôr os 4 segredos no GitHub (Settings › Secrets › Actions): KEYSTORE_B64, KEYSTORE_PASS, KEY_ALIAS=upload, KEY_PASS (= KEYSTORE_PASS). A chave foi entregue a ele.
-- [ ] Firebase: adicionar app Android `com.muscleatlas.app` com o SHA-1 da chave de envio e, depois do 1º envio, o SHA-1 da "chave de assinatura do app" do Play Console; baixar `google-services.json` e pôr em base64 no segredo GOOGLE_SERVICES_B64.
+- [x] Firebase: app Android `com.muscleatlas.app` criado (24/11/2026) com o SHA-1 da chave de envio.
+- [ ] Dono: mandar o `google-services.json` (baixado na pasta Downloads do PC) para o Claude pôr no app, ou pôr em base64 no segredo GOOGLE_SERVICES_B64.
+- [ ] Depois do 1º envio ao Play Console: copiar o SHA-1 da "chave de assinatura do app" (Play Console › Integridade do app) e adicionar no Firebase, no mesmo app Android.
 - [ ] iOS: `npx cap add ios`, GoogleService-Info.plist, build no Mac do GitHub Actions (precisa da conta Apple).
 - [ ] iOS: montar no Mac (ou no Mac grátis do GitHub Actions), assinar e enviar pela App Store Connect.
 - [ ] Android: gerar o .aab assinado e guardar a chave de assinatura com segurança.
 - [ ] Play: teste fechado com pelo menos 12 pessoas por 14 dias (conta pessoal nova) antes de publicar para todos.
-- [ ] Material da loja: ícone 1024 px, fotos de tela (iPhone 6,7"/6,5", Android), descrição curta e longa em pt/en/es, palavras-chave, categoria Saúde e fitness.
-- [ ] Formulários: privacidade da Apple (dados coletados: e-mail e treinos, só com conta), segurança de dados do Google, classificação etária.
-- [ ] Conferir se o nome "Muscle Atlas" está livre nas lojas (e marca registrada).
+- [x] Material da Play Store (0.46): textos pt/en/es, imagem de destaque, ícone e 7 capturas por idioma em [loja/LOJA.md](loja/LOJA.md) (`node tools/loja-shots.js`).
+- [ ] Material da App Store: capturas no tamanho do iPhone (quando fizer o iOS).
+- [x] Respostas dos formulários (segurança dos dados, classificação, público, App Privacy) em [loja/LOJA.md](loja/LOJA.md); falta preencher no console.
+- [ ] Conferir se o nome "Muscle Atlas" está livre nas lojas (e marca registrada). Busca rápida em 24/11/2026 não achou app com esse nome; conferir no console ao criar o app.
 
 ## Interessante adicionar (depois ou antes do lançamento)
 

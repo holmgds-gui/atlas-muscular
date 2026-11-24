@@ -65,6 +65,7 @@ Repositório e conta: **holmgds-gui/atlas-muscular**. Use só a conta `holmgds-g
 | `vendor/three/`, `fonts/` | Three.js 0.160 (MIT) e fontes Barlow/Barlow Condensed (OFL) servidos pelo próprio app (0.43) |
 | `privacidade.html`, `suporte.html`, `pagina.css`, `pagina.js` | Política de privacidade e suporte em pt/en/es (links nas Configurações e nas lojas) |
 | `docs/LANCAMENTO.md` | Lista de afazeres para publicar na App Store e na Play Store |
+| `docs/loja/` | Material das lojas: `LOJA.md` (textos pt/en/es e respostas dos formulários) e `imagens/` (capturas 1080×1920, destaque 1024×500, ícone), geradas por `node tools/loja-shots.js`; os dados de exemplo dos prints ficam em `tools/demo-seed.js` (também usado por `tools/intro-shots.js`) |
 | `tools/desktop/`, `.github/workflows/desktop.yml` | App para Windows (Electron) e o workflow que gera e publica o `MuscleAtlas-Setup.exe` |
 | `README.md` | Descrição curta para quem abre o repositório |
 | `docs/` | Histórico e fontes |
