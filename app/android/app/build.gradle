@@ -25,8 +25,10 @@ android {
             if (ks.exists()) {
                 storeFile ks
                 storePassword System.getenv("KEYSTORE_PASS")
-                keyAlias System.getenv("KEY_ALIAS") ?: "upload"
-                keyPassword System.getenv("KEY_PASS") ?: System.getenv("KEYSTORE_PASS")
+                // o alias é sempre "upload" e a senha da chave é a mesma do arquivo (como o dono criou, 25/11/2026);
+                // KEY_ALIAS/KEY_PASS não são mais lidos (um espaço a mais no segredo quebrava o build)
+                keyAlias "upload"
+                keyPassword System.getenv("KEYSTORE_PASS")
             }
         }
     }
