@@ -3,7 +3,8 @@
 # moderate thighs, narrower shoulders; breasts as a see-through aura, BREASTS=0 turns them off), solid skull with teeth (baked shadow), skin only on hands,
 # feet and the front of the neck (owner, nov/2026).
 # Needs: pip install trimesh fast_simplification scipy scikit-image (embree/pyembree speeds up the skull shadow) ; the BodyParts3D
-#        STL folder in BP3D_STL (muscles, bones, skin FMA7163, the 28 teeth and the eyeballs FMA12513) ; sel.tsv next to this file.
+#        STL folder in BP3D_STL (muscles, bones, skin FMA7163, the 28 teeth, the eyeballs FMA12513 and the ears FMA52780) ; sel.tsv next to this file.
+#        The glb has two heads: "osso" (skull, with "pele_n" = front of the neck) and "cabeca" (mannequin, 0.54); the app shows one.
 # Run:  BP3D_STL=/path/to/stl python3 build.py        ->  corpo.glb   + juntas.json
 #       BP3D_STL=/path/to/stl SEX=f python3 build.py  ->  corpo-f.glb + juntas-f.json
 #       then  npx @gltf-transform/cli quantize corpo.glb ../../3d/corpo-N.glb  (and the same for the female body), and copy the
@@ -146,17 +147,65 @@ raw=[(k,n,m) for k,n,m in raw if len(m.faces)]
 # --- skin only where there is no muscle to show (owner: the skull, bony hands and feet looked odd): head, front of the
 #     neck (hides windpipe and spine), hands below the wrist and feet below the ankle. Same grey as the muscles.
 SK=trimesh.load(D+'FMA7163.stl');SKc=SK.triangles_center
-def crop(mask,name,tgt,taper=None):
+def crop(mask,name,tgt,taper=None,key='pele'):
   s=SK.submesh([np.where(mask)[0]],append=True);s.merge_vertices()
   if taper:   # the top of the foot skin narrows onto the ankle tendons, so it does not look like a boot
     zt,band,k=taper;V=s.vertices.copy();w=np.clip((V[:,2]-(zt-band))/band,0,1)**1.5
     top=V[V[:,2]>zt-12];c=top[:,:2].mean(0);V[:,:2]=c+(V[:,:2]-c)*(1-k*w)[:,None];s=trimesh.Trimesh(V,s.faces,process=False)
   if len(s.faces)>tgt:
     v,f=fs.simplify(s.vertices.astype(np.float32),s.faces.astype(np.int32),target_reduction=1-tgt/len(s.faces));s=trimesh.Trimesh(v,f,process=True)
-  raw.append(('pele',name,s))
+  raw.append((key,name,s))
 x,y,z=SKc[:,0],SKc[:,1],SKc[:,2]
 
-crop((z>1330)&(z<=1408)&(np.abs(x)<44)&(y<-118)&(SK.face_normals[:,2]>-0.55),"skinneck",700,(1408,40,0.35))
+# front of the neck: its own node "pele_n", shown only with the skull (the mannequin head has its own neck)
+crop((z>1330)&(z<=1408)&(np.abs(x)<44)&(y<-118)&(SK.face_normals[:,2]>-0.55),"skinneck",700,(1408,40,0.35),key='pele_n')
+# ---- mannequin head (owner 0.54: "rosto de manequim bem feito sem erros"; the skull stays as an option in Settings):
+#      the head skin + both ears (FMA52780) + the eyeballs (closed, smooth lids) and the neck (the whole body section
+#      filled, kept inside a neck ellipse) are voxelised as one solid, small grooves are closed (eye slits, nostrils),
+#      blurred a little (soft lips and nose, no skin detail) and one smooth surface comes out. The bottom of the neck
+#      tucks in under the trapezius / sternocleidomastoid / clavicles. Node "cabeca", same grey as the muscles.
+def mannequin(P=0.8,ZC=1340,ZH=1418,RN=66,SIG=2.0,NF=20000,KT=0.3,BK=0,PB=0):
+  from scipy import ndimage;from skimage import measure
+  NK=np.array([0.,-87.]);E=trimesh.load(D+'FMA52780.stl');top=SK.bounds[1][2]
+  lo=np.round(np.array([-130.,-230.,ZC-10])/P)*P;shape=tuple(np.ceil((np.array([130.,30.,top+12])-lo)/P).astype(int)+1)
+  def surf(m,lo,shape):
+    G=np.zeros(shape,bool);pts=m.sample(int(m.area/(P*P*0.15)));ij=np.round((pts-lo)/P).astype(int);ok=np.all((ij>=0)&(ij<shape),1);G[tuple(ij[ok].T)]=True
+    return ndimage.binary_dilation(G,iterations=1)
+  def sub(mask):q=SK.submesh([np.where(mask)[0]],append=True);q.merge_vertices();return q
+  G=surf(sub((z>ZH-15)&(np.abs(x)<128)),lo,shape);B=np.zeros(shape,bool);k0=int(round((ZH-lo[2])/P))
+  for k in range(k0,shape[2]):B[:,:,k]=ndimage.binary_fill_holes(G[:,:,k])
+  lw=lo.copy();lw[0]=-280;sw=(int(round((280-lw[0])/P))+1,shape[1],k0+int(round(14/P)))
+  Gw=surf(sub((z>ZC-14)&(z<ZH+16)),lw,sw);ox=int(round((lo[0]-lw[0])/P))
+  ii=np.indices(shape[:2]).transpose(1,2,0)*P+lo[:2];ell=((ii-NK)**2).sum(-1)<=RN**2;del ii
+  for k in range(sw[2]):
+    f=ndimage.binary_fill_holes(Gw[:,:,k])[ox:ox+shape[0]];B[:,:,k]|=f&ell
+  Eg=surf(E,lo,shape);Ef=Eg.copy()
+  for j in range(shape[1]):Ef[:,j,:]|=ndimage.binary_fill_holes(Eg[:,j,:])
+  B|=Ef
+  for ce,r in EYES:   # only the box around each eye (a full-grid distance would need ~1 GB)
+    R=r+1.5;a0=np.maximum(np.floor((ce-R-lo)/P).astype(int),0);a1=np.minimum(np.ceil((ce+R-lo)/P).astype(int)+1,shape)
+    g=np.stack(np.meshgrid(*[np.arange(a0[i],a1[i])*P+lo[i] for i in range(3)],indexing='ij'),-1)
+    B[a0[0]:a1[0],a0[1]:a1[1],a0[2]:a1[2]]|=((g-ce)**2).sum(-1)<=R*R
+  ball=lambda r:np.add.outer(np.add.outer(np.arange(-r,r+1)**2,np.arange(-r,r+1)**2),np.arange(-r,r+1)**2)<=r*r
+  B=ndimage.binary_closing(np.pad(B,4),ball(3))[4:-4,4:-4,4:-4]
+  del G,Gw,Eg,Ef
+  v,f,_,_=measure.marching_cubes(ndimage.gaussian_filter(B.astype(np.float32),SIG/P),0.5);v=v*P+lo;del B
+  s=trimesh.Trimesh(v,f[:,::-1],process=True);s=max(s.split(only_watertight=False),key=lambda q:len(q.faces))
+  trimesh.smoothing.filter_taubin(s,iterations=10)
+  for tg in (200000,60000,NF):
+    v,f=fs.simplify(s.vertices.astype(np.float32),s.faces.astype(np.int32),target_reduction=1-tg/len(s.faces));s=trimesh.Trimesh(v,f,process=True)
+  trimesh.smoothing.filter_taubin(s,iterations=6)
+  # at the back the neck ends higher (BK mm) and is pushed in (PB mm), so the trapezius shows there
+  ss=lambda a,b,q:np.clip((q-a)/(b-a),0,1)**2*(3-2*np.clip((q-a)/(b-a),0,1))
+  V=s.vertices.copy();bk=ss(-110,-55,V[:,1]);ZT=ZC+30+BK*bk;t=np.clip((ZT-V[:,2])/(ZT-ZC+4),0,1)**1.4
+  V[:,:2]=NK+(V[:,:2]-NK)*(1-(KT+0.15*bk)*t)[:,None]
+  V[:,1]-=bk*PB*np.clip((1458-V[:,2])/55,0,1)**1.2
+  s=trimesh.Trimesh(V,s.faces,process=False);s.fix_normals();return s
+HEAD=mannequin(RN=58,KT=0.38,BK=50,PB=22) if FEM else mannequin()   # the female trapezius is small: slimmer neck
+print('mannequin faces',len(HEAD.faces))
+# soft baked shadow (ears, nostrils, under the jaw), much lighter than on the skull
+HEAD_AO=np.clip(0.6+0.4*ao(HEAD,n=32,maxd=40)**1.5,0,1)
+raw.append(('cabeca',"skinhead",HEAD))
 for sd,sx in(("right",-1),("left",1)):
   crop((z<872)&(z>560)&(x*sx>201),"skinhand "+sd,6000,(872,70,0.42))
   crop((z<150)&(x*sx>0),"skinfoot "+sd,4500,(150,95,0.5))
@@ -254,8 +303,10 @@ def waist(m):
 BUDGET_M=int(sys.argv[1]) if len(sys.argv)>1 else 170000;BUDGET_B=int(sys.argv[2]) if len(sys.argv)>2 else 45000
 barea=sum(m.area for k,n,m in raw if k in('osso','fundo'))
 for key,n,m in raw:
-  if key in('pele','mama'):
-    m=pose(m,n);v=m.vertices;m=trimesh.Trimesh(np.c_[v[:,0],v[:,2],-v[:,1]]/1000.0,m.faces,process=False);add(key,m);continue
+  if key in('pele','pele_n','mama','cabeca'):
+    m=pose(m,n);v=m.vertices;m=trimesh.Trimesh(np.c_[v[:,0],v[:,2],-v[:,1]]/1000.0,m.faces,process=False)
+    if key=='cabeca':_g=(HEAD_AO*255).astype(np.uint8);m.visual=trimesh.visual.ColorVisuals(m,vertex_colors=np.c_[_g,_g,_g,np.full(len(_g),255,np.uint8)])
+    add(key,m);continue
   share=(BUDGET_B*m.area/barea) if key in('osso','fundo') else (BUDGET_M*m.area/area)
   tgt=max(120 if key in('osso','fundo') else 400,int(share))
   if len(m.faces)>tgt:
@@ -307,7 +358,7 @@ def fiber_uv(m,fan):
   return np.c_[u-u.min()+0.01,v-v.min()+0.01]/1.0
 for key,L in meshes.items():
   for q in L:
-    if key in("osso","fundo","base","pele","tend") or key.startswith("mama"):continue
+    if key in("osso","fundo","base","pele","pele_n","cabeca","tend") or key.startswith("mama"):continue
     q.visual=trimesh.visual.TextureVisuals(uv=fiber_uv(q,key.startswith(FAN)))
 sc=trimesh.Scene();allv=[]
 for key,L in meshes.items():

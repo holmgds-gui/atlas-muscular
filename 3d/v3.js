@@ -1,6 +1,6 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
-   in index.html; the models are 3d/corpo-6.glb (male) and 3d/corpo-f-3.glb (female, owner 0.15–0.17), each with its joint
+   in index.html; the models are 3d/corpo-7.glb (male) and 3d/corpo-f-4.glb (female, owner 0.15–0.17; mannequin head 0.54), each with its joint
    marks (3d/juntas-2.json, 3d/juntas-f-2.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
    Atlas muscle keys, A-pose, Classic Physique upper body, proportional legs, skull, skin on hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
@@ -18,6 +18,9 @@ import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
 /* the parsed bodies are kept here and shared by every viewer (Atlas, Progresso, Força, Stories): one download, one
    parse, the geometry is shared between copies (owner 0.18: 3D in the whole app) */
 const SCN={};
+/* head (owner 0.54): "cabeca" = mannequin (default), "osso" + "pele_n" = skull with the front of the neck; Settings picks */
+let HEAD="mq";const HEADS=new Set();
+export function setHead(h){HEAD=h==="skull"?"skull":"mq";HEADS.forEach(f=>f())}
 function getScene(file,onProg){
   if(!SCN[file])SCN[file]=(async()=>{const r=await fetch(new URL(file,import.meta.url));if(!r.ok)throw 0;const tot=+r.headers.get("content-length")||4000000;let buf;
     if(r.body&&r.body.getReader){const rd=r.body.getReader(),ch=[];let got=0;
@@ -87,7 +90,7 @@ export function mount(box, api){
 
   function paint(){const art=!!state.__art;
     for(const [k0,o] of Object.entries(parts)){if(k0==="mama"){o.material.uniforms.col.value.copy(art?C.art:C.aura);continue}const k=BASEK(k0),s=art?{}:state[k]||{};
-    const c=art?(/^(osso|fundo|base|pele|tend)$/.test(k)?C.art:C.art2):s.on?C.target:s.syn?C.syn:k==="osso"?C.bone:k==="fundo"||k==="base"?C.base:k==="deco"||k==="tend"?C.mlo:k==="pele"?C.m:s.c?(s.dim?new THREE.Color(s.c).lerp(C.m,.75):new THREE.Color(s.c)):(k===hov?C.hov:C.m);
+    const c=art?(/^(osso|fundo|base|pele|pele_n|cabeca|tend)$/.test(k)?C.art:C.art2):s.on?C.target:s.syn?C.syn:k==="osso"?C.bone:k==="fundo"||k==="base"?C.base:k==="deco"||k==="tend"?C.mlo:/^(pele|pele_n|cabeca)$/.test(k)?C.m:s.c?(s.dim?new THREE.Color(s.c).lerp(C.m,.75):new THREE.Color(s.c)):(k===hov?C.hov:C.m);
     if(o.userData.fu)o.userData.fu.value.copy(C.fib);baseU.value.copy(C.base);
     o.material.color.copy(c);o.material.emissive.copy(s.on?C.target:s.syn?C.syn:new THREE.Color(0));o.material.emissiveIntensity=s.on||s.syn?0.18:0}
     /* Articulações: the joint marks (ring + dot, like the 2D) show only in that mode; the chosen joint is red */
@@ -156,9 +159,9 @@ export function mount(box, api){
     let best=null,bd=Infinity;for(const g of jMarks){const p=g.position.clone().project(camera),dx=(p.x-ndc.x)*r.width/2,dy=(p.y-ndc.y)*r.height/2,d=Math.hypot(dx,dy);
       const rad=Math.max(16,g.scale.x/ (camera.position.distanceTo(g.position)*Math.tan(THREE.MathUtils.degToRad(camera.fov/2)))*r.height/2*1.6);if(d<rad&&d<bd){bd=d;best=g.userData.j}}return best}
   function pick(x,y){const r=canvas.getBoundingClientRect();ndc.set(((x-r.left)/r.width)*2-1,-((y-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);
-    const hs=ray.intersectObjects(pickables,false),h=hs[0];lastHit=h?h.point:null;if(!h||!h.face)return null;
+    const hs=ray.intersectObjects(pickables.filter(o=>o.visible),false),h=hs[0];lastHit=h?h.point:null;if(!h||!h.face)return null;
     const front=x=>x.face&&x.face.normal.clone().transformDirection(x.object.matrixWorld).dot(ray.ray.direction)<0;  /* the inside of a muscle seen through a gap is not a tap on it */
-    const NM=k=>/^(osso|fundo|base|deco|tend|pele)$/.test(k);
+    const NM=k=>/^(osso|fundo|base|deco|tend|pele|pele_n|cabeca)$/.test(k);
     if(!front(h))return null;if(!NM(h.object.userData.k))return BASEK(h.object.userData.k);
     /* the filler layer sits just under the muscles: a tap on a seam still picks the muscle right behind it */
     const m=hs.find(x=>x.distance-h.distance<0.02&&!NM(x.object.userData.k)&&front(x));return m?BASEK(m.object.userData.k):h.object.userData.k}
@@ -175,7 +178,7 @@ export function mount(box, api){
     if(state.__art){const j=pickJ(e.clientX,e.clientY);if(j){api.joint(j);return}}
     const k=state.__art?null:pick(e.clientX,e.clientY),now=performance.now();
     if(now-lastTap.t<330&&Math.hypot(e.clientX-lastTap.x,e.clientY-lastTap.y)<30){lastTap.t=0;focusAt(lastHit);return}
-    lastTap={t:now,x:e.clientX,y:e.clientY};api.tap(k&&!/^(osso|fundo|base|deco|tend|pele)$/.test(k)?k:null)});
+    lastTap={t:now,x:e.clientX,y:e.clientY};api.tap(k&&!/^(osso|fundo|base|deco|tend|pele|pele_n|cabeca)$/.test(k)?k:null)});
   const tip=document.createElement("div");tip.className="v3tip";tip.hidden=true;box.appendChild(tip);
   canvas.addEventListener("pointermove",e=>{if(e.pointerType!=="mouse"||e.buttons)return;
     if(state.__art){const j=pickJ(e.clientX,e.clientY);if(j!==hovJ){hovJ=j;paint();canvas.style.cursor=j?"pointer":"grab"}tip.hidden=!j;if(j){const r=box.getBoundingClientRect();tip.textContent=api.jname(j);tip.style.left=(e.clientX-r.left)+"px";tip.style.top=(e.clientY-r.top)+"px"}return}
@@ -188,7 +191,7 @@ export function mount(box, api){
   const mo=new MutationObserver(()=>{readColors();paint()});mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class","style"]});
   const mq=matchMedia("(prefers-color-scheme: dark)"),onMq=()=>{readColors();paint()};mq.addEventListener("change",onMq);
 
-  const FILES={m:["./corpo-6.glb","./juntas-2.json"],f:["./corpo-f-3.glb","./juntas-f-2.json"]};let loadN=0;
+  const FILES={m:["./corpo-7.glb","./juntas-2.json"],f:["./corpo-f-4.glb","./juntas-f-2.json"]};let loadN=0;
   async function load(sx){sx=sx==="f"?"f":"m";if(sx===curSex)return;curSex=sx;const my=++loadN,live=()=>alive&&my===loadN;
     fetch(new URL(FILES[sx][1],import.meta.url)).then(r=>r.json()).then(j=>{if(live()){clearJoints();addJoints(j)}}).catch(()=>{});
     let base;try{base=await getScene(FILES[sx][0],api.progress)}catch(e){if(live())api.fail();return}
@@ -199,9 +202,9 @@ export function mount(box, api){
       for(const k in parts)delete parts[k];pickables.length=0;meshes.length=0;ghosts.length=0;root=g.scene;
       const ms=[];g.scene.traverse(o=>{if(o.isMesh)ms.push(o)});
       ms.forEach(o=>{const k=(o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"deco").replace(/_\d+$/,"");
-        o.material=new THREE.MeshStandardMaterial({color:0x999999,roughness:k==="osso"?0.75:0.55,metalness:0,side:THREE.DoubleSide,vertexColors:!!o.geometry.attributes.color});   /* skull: baked shadow in the orbits, nose and teeth */
+        o.material=new THREE.MeshStandardMaterial({color:0x999999,roughness:k==="osso"?0.75:k==="cabeca"?0.62:0.55,metalness:0,side:THREE.DoubleSide,vertexColors:!!o.geometry.attributes.color});   /* skull: baked shadow in the orbits, nose and teeth */
         shade(o,!!o.geometry.attributes.uv&&k!=="osso"&&k!=="fundo");o.userData.k=k;parts[k]=o;pickables.push(o);
-        o.userData.idm=new THREE.ShaderMaterial({uniforms:{id:{value:k.startsWith("mama_")?250:meshes.length+1},sd:{value:/^(osso|fundo|base|pele|tend|mama_.*)$/.test(k)?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
+        o.userData.idm=new THREE.ShaderMaterial({uniforms:{id:{value:k.startsWith("mama_")?250:meshes.length+1},sd:{value:/^(osso|fundo|base|pele|pele_n|cabeca|tend|mama_.*)$/.test(k)?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
         if(k==="mama"){o.material=ghostMat();o.renderOrder=5;
           pickables.splice(pickables.indexOf(o),1);ghosts.push(o);return}
         lay(o.material,k);lay(o.userData.idm,k);meshes.push(o)});
@@ -210,7 +213,10 @@ export function mount(box, api){
       {const P=[];g.scene.updateMatrixWorld(true);const v=new THREE.Vector3();
         for(const o of ms){const a=o.geometry.attributes.position,st=Math.max(1,Math.floor(a.count/260));for(let i=0;i<a.count;i+=st){v.fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);P.push(v.x,v.y,v.z)}}
         CLOUD=new Float32Array(P)}
-      const first=!ready;ready=true;if(first){resize();view(curV,false)}else{lims();need=true}paint();readyRes&&readyRes();api.ready()}}
+      applyHead();const first=!ready;ready=true;if(first){resize();view(curV,false)}else{lims();need=true}paint();readyRes&&readyRes();api.ready()}}
+  /* an old model without the mannequin keeps its skull */
+  function applyHead(){const mq=HEAD!=="skull"&&!!parts.cabeca;if(parts.osso)parts.osso.visible=!mq;if(parts.pele_n)parts.pele_n.visible=!mq;if(parts.cabeca)parts.cabeca.visible=mq;need=true}
+  HEADS.add(applyHead);
   let readyRes=null;const readyP=new Promise(r=>readyRes=r);
   load(api.sex?api.sex():"m");
 
@@ -230,7 +236,7 @@ export function mount(box, api){
   return {
     sync(s){state=s||{};paint()},
     /* which muscle is under this screen point (menu do botão direito / segurar) */
-    pickAt(x,y){const k=ready?pick(x,y):null;return k&&!/^(osso|fundo|base|deco|tend|pele)$/.test(k)?k:null},
+    pickAt(x,y){const k=ready?pick(x,y):null;return k&&!/^(osso|fundo|base|deco|tend|pele|pele_n|cabeca)$/.test(k)?k:null},
     view(v){view(v==="back"?"back":"front")},
     sex(s){return load(s)},
     whenReady(){return readyP},
@@ -257,6 +263,6 @@ export function mount(box, api){
       return {dist:o.length(),polar:THREE.MathUtils.radToDeg(Math.acos(o.y/o.length())),surf:m,max:controls.maxDistance,min:controls.minDistance}},
     jointAt(j){const g=jMarks.find(x=>x.userData.j===j);if(!g)return null;const c=g.position.clone().project(camera),r=canvas.getBoundingClientRect();return {x:r.left+(c.x+1)/2*r.width,y:r.top+(1-c.y)/2*r.height,c:"#"+g.userData.fill.material.color.getHexString()}},
     color(k){const o=parts[k];return o?"#"+o.material.color.getHexString():null},
-    dispose(){alive=false;renderer.setAnimationLoop(null);ro.disconnect();mo.disconnect();mq.removeEventListener("change",onMq);controls.dispose();renderer.dispose();canvas.remove();tip.remove()}
+    dispose(){alive=false;HEADS.delete(applyHead);renderer.setAnimationLoop(null);ro.disconnect();mo.disconnect();mq.removeEventListener("change",onMq);controls.dispose();renderer.dispose();canvas.remove();tip.remove()}
   };
 }

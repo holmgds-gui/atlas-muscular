@@ -2471,7 +2471,7 @@ const LS={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.pa
           set(k,v){try{localStorage.setItem(k,JSON.stringify(v));if(SYNCK.has(k)&&self.__sd)self.__sd();return true}catch(e){return false}}};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 /* app settings (Configurações). Some are saved but not active yet; see renderConf. */
-const CONF_DEF={name:"",age:null,height:null,exp:"",theme:"auto",accent:"",fs:"m",noanim:false,lang:null,unit:"kg",sets:3,reps:"8-12",rest:90,goal:0,remind:false,rdays:[0,2,4],rtime:"18:00",sound:true,vibe:true,fig:"3d"};
+const CONF_DEF={name:"",age:null,height:null,exp:"",theme:"auto",accent:"",fs:"m",noanim:false,lang:null,unit:"kg",sets:3,reps:"8-12",rest:90,goal:0,remind:false,rdays:[0,2,4],rtime:"18:00",sound:true,vibe:true,fig:"3d",head:"mq"};
 let CONF=(()=>{const c=LS.get("atlas-conf",null);return {...CONF_DEF,...(c&&typeof c==="object"?c:{})}})();
 const saveConf=()=>{if(!LS.set("atlas-conf",CONF))toast("Não foi possível salvar neste aparelho")};
 function accMix(a,b,t){const h=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)),A=h(a),B=h(b);
@@ -2741,7 +2741,7 @@ async function set3D(on,quiet){v3on=on;v3ui();if(!on)return;if(!quiet)buzz();
   if(v3busy)return;v3busy=true;v3loading();const L=$("v3load");
   const fail=()=>{L.hidden=false;L.innerHTML=`<span>${tx("Não deu para carregar o 3D. Confira a internet e toque em 3D de novo.","Couldn't load the 3D body. Check the internet and tap 3D again.","No se pudo cargar el 3D. Revisa internet y toca 3D otra vez.")}</span>`;
     if(V3){V3.dispose();V3=null}v3busy=false;v3on=false;v3ui();$("v3").hidden=false;setTimeout(()=>{if(!v3on){$("v3").hidden=true;L.hidden=true}},3500)};
-  try{const mod=await import("./3d/v3.js");
+  try{const mod=await import("./3d/v3.js");mod.setHead&&mod.setHead(CONF.head);
     V3=mod.mount($("v3"),{firm:true,covered:isCovered,sex:()=>sex,name:k=>M[k]?M[k].n:"",jname:j=>JOINTS[j]?JOINTS[j].n:"",
       joint:j=>{if(isCovered()){peek=true;render();return}const g=svg.querySelector(`.jt[data-j="${j}"]`);if(g)onFigTap(g);else selectJoint(j,true)},
       tap:k=>{if(isCovered()){peek=true;render();return}if(!k)return;const g=svg.querySelector(`[data-m="${k}"]`);if(g)onFigTap(g);else if(M[k])selectMuscle(k,true)},
@@ -2769,7 +2769,7 @@ P3EL.addEventListener("click",e=>{const b=e.target.closest("[data-p3]");if(!b)re
 function p3rerender(){if(tab==="prog"){const y=$("tab-prog").scrollTop;renderProg();$("tab-prog").scrollTop=y}}
 function p3mount(){if(P3||P3busy)return;P3busy=true;const L=P3EL.querySelector(".v3load");L.hidden=false;
   L.innerHTML=`<span>${tx("Carregando o corpo 3D…","Loading the 3D body…","Cargando el cuerpo 3D…")}</span>`;
-  import("./3d/v3.js").then(mod=>{P3=mod.mount(P3EL.querySelector(".p3box"),{covered:()=>false,sex:()=>sex,name:k=>P3info?P3info(k):"",jname:()=>"",joint:()=>{},
+  import("./3d/v3.js").then(mod=>{mod.setHead&&mod.setHead(CONF.head);P3=mod.mount(P3EL.querySelector(".p3box"),{covered:()=>false,sex:()=>sex,name:k=>P3info?P3info(k):"",jname:()=>"",joint:()=>{},
     tap:k=>p3tip(k),progress:()=>{},ready:()=>{L.hidden=true;P3busy=false;P3.sync(P3st);P3.view(p3V)},fail:()=>{P3bad=true;P3busy=false;if(P3){P3.dispose();P3=null}p3rerender()}})})
     .catch(()=>{P3bad=true;P3busy=false;p3rerender()})}
 /* puts the 3D (or the 2D figure, by the setting) in host. st = {muscle key: {c: colour, dim}}, info(k) = text for a tap */
@@ -5543,6 +5543,7 @@ function renderConf(){
     ${cfRow("Cor de destaque","Troca o vermelho do app todo: título, abas, músculo escolhido (2D e 3D), botões e gráficos. Apagar e avisos continuam vermelhos.",`<div class="cf-dots" role="group" aria-label="Cor de destaque">${ACCENTS.map(([v,t,css])=>`<button data-cf="accent" data-v="${v}" aria-pressed="${c.accent===v}" aria-label="${t}" title="${t}" style="background:${css||v}"></button>`).join("")}</div>`,false,1)}
     ${cfRow("Tamanho da letra","",cfSeg("fs",[["s","Pequena"],["m","Normal"],["l","Grande"]],c.fs,"Tamanho da letra"),false,1)}
     ${cfRow(tx("Boneco do Atlas","Atlas figure","Muñeco del Atlas"),tx("Com 2D e 3D, um botão no canto do boneco troca entre os dois.","With 2D and 3D, a button in the corner of the figure switches between them.","Con 2D y 3D, un botón en la esquina del muñeco cambia entre los dos."),cfSeg("fig",[["2d",tx("Só 2D","2D only","Solo 2D")],["3d",tx("Só 3D","3D only","Solo 3D")],["both",tx("2D e 3D","2D and 3D","2D y 3D")]],c.fig,tx("Boneco do Atlas","Atlas figure","Muñeco del Atlas")),false,1)}
+    ${c.fig!=="2d"?cfRow(tx("Cabeça do boneco 3D","3D figure head","Cabeza del muñeco 3D"),tx("Manequim liso ou a caveira de antes.","Smooth mannequin or the skull from before.","Maniquí liso o la calavera de antes."),cfSeg("head",[["mq",tx("Manequim","Mannequin","Maniquí")],["skull",tx("Caveira","Skull","Calavera")]],c.head==="skull"?"skull":"mq",tx("Cabeça do boneco 3D","3D figure head","Cabeza del muñeco 3D")),false,1):""}
     ${cfRow("Reduzir animações","Desliga as transições.",cfSw("noanim",c.noanim))}
     ${cfRow("Idioma","",`<select class="inp cf-in" data-cfsel="lang" data-notr><option value="pt"${LANG==="pt"?" selected":""}>Português</option><option value="en"${LANG==="en"?" selected":""}>English</option><option value="es"${LANG==="es"?" selected":""}>Español</option></select>`)}
   </div>
@@ -5595,6 +5596,7 @@ $("confBody").addEventListener("click",e=>{
     if(k==="sex"){setSex(v)}
     else if(k==="unit"){if(v!==UNIT){cfSet(k,v);location.reload()}return}   // kg/lb: everything is redrawn in the new unit
     else if(k==="fig"){cfSet(k,v);applyFig(false)}
+    else if(k==="head"){cfSet(k,v);if(V3||P3)import("./3d/v3.js").then(m=>m.setHead&&m.setHead(v))}
     else if(k==="goal"||k==="rest")cfSet(k,+v);
     else cfSet(k,k==="exp"&&CONF.exp===v?"":v);
     return renderConf()}
