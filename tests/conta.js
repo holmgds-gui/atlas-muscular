@@ -81,16 +81,26 @@ for(const th of ['dark','light']){docs.clear();
   ok(await until(B.p,()=>syncUser&&syncSt==="ok"),th+" B recarregou e continua conectado");
   await B.p.waitForTimeout(1200);
   s=await B.p.evaluate(()=>({w:workouts.length,ids:new Set(workouts.map(w=>w.id)).size,p:plans.length}));ok(s.w===s.ids&&s.w===6&&s.p===2,th+" sem duplicar "+JSON.stringify(s));
+  // ---- economy (0.53): reopening reads only what changed since last time, not the whole account
+  await B.p.evaluate(()=>localStorage.setItem("atlas-fbtest-margin","0"));
+  await A.p.evaluate(()=>{workouts.push({id:"wa5",date:"2026-11-19",title:"Depois",planId:null,done:true,notes:"",items:[]});saveW()});
+  await until(A.p,()=>syncSt==="ok");await A.p.waitForTimeout(800);
+  const total=live("w").length+live("p").length+live("k").length;
+  await B.p.reload();await B.p.waitForTimeout(500);
+  ok(await until(B.p,()=>workouts.some(w=>w.id==="wa5")),th+" reabrir: o treino novo do A chegou");
+  await B.p.waitForTimeout(1200);
+  const rd=await B.p.evaluate(()=>self.__ffReads);ok(rd>=1&&rd<=4&&rd<total,th+` reabrir leu só o que mudou: ${rd} de ${total} registros`);
+  await B.p.evaluate(()=>localStorage.removeItem("atlas-fbtest-margin"));
   // ---- sign out on B: data stays on the device
   await B.p.evaluate(()=>setTab("conf"));await B.p.waitForTimeout(300);await B.p.click('[data-cact="logout"]');await B.p.waitForLoadState();await B.p.waitForTimeout(1200);
   s=await B.p.evaluate(()=>({u:syncUser,w:workouts.length,login:!!document.querySelector('[data-cact="login"]')}));
-  ok(!s.u&&s.w===6,th+" Sair: dados ficam no aparelho "+JSON.stringify(s));
+  ok(!s.u&&s.w===7,th+" Sair: dados ficam no aparelho "+JSON.stringify(s));
   // ---- delete account on A: the cloud is emptied, the device keeps its data
   await A.p.evaluate(()=>setTab("conf"));await A.p.waitForTimeout(300);await A.p.click('[data-cact="delAcct"]');await A.p.waitForTimeout(200);
   await A.p.evaluate(()=>document.querySelector('[data-cact="delAcct!"]').scrollIntoView({block:"center"}));await A.p.screenshot({path:`${OUT}/conta-${th}-4-apagar.png`});
   await A.p.click('[data-cact="delAcct!"]');await A.p.waitForTimeout(2500);
   ok(live("w").length===0&&live("p").length===0&&live("k").length===0,th+" Apagar minha conta limpou a nuvem");
-  s=await A.p.evaluate(()=>({u:syncUser,w:workouts.length}));ok(!s.u&&s.w===6,th+" A continua com os dados no aparelho "+JSON.stringify(s));
+  s=await A.p.evaluate(()=>({u:syncUser,w:workouts.length}));ok(!s.u&&s.w===7,th+" A continua com os dados no aparelho "+JSON.stringify(s));
   await A.ctx.close();await B.ctx.close()}
 // ---- without the Firebase project the row stays "em breve" (only while FB_CFG is empty)
 {const ctx=await b.newContext({viewport:{width:390,height:844}});const p=await ctx.newPage();await p.addInitScript(()=>{localStorage.setItem("atlas-intro","1");localStorage.setItem("atlas-conf",'{"fig":"2d"}')});

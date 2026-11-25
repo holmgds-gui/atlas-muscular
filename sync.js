@@ -10,7 +10,12 @@
      nuvem. Mudou aqui e não lá → envia. Mudou lá e não aqui → aplica. Mudou nos dois → fica a deste aparelho e envia.
      Na 1ª entrada a base está vazia: tudo do aparelho sobe e tudo da conta desce (junta, sem duplicar: mesmo id = um só).
    - Sem internet o Firestore guarda os envios no próprio aparelho (IndexedDB) e manda quando a internet volta.
-   - O app (index.html) entrega `app.data()` (o que está no aparelho) e `app.apply(D)` (troca e redesenha). */
+   - O app (index.html) entrega `app.data()` (o que está no aparelho) e `app.apply(D)` (troca e redesenha).
+   - Leitura econômica (0.53, para o plano grátis aguentar muita gente: 50 mil leituras/dia): o Firestore cobra uma
+     leitura por documento que chega, e reabrir o app depois de 30 min relia a coleção inteira. Agora cada aparelho
+     guarda a hora (do servidor, campo `t`) do registro mais novo que já recebeu de cada coleção (`lastT`, em
+     `atlas-sync-t-<uid>`) e, ao abrir, só pede os registros com `t` maior que ela (menos 10 min de folga). Apagar já é
+     uma marca `d:null` com `t` novo, então aparece também. A 1ª vez (aparelho novo ou versão antiga) lê tudo. */
 const V="13.1.0",G=`https://www.gstatic.com/firebasejs/${V}/`;
 let A,F,auth,db,app,user=null,unsubs=[],base=new Map(),ready={w:0,p:0,k:0},timer=0,st="off",pend=0,started=false,fresh=false;
 
@@ -19,7 +24,11 @@ function h(s){let a=0xdeadbeef,b=0x41c6ce57;for(let i=0;i<s.length;i++){const c=
   a=Math.imul(a^(a>>>16),2246822507)^Math.imul(b^(b>>>13),3266489909);b=Math.imul(b^(b>>>16),2246822507)^Math.imul(a^(a>>>13),3266489909);
   return (4294967296*(2097151&b)+(a>>>0)).toString(36)}
 const DEL="-";
-const bKey=()=>"atlas-sync-base-"+user.uid;
+const bKey=()=>"atlas-sync-base-"+user.uid,tKey=()=>"atlas-sync-t-"+user.uid;
+let lastT={},delta={};const MARGIN=(()=>{try{const v=localStorage.getItem("atlas-fbtest-margin");if(v!=null)return +v}catch(e){}return 10*60*1000})();   // tests can set 0
+const tMs=v=>v&&typeof v.toMillis==="function"?v.toMillis():typeof v==="number"?v:0;
+function loadT(){try{lastT=JSON.parse(localStorage.getItem(tKey())||"{}")||{}}catch(e){lastT={}}}
+function saveT(){try{localStorage.setItem(tKey(),JSON.stringify(lastT))}catch(e){}}
 function loadBase(){try{base=new Map(Object.entries(JSON.parse(localStorage.getItem(bKey())||"{}")))}catch(e){base=new Map()}}
 function saveBase(){try{localStorage.setItem(bKey(),JSON.stringify(Object.fromEntries(base)))}catch(e){}}
 
@@ -53,10 +62,13 @@ export function dirty(){if(!user)return;clearTimeout(timer);timer=setTimeout(pus
 
 /* what arrived from the account */
 function onRemote(col,snapq){
-  const loc=snap(),take=[];
-  for(const ch of snapq.docChanges()){
+  const loc=snap(),take=[],srv=!(snapq.metadata&&snapq.metadata.fromCache);let mx=lastT[col]||0;
+  for(const ch of snapq.docChanges({includeMetadataChanges:true})){
     if(ch.doc.metadata.hasPendingWrites)continue;
-    const key=col+"/"+ch.doc.id,d=ch.type==="removed"?null:(ch.doc.data().d??null);
+    // with the "only what changed" query a document never really leaves it (t only grows); ignore, don't delete
+    if(ch.type==="removed"&&delta[col])continue;
+    const raw=ch.type==="removed"?null:ch.doc.data();if(srv&&raw){const t=tMs(raw.t);if(t>mx)mx=t}
+    const key=col+"/"+ch.doc.id,d=raw?(raw.d??null):null;
     const rh=d==null?DEL:h(d),lj=loc.get(key),lh=lj==null?DEL:h(lj),bh=base.get(key);
     if(rh===lh){base.set(key,rh);continue}
     // settings, weight and achievements (k/…) on the 1st sign-in of a device: join both, the account's values first
@@ -67,7 +79,7 @@ function onRemote(col,snapq){
     if(localUntouched){take.push([key,d]);base.set(key,rh)}
   }
   if(take.length)apply(take);
-  saveBase();
+  saveBase();if(mx>(lastT[col]||0)){lastT[col]=mx;saveT()}
   // a device's 1st sync waits for the account's answer from the server (not just this device's empty copy), so nothing
   // from the account is overwritten by a new phone's defaults; offline it simply waits
   if(!ready[col]){if(fresh&&snapq.metadata&&snapq.metadata.fromCache)return;
@@ -87,9 +99,12 @@ function apply(take){
 }
 
 function listen(){
-  stop();ready={w:0,p:0,k:0};loadBase();fresh=base.size===0;
-  for(const c of ["w","p","k"])
-    unsubs.push(F.onSnapshot(F.collection(db,"users",user.uid,c),s=>onRemote(c,s),e=>{console.warn("sync listen",e);app.status("err",e&&e.code)}));
+  stop();ready={w:0,p:0,k:0};loadBase();loadT();fresh=base.size===0;if(fresh)lastT={};
+  for(const c of ["w","p","k"]){
+    const col=F.collection(db,"users",user.uid,c),since=lastT[c]||0;delta[c]=since>0;
+    const ref=delta[c]?F.query(col,F.where("t",">",F.Timestamp.fromMillis(Math.max(0,since-MARGIN)))):col;
+    // metadata changes too: when our own write is confirmed we learn its server time and move lastT past it
+    unsubs.push(F.onSnapshot(ref,{includeMetadataChanges:true},s=>onRemote(c,s),e=>{console.warn("sync listen",e);app.status("err",e&&e.code)}))}
 }
 function stop(){unsubs.forEach(u=>u());unsubs=[]}
 
@@ -136,7 +151,7 @@ export function testLogin(json){return A.signInWithCredential(auth,A.GoogleAuthP
 
 /* Sair: os dados continuam neste aparelho; a cópia local da nuvem é apagada */
 export async function signOut(){await push();stop();try{if(navigator.onLine)await Promise.race([F.waitForPendingWrites(db),new Promise(r=>setTimeout(r,4000))])}catch(e){}
-  try{localStorage.removeItem(bKey())}catch(e){}
+  try{localStorage.removeItem(bKey());localStorage.removeItem(tKey())}catch(e){}
   await A.signOut(auth);try{const FA=nativeAuth();if(FA)await FA.signOut()}catch(e){}try{await F.terminate(db);await F.clearIndexedDbPersistence(db)}catch(e){}}
 
 /* Apagar minha conta: apaga tudo da nuvem e a conta; os dados deste aparelho ficam */
@@ -150,7 +165,7 @@ export async function deleteAccount(){
       if(user.providerData.some(p=>p.providerId==="password")){const pw=await app.askPw();if(!pw)throw e;await A.reauthenticateWithCredential(user,A.EmailAuthProvider.credential(user.email,pw))}
       else await A.reauthenticateWithPopup(user,new A.GoogleAuthProvider());
       await auth.currentUser.delete()}else throw e}
-  try{localStorage.removeItem("atlas-sync-base-"+uid)}catch(e){}
+  try{localStorage.removeItem("atlas-sync-base-"+uid);localStorage.removeItem("atlas-sync-t-"+uid)}catch(e){}
   try{await F.terminate(db);await F.clearIndexedDbPersistence(db)}catch(e){}
 }
 export const now=()=>({st,user:user?{uid:user.uid}:null});

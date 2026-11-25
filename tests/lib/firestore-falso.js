@@ -12,6 +12,13 @@ export const persistentLocalCache=()=>({}),persistentMultipleTabManager=()=>({})
 export function initializeFirestore(){const db={q:rd(LQ,[]),cache:rd(LC,{}),ls:new Set(),dead:false,waits:[],t:0};dbs.push(db);db.t=setInterval(()=>tick(db),150);return db}
 export const doc=(db,...p)=>({path:p.join("/"),id:p[p.length-1]});
 export const collection=(db,...p)=>({path:p.join("/")});
+// "only what changed" (0.53): query(collection, where("t", ">", Timestamp)); t here is a number (ms)
+export const Timestamp={fromMillis:ms=>({ms,toMillis:()=>ms})};
+export const where=(f,op,v)=>({f,op,v});
+export const query=(ref,...w)=>({path:ref.path,w});
+const pass=(l,data)=>!l.w||l.w.every(c=>c.f==="t"&&c.op===">"?(data&&data.t||0)>c.v.toMillis():true);
+// reads counted like the real bill: every document that comes from the server to a listener
+self.__ffReads=0;
 const parentOf=p=>p.split("/").slice(0,-1).join("/");
 function emit(db,col,changes,pending,fromCache=false,force=false){for(const l of db.ls)if(l.col===col&&(changes.length||force))l.next({metadata:{fromCache},docChanges:()=>changes.map(c=>({type:c.type,doc:{id:c.id,data:()=>c.data,metadata:{hasPendingWrites:pending}}}))})}
 export function writeBatch(db){const ops=[];return {set(r,data){ops.push({p:r.path,data:{...data,t:Date.now()}})},delete(r){ops.push({p:r.path,del:true})},
@@ -28,15 +35,17 @@ async function tick(db){
     if(db.q.length){const ops=db.q.slice();const r=await fetch(NUVEM+"/write",{method:"POST",body:JSON.stringify(ops)});if(r.ok){db.q=db.q.slice(ops.length);wr(LQ,db.q);if(!db.q.length){db.waits.splice(0).forEach(f=>f())}}}
     for(const l of db.ls){const r=await fetch(NUVEM+"/list?col="+encodeURIComponent(l.col)+"&since="+l.v);if(!r.ok)continue;const j=await r.json();l.v=j.v;
       const ch=[];for(const d of j.docs){const p=l.col+"/"+d.id,cur=db.cache[p];
+        if(!d.del&&!pass(l,d.data))continue;
         if(db.q.some(o=>o.p===p))continue;   // our own write is still on its way: the local version wins for now
         if(d.del){if(cur!==undefined){delete db.cache[p];ch.push({type:"removed",id:d.id,data:cur})}continue}
-        if(cur&&JSON.stringify(cur.d)===JSON.stringify(d.data.d))continue;
+        if(cur&&JSON.stringify(cur.d)===JSON.stringify(d.data.d)){if(l.meta)ch.push({type:"modified",id:d.id,data:d.data});continue}   // our own write confirmed (no read billed)
+        self.__ffReads++;
         db.cache[p]=d.data;ch.push({type:cur?"modified":"added",id:d.id,data:d.data})}
       wr(LC,db.cache);emit(db,l.col,ch,false,false,!l.srv);l.srv=1}
   }catch(e){}finally{db.busy=0}}
-export function onSnapshot(ref,next,err){const db=dbs[dbs.length-1];const l={col:ref.path,next,v:0};db.ls.add(l);
+export function onSnapshot(ref,a,b,c){const o=typeof a==="object"&&a?a:null,next=o?b:a;const db=dbs[dbs.length-1];const l={col:ref.path,next,v:0,w:ref.w,meta:!!(o&&o.includeMetadataChanges)};db.ls.add(l);
   // first answer comes from what this device already has (like the real offline cache)
-  const pre=Object.keys(db.cache).filter(p=>parentOf(p)===ref.path).map(p=>({type:"added",id:p.split("/").pop(),data:db.cache[p]}));
+  const pre=Object.keys(db.cache).filter(p=>parentOf(p)===ref.path&&pass(l,db.cache[p])).map(p=>({type:"added",id:p.split("/").pop(),data:db.cache[p]}));
   setTimeout(()=>emit(db,ref.path,pre,false,true,true),0);   // like the real one: first what is on the device (fromCache), then the server
   return ()=>db.ls.delete(l)}
 export async function getDocs(ref){const r=await fetch(NUVEM+"/list?col="+encodeURIComponent(ref.path)+"&since=0");const j=await r.json();
