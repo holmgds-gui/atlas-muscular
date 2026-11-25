@@ -61,7 +61,7 @@ As listas de exercícios, as faixas de séries, o ranking de força, o "Como faz
 
 ## Documentação
 
-- [CLAUDE.md](CLAUDE.md): como o app funciona por dentro e as decisões já tomadas com o dono (o Claude lê este arquivo sozinho ao começar).
+- [CLAUDE.md](CLAUDE.md): resumo curto para o Claude (lido sozinho ao começar) e [docs/DETALHES.md](docs/DETALHES.md): como cada parte do app funciona por dentro e as decisões já tomadas com o dono.
 - [docs/HISTORICO.md](docs/HISTORICO.md): o que foi construído, em ordem, e as perguntas respondidas.
 - [docs/FONTES.md](docs/FONTES.md): todos os estudos e links usados.
 - [tests/README.md](tests/README.md): como rodar os testes.

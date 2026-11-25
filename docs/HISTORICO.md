@@ -202,6 +202,7 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 - **Versão 0.51**: o boneco 3D do Atlas volta a acompanhar o mouse/dedo para cima e para baixo, só um pouco (até 12° acima ou abaixo da horizontal); continua sem inércia.
 - **Versão 0.52**: no celular, ao arrastar a lista para baixo, o boneco pequeno do canto cresce junto com o dedo até o tamanho grande (2D e 3D); ao soltar ele continua dali, sem pulo.
 - **Versão 0.53** (pedido do dono: aguentar muita gente no plano grátis do Firebase, 50 mil leituras/dia): a sincronização só pede o que mudou. Cada aparelho guarda a hora (do servidor) do registro mais novo que já recebeu de cada coleção (`atlas-sync-t-<uid>`) e, ao abrir, ouve só os registros com `t` maior (10 min de folga); os próprios envios confirmados também avançam essa hora (`includeMetadataChanges`). Antes, abrir o app depois de 30 min relia a conta inteira (centenas de leituras); agora ~1–5. 1ª vez num aparelho continua lendo tudo. Teste em `tests/conta.js` ("reabrir leu só o que mudou: 1 de 13").
+- **CLAUDE.md curto** (25/11/2026, pedido do dono para gastar menos uso): o `CLAUDE.md` (≈22 mil tokens, relido a cada passo do Claude) virou um resumo de ≈3 mil com as regras gerais; todo o texto detalhado foi para `docs/DETALHES.md`, que o Claude lê só no trecho da parte que vai mexer.
 - Corrigido junto: séries só com a carga planejada não contam mais como feitas no Ao vivo, e a "Última vez" ignora séries sem repetições.
 
 ## 17. Perguntas que o dono fez (respostas resumidas)
