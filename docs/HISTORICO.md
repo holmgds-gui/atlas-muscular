@@ -223,6 +223,8 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 - **Versão 0.71 — músculos mais volumosos** (dono: "com a cabeça nova os músculos ficaram um pouco pequenos perto dela"): todo músculo cresce 30% a mais no homem e 25% na mulher (os tendões não, então as articulações continuam finas). Esqueleto e articulações foram refeitos junto, para continuarem encaixados.
 - Corrigido junto: séries só com a carga planejada não contam mais como feitas no Ao vivo, e a "Última vez" ignora séries sem repetições.
 
+- **Gola no pescoço do boneco 3D (0.72, nov/2026)**: o dono disse que o trapézio superior parecia uma gola em volta da cabeça ("tá pra fora"). O músculo era cortado reto na nuca e a borda sobrava ~2 cm para fora do pescoço do manequim. Agora, com o manequim, o `3d/v3.js` afina a parte de cima desse músculo para dentro da elipse do pescoço da cabeça (`neckFit`/`neckApply`), então ele desce em rampa e a borda some. Vale para ♂ e ♀; com a caveira o músculo fica como era.
+
 ## 17. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.

@@ -228,7 +228,29 @@ export function mount(box, api){
   /* with the mannequin, the tops of the upper trapezius and of the deep neck tissue would poke through the back of
      its head (thin ragged bits with outlines): they are clipped a little above the nape (0.58) */
   const CLIPK=new Set(["trapezio_superior","deco","fundo"]),CLIPU={value:99},CLIPP=new THREE.Plane(new THREE.Vector3(0,-1,0),99);
-  function applyHead(){const mq=HEAD!=="skull"&&!!parts.cabeca;if(parts.osso)parts.osso.visible=!mq;if(parts.pele_n)parts.pele_n.visible=!mq;if(parts.cabeca)parts.cabeca.visible=mq;applyXr();
+  /* 0.72 (owner: "parece uma gola"): the upper trapezius was cut flat at the nape and its rim stuck out ~2 cm around the
+     mannequin's neck. With the mannequin, the vertices from just above the base of the neck up to the cut are drawn in
+     toward the neck's own ellipse (measured on the head model), so the muscle tapers into the neck and the rim hides
+     inside it. The geometry is cloned (the loaded one is shared); both versions are kept and swapped by applyHead. */
+  function neckFit(){const o=parts.trapezio_superior,h=parts.cabeca;if(!o||!h||o.userData.nk)return;
+    const m=o.matrixWorld,mh=h.matrixWorld;o.updateWorldMatrix(true,false);h.updateWorldMatrix(true,false);
+    const hb=new THREE.Box3().setFromObject(h),y0=hb.min.y,y1=hb.max.y-0.172*(hb.max.y-hb.min.y)/0.328,v=new THREE.Vector3();
+    const ha=h.geometry.attributes.position;let xn=1e9,xx=-1e9,zn=1e9,zx=-1e9;
+    for(let i=0;i<ha.count;i++){v.fromBufferAttribute(ha,i).applyMatrix4(mh);if(v.y>y0+0.03&&v.y<y0+0.10){xn=Math.min(xn,v.x);xx=Math.max(xx,v.x);zn=Math.min(zn,v.z);zx=Math.max(zx,v.z)}}
+    if(xx<xn)return;
+    const cx=(xn+xx)/2,cz=(zn+zx)/2,rx=(xx-xn)/2*NK.fit,rz=(zx-zn)/2*NK.fit,a0=y0+NK.from,inv=m.clone().invert();
+    const g=o.geometry.clone(),pa=g.attributes.position,buf=pa.isInterleavedBufferAttribute?pa.data:pa,orig=buf.array.slice();   /* the model's buffers are interleaved: positions, normals, … share one array */
+    for(let i=0;i<pa.count;i++){v.fromBufferAttribute(pa,i).applyMatrix4(m);
+      let t=(v.y-a0)/(y1-a0);t=Math.min(1,Math.max(0,t));t=t*t*(3-2*t);if(t<=0)continue;
+      const dx=v.x-cx,dz=v.z-cz,n=Math.hypot(dx/rx,dz/rz),k=n>1?1/n:1,f=1+(k-1)*t;
+      v.set(cx+dx*f,v.y,cz+dz*f).applyMatrix4(inv);pa.setXYZ(i,v.x,v.y,v.z)}
+    if(g.attributes.normal)g.computeVertexNormals();
+    o.geometry=g;o.userData.nk={buf,orig,fit:buf.array.slice()}}
+  const NK={fit:0.92,from:0.045};
+  function neckApply(on){const o=parts.trapezio_superior,n=o&&o.userData.nk;if(!n)return;
+    n.buf.array.set(on?n.fit:n.orig);n.buf.needsUpdate=true;
+    o.geometry.computeBoundingSphere();o.geometry.computeBoundingBox()}
+  function applyHead(){const mq=HEAD!=="skull"&&!!parts.cabeca;if(mq)neckFit();neckApply(mq);if(parts.osso)parts.osso.visible=!mq;if(parts.pele_n)parts.pele_n.visible=!mq;if(parts.cabeca)parts.cabeca.visible=mq;applyXr();
     let y=99;if(mq){const b=new THREE.Box3().setFromObject(parts.cabeca);y=b.max.y-0.172*(b.max.y-b.min.y)/0.328}
     CLIPU.value=y;CLIPP.constant=y;need=true}
   HEADS.add(applyHead);
