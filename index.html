@@ -3813,7 +3813,7 @@ function cLiveCard(it,w){const s=it.sets[0]||{};return `<div class="card lv-ex">
   <button class="btn primary wide lv-done" data-lv="cDone">✓ ${s.ok?tx("Salvar cardio","Save cardio","Guardar cardio"):tx("Cardio feito","Cardio done","Cardio hecho")}</button></div>`}
 function cSaveLive(s){const m=$("lvMin"),k=$("lvKm");if(m)s.min=m.value.trim();if(k)s.km=k.value.trim()}
 /* ---------------------------------------------------------- hoje tab */
-let openW=null,askDel=false,pendingImport=null;
+let openW=null,askDel=false,pendingImport=null,hjList=false;   /* hjList: the "Meus treinos" box in Hoje is open */
 function wCard(x){const onlyC=x.items.length&&x.items.every(isC);return `<div class="card tcard"><div class="row between"><div><div class="wx-n">${esc(x.title||"Treino")}</div><span class="muted-s">${x.items.length?x.items.map(it=>esc(dName(it.name,it.ref))+(isC(it)&&cMin(it,it.sets[0]||{},x)?` ${cMin(it,it.sets[0]||{},x)} min`:"")).join(" · "):"Sem exercícios"}</span></div>${statusPill(x)}</div>
   <div class="row">${x.done===false?`<button class="btn primary" data-act="markDone" data-wid="${x.id}">Marcar como feito</button><button class="btn" data-open="${x.id}">Continuar</button>`:`<button class="btn" data-open="${x.id}">${onlyC?tx("Ver","View","Ver"):"Ver séries"}</button><button class="btn" data-act="undo" data-wid="${x.id}">Desfazer</button>`}${isCustom(x)&&!onlyC?saveBtn(x):""}</div></div>`}
 /* this week (Mon–Sun) with what was actually done each day */
@@ -3854,7 +3854,7 @@ function renderTreino(){
       ${hvSeg()}
       ${weekDone()}
       ${isT?"":`<div class="pastbox"><div><b>Registrando ${esc(fmtLong(fromIso(sel)))}</b><span>${nDone?`${plural(nDone,"treino")} feito${nDone===1?"":"s"} neste dia. `:""}O que você marcar agora fica nesse dia.</span></div><button class="btn" data-act="toToday">Voltar para hoje</button></div>`}
-      <h3 class="section-t">Seus treinos${isT?"":` · ${esc(dayName)}`}</h3>`;
+      `;
     const pcard=p=>{const ex=tw.filter(x=>x.planId===p.id).pop(),tag=p.days.includes(sd)?`<span class="pill soft">${isT?"Dia de hoje":"Dia deste treino"}</span>`:"";
       const sum=p.items.length?p.items.map(it=>esc(dName(it.name,it.ref))).join(" · "):"Sem exercícios. Monte na aba Treinos.";
       let btns;
@@ -3864,8 +3864,10 @@ function renderTreino(){
       return `<div class="card tcard${ex&&ex.done!==false?" isdone":""}"><div class="row between"><div style="min-width:0"><div class="wx-n">${esc(p.name||"Treino")}</div><span class="muted-s">${sum}</span></div>${ex?statusPill(ex):tag}</div><div class="row">${btns}</div></div>`};
     /* owner: less clutter. Workouts of this weekday (or already started today) on top; the rest folded */
     const main=list.filter(p=>p.days.includes(sd)||tw.some(x=>x.planId===p.id)),rest=list.filter(p=>!main.includes(p));
-    h+=list.length?(main.length?main.map(pcard).join("")+(rest.length?`<details class="card more-w"><summary>${tx(`Outros treinos (${rest.length})`,`Other workouts (${rest.length})`,`Otros entrenos (${rest.length})`)}</summary>${rest.map(pcard).join("")}</details>`:"")
-      :list.map(pcard).join(""))
+    /* owner (0.73): the whole list of workouts starts closed ("Meus treinos") and opens with a tap; it stays open while he works in it */
+    const inner=main.length?main.map(pcard).join("")+(rest.length?`<details class="card more-w"><summary>${tx(`Outros treinos (${rest.length})`,`Other workouts (${rest.length})`,`Otros entrenos (${rest.length})`)}</summary>${rest.map(pcard).join("")}</details>`:"")
+      :list.map(pcard).join("");
+    h+=list.length?`<details class="card more-w hj-list"${hjList?" open":""}><summary>${tx("Meus treinos","My workouts","Mis entrenos")} (${list.length})${isT?"":` · ${esc(dayName)}`}</summary>${inner}</details>`
       :`<div class="card"><p class="muted">Você ainda não tem treinos montados.</p><div class="row"><button class="btn primary" data-act="goPlans">Montar um treino</button></div></div>`;
     const free=tw.filter(x=>!x.planId||!plans.some(p=>p.id===x.planId));
     h+=(free.length?`<h3 class="section-t">${isT?tx("Também hoje","Also today","También hoy"):tx("Também neste dia","Also on this day","También este día")}</h3>`+free.map(wCard).join(""):"")+
@@ -4187,7 +4189,7 @@ function howHTML(it,open){const r=it.f?{f:it.f,sel:it.sel}:parseRef(it.ref)||par
   const sel=r.sel||r.f.d;if(!HOW)loadHow();
   return `<details class="how" data-hf="${r.f.id}" data-hs="${esc(JSON.stringify(sel))}"${open?" open":""}><summary>${tx("Como fazer","How to do it","Cómo hacerlo")}</summary><div class="how-b">${howInner(r.f.id,sel)}</div></details>`}
 /* remember whether the guide was open, so it stays open when the card is redrawn (variation changed, set done) */
-document.addEventListener("toggle",e=>{if(e.target.matches&&e.target.matches("details.how"))howOpen=e.target.open},true);
+document.addEventListener("toggle",e=>{if(e.target.matches&&e.target.matches("details.how"))howOpen=e.target.open;if(e.target.matches&&e.target.matches("details.hj-list"))hjList=e.target.open},true);
 
 /* ---- swap: exercises that hit the same target muscles (taken from those muscles' ranked lists) */
 function swapOpts(it){const info=exInfo(it.name,it.ref);if(!info)return [];const P=info.p||[],S=info.s||[];if(!P.length)return [];

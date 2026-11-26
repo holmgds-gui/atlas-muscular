@@ -225,6 +225,8 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 
 - **Gola no pescoço do boneco 3D (0.72, nov/2026)**: o dono disse que o trapézio superior parecia uma gola em volta da cabeça ("tá pra fora"). O músculo era cortado reto na nuca e a borda sobrava ~2 cm para fora do pescoço do manequim. Agora, com o manequim, o `3d/v3.js` afina a parte de cima desse músculo para dentro da elipse do pescoço da cabeça (`neckFit`/`neckApply`), então ele desce em rampa e a borda some. Vale para ♂ e ♀; com a caveira o músculo fica como era.
 
+- **Lista de treinos do Hoje começa fechada (0.73, nov/2026)**: o dono pediu que, no Hoje › Registro, a lista de treinos ficasse fechada como "Meus treinos" e abrisse com um toque. Agora ela é uma caixa `details.hj-list` "Meus treinos (N)", fechada ao entrar; o estado aberto/fechado fica na variável `hjList` e sobrevive aos redesenhos da tela (marcar como feito etc.).
+
 ## 17. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.
