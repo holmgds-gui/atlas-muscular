@@ -16,6 +16,38 @@
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
+/* 0.80 (owner: "no supino o braço fica muito fino … está esticando muito"): dual-quaternion skinning. With the usual
+   linear blend a part that twists (the forearm turning ~140° to hold the bar) or bends a lot (elbow, knee) shrinks — the
+   "candy wrapper". Here each bone's matrix is turned into a dual quaternion (skinBody(): skeleton.update writes them
+   into the first 8 floats of each bone's slot in the bone texture) and the shader blends those, which keeps the volume.
+   All the SkinnedMeshes of the app are this body, so the chunks are replaced for every material. */
+THREE.ShaderChunk.skinbase_vertex=`#ifdef USE_SKINNING
+	mat4 dqmX=getBoneMatrix(skinIndex.x),dqmY=getBoneMatrix(skinIndex.y),dqmZ=getBoneMatrix(skinIndex.z),dqmW=getBoneMatrix(skinIndex.w);
+	vec4 dqR=dqmX[0]*skinWeight.x,dqD=dqmX[1]*skinWeight.x;
+	float dqs=dot(dqmX[0],dqmY[0])<0.0?-1.0:1.0;dqR+=dqmY[0]*skinWeight.y*dqs;dqD+=dqmY[1]*skinWeight.y*dqs;
+	dqs=dot(dqmX[0],dqmZ[0])<0.0?-1.0:1.0;dqR+=dqmZ[0]*skinWeight.z*dqs;dqD+=dqmZ[1]*skinWeight.z*dqs;
+	dqs=dot(dqmX[0],dqmW[0])<0.0?-1.0:1.0;dqR+=dqmW[0]*skinWeight.w*dqs;dqD+=dqmW[1]*skinWeight.w*dqs;
+	float dqL=max(length(dqR),1e-6);dqR/=dqL;dqD/=dqL;
+#endif`;
+THREE.ShaderChunk.skinning_vertex=`#ifdef USE_SKINNING
+	vec3 dqp=(bindMatrix*vec4(transformed,1.0)).xyz;
+	dqp+=2.0*cross(dqR.xyz,cross(dqR.xyz,dqp)+dqR.w*dqp)+2.0*(dqR.w*dqD.xyz-dqD.w*dqR.xyz+cross(dqR.xyz,dqD.xyz));
+	transformed=(bindMatrixInverse*vec4(dqp,1.0)).xyz;
+#endif`;
+THREE.ShaderChunk.skinnormal_vertex=`#ifdef USE_SKINNING
+	vec3 dqn=mat3(bindMatrix)*objectNormal;dqn+=2.0*cross(dqR.xyz,cross(dqR.xyz,dqn)+dqR.w*dqn);objectNormal=mat3(bindMatrixInverse)*dqn;
+	#ifdef USE_TANGENT
+		vec3 dqt=mat3(bindMatrix)*objectTangent;dqt+=2.0*cross(dqR.xyz,cross(dqR.xyz,dqt)+dqR.w*dqt);objectTangent=mat3(bindMatrixInverse)*dqt;
+	#endif
+#endif`;
+const _dqM=new THREE.Matrix4(),_dqQ=new THREE.Quaternion();
+function dqSkeleton(sk){const up=sk.update.bind(sk);
+  sk.update=function(){up();const a=this.boneMatrices;
+    for(let i=0,n=this.bones.length;i<n;i++){const o=16*i;_dqM.fromArray(a,o);_dqQ.setFromRotationMatrix(_dqM);
+      const x=_dqQ.x,y=_dqQ.y,z=_dqQ.z,w=_dqQ.w,tx=a[o+12],ty=a[o+13],tz=a[o+14];
+      a[o]=x;a[o+1]=y;a[o+2]=z;a[o+3]=w;
+      a[o+4]=0.5*(tx*w+ty*z-tz*y);a[o+5]=0.5*(-tx*z+ty*w+tz*x);a[o+6]=0.5*(tx*y-ty*x+tz*w);a[o+7]=-0.5*(tx*x+ty*y+tz*z)}}
+  return sk}
 
 /* the parsed bodies are kept here and shared by every viewer (Atlas, Progresso, Força, Stories): one download, one
    parse, the geometry is shared between copies (owner 0.18: 3D in the whole app) */
@@ -320,14 +352,42 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       const id=Object.keys(rig.G).find(k=>rig.G[k]===g),c=rig.C0[id];o.matrix.copy(new THREE.Matrix4().makeTranslation(-c.x,-c.y,-c.z).multiply(w));o.matrix.decompose(o.position,o.quaternion,o.scale)}}
   /* 0.76 (stage 2): each body mesh becomes a SkinnedMesh on the joints, with the weights baked by build.py ("_skinidx",
      "_skinw"); the loaded geometry is shared, the skin attributes are added to it once */
-  function skinBody(ms){const sk=new THREE.Skeleton(rig.R.pele.map(id=>rig.G[id]));rigRoot.updateMatrixWorld(true);
+  function skinBody(ms){const sk=dqSkeleton(new THREE.Skeleton(rig.R.pele.map(id=>rig.G[id])));rigRoot.updateMatrixWorld(true);
     return ms.map(o=>{const g=o.geometry,si=g.attributes._skinidx,sw=g.attributes._skinw;if(!si||!sw)return o;
       if(!g.attributes.skinIndex){const n=si.count,I=new Uint16Array(n*4),W=new Float32Array(n*4);
         for(let i=0;i<n;i++){I[i*4]=si.getX(i);I[i*4+1]=si.getY(i);I[i*4+2]=si.getZ(i);I[i*4+3]=si.getW(i);
           const a=sw.getX(i),b=sw.getY(i),c=sw.getZ(i),d=sw.getW(i),t=(a+b+c+d)||1;W[i*4]=a/t;W[i*4+1]=b/t;W[i*4+2]=c/t;W[i*4+3]=d/t}
+        for(const sd of ["d","e"]){hingeSpread(g,o,I,W,"quadril_"+sd,["joelho_"+sd],"joelho_"+sd,"tornozelo_"+sd,0.055);hingeSpread(g,o,I,W,"ombro_"+sd,["cotovelo_"+sd,"antebraco_"+sd],"cotovelo_"+sd,"punho_"+sd,0.045)}
+        twistSpread(g,o,I,W);
         g.setAttribute("skinIndex",new THREE.Uint16BufferAttribute(I,4));g.setAttribute("skinWeight",new THREE.Float32BufferAttribute(W,4))}
       const s=new THREE.SkinnedMesh(g,o.material);s.name=o.name;s.userData=o.userData;s.position.copy(o.position);s.quaternion.copy(o.quaternion);s.scale.copy(o.scale);
       s.frustumCulled=false;const par=o.parent;par.add(s);par.remove(o);s.updateMatrixWorld(true);s.bind(sk,s.matrixWorld);return s})}
+  /* 0.80: the forearm's turn (pronation, joint "antebraco") is spread along its length, as in a real arm (the radius
+     rolls over the ulna and the skin twists little by little): the share of "cotovelo" + "antebraco" in a vertex goes from
+     all-elbow at the elbow to all-forearm at the wrist (before, the side near the radius turned and the side near the ulna
+     did not, which tore and thinned the forearm) */
+  /* 0.80: knee and elbow — the share between the bone above (thigh / upper arm) and the one below (shin / forearm) follows
+     the line of the lower bone: all "above" a few cm before the joint, all "below" a few cm after (w), smooth in between.
+     The weights by distance to the bones mixed over a wide band and the shin/forearm folded and thinned when bent. */
+  function hingeSpread(g,o,I,W,par,kids,jid,eid,w){const L=rig.R.pele,ip=L.indexOf(par),ik=kids.map(k=>L.indexOf(k)),i0=ik[0];if(ip<0||i0<0)return;
+    o.updateWorldMatrix(true,false);const J=rig.C0[jid],ax=rig.C0[eid].clone().sub(J).normalize(),pa=g.attributes.position,v=new THREE.Vector3();
+    for(let i=0;i<pa.count;i++){let sp=0,sk=0,jp=-1,jk=-1;for(let k=0;k<4;k++){const b=I[i*4+k];if(b===ip){sp+=W[i*4+k];jp=k}else if(ik.includes(b)){sk+=W[i*4+k];if(b===i0)jk=k}}
+      const tot=sp+sk;if(tot<0.02||(sp<0.002&&sk<0.002))continue;v.fromBufferAttribute(pa,i).applyMatrix4(o.matrixWorld);
+      let t=(v.sub(J).dot(ax)+w)/(2*w);t=Math.min(1,Math.max(0,t));t=t*t*(3-2*t);
+      /* the kids keep their own split (elbow/forearm), scaled to the new total */
+      const nk=tot*t,np=tot-nk,f=sk>1e-6?nk/sk:0;
+      for(let k=0;k<4;k++){const b=I[i*4+k];if(ik.includes(b))W[i*4+k]*=f}
+      if(sk<1e-6&&nk>0){if(jk<0){let m=-1,mw=9;for(let k=0;k<4;k++)if(k!==jp&&W[i*4+k]<mw){mw=W[i*4+k];m=k}jk=m;I[i*4+jk]=i0}W[i*4+jk]=nk}
+      if(jp<0&&np>0){let m=-1,mw=9;for(let k=0;k<4;k++)if(k!==jk&&!ik.includes(I[i*4+k])&&W[i*4+k]<mw){mw=W[i*4+k];m=k}if(m>=0){jp=m;I[i*4+jp]=ip}}
+      if(jp>=0)W[i*4+jp]=np;let s=0;for(let k=0;k<4;k++)s+=W[i*4+k];for(let k=0;k<4;k++)W[i*4+k]/=s||1}}
+  function twistSpread(g,o,I,W){const L=rig.R.pele,ix=k=>L.indexOf(k),pa=g.attributes.position,v=new THREE.Vector3();o.updateWorldMatrix(true,false);
+    for(const sd of ["d","e"]){const ce=ix("cotovelo_"+sd),an=ix("antebraco_"+sd);if(ce<0||an<0)continue;const E=rig.C0["cotovelo_"+sd],Wr=rig.C0["punho_"+sd],EW=Wr.clone().sub(E),l2=EW.lengthSq();
+      for(let i=0;i<pa.count;i++){let sc=0,sa=0,jc=-1,ja=-1;for(let k=0;k<4;k++){const b=I[i*4+k];if(b===ce){sc+=W[i*4+k];jc=k}else if(b===an){sa+=W[i*4+k];ja=k}}
+        const tot=sc+sa;if(tot<0.02)continue;v.fromBufferAttribute(pa,i).applyMatrix4(o.matrixWorld);let t=v.sub(E).dot(EW)/l2;t=Math.min(1,Math.max(0,(t-0.08)/0.84));t=t*t*(3-2*t);
+        const wa=tot*t,wc=tot-wa;
+        if(jc<0){let m=-1,mw=9;for(let k=0;k<4;k++)if(k!==ja&&W[i*4+k]<mw){mw=W[i*4+k];m=k}jc=m;I[i*4+jc]=ce;W[i*4+jc]=0}
+        if(ja<0){let m=-1,mw=9;for(let k=0;k<4;k++)if(k!==jc&&W[i*4+k]<mw){mw=W[i*4+k];m=k}ja=m;I[i*4+ja]=an;W[i*4+ja]=0}
+        W[i*4+jc]=wc;W[i*4+ja]=wa;let s=0;for(let k=0;k<4;k++)s+=W[i*4+k];for(let k=0;k<4;k++)W[i*4+k]/=s||1}}}
   const wpos=g=>{g.updateWorldMatrix(true,false);return new THREE.Vector3().setFromMatrixPosition(g.matrixWorld)};
   const wq=g=>{g.updateWorldMatrix(true,false);return g.getWorldQuaternion(new THREE.Quaternion())};
   function setWorldQ(g,q){const pq=wq(g.parent);g.quaternion.copy(pq.invert().multiply(q));g.updateWorldMatrix(false,true)}
@@ -342,7 +402,15 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     /* 0.77: the bend is found by bisection on the joint's own flexion (0 … max): the inner angle only shrinks as it flexes,
        so it never bends backwards and it is exact even when the axis is not square to the limb */
     const axL=new THREE.Vector3().fromArray(fx.eixo).normalize(),rep=fx.repouso;
-    const setF=deg=>{B.quaternion.setFromAxisAngle(axL,THREE.MathUtils.degToRad(deg-rep));B.updateWorldMatrix(false,true)};
+    /* 0.80: the couplings of this flexion go along (knee → patella 70 %, "screw-home" twist), else the kneecap stayed behind
+       when the IK bent the knee and made a beak in the squat */
+    const r=THREE.MathUtils.degToRad,CPs=rig.CP.filter(c=>c.de===midId+".flex"),f=(c,x)=>c.apos!=null?Math.max(0,x-c.apos):Math.max(0,c.ate-x);
+    const setF=deg=>{const q=new THREE.Quaternion(),own={};
+      for(const c of CPs)for(const [tg,k] of c.para){const [tid,tmv]=tg.split("."),td=rig.J[tid]&&rig.J[tid].mov.find(m=>m.id===tmv);if(!td)continue;
+        const val=Math.min(td.max,Math.max(td.min,td.repouso+k*(f(c,deg)-f(c,rep))));
+        if(tid===midId)own[tmv]=val;else{rig.G[tid].quaternion.setFromAxisAngle(new THREE.Vector3().fromArray(td.eixo).normalize(),r(val-td.repouso));rig.G[tid].updateWorldMatrix(false,true)}}
+      for(const [mv,val] of Object.entries(own)){const md=rig.J[midId].mov.find(m=>m.id===mv);q.premultiply(new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3().fromArray(md.eixo).normalize(),r(val-md.repouso)))}
+      q.premultiply(new THREE.Quaternion().setFromAxisAngle(axL,r(deg-rep)));B.quaternion.copy(q);B.updateWorldMatrix(false,true)};
     let lo=Math.max(0,fx.min),hi=fx.max;for(let i=0;i<22;i++){const mid=(lo+hi)/2;setF(mid);if(inner()>want)lo=mid;else hi=mid}setF((lo+hi)/2);
     const e2=wpos(E),from=e2.sub(a).normalize(),to=T.clone().sub(a).normalize();
     setWorldQ(A,new THREE.Quaternion().setFromUnitVectors(from,to).multiply(wq(A)));
@@ -465,7 +533,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
   const jp=id=>{const v=new THREE.Vector3();rig.G[id].getWorldPosition(v);return v};
   /* the movements. a/b = poses at u=0 / u=1; t = timeline [seconds, u to reach] (hold = same u); cam = [degrees around,
      target height, distance × framing, target z]. Same keys in a and b. */
-  const ARMS_SQ={ombro_d:{abd:80,flex:10,rot:-70},ombro_e:{abd:80,flex:10,rot:-70},cotovelo_d:{flex:110},cotovelo_e:{flex:110},antebraco_d:{pron:-40},antebraco_e:{pron:-40}};
+  const ARMS_SQ={ombro_d:{abd:72,flex:8,rot:-50},ombro_e:{abd:72,flex:8,rot:-50},cotovelo_d:{flex:110},cotovelo_e:{flex:110},antebraco_d:{pron:-40},antebraco_e:{pron:-40}};
   const MOV={
     agach:{a:{pelve:{pos:[0,-0.035,-0.01],flex:4},coluna:{flex:-3},cervical:{flex:0},quadril_d:{abd:12,rot:-12},quadril_e:{abd:12,rot:-12},...ARMS_SQ},
            b:{pelve:{pos:[0,-0.40,-0.13],flex:38},coluna:{flex:-4},cervical:{flex:-10},quadril_d:{abd:18,rot:-15},quadril_e:{abd:18,rot:-15},...ARMS_SQ},
@@ -502,7 +570,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       m.feet=[{alvo:[-0.30,A0.y,pv.z+0.40]},{alvo:[0.30,A1.y,pv.z+0.40]}];P.ik={pe_d:m.feet[0],pe_e:m.feet[1]};rigPose(P);
       const ch=boxOf(["peito_medial","peito_inferior"]),t6=jp("T6");m.low=new THREE.Vector3(0,ch.max.y+0.016,t6.z+0.03);
       const sd=jp("ombro_d"),se=jp("ombro_e"),la=sd.distanceTo(jp("cotovelo_d"))+jp("cotovelo_d").distanceTo(jp("punho_d"));
-      m.top=new THREE.Vector3(0,(sd.y+se.y)/2+la*0.985+0.075,(sd.z+se.z)/2+0.01);m.gx=m.sex==="f"?0.27:0.30;
+      m.gx=m.sex==="f"?0.33:0.37;{const dx=m.gx-Math.abs(sd.x),reach=la*0.985+0.075;m.top=new THREE.Vector3(0,(sd.y+se.y)/2+Math.sqrt(Math.max(0.01,reach*reach-dx*dx)),(sd.z+se.z)/2+0.01)}
       m.headZ=jp("cabeca").z;m.pv=pv}
     m.bar=barbell();m.g.add(m.bar);
     /* where the movement starts (for the hook heights) */
@@ -578,6 +646,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     look(deg,dist,yf,xo,zo){const a=THREE.MathUtils.degToRad(deg),y=yf==null?CY:BB.min.y+(BB.max.y-BB.min.y)*yf,d=dist||fitD(),x=xo||0,z=zo||0;
       controls.target.set(x,y,z);camera.position.set(x+Math.sin(a)*d,y+0.03,z+Math.cos(a)*d);need=true},
     /* for tests: put the camera somewhere (relative to the target) and read where it ended up */
+    setTarget(t){controls.target.fromArray(t);if(MOT)MOT.tgt.fromArray(t);need=true},
     place(x,y,z){camera.position.set(controls.target.x+x,controls.target.y+y,controls.target.z+z);need=true},
     cam(){const o=camera.position.clone().sub(controls.target),p=camera.position;let m=Infinity;
       if(CLOUD)for(let i=0;i<CLOUD.length;i+=3)m=Math.min(m,Math.hypot(CLOUD[i]-p.x,CLOUD[i+1]-p.y,CLOUD[i+2]-p.z));

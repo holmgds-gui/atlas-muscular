@@ -239,6 +239,8 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 
 - **Exercícios voltava sozinho para Músculos (0.79, nov/2026)**: o dono disse que, ao arrastar ou chegar em Exercícios, o Atlas voltava para Músculos. Causa: vindo de Articulações, o app primeiro voltava ao modelo normal e, nesse instante, mandava a faixa rolar suave até "Músculos"; quando a rolagem parava, a faixa trocava o modo. Além disso, a trava da faixa podia ficar presa e ignorar o arrasto seguinte. Agora o modo novo é marcado antes, a rolagem que sobrou é cancelada e a trava é solta (o mesmo valia para Cardio).
 
+- **Boneco esticando na animação (0.80, nov/2026)**: o dono achou a animação boa, mas o boneco com erros — "no supino o braço fica muito fino… está esticando muito". Revisão de perto: (1) o **antebraço virava uma corda** no supino e no terra, porque para segurar a barra ele gira quase meia volta e a "pele" comum encolhe o que torce; agora a pele é por **dual quaternion** (mantém o volume ao torcer e dobrar) e a torção é **espalhada ao longo do antebraço**, como no braço de verdade; (2) **joelho e cotovelo** deformavam a canela/antebraço ao dobrar: a divisão entre o osso de cima e o de baixo agora segue a linha do osso, numa faixa curta em volta da junta; (3) a **patela** ficava para trás quando o "pé no chão" dobrava o joelho; (4) supino com pegada mais aberta (o cotovelo dobrava demais e embolava) e agachamento com o ombro menos girado.
+
 ## 17. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.
