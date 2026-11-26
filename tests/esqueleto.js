@@ -11,7 +11,9 @@ await p.addInitScript(()=>{localStorage.setItem("atlas-intro","1");localStorage.
 await p.goto(BASE);await p.waitForFunction(()=>window.V3&&V3.keys().length>10,null,{timeout:60000});
 await p.tap('#xrTgl');await p.waitForTimeout(200);
 const items=await p.evaluate(()=>[...document.querySelectorAll('#xrPop [data-xr]')].map(x=>x.dataset.xr));console.log(loc,'músculos:',items);if(items.join()!=='off,raiox')errs.push(loc+' menu em Músculos '+items);
-await p.evaluate(()=>{xrClose();setMode('art')});await p.waitForTimeout(400);await p.tap('#xrTgl');await p.waitForTimeout(200);
+await p.evaluate(()=>{xrClose();setMode('art')});await p.waitForTimeout(400);
+const auto=await p.evaluate(()=>[xrMode,V3.xrNow()]);console.log(loc,'entrou em Articulações:',auto);if(auto.join()!=='esq,esq')errs.push(loc+' Articulações não abriu no Esqueleto '+auto);
+await p.tap('#xrTgl');await p.waitForTimeout(200);
 const items2=await p.evaluate(()=>[...document.querySelectorAll('#xrPop [data-xr]')].map(x=>x.dataset.xr));console.log(loc,'articulações:',items2);if(items2.join()!=='off,raiox,esq')errs.push(loc+' menu em Articulações '+items2);
 await p.tap('[data-xr="esq"]');await p.waitForFunction(()=>V3.bonesReady(),null,{timeout:60000});await p.waitForTimeout(800);
 const r=await p.evaluate(()=>{const vis=V3.keys().filter(k=>V3.visible&&V3.visible(k));return {mode:V3.xrNow(),vis,box:V3.boxes&&V3.boxes()}});
@@ -20,7 +22,8 @@ if(r.vis.length)errs.push(loc+' músculos visíveis no Esqueleto: '+r.vis);
 if(r.box){const [s,c]=[r.box.bones,r.box.body];if(!(s.min[1]>=c.min[1]-0.01&&s.max[1]<=c.max[1]+0.01&&s.min[0]>=c.min[0]-0.01&&s.max[0]<=c.max[0]+0.01))errs.push(loc+' esqueleto fora do corpo '+JSON.stringify(r.box))}
 await p.screenshot({path:`${OUT}/esq-${loc}-esqueleto.png`});
 await p.evaluate(()=>setMode('mus'));await p.waitForTimeout(600);
-const back=await p.evaluate(()=>[xrMode,V3.xrNow()]);console.log(loc,'saiu de Articulações:',back);if(back.join()!=='raiox,raiox')errs.push(loc+' esqueleto fora de Articulações '+back);
+const back=await p.evaluate(()=>[xrMode,V3.xrNow()]);console.log(loc,'saiu de Articulações:',back);if(back.join()!=='off,off')errs.push(loc+' ao sair de Articulações devia voltar para Músculos '+back);
+await p.evaluate(()=>setXr('raiox'));await p.waitForTimeout(300);
 const pt=await p.evaluate(()=>V3.at('peito_medial'));await p.touchscreen.tap(pt.x,pt.y);await p.waitForTimeout(1200);
 const t=await p.evaluate(()=>[V3.xrNow(),cur]);console.log(loc,'raiox tap',t);if(t[1]!=='peito_medial')errs.push(loc+' toque no Raio-X');
 await p.screenshot({path:`${OUT}/esq-${loc}-raiox.png`});

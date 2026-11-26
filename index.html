@@ -2862,7 +2862,14 @@ const XRS={off:()=>tx("Só os músculos","Muscles only","Solo los músculos"),ra
 /* owner (0.66): Esqueleto only in Articulações; Músculos, Grupos and Cardio offer Músculos and Raio-X. Leaving
    Articulações with Esqueleto on turns it into Raio-X (the bones stay in sight). */
 const xrModes=()=>model==="art"?["off","raiox","esq"]:["off","raiox"];
-function xrUi(){const w=$("xrW"),b=$("xrTgl");w.hidden=!v3on;if(!xrModes().includes(xrMode)){xrMode="raiox";if(V3&&V3.xray)V3.xray("raiox")}if(v3on&&xrMode==="esq"&&model!=="art")$("v3hint").textContent=tx("Arraste para girar","Drag to turn","Arrastra para girar");b.innerHTML=XRSVG[xrMode];b.dataset.xr=xrMode;
+/* owner (0.69): entering Articulações (in 3D) goes straight to Esqueleto; leaving it goes back to what was on before
+   (unless the person changed it while there) */
+let xrArt=false,xrPrev="off";
+function xrUi(){const w=$("xrW"),b=$("xrTgl");w.hidden=!v3on;const art=model==="art";
+  const on=art&&v3on;
+  if(on!==xrArt){xrArt=on;if(on){xrPrev=xrMode;xrMode="esq";if(V3&&V3.xray){V3.xray("esq");if(V3.bonesReady&&!V3.bonesReady())xrLoading(0)}}
+    else if(xrMode==="esq"){xrMode=xrPrev;if(V3&&V3.xray)V3.xray(xrMode)}}
+  if(!xrModes().includes(xrMode)){xrMode="raiox";if(V3&&V3.xray)V3.xray("raiox")}if(v3on&&xrMode==="esq"&&model!=="art")$("v3hint").textContent=tx("Arraste para girar","Drag to turn","Arrastra para girar");b.innerHTML=XRSVG[xrMode];b.dataset.xr=xrMode;
   b.title=b.ariaLabel=tx("Visão: ","View: ","Vista: ")+XRN[xrMode]();
   $("xrPop").innerHTML=xrModes().map(k=>`<button type="button" role="menuitemradio" aria-checked="${k===xrMode}" data-xr="${k}">${XRSVG[k]}<span>${XRN[k]()}<small>${XRS[k]()}</small></span></button>`).join("")}
 function xrClose(){$("xrPop").hidden=true;$("xrTgl").setAttribute("aria-expanded","false")}
