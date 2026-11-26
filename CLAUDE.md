@@ -19,7 +19,7 @@ Histórico: [docs/HISTORICO.md](docs/HISTORICO.md). Fontes científicas e links:
 ## Como publicar uma mudança
 
 1. Edite os arquivos (o app quase todo está em `index.html`).
-2. **Suba a versão** em `sw.js` (`const CACHE="atlas-v0.77"` → `0.78`; é o número que aparece em Configurações › Versão).
+2. **Suba a versão** em `sw.js` (`const CACHE="atlas-v0.78"` → `0.79`; é o número que aparece em Configurações › Versão).
 3. Registre em `docs/HISTORICO.md` e atualize o trecho da parte mexida em `docs/DETALHES.md`.
 4. Commit na `main` e push (o GitHub Pages publica em ~1 min; o push também gera o app Android pelo workflow "App Android").
 5. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
@@ -57,7 +57,7 @@ Histórico: [docs/HISTORICO.md](docs/HISTORICO.md). Fontes científicas e links:
 
 ## Mapa rápido das partes (detalhes em DETALHES.md)
 
-Atlas (boneco 2D/3D, modos Músculos · Grupos · Articulações · Cardio, arrastar a folha) · Meus treinos e Treinos prontos (quiz "Qual treino é para mim?") · Página "Como fazer" (boneco 3D com o movimento) · Hoje › Registro e Ao vivo (descanso, recordes, próxima carga) · Cardio · Progresso › Músculos (mapa de calor, radar) e Força (ranking de 9 níveis, cargas) · Conquistas (troféu) · Cartão para Stories · Configurações (conta, tema, cor, idioma, kg/lb, instalar, backup) · Tela de login e apresentação da 1ª vez · Menu do botão direito / segurar o dedo · Movimento estilo iPhone (arrastar páginas, abas e folhas).
+Atlas (boneco 2D/3D, modos Músculos · Grupos · Articulações · Exercícios · Cardio, arrastar a folha) · Meus treinos e Treinos prontos (quiz "Qual treino é para mim?") · Página "Como fazer" (boneco 3D com o movimento) · Hoje › Registro e Ao vivo (descanso, recordes, próxima carga) · Cardio · Progresso › Músculos (mapa de calor, radar) e Força (ranking de 9 níveis, cargas) · Conquistas (troféu) · Cartão para Stories · Configurações (conta, tema, cor, idioma, kg/lb, instalar, backup) · Tela de login e apresentação da 1ª vez · Menu do botão direito / segurar o dedo · Movimento estilo iPhone (arrastar páginas, abas e folhas).
 
 ## Testes
 

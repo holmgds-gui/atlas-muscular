@@ -2,7 +2,7 @@
    outros) abre a página; boneco 3D em cima — agachamento livre, terra e supino reto com barra se mexem (com barra,
    anilhas, banco/suporte), repetindo; ❚❚ pausa, 0,5× muda a velocidade; "Reduzir animações" abre pausado; nos outros, boneco
    parado com o alvo vermelho e "Movimento em breve"; folha com o guia arrasta para cima; Voltar e Esc fecham; pt/en/es;
-   ♀ também. Prints em tests/out/como-fazer-*.png (390 px, claro e escuro). */
+   ♀ também; 0.78: modo Exercícios do Atlas e ossos escondidos fora de Articulações/Raio-X. Prints em tests/out/como-fazer-*.png (390 px, claro e escuro). */
 const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=require("path").join(__dirname,"out");require("fs").mkdirSync(OUT,{recursive:true});
 const {chromium}=require('playwright');
 (async()=>{const b=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"]});const errs=[],fail=[];
@@ -52,6 +52,27 @@ for(const [sx,theme] of [["m","light"],["f","dark"]]){const p=await page({sex:sx
   ok(!s.mv&&s.soon,`${sx} rosca: sem movimento, aviso "${s.lab.trim()}"`);
   await p.screenshot({path:`${OUT}/como-fazer-${sx}-${theme}-rosca.png`});
   await p.keyboard.press('Escape');await p.waitForTimeout(300);ok(await p.evaluate(()=>$("howPg").hidden),`${sx} Esc fecha`);
+  await p.close()}
+/* 2b) 0.78: Atlas › Exercícios (entre Articulações e Cardio) → lista com busca → página; e os ossos somem ao sair de Articulações */
+for(const loc of ['pt-BR','en-US']){const p=await page({loc,conf:{fig:"3d"}});await p.waitForFunction(()=>window.V3&&V3.rigReady(),null,{timeout:90000});await p.waitForTimeout(600);
+  const order=await p.evaluate(()=>[...document.querySelectorAll('#msTrack [data-mode]')].map(b=>b.dataset.mode).join(','));
+  ok(order==="mus,grp,art,ex,cd",`${loc} ordem dos modos: ${order}`);
+  await p.click('#msTrack [data-mode="ex"]');await p.waitForTimeout(1200);
+  ok(await p.evaluate(()=>curMode()==="ex"&&!!document.querySelector('#body [data-exf="supino"]')),`${loc} modo Exercícios com a lista`);
+  const first=await p.evaluate(()=>[...document.querySelectorAll('#body .exf-h')].map(h=>h.textContent).slice(0,2).join(' | '));
+  ok(/Com movimento|With movement/.test(first),`${loc} primeiro "Com movimento" (${first})`);
+  await p.evaluate(()=>sheetMove("up"));await p.waitForTimeout(700);
+  await p.fill('#exQ',loc==='pt-BR'?'remada':'row');await p.waitForTimeout(300);
+  const n=await p.evaluate(()=>document.querySelectorAll('#body [data-exf]').length);ok(n>0&&n<25,`${loc} busca filtra (${n})`);
+  await p.screenshot({path:`${OUT}/como-fazer-modo-${loc}.png`});
+  await p.click('#body [data-exf]');await ready(p);await p.waitForTimeout(500);
+  ok(await p.evaluate(()=>!$("howPg").hidden),`${loc} tocar abre a página`);await p.click('#hpBack');await p.waitForTimeout(300);
+  ok(await p.evaluate(()=>curMode()==="ex"),`${loc} Voltar volta para Exercícios`);
+  if(loc==='pt-BR'){await p.evaluate(()=>setMode("art"));await p.waitForFunction(()=>V3.bonesReady(),null,{timeout:90000});await p.waitForTimeout(600);
+    const on=await p.evaluate(()=>isFinite(V3.boxes().bones.min[0]));
+    await p.evaluate(()=>setMode("mus"));await p.waitForTimeout(600);
+    const off=await p.evaluate(()=>!isFinite(V3.boxes().bones.min[0]));
+    ok(on&&off,`ossos aparecem em Articulações e somem em Músculos (${on}/${off})`)}
   await p.close()}
 /* 3) Reduzir animações → abre pausado; idiomas */
 {const p=await page({conf:{noanim:true}});await p.evaluate(()=>document.documentElement.classList.add("noanim"));
