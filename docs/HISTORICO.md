@@ -229,6 +229,8 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 
 - **Fonte de título em "Meus treinos" (0.74, nov/2026)**: o dono pediu a fonte grande diferente (a dos títulos) na caixa "Meus treinos" do Hoje. Agora o nome usa itálico pesado condensado de 30 px com a barra vermelha inclinada, igual ao título "HOJE" (`.hj-list` em `design2.css`); o número de treinos fica pequeno ao lado.
 
+- **"+ Série" que não ia (0.75, nov/2026)**: o dono disse que o botão de mais uma série no treino do dia não funcionava e pediu para consertar e conferir os outros botões. Não deu para reproduzir uma falha total (o botão funcionava no teste), mas achei o que dava essa sensação: no Ao vivo, o "+" era uma caixinha sem texto, não avisava nada e **apagava o que estava digitado** (carga/repetições) da série atual ao redesenhar. Agora: o digitado é guardado antes de qualquer redesenho (+, trocar de série/exercício), o "+" mostra "série" embaixo, e os dois "+ Série" (Registro e Ao vivo) vibram e mostram um aviso "Série N adicionada"; no Registro a tela rola até a série nova. **Causa principal achada:** logo depois de "Série feita" aparece a pílula flutuante de descanso (⏱ 1:30 +15 ✕), e num iPhone de 390×844 ela ficava exatamente por cima do "+ série", engolindo o toque. Agora, na tela do Ao vivo, a pílula some e o descanso aparece no cartão do topo (`#lvRchip`, ao lado do relógio). Varredura de todos os botões de Hoje (Registro, treino aberto, Ao vivo) e de Treinos (montar/editar): todos respondem.
+
 ## 17. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.

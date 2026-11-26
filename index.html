@@ -100,6 +100,7 @@ header{position:relative}
 .lv-pick .pn,.lv-pick .ps{grid-column:1}.lv-pick b{grid-column:2;grid-row:1/3;font-size:18px;color:var(--target)}
 .lv-pick:disabled{opacity:.5}
 .card.lv-top{display:flex;flex-direction:row;justify-content:space-between;align-items:center;gap:12px;padding-block:12px}
+.lv-clk{display:grid;justify-items:end;gap:2px}.lv-rchip{font-family:var(--f-display);font-weight:800;font-size:16px;letter-spacing:.06em;color:var(--target);font-variant-numeric:tabular-nums}.lv-rchip[hidden]{display:none}
 .lv-clock{font-family:var(--f-display);font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
 .lv-rest .row{gap:6px}.lv-big{font-family:var(--f-display);font-size:40px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
 .lv-rest.on .lv-big{color:var(--target)}
@@ -3951,7 +3952,8 @@ $("treinoBody").addEventListener("click",e=>{
   else if(!w)return;
   else if(a==="addEx")return openPicker("Adicionar ao treino",(name,ref)=>{w.items.push(mkItem(name,CONF.sets,CONF.reps,ref));saveW();renderTreino()});
   else if(a==="cInt"){const it=w.items[i];(it.sets[0]||(it.sets[0]={min:"",km:""})).int=b.dataset.v}
-  else if(a==="addSet"){const s=w.items[i].sets,l=s[s.length-1];s.push({r:"",kg:l?l.kg:""})}
+  else if(a==="addSet"){const s=w.items[i].sets,l=s[s.length-1];s.push({r:"",kg:l?l.kg:""});buzz();toast(tx(`Série ${s.length} adicionada`,`Set ${s.length} added`,`Serie ${s.length} añadida`));
+    saveW();renderTreino();const rows=document.querySelectorAll(`#treinoBody [data-sf="r"][data-i="${i}"]`),nr=rows[rows.length-1];if(nr)nr.scrollIntoView({block:"center",behavior:noAnim()?"auto":"smooth"});return}
   else if(a==="rmSet"){w.items[i].sets.splice(+b.dataset.s,1);if(!w.items[i].sets.length)w.items[i].sets.push({r:"",kg:""})}
   else if(a==="rmItem")w.items.splice(i,1);
   else if(a==="swapItem")return openSwap(w.items[i],(name,ref)=>{w.items[i].name=name;w.items[i].ref=ref;saveW();renderTreino()});
@@ -4034,7 +4036,9 @@ function tickLive(force){const w=liveW(),now=Date.now();
   const rc=$("restBig");if(rc)rc.textContent=mmss(rest?left:restFor(w&&live&&w.items[live.i]));
   const rb=$("restBar");if(rb)rb.style.width=rest?(100*left/rest.total).toFixed(1)+"%":"0%";
   const onLive=tab==="treino"&&hView==="live"&&!openW;
-  const pill=$("restPill");if(pill){pill.hidden=!(rest||(w&&!onLive));
+  const rch=$("lvRchip");if(rch){rch.hidden=!rest;if(rest)rch.textContent="⏱ "+mmss(left)}
+  /* 0.75: on the live page the floating pill covered the "+ série" button right after each set (owner: "não está indo"): there it is hidden, and the rest shows in the top card */
+  const pill=$("restPill");if(pill){pill.hidden=onLive||!(rest||w);
     if(!pill.hidden)$("restPillT").textContent=rest?"⏱ "+mmss(left):"● "+tx("Treino ao vivo","Live workout","Entreno en vivo")+" "+mmss((now-(w.start||now))/1000)}
   if(force&&onLive)renderTreino()}
 setInterval(()=>tickLive(false),1000);
@@ -4074,7 +4078,7 @@ function liveHTML(){
       <button class="btn wide" data-lv="startFree">+ ${tx("Treino livre (escolher os exercícios agora)","Free workout (pick exercises now)","Entreno libre (elegir los ejercicios ahora)")}</button>`}
   liveFix(w);const it=w.items[live.i],tot=w.items.reduce((a,x)=>a+x.sets.length,0),ok=w.items.reduce((a,x)=>a+x.sets.filter(s=>s.ok).length,0);
   const now=Date.now(),left=rest?(rest.end-now)/1000:0;
-  let h=`<div class="card lv-top"><div><div class="eyebrow">${tx("Ao vivo","Live","En vivo")}</div><div class="wx-n">${esc(w.title||"Treino")}</div><span class="muted-s">${tx(`${ok} de ${tot} séries`,`${ok} of ${tot} sets`,`${ok} de ${tot} series`)}</span></div><b class="lv-clock" id="lvClock">${mmss((now-(w.start||now))/1000)}</b></div>
+  let h=`<div class="card lv-top"><div><div class="eyebrow">${tx("Ao vivo","Live","En vivo")}</div><div class="wx-n">${esc(w.title||"Treino")}</div><span class="muted-s">${tx(`${ok} de ${tot} séries`,`${ok} of ${tot} sets`,`${ok} de ${tot} series`)}</span></div><div class="lv-clk"><b class="lv-clock" id="lvClock">${mmss((now-(w.start||now))/1000)}</b><span class="lv-rchip" id="lvRchip"${rest?"":" hidden"}>⏱ ${mmss(left)}</span></div></div>
 `;
   const restCard=`    <div class="card lv-rest${rest?" on":""}"><div class="row between"><div><div class="eyebrow">${tx("Descanso","Rest","Descanso")}</div><b class="lv-big" id="restBig">${mmss(rest?left:restFor(w.items[live.i]))}</b></div>
       <div class="row">${rest?`<button class="btn" data-lv="r-15">−15 s</button><button class="btn" data-lv="r+15">+15 s</button><button class="btn" data-lv="rStop">${tx("Pular","Skip","Saltar")}</button>`
@@ -4097,7 +4101,7 @@ function liveHTML(){
       <div class="lv-inps"><label><span>${tx(`Carga (${UNIT})`,`Load (${UNIT})`,`Carga (${UNIT})`)}${kgHelpBtn()}</span><input class="inp" id="lvKg" inputmode="decimal" value="${esc(kIn(s.kg))}" placeholder="${g&&g.kg!==""?fkg(toU(g.kg)):UNIT}">${(h=>h?`<small class="kgh kgb">${esc(h)}</small>`:"")(kgHint(it.name,it.ref))}</label>
         <label><span>${tx("Repetições","Reps","Repeticiones")}</span><input class="inp" id="lvR" inputmode="numeric" value="${esc(s.r)}" placeholder="${g?g.r:esc(it.target||"reps")}"></label></div>
       <button class="btn primary wide lv-done" data-lv="setDone">✓ ${s.ok?tx("Salvar série","Save set","Guardar serie"):tx("Série feita","Set done","Serie hecha")}</button>
-      <div class="lv-sets">${it.sets.map((x,j)=>`<button data-lv="pickSet" data-j="${j}" class="${j===live.j?"cur":""}${x.ok?" ok":""}" aria-pressed="${j===live.j}">${j+1}<small>${x.ok?`${x.kg!==""?esc(x.kg)+"×":""}${esc(x.r)}`:"—"}</small></button>`).join("")}<button data-lv="addSet" aria-label="${esc(L("+ Série"))}">+</button></div>
+      <div class="lv-sets">${it.sets.map((x,j)=>`<button data-lv="pickSet" data-j="${j}" class="${j===live.j?"cur":""}${x.ok?" ok":""}" aria-pressed="${j===live.j}">${j+1}<small>${x.ok?`${x.kg!==""?esc(x.kg)+"×":""}${esc(x.r)}`:"—"}</small></button>`).join("")}<button data-lv="addSet" aria-label="${esc(L("+ Série"))}">+<small>${tx("série","set","serie")}</small></button></div>
       <div class="row lv-tools">${typeof swapOpts==="function"?`<button class="btn" data-lv="swap">⇄ ${tx("Trocar exercício","Swap exercise","Cambiar ejercicio")}</button>`:""}</div>
       ${how}</div>`;
     if(!isC(it))h+=restCard;
@@ -4118,6 +4122,9 @@ $("treinoBody").addEventListener("click",e=>{
   const v=e.target.closest("[data-hv]");if(v){e.stopPropagation();hView=v.dataset.hv;LS.set("atlas-hview",hView);openW=null;renderTreino();$("tab-treino").scrollTop=0;return}
   const b=e.target.closest("[data-lv]");if(!b)return;e.stopPropagation();unlockAudio();
   const a=b.dataset.lv,w=liveW();
+  /* 0.75: what was typed for the current set (not yet "Série feita") must survive a redraw caused by + / picking a set or exercise */
+  if(w&&a!=="setDone"&&$("lvKg")&&$("lvR")){const it0=w.items[live.i],s0=it0&&it0.sets[live.j];
+    if(s0&&!s0.ok){const kg0=kOut($("lvKg").value.trim()),r0=$("lvR").value.trim();if(kg0!=="")s0.kg=kg0;if(r0!=="")s0.r=r0;saveW()}}
   if(a==="start"){const pl=plans.find(x=>x.id===b.dataset.pid);if(pl)liveStart(pl)}
   else if(a==="startFree"){liveStart(null);return openPicker(L("Adicionar exercício"),(name,ref)=>{const x=liveW();if(x){x.items.push(mkItem(name,CONF.sets,CONF.reps,ref));saveW()}renderTreino()})}
   else if(a==="resume"){const x=workouts.find(y=>y.id===b.dataset.wid);if(x){x.start=x.start||Date.now();live={wid:x.id,i:0,j:0};liveNext(x);saveW();saveLive()}}
@@ -4140,7 +4147,7 @@ $("treinoBody").addEventListener("click",e=>{
   else if(a==="pickSet")live.j=+b.dataset.j;
   else if(a==="pickEx"){live.i=+b.dataset.i;const j=w.items[live.i].sets.findIndex(s=>!s.ok);live.j=j<0?0:j}
   else if(a==="prevEx"||a==="nextEx"){live.i+=a==="nextEx"?1:-1;liveFix(w);const j=w.items[live.i].sets.findIndex(s=>!s.ok);live.j=j<0?0:j}
-  else if(a==="addSet"){const s=w.items[live.i].sets,l=s[s.length-1];s.push({r:"",kg:l?l.kg:""});live.j=s.length-1;saveW()}
+  else if(a==="addSet"){const s=w.items[live.i].sets,l=s[s.length-1];s.push({r:"",kg:l?l.kg:""});live.j=s.length-1;saveW();buzz();toast(tx(`Série ${s.length} adicionada`,`Set ${s.length} added`,`Serie ${s.length} añadida`))}
   else if(a==="addEx")return openPicker(L("Adicionar exercício"),(name,ref)=>{w.items.push(mkItem(name,CONF.sets,CONF.reps,ref));live.i=w.items.length-1;live.j=0;saveW();saveLive();renderTreino()});
   else if(a==="swap"&&typeof openSwap==="function")return openSwap(w.items[live.i],(name,ref)=>{const it=w.items[live.i];it.name=name;it.ref=ref;saveW();renderTreino()});
   else if(a==="how"){lvHow=!lvHow}
