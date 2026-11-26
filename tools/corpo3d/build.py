@@ -138,6 +138,7 @@ def ao(S,n=48,maxd=45):
     loc,ri,_=S.ray.intersects_location(O,D,multiple_hits=False);dist=np.full(len(V),1e9);dist[ri]=np.linalg.norm(loc-O[ri],axis=1)
     occ+=c*(dist<maxd)*(1-dist.clip(0,maxd)/maxd)**0.5;w+=c
   return 1-occ/w
+if os.environ.get('DBGHEAD'):SKULL.export('skull_dbg.ply');np.save('eyes_dbg.npy',np.array([[*c,r] for c,r in EYES]));sys.exit(0)
 SKULL_AO=np.clip(0.06+1.0*ao(SKULL,maxd=60)**2.6,0,1)
 # --- tendons that ran on into the hand and the foot poked through the skin there as dark slivers: anything that is not
 #     skin is cut away well inside the hand/foot skin (the top band, where the skin narrows, keeps them)
@@ -205,7 +206,48 @@ def mannequin(ZC=1318,NF=30000,KT=0.15,BK=0,PB=0,NR=(52,50),HS=1.0,JN=1.7,JL=0.4
   V[:,:2]=NK+(V[:,:2]-NK)*(1-(KT+0.15*bk)*t)[:,None]
   V[:,1]-=bk*PB*np.clip((1458-V[:,2])/55,0,1)**1.2
   s=trimesh.Trimesh(V,s.faces,process=False);s.fix_normals();return s
-HEAD=mannequin(NR=(48,46),HS=0.96,KT=0.2,BK=50,PB=14) if FEM else mannequin()   # female: slimmer neck, a bit smaller head
+# ---- mannequin head from the skull (0.70, owner: "aproveite o formato do crânio para a cabeça do manequim"): the solid
+#      skull's outline (convex hull, so orbits, nose, temples, cheeks and mouth do not show) above the jaw line, grown
+#      by a soft-tissue layer, joined to the same neck as before and blurred, so it keeps the skull's proportions
+#      (cranium, brow, cheekbones, jaw, chin) but stays a smooth mannequin: no eyes, mouth, nose or ears.
+#      The skeleton (Raio-X) now sits exactly inside it. HEADV=formula brings back the 0.58–0.60 formula head.
+def skull_head(S,T=7.0,pitch=1.2,sig=6.0,NR=(52,50),ZC=1318,NF=30000,KT=0.15,BK=0,PB=0,EY=None):
+  """the skull's outline, mannequin-smooth: convex hull of the skull (without the nasal bones, so no nose) above the
+  mandibular plane (chin → jaw angles, so the hull does not bridge under the jaw), grown by a soft-tissue layer, joined
+  to the neck and blurred"""
+  from scipy import ndimage;from skimage import measure;from scipy.spatial import ConvexHull
+  NK=np.array([0.,-84.]);V=S.vertices;c=V.mean(0)
+  mid=V[(np.abs(V[:,0])<8)&(V[:,1]<c[1])];men=mid[np.argmin(mid[:,2])]                       # menton (lowest point of the chin)
+  gon=[];
+  for sg in(-1,1):W=V[(V[:,0]*sg>30)&(V[:,2]<men[2]+30)];gon.append(W[np.argmax(W[:,1])])   # gonions (angles of the jaw)
+  n=np.cross(gon[0]-men,gon[1]-men);n/=np.linalg.norm(n);n=n if n[2]>0 else -n
+  fr=V[:,1].min();nasal=(np.abs(V[:,0])<15)&(V[:,1]<fr+22)&(V[:,2]>men[2]+50)              # the nose bones stay out of the hull
+  H=ConvexHull(V[~nasal]);EQ=H.equations
+  lo=S.bounds[0]-np.array([T+16,T+16,0]);lo[2]=ZC-12;hi=S.bounds[1]+T+16
+  shape=tuple(np.ceil((hi-lo)/pitch).astype(int)+1);ii=np.indices(shape).transpose(1,2,3,0)*pitch+lo;P=ii.reshape(-1,3)
+  inside=np.ones(len(P),bool)
+  for k in range(len(EQ)):inside&=(P@EQ[k,:3]+EQ[k,3])<=0
+  G=(inside&(((P-men)@n)>-2)).reshape(shape)
+  D=ndimage.distance_transform_edt(~G)*pitch   # (the skull itself is not added back: its nose bones would make a bump)
+  X,Y,Z=ii[...,0],ii[...,1],ii[...,2]
+  nq=(X/NR[0])**2+((Y-NK[1]-4)/NR[1])**2;neck=(nq<=1)&(Z<=men[2]+70)   # up under the skull base, so the nape is covered
+  F=ndimage.gaussian_filter(((D<=T)|neck).astype(np.float32),sig/pitch)
+  v,f,_,_=measure.marching_cubes(F,0.5);v=v*pitch+lo
+  s=trimesh.Trimesh(v,f[:,::-1],process=True);s=max(s.split(only_watertight=False),key=lambda q:len(q.faces))
+  s=s.submesh([np.where(s.triangles_center[:,2]>ZC-8)[0]],append=True)
+  v,fc=fs.simplify(s.vertices.astype(np.float32),s.faces.astype(np.int32),target_reduction=max(0,1-NF/len(s.faces)));s=trimesh.Trimesh(v,fc,process=True)
+  trimesh.smoothing.filter_taubin(s,iterations=20)
+  ss=lambda a,b,q:np.clip((q-a)/(b-a),0,1)**2*(3-2*np.clip((q-a)/(b-a),0,1))
+  V=s.vertices.copy();bk=ss(-110,-55,V[:,1]);ZT=ZC+30+BK*bk;t=np.clip((ZT-V[:,2])/(ZT-ZC+4),0,1)**1.4
+  V[:,:2]=NK+(V[:,:2]-NK)*(1-(KT+0.15*bk)*t)[:,None]
+  V[:,1]-=bk*PB*np.clip((1458-V[:,2])/55,0,1)**1.2
+  s=trimesh.Trimesh(V,s.faces,process=False);s.fix_normals();return s
+if os.environ.get("HEADV","skull")=="formula":
+  HEAD=mannequin(NR=(48,46),HS=0.96,KT=0.2,BK=50,PB=14) if FEM else mannequin()   # female: slimmer neck, a bit smaller head
+else:
+  _S=SKULL
+  if FEM:b0=_S.vertices;_b=np.array([0,b0[:,1].mean(),b0[:,2].min()+25]);_S=trimesh.Trimesh(_b+(b0-_b)*0.93,_S.faces,process=False)   # same smaller skull as the female skeleton
+  HEAD=skull_head(_S,T=6.5,NR=(48,46),KT=0.2,BK=50,PB=14) if FEM else skull_head(_S)
 print('mannequin faces',len(HEAD.faces))
 raw.append(('cabeca',"skinhead",HEAD))
 for sd,sx in(("right",-1),("left",1)):
