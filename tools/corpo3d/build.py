@@ -164,7 +164,7 @@ crop((z>1330)&(z<=1408)&(np.abs(x)<44)&(y<-118)&(SK.face_normals[:,2]>-0.55),"sk
 #      Not taken from the skin any more: a smooth shape built from three soft pieces sized on the BodyParts3D head
 #      (cranium egg, lower face/jaw egg, elliptic neck) joined with a smooth minimum, so there are no eyes, mouth,
 #      ears, folds or holes. The bottom of the neck tucks in under the trapezius / sternocleidomastoid / clavicles.
-def mannequin(ZC=1318,NF=30000,KT=0.15,BK=0,PB=0,NR=(52,50),HS=1.0):
+def mannequin(ZC=1318,NF=30000,KT=0.15,BK=0,PB=0,NR=(52,50),HS=1.0,JN=1.7):
   NK=np.array([0.,-84.]);HC=np.array([0.,-90.,1555.])
   # exponential smooth minimum: smooth everywhere (the polynomial one left a faint ring where its blend started)
   def smin(a,b,k):m=np.minimum(a,b);return m-k*np.log(np.exp(-(a-m)/k)+np.exp(-(b-m)/k))
@@ -173,8 +173,10 @@ def mannequin(ZC=1318,NF=30000,KT=0.15,BK=0,PB=0,NR=(52,50),HS=1.0):
     # one egg, no seams: wide and round on top, narrowing and coming forward towards the chin; every radius changes
     # with a smooth (C∞) weight of the height, so the surface has no shading lines
     zc=HC[2];sg=lambda v:1/(1+np.exp(-v));t=sg((zc-10-Z)/22)*np.clip((zc+40-Z)/150,0,1)**1.2
-    rx=67*HS*(1-0.17*t);ry=95*HS*(1-0.12*t);cy=HC[1]-16*HS*t;rz=(86+44*sg((zc-15-Z)/20))*HS
-    head=(np.sqrt((X/rx)**2+((Y-cy)/ry)**2+((Z-zc)/rz)**2)-1)*np.minimum(rx,np.minimum(ry,rz))
+    rx=67*HS*(1-0.17*t);ry=95*HS*(1-0.08*t);cy=HC[1]-14*HS*t;rz=(86+36*sg((zc-15-Z)/20))*HS
+    # jaw (0.59, owner: "uma mandíbula grande, pouquíssimo marcada"): towards the bottom the egg turns into a
+    # rounded box (exponent 2 → 2+JN), which gives jaw angles, a chin and a flat line under it, all softly
+    n=2+JN*t;head=((np.abs(X/rx)**n+np.abs((Y-cy)/ry)**n+np.abs((Z-zc)/rz)**n)**(1/n)-1)*np.minimum(rx,np.minimum(ry,rz))
     # neck: a rounded cylinder written as one smooth formula (a max() here made a crease on the head above it)
     nq=(X/NR[0])**2+((Y-NK[1]-4)/NR[1])**2+((Z-1400)/110)**8
     neck=(np.sqrt(nq)-1)*min(NR)

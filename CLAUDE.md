@@ -19,7 +19,7 @@ Histórico: [docs/HISTORICO.md](docs/HISTORICO.md). Fontes científicas e links:
 ## Como publicar uma mudança
 
 1. Edite os arquivos (o app quase todo está em `index.html`).
-2. **Suba a versão** em `sw.js` (`const CACHE="atlas-v0.58"` → `0.59`; é o número que aparece em Configurações › Versão).
+2. **Suba a versão** em `sw.js` (`const CACHE="atlas-v0.59"` → `0.60`; é o número que aparece em Configurações › Versão).
 3. Registre em `docs/HISTORICO.md` e atualize o trecho da parte mexida em `docs/DETALHES.md`.
 4. Commit na `main` e push (o GitHub Pages publica em ~1 min; o push também gera o app Android pelo workflow "App Android").
 5. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
@@ -32,7 +32,7 @@ Histórico: [docs/HISTORICO.md](docs/HISTORICO.md). Fontes científicas e links:
 | `design2.css`, `design2.js` | Design "Arena" (padrão desde a 0.42) |
 | `sync.js` | Conta e sincronização (Firebase: login Google/e-mail + Firestore), carregado só por quem usa |
 | `sw.js` | Service worker (offline) e número da versão |
-| `3d/` | Boneco 3D (`v3.js` + modelos `corpo-9.glb`/`corpo-f-6.glb` gerados por `tools/corpo3d/build.py`; cabeça de manequim ou caveira) |
+| `3d/` | Boneco 3D (`v3.js` + modelos `corpo-10.glb`/`corpo-f-7.glb` gerados por `tools/corpo3d/build.py`; cabeça de manequim ou caveira) |
 | `how/` | "Como fazer" de cada exercício em pt/en/es (mesmas chaves nos 3) |
 | `vendor/three/`, `fonts/` | three.js e fontes servidos pelo próprio app |
 | `app/` | App das lojas (Capacitor, Android); `.github/workflows/android.yml` gera o `.aab` assinado |

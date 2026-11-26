@@ -17,7 +17,7 @@
 <link rel="stylesheet" href="fonts/fonts.css">
 <style>
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);box-sizing:border-box;height:100%}
-html.sa-ios{padding-bottom:max(10px,calc(env(safe-area-inset-bottom,0px) - 12px))}html.sa-ios.ios-short{padding-bottom:8px}
+html.sa-ios{padding-bottom:max(14px,calc(env(safe-area-inset-bottom,0px) - 20px))}html.sa-ios.ios-short{padding-bottom:14px;overflow:hidden}
 body{margin:0}
 [hidden]{display:none!important}
 /* motion (owner, 0.31: "mais suave e smooth, como os apps de iPhone/Samsung"): one set of curves for the whole app.
@@ -5466,10 +5466,12 @@ const STANDALONE=NATIVE||!!window.muscleDesktop||matchMedia("(display-mode: stan
    owner's phone (nov/2026) the window still stops above the home bar and the safe-area padding was added on top of
    that gap: the tab bar floated ~88 pt above the bottom. 0.57 (owner: "mais perto, porém não tanto, bem ergonômico"):
    when the window is short, the bottom safe-area padding goes (the system already keeps that strip); when it is full
-   height, the padding is a bit smaller than the safe area. */
+   height, the padding is a bit smaller than the safe area. 0.59 (owner's print: still ~60 pt under the bar): the short
+   window is stretched to the screen again (as in 0.37) and the bottom padding is 14 px, so the bar sits ~20 pt from the
+   bottom edge, just above the home indicator. */
 (function fitIOS(){if(navigator.standalone!==true)return;const de=document.documentElement;de.classList.add("sa-ios");
   const fix=()=>{const port=matchMedia("(orientation: portrait)").matches,H=port?Math.max(screen.width,screen.height):Math.min(screen.width,screen.height);
-    de.classList.toggle("ios-short",H-innerHeight>20&&H-innerHeight<80)};
+    const sh=H-innerHeight>20&&H-innerHeight<80;de.classList.toggle("ios-short",sh);de.style.height=sh?H+"px":""};
   fix();addEventListener("resize",fix);addEventListener("orientationchange",()=>setTimeout(fix,300))})();
 let inPrompt=null;
 function instSync(){const on=!!inPrompt&&!STANDALONE;const h=$("instBtn");if(h)h.hidden=!on;const b=$("inInst");if(b)b.hidden=!on;
