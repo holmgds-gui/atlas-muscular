@@ -556,4 +556,20 @@ if os.environ.get("OSSOS","1")=="1":
   json.dump({k:[[round(x,4) for x in JT[i]["centro"]] for i in v] for k,v in JM.items()},open(OUT.replace("corpo","juntas")+".json","w"),separators=(",",":"));print("juntas do esqueleto")
   RO="rig-f" if FEM else "rig"
   json.dump({"v":1,"unid":"metros; eixos do app (x = esquerda do corpo, y = cima, z = frente)","ordem":"rot, depois abd/incl/desv/prot, depois flex (eixos no repouso do pai)",
-    "articulacoes":JT,"acoplamentos":CP},open(RO+".json","w"),ensure_ascii=False,separators=(",",":"));print("rig",len(JT),"articulações")
+    "articulacoes":JT,"acoplamentos":CP,"pele":list(JT.keys())},open(RO+".json","w"),ensure_ascii=False,separators=(",",":"));print("rig",len(JT),"articulações")
+  # ---- skinning (0.76, stage 2 of the animations; owner: "faça 1 e 2"): every vertex of the body learns which bone
+  #      pieces it follows. For each piece we take the distance from the vertex to that piece's bones; the nearest piece
+  #      leads and the others share in with a Gaussian of how much farther they are (the farther the vertex sits from any
+  #      bone — a glute, a belly — the softer the blend). It depends only on position, so muscles that touch get the same
+  #      weights and do not tear apart when the body bends. Up to 4 pieces per vertex, stored in the glb as custom vertex
+  #      attributes "_skinidx" (index in rig "pele") and "_skinw" (0–255).
+  import pickle,skin
+  ORDEM=list(JT.keys());SP={}
+  for (sg_,g),L in groups.items():
+    for m,a in L:
+      v=m.vertices;p=np.c_[v[:,0],v[:,2],-v[:,1]]/1000.0-ctr
+      if len(p)>3000:p=p[np.random.default_rng(5).choice(len(p),3000,replace=False)]
+      SP.setdefault(sg_,[]).append(p)
+  SP={k:np.vstack(v) for k,v in SP.items()}
+  pickle.dump((sc,SP,ORDEM,OUT),open(OUT+"-skin.pkl","wb"))   # tools/corpo3d/skin.py can redo only the weights from this
+  skin.run(sc,SP,ORDEM,OUT)

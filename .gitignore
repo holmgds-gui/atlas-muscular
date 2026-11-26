@@ -20,3 +20,5 @@ tools/corpo3d/ossos-f.glb
 tools/corpo3d/rig.json
 tools/corpo3d/rig-f.json
 __pycache__/
+tools/corpo3d/corpo-skin.pkl
+tools/corpo3d/corpo-f-skin.pkl

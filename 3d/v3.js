@@ -1,6 +1,6 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
-   in index.html; the models are 3d/corpo-13.glb (male; 0.71 more muscle volume) and 3d/corpo-f-8.glb (now 3d/corpo-f-11.glb; 0.70: mannequin head shaped on the skull; more feminine in 0.66; female, owner 0.15–0.17; mannequin head 0.54, plain 0.57, smooth egg 0.58, jaw 0.59–0.60), each with its joint
+   in index.html; the models are 3d/corpo-14.glb (male; 0.71 more muscle volume, 0.76 skin weights) and 3d/corpo-f-8.glb (now 3d/corpo-f-12.glb; 0.70: mannequin head shaped on the skull; more feminine in 0.66; female, owner 0.15–0.17; mannequin head 0.54, plain 0.57, smooth egg 0.58, jaw 0.59–0.60), each with its joint
    marks (3d/juntas-4.json, 3d/juntas-f-5.json — on the skeleton's joint centres since 0.68) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
    Atlas muscle keys, A-pose, Classic Physique upper body, proportional legs, skull, skin on hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
@@ -61,7 +61,13 @@ export function mount(box, api){
   const ghosts=[];
   /* aura: almost clear in the middle, stronger toward the outline (like a glow around the shape) */
   const ghostMat=()=>new THREE.ShaderMaterial({transparent:true,depthWrite:false,side:THREE.FrontSide,vertexColors:true,uniforms:{col:{value:new THREE.Color()},a0:{value:.14},a1:{value:.45}},
-    vertexShader:`varying vec3 vN;varying vec3 vV;varying float vF;void main(){vec4 mv=modelViewMatrix*vec4(position,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);vF=color.r;gl_Position=projectionMatrix*mv;}`,
+    vertexShader:`#include <common>
+#include <skinning_pars_vertex>
+varying vec3 vN;varying vec3 vV;varying float vF;void main(){
+#include <skinbase_vertex>
+#include <begin_vertex>
+#include <skinning_vertex>
+vec4 mv=modelViewMatrix*vec4(transformed,1.0);vN=normalize(normalMatrix*normal);vV=normalize(-mv.xyz);vF=color.r;gl_Position=projectionMatrix*mv;}`,
     fragmentShader:`uniform vec3 col;uniform float a0;uniform float a1;varying vec3 vN;varying vec3 vV;varying float vF;void main(){float r=1.0-abs(dot(normalize(vN),normalize(vV)));gl_FragColor=vec4(col,(a0+a1*pow(r,3.0))*vF);}`});   /* vF: fades out toward the edge */
   const jScene=new THREE.Scene(),jMarks=[],jFills=[];jScene.visible=false;
   const ringG=new THREE.RingGeometry(0.62,1,40),dotG=new THREE.CircleGeometry(0.64,40);
@@ -106,7 +112,14 @@ export function mount(box, api){
   /* separation lines: every mesh is drawn once more with its own id into an off-screen buffer; a full-screen pass draws a
      thin dark line wherever neighbouring pixels have different ids (where muscles meet, at bones, around the outline) */
   const idT=new THREE.WebGLRenderTarget(2,2,{minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter});
-  const idVS=`varying float vx;varying float vy;void main(){vec4 w=modelMatrix*vec4(position,1.0);vx=w.x;vy=w.y;gl_Position=projectionMatrix*viewMatrix*w;}`;
+  /* 0.76: skinning-aware (the body bends with the skeleton) */
+  const idVS=`#include <common>
+#include <skinning_pars_vertex>
+varying float vx;varying float vy;void main(){
+#include <skinbase_vertex>
+#include <begin_vertex>
+#include <skinning_vertex>
+vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.0)).y;gl_Position=projectionMatrix*viewMatrix*w;}`;   /* vy: height at rest, so the nape clip follows the body when it bends */
   const idFS=`uniform float id;uniform float sd;uniform float clipY;uniform float cl;varying float vx;varying float vy;void main(){if(cl>0.5&&vy>clipY)discard;gl_FragColor=gl_FrontFacing?vec4(id/255.0,sd>0.5?(vx>0.0?1.0:0.5):0.5,0.0,1.0):vec4(1.0,0.25,0.0,1.0);}`;
   /* inflated muscles overlap a little; the outer layer always wins the depth test */
   const LAYER={trapezio_superior:-3,trapezio_medio:-3,trapezio_inferior:-3,ombro_frontal:-3,ombro_lateral:-3,ombro_posterior:-3,peito_superior:-3,peito_medial:-3,peito_inferior:-3,
@@ -145,6 +158,11 @@ export function mount(box, api){
   const baseU={value:new THREE.Color()},nearU={value:1};
   function shade(o,fib){const g=o.geometry;if(fib)g.setAttribute("fib",g.attributes.uv);const fu={value:new THREE.Color()};o.userData.fu=fu;
     o.material.onBeforeCompile=sh=>{sh.uniforms.fibCol=fu;sh.uniforms.baseCol=baseU;sh.uniforms.fibNear=nearU;
+      /* 0.76: the nape clip (trapezius top, deep neck tissue) is cut at the height they have at rest, so it rides along
+         when the body bends instead of slicing through a raised shoulder */
+      if(o.userData.clip){sh.uniforms.clipY=CLIPU;
+        sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nvarying float vRestY;").replace("#include <begin_vertex>","#include <begin_vertex>\nvRestY=(modelMatrix*vec4(position,1.0)).y;");
+        sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nvarying float vRestY;uniform float clipY;").replace("#include <clipping_planes_fragment>","#include <clipping_planes_fragment>\n if(vRestY>clipY)discard;")}
       if(!fib){sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nuniform vec3 baseCol;").replace("#include <color_fragment>","#include <color_fragment>\n if(!gl_FrontFacing)diffuseColor.rgb=baseCol;");return}
       sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nattribute vec2 fib;varying vec2 vFib;").replace("#include <begin_vertex>","#include <begin_vertex>\nvFib=fib;");
       sh.fragmentShader=sh.fragmentShader.replace("#include <common>",`#include <common>
@@ -158,7 +176,7 @@ export function mount(box, api){
           float st=0.45+0.55*h1(id+11.0);
           return line*dash*st*(1.0-smoothstep(0.045,0.12,fw));}`)
         .replace("#include <color_fragment>","#include <color_fragment>\n if(gl_FrontFacing)diffuseColor.rgb*=1.0-0.28*fibNear*fibre(vFib); else diffuseColor.rgb=baseCol;");
-    };o.material.customProgramCacheKey=()=>fib?"fib":"solid"}
+    };o.material.customProgramCacheKey=()=>(fib?"fib":"solid")+(o.userData.clip?"-clip":"")}   /* 0.76: the nape clip makes a different shader */
 
   /* tap vs drag; a double tap zooms on that spot */
   const ray=new THREE.Raycaster(),ndc=new THREE.Vector2();let down=null,lastHit=null,lastTap={t:0,x:0,y:0};
@@ -200,19 +218,23 @@ export function mount(box, api){
   const mo=new MutationObserver(()=>{readColors();paint()});mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class","style"]});
   const mq=matchMedia("(prefers-color-scheme: dark)"),onMq=()=>{readColors();paint()};mq.addEventListener("change",onMq);
 
-  const FILES={m:["./corpo-13.glb","./juntas-4.json"],f:["./corpo-f-11.glb","./juntas-f-5.json"]};let loadN=0;
+  const FILES={m:["./corpo-14.glb","./juntas-4.json"],f:["./corpo-f-12.glb","./juntas-f-5.json"]};let loadN=0;
   async function load(sx){sx=sx==="f"?"f":"m";if(sx===curSex)return;curSex=sx;const my=++loadN,live=()=>alive&&my===loadN;
     fetch(new URL(FILES[sx][1],import.meta.url)).then(r=>r.json()).then(j=>{if(live()){clearJoints();addJoints(j)}}).catch(()=>{});
+    const rp=fetch(new URL(RIGF[sx],import.meta.url)).then(r=>r.ok?r.json():null).catch(()=>null);
     let base;try{base=await getScene(FILES[sx][0],api.progress)}catch(e){if(live())api.fail();return}
     if(!live())return;
     {const g={scene:base.clone(true)};
       /* swapping ♂/♀: the old body goes away only when the new one is ready */
       if(root){scene.remove(root);root.traverse(o=>{if(o.isMesh){o.material.dispose();o.userData.idm&&o.userData.idm.dispose()}})}   /* geometry is shared: kept */
       for(const k in parts)delete parts[k];pickables.length=0;meshes.length=0;ghosts.length=0;root=g.scene;
-      const ms=[];g.scene.traverse(o=>{if(o.isMesh)ms.push(o)});
+      let ms=[];g.scene.traverse(o=>{if(o.isMesh)ms.push(o)});
+      /* 0.76: the joints come with the body, and the body is skinned to them */
+      if(rigRoot){scene.remove(rigRoot);rigRoot=null}rig=null;
+      {const R=await rp;if(!live())return;if(R&&R.pele){rig=buildRig(R);rig.sex=sx;scene.add(rigRoot);ms=skinBody(ms)}}
       ms.forEach(o=>{const k=(o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"deco").replace(/_\d+$/,"");
         o.material=new THREE.MeshStandardMaterial({color:0x999999,roughness:k==="osso"?0.75:k==="cabeca"?0.62:0.55,metalness:0,side:THREE.DoubleSide,vertexColors:!!o.geometry.attributes.color});   /* skull: baked shadow in the orbits, nose and teeth */
-        if(CLIPK.has(k))o.material.clippingPlanes=[CLIPP];
+        o.userData.clip=CLIPK.has(k);
         shade(o,!!o.geometry.attributes.uv&&k!=="osso"&&k!=="fundo");o.userData.k=k;parts[k]=o;pickables.push(o);
         o.userData.idm=new THREE.ShaderMaterial({uniforms:{clipY:CLIPU,cl:{value:CLIPK.has(k)?1:0},id:{value:k.startsWith("mama_")?250:meshes.length+1},sd:{value:/^(osso|fundo|base|pele|pele_n|cabeca|tend|mama_.*)$/.test(k)?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
         if(k==="mama"){o.material=ghostMat();o.renderOrder=5;
@@ -258,21 +280,19 @@ export function mount(box, api){
      "esq" = bone (ivory, baked shadow), "cart" = costal cartilages and intervertebral discs (bluish). Downloaded only when
      Raio-X or Esqueleto is chosen. Raio-X: the muscles turn glassy (front faces only, no depth write) and the deep
      filler/skull/tendon nodes of the body hide (the skeleton replaces them). Esqueleto: only the bones, with an outline. */
-  const SKF={m:"./ossos-3.glb",f:"./ossos-f-4.glb"},RIGF={m:"./rig-2.json",f:"./rig-f-2.json"};
+  const SKF={m:"./ossos-3.glb",f:"./ossos-f-4.glb"},RIGF={m:"./rig-3.json",f:"./rig-f-3.json"};
   const xrOn=()=>XR!=="off"&&!!bones&&bonesSex===curSex&&bones.visible;
   const isCart=k=>k==="cart"||k.startsWith("c_");
   async function loadBones(){if(XR==="off"||!curSex)return;if(bones&&bonesSex===curSex){applyXr();return}
-    const sx=curSex,my=++boneN;let base,R=null;api.xrProg&&api.xrProg(0);
-    const rp=fetch(new URL(RIGF[sx],import.meta.url)).then(r=>r.ok?r.json():null).catch(()=>null);
+    const sx=curSex,my=++boneN;let base;api.xrProg&&api.xrProg(0);
     try{base=await getScene(SKF[sx],x=>api.xrProg&&api.xrProg(x))}catch(e){api.xrProg&&api.xrProg(null);if(alive&&my===boneN)api.xrFail&&api.xrFail();return}
-    R=await rp;api.xrProg&&api.xrProg(null);if(!alive||my!==boneN||sx!==curSex)return;
+    api.xrProg&&api.xrProg(null);if(!alive||my!==boneN||sx!==curSex)return;
     if(bones){scene.remove(bones);bones.traverse(o=>{if(o.isMesh){o.material.dispose();o.userData.idm.dispose()}})}
     bones=base.clone(true);bonesSex=sx;
     bones.traverse(o=>{if(!o.isMesh)return;const k=o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"esq";o.userData.k=k;
       o.material=new THREE.MeshStandardMaterial({color:isCart(k)?C.cart:C.osso,roughness:isCart(k)?0.42:0.68,metalness:0,vertexColors:!!o.geometry.attributes.color});
       o.userData.idm=new THREE.ShaderMaterial({uniforms:{clipY:CLIPU,cl:{value:0},id:{value:isCart(k)?240:241},sd:{value:0}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide})});
-    rig=R?buildRig(R,bones):null;
-    scene.add(bones);applyXr()}
+    scene.add(bones);if(rig&&rig.sex===sx)attachBones(bones);applyXr()}
   /* ---- joints of the skeleton (0.68, stage 1 of the animations; tools/corpo3d/rig.py → 3d/rig-N.json): one group per
      joint at its centre of rotation, nested like the body (pelvis → spine → head; shoulder girdle → arm → hand → fingers;
      hip → knee → ankle → foot → toes); each bone piece ("o_<joint>", "c_<joint>") hangs from the joint that moves it.
@@ -280,19 +300,59 @@ export function mount(box, api){
      (angle − the angle the A-pose already has), kept inside the joint's range; order: rotation about the bone, then
      the side-to-side movement, then flexion. "coluna" / "lombar" / "toracica" / "cervical" spread a movement over the
      levels in proportion to each level's range. Couplings: scapulohumeral rhythm, patella, knee screw-home. */
-  let rig=null;
-  function buildRig(R,root){const J=R.articulacoes,G={},C0={};
+  let rig=null,rigRoot=null;
+  function buildRig(R){const J=R.articulacoes,G={},C0={};rigRoot=new THREE.Group();rigRoot.name="rig";
     const mk=id=>{if(G[id])return G[id];const j=J[id];const g=new THREE.Group();g.name="j_"+id;C0[id]=new THREE.Vector3().fromArray(j.centro);
-      const par=j.pai&&J[j.pai]?mk(j.pai):root;g.position.copy(C0[id]);if(j.pai&&J[j.pai])g.position.sub(C0[j.pai]);par.add(g);G[id]=g;return g};
-    Object.keys(J).forEach(mk);
-    const ms=[];root.traverse(o=>{if(o.isMesh)ms.push(o)});
-    for(const o of ms){const seg=o.userData.k.replace(/^[oc]_/,"");const id=G[seg]?seg:"pelve";const g=G[id];
-      o.updateMatrixWorld(true);const w=o.matrixWorld.clone();o.parent.remove(o);g.add(o);
-      /* the piece keeps its place: its new local matrix = (joint at rest)⁻¹ × old world */
-      const inv=new THREE.Matrix4().makeTranslation(-C0[id].x,-C0[id].y,-C0[id].z);o.matrix.copy(inv.multiply(w));o.matrix.decompose(o.position,o.quaternion,o.scale)}
-    return {J,G,C0,CP:R.acoplamentos||[],ang:{}}}
+      const par=j.pai&&J[j.pai]?mk(j.pai):rigRoot;g.position.copy(C0[id]);if(j.pai&&J[j.pai])g.position.sub(C0[j.pai]);par.add(g);G[id]=g;return g};
+    Object.keys(J).forEach(mk);rigRoot.updateMatrixWorld(true);
+    const P0={};for(const id in G)P0[id]=G[id].position.clone();
+    return {J,G,C0,P0,R,CP:R.acoplamentos||[],ang:{}}}
+  /* bone pieces ("o_<joint>", "c_<joint>") hang from the joint that moves them, keeping their place */
+  function attachBones(root){const ms=[];root.traverse(o=>{if(o.isMesh&&o.userData.k)ms.push(o)});root.updateMatrixWorld(true);rigRoot.updateMatrixWorld(true);
+    for(const o of ms){const seg=o.userData.k.replace(/^[oc]_/,"");const g=rig.G[seg]||rig.G.pelve;
+      const w=o.matrixWorld.clone();o.parent.remove(o);g.add(o);
+      /* placed against the joint at rest (the body may be posed right now) */
+      const id=Object.keys(rig.G).find(k=>rig.G[k]===g),c=rig.C0[id];o.matrix.copy(new THREE.Matrix4().makeTranslation(-c.x,-c.y,-c.z).multiply(w));o.matrix.decompose(o.position,o.quaternion,o.scale)}}
+  /* 0.76 (stage 2): each body mesh becomes a SkinnedMesh on the joints, with the weights baked by build.py ("_skinidx",
+     "_skinw"); the loaded geometry is shared, the skin attributes are added to it once */
+  function skinBody(ms){const sk=new THREE.Skeleton(rig.R.pele.map(id=>rig.G[id]));rigRoot.updateMatrixWorld(true);
+    return ms.map(o=>{const g=o.geometry,si=g.attributes._skinidx,sw=g.attributes._skinw;if(!si||!sw)return o;
+      if(!g.attributes.skinIndex){const n=si.count,I=new Uint16Array(n*4),W=new Float32Array(n*4);
+        for(let i=0;i<n;i++){I[i*4]=si.getX(i);I[i*4+1]=si.getY(i);I[i*4+2]=si.getZ(i);I[i*4+3]=si.getW(i);
+          const a=sw.getX(i),b=sw.getY(i),c=sw.getZ(i),d=sw.getW(i),t=(a+b+c+d)||1;W[i*4]=a/t;W[i*4+1]=b/t;W[i*4+2]=c/t;W[i*4+3]=d/t}
+        g.setAttribute("skinIndex",new THREE.Uint16BufferAttribute(I,4));g.setAttribute("skinWeight",new THREE.Float32BufferAttribute(W,4))}
+      const s=new THREE.SkinnedMesh(g,o.material);s.name=o.name;s.userData=o.userData;s.position.copy(o.position);s.quaternion.copy(o.quaternion);s.scale.copy(o.scale);
+      s.frustumCulled=false;const par=o.parent;par.add(s);par.remove(o);s.updateMatrixWorld(true);s.bind(sk,s.matrixWorld);return s})}
+  const wpos=g=>{g.updateWorldMatrix(true,false);return new THREE.Vector3().setFromMatrixPosition(g.matrixWorld)};
+  const wq=g=>{g.updateWorldMatrix(true,false);return g.getWorldQuaternion(new THREE.Quaternion())};
+  function setWorldQ(g,q){const pq=wq(g.parent);g.quaternion.copy(pq.invert().multiply(q));g.updateWorldMatrix(false,true)}
+  /* two-bone IK (hip–knee–ankle, shoulder–elbow–wrist): law of cosines for the middle joint (turned about its own
+     anatomical axis), then the shortest turn of the first joint that puts the end on the target */
+  function ik2(A,B,E,T,midId,axWant){if(!A||!B||!E)return;
+    const a=wpos(A),b=wpos(B),e=wpos(E),l1=a.distanceTo(b),l2=b.distanceTo(e);
+    const d=Math.min(l1+l2-1e-4,Math.max(Math.abs(l1-l2)+1e-4,a.distanceTo(T)));
+    const inner=()=>{const b2=wpos(B),e2=wpos(E),a2=wpos(A);return a2.sub(b2).angleTo(e2.sub(b2))};
+    const want=Math.acos(Math.min(1,Math.max(-1,(l1*l1+l2*l2-d*d)/(2*l1*l2))));
+    const fx=rig.J[midId].mov.find(m=>m.id==="flex"),ax=new THREE.Vector3().fromArray(fx.eixo).normalize().applyQuaternion(wq(B.parent));
+    const turn=ang=>{const qd=new THREE.Quaternion().setFromAxisAngle(ax,ang);setWorldQ(B,qd.multiply(wq(B)))};
+    const d0=inner()-want;turn(d0);if(Math.abs(inner()-want)>Math.abs(d0)*0.5+1e-3)turn(-2*d0);
+    const e2=wpos(E),from=e2.sub(a).normalize(),to=T.clone().sub(a).normalize();
+    setWorldQ(A,new THREE.Quaternion().setFromUnitVectors(from,to).multiply(wq(A)));
+    /* pole: the shortest turn can twist the limb (knees crossing or bending backwards); spin it about hip/shoulder→target
+       so the elbow hinge axis lies as the angles above left it; with the foot flat on the floor the knee follows the toes
+       (hinge = its rest axis turned by the foot's giro), as coaches cue in the squat */
+    const ax1=new THREE.Vector3().fromArray(fx.eixo).normalize().applyQuaternion(wq(B.parent)),pr=v=>v.sub(to.clone().multiplyScalar(v.dot(to)));
+    const p0=pr((axWant||ax).clone()),p1=pr(ax1);
+    if(p0.lengthSq()>1e-4&&p1.lengthSq()>1e-4){const ang=Math.atan2(to.dot(p1.clone().cross(p0)),p1.dot(p0));
+      setWorldQ(A,new THREE.Quaternion().setFromAxisAngle(to,ang).multiply(wq(A)))}}
   const SPINE={lombar:/^L\d$/,toracica:/^T\d+$/,cervical:/^C[2-7]$/,coluna:/^([LT]\d+|C[2-7])$/};
-  function rigPose(P){if(!rig)return;const A={};
+  /* pegada_d / pegada_e (0–1): closes the fingers round a bar (1 = full grip) */
+  const GRIP={mcf:70,ifp:85,ifd:50,cmc1:{abd:45,flex:10},mcf1:35,if1:40};
+  function grip(P){const Q={...P};for(const sd of ["d","e"]){const k=P["pegada_"+sd];delete Q["pegada_"+sd];if(!k)continue;
+      for(const f of [2,3,4,5])for(const j of ["mcf","ifp","ifd"])Q[j+f+"_"+sd]={flex:GRIP[j]*k,...(Q[j+f+"_"+sd]||{})};
+      Q["cmc1_"+sd]={abd:GRIP.cmc1.abd*k,flex:GRIP.cmc1.flex*k,...(Q["cmc1_"+sd]||{})};
+      for(const j of ["mcf1","if1"])Q[j+"_"+sd]={flex:GRIP[j]*k,...(Q[j+"_"+sd]||{})}}return Q}
+  function rigPose(P){if(!rig)return;const A={};P=P&&grip(P);
     for(const [id,v] of Object.entries(P||{})){const re=SPINE[id];
       if(re){for(const [mv,deg] of Object.entries(v)){const lv=Object.keys(rig.J).filter(k=>re.test(k));
           const w=lv.map(k=>{const d=rig.J[k].mov.find(m=>m.id===mv);return d?(deg>=0?d.max:-d.min):0}),sw=w.reduce((a,b)=>a+b,0)||1;
@@ -316,6 +376,20 @@ export function mount(box, api){
       tr.updateWorldMatrix(true,false);sc.updateWorldMatrix(true,false);
       const qt=new THREE.Quaternion(),qs=new THREE.Quaternion();tr.getWorldQuaternion(qt);sc.getWorldQuaternion(qs);
       const rel=qt.clone().invert().multiply(qs);gh.quaternion.premultiply(rel.invert())}
+    /* root (0.76): pelve:{pos:[x,y,z] metres added to its place, flex (tips forward, + ) / incl (to the left, +) / rot (turns
+       left, +) in degrees} — moves and turns the whole body, e.g. lying on the bench (flex −90) */
+    const G0=rig.G.pelve,pv=P&&P.pelve;G0.position.copy(rig.P0.pelve);G0.quaternion.identity();
+    if(pv){if(pv.pos)G0.position.add(new THREE.Vector3().fromArray(pv.pos));
+      const r=THREE.MathUtils.degToRad;G0.quaternion.setFromEuler(new THREE.Euler(r(pv.flex||0),r(pv.rot||0),-r(pv.incl||0),"YXZ"))}
+    /* IK (0.76): ik:{pe_d:[x,y,z], mao_e:[x,y,z]…} — the ankle / wrist goes to that point (world metres), the knee / elbow
+       bends just enough and the hip / shoulder turns toward it, keeping the bend's direction from the angles above; the
+       foot stays flat on the floor (its rest orientation; {alvo:[…],giro:20} turns the toes out 20°) unless {alvo:[…],plano:false} */
+    if(P&&P.ik)for(const [k,t] of Object.entries(P.ik)){const m=/^(pe|mao)_([de])$/.exec(k);if(!m||!t)continue;const sd=m[2],leg=m[1]==="pe";
+      const T=new THREE.Vector3().fromArray(Array.isArray(t)?t:t.alvo);
+      const flat=leg&&!(t&&t.plano===false),qf=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),THREE.MathUtils.degToRad((t&&t.giro||0)*(sd==="d"?-1:1)));
+      const kw=flat?new THREE.Vector3().fromArray(rig.J["joelho_"+sd].mov.find(m=>m.id==="flex").eixo).normalize().applyQuaternion(qf):null;
+      ik2(rig.G[(leg?"quadril_":"ombro_")+sd],rig.G[(leg?"joelho_":"cotovelo_")+sd],rig.G[(leg?"tornozelo_":"punho_")+sd],T,(leg?"joelho_":"cotovelo_")+sd,kw);
+      if(flat)setWorldQ(rig.G["tornozelo_"+sd],qf)}
     /* the Articulações marks follow their joint */
     const MK={pescoco:["C4"],toracica:["T6"],lombar:["L3"]};for(const k of ["ombro","cotovelo","punho","quadril","joelho","tornozelo"])MK[k]=[k+"_d",k+"_e"];
     for(const g of jMarks){const id=(MK[g.userData.j]||[])[g.userData.i],G=id&&rig.G[id];if(!G)continue;G.updateWorldMatrix(true,false);G.getWorldPosition(g.position)}
@@ -374,11 +448,19 @@ export function mount(box, api){
     xray(m){XR=m==="raiox"||m==="esq"?m:"off";if(XR==="off")applyXr();else loadBones()},
     xrNow(){return XR},
     /* 0.68: the skeleton's joints (Esqueleto/Raio-X loaded): pose({ombro_d:{flex:90},coluna:{flex:30}…}), rig info, debug marks */
-    pose(P){rigPose(P)},rigReady(){return !!rig},rigJoints(){return rig?Object.fromEntries(Object.entries(rig.J).map(([k,j])=>[k,{nome:j.nome,pai:j.pai,mov:j.mov.map(m=>[m.id,m.min,m.max,m.repouso])}])):null},
+    pose(P){rigPose(P)},rigReady(){return !!rig},
+    /* for checks/prints only: a thin rod between two points (stands in for a barbell until the equipment exists) */
+    marca(id,a,b){scene.children.filter(o=>o.name==="mk_"+id).forEach(o=>{scene.remove(o);o.geometry.dispose()});if(!a)return need=true;
+      const A=new THREE.Vector3().fromArray(a),B=new THREE.Vector3().fromArray(b),L=A.distanceTo(B);
+      const m=new THREE.Mesh(new THREE.CylinderGeometry(0.014,0.014,L,16),new THREE.MeshStandardMaterial({color:0x555b63,roughness:0.4,metalness:0.6}));m.name="mk_"+id;
+      m.position.copy(A).add(B).multiplyScalar(0.5);m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),B.clone().sub(A).normalize());scene.add(m);need=true},rigJoints(){return rig?Object.fromEntries(Object.entries(rig.J).map(([k,j])=>[k,{nome:j.nome,pai:j.pai,mov:j.mov.map(m=>[m.id,m.min,m.max,m.repouso])}])):null},
     rigDebug(on){rigDebug(on)},
     jointPos(id){if(!rig||!rig.G[id])return null;const v=new THREE.Vector3();rig.G[id].getWorldPosition(v);return v.toArray()},
     /* for tests: is this part drawn now; bounding boxes of the skeleton and of the body */
     visible(k){return !!(parts[k]&&parts[k].visible)},
+    /* 0.76: how many parts are skinned to the joints; each part's box with the pose applied (CPU skinning, slow) */
+    skinned(){return [pickables.filter(o=>o.isSkinnedMesh).length,pickables.length]},
+    partBoxes(){root.updateMatrixWorld(true);const r={};for(const [k,o] of Object.entries(parts)){const b=new THREE.Box3().expandByObject(o,true);r[k]={min:b.min.toArray(),max:b.max.toArray()}}return r},
     boxes(){if(!bones||!root)return null;const bb=new THREE.Box3().setFromObject(bones),cv=root.visible;const v0=Object.values(parts).map(o=>o.visible);Object.values(parts).forEach(o=>o.visible=true);
       const cb=new THREE.Box3().setFromObject(root);Object.values(parts).forEach((o,i)=>o.visible=v0[i]);return {bones:{min:bb.min.toArray(),max:bb.max.toArray()},body:{min:cb.min.toArray(),max:cb.max.toArray()}}},
     bonesReady(){return !!bones&&bonesSex===curSex},
@@ -389,8 +471,8 @@ export function mount(box, api){
     at(k){const o=parts[k];if(!o)return null;const bb=new THREE.Box3().setFromObject(o),c=bb.getCenter(new THREE.Vector3());c.z=curV==="back"?bb.min.z:bb.max.z;c.x=bb.min.x+(bb.max.x-bb.min.x)*0.3;
       c.project(camera);const r=canvas.getBoundingClientRect();return {x:r.left+(c.x+1)/2*r.width,y:r.top+(1-c.y)/2*r.height}},
     /* for screenshots: look from an angle (deg, 0 = front), distance (m) and height (0..1 of the body) */
-    look(deg,dist,yf,xo){const a=THREE.MathUtils.degToRad(deg),y=yf==null?CY:BB.min.y+(BB.max.y-BB.min.y)*yf,d=dist||fitD(),x=xo||0;
-      controls.target.set(x,y,0);camera.position.set(x+Math.sin(a)*d,y+0.03,Math.cos(a)*d);need=true},
+    look(deg,dist,yf,xo,zo){const a=THREE.MathUtils.degToRad(deg),y=yf==null?CY:BB.min.y+(BB.max.y-BB.min.y)*yf,d=dist||fitD(),x=xo||0,z=zo||0;
+      controls.target.set(x,y,z);camera.position.set(x+Math.sin(a)*d,y+0.03,z+Math.cos(a)*d);need=true},
     /* for tests: put the camera somewhere (relative to the target) and read where it ended up */
     place(x,y,z){camera.position.set(controls.target.x+x,controls.target.y+y,controls.target.z+z);need=true},
     cam(){const o=camera.position.clone().sub(controls.target),p=camera.position;let m=Infinity;
