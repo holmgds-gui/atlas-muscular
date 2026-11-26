@@ -1,4 +1,4 @@
-/* Articulações do esqueleto 3D (0.68, etapa 1 da animação): 3d/rig-1.json / rig-f-1.json carregam, os centros ficam
+/* Articulações do esqueleto 3D (0.68, etapa 1 da animação): 3d/rig-N.json / rig-f-N.json carregam, os centros ficam
    simétricos e dentro do esqueleto, os ossos não mudam de comprimento ao dobrar, cada movimento vai para o lado certo
    (flexão do ombro leva o braço para a frente, do joelho leva a perna para trás, dorsiflexão sobe o pé…) e a
    amplitude (ROM) é respeitada. Prints em tests/out/rig-*.png. */

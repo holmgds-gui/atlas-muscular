@@ -41,8 +41,11 @@ if FEM:   # owner (0.15): female 3D, Wellness — thick thighs, very big glutes,
 PEAK={"quad_vasto_lateral":(0.55,0.3),"quad_vasto_medial":(0.2,0.14),"quad_reto_femoral":(0.6,0.33),"panturrilha_gastro":(0.74,0.17),
  "panturrilha_soleo":(0.4,0.25),"isquio":(0.65,0.3),"adutores":(0.82,0.22)}
 if FEM:PEAK["gluteo_maximo"]=(0.42,0.36)   # the round glute sits low, with a shelf on top
+# 0.71 (owner: "com a cabeça nova os músculos ficaram pequenos perto dela, deixe mais volumosos"): every muscle grows
+# VOL × its INF (male 1.3, female 1.25); the tendons do not, so the joints stay slim
+VOL=float(os.environ.get("VOL","1.25" if FEM else "1.3"))
 def inflate(m,key,name):
-  a=next((v for k,v in INF.items() if key.startswith(k)),0)
+  a=next((v for k,v in INF.items() if key.startswith(k)),0)*VOL
   if key=="deco":  # shin and front-of-thigh muscles fill out too, so the lower leg is not thin next to the calves
     a=next((v for k,v in (("tibialis anterior",4),("fibularis",3),("extensor digitorum longus",3),("sartorius",3)) if k in name),0)
   if not a:return m
