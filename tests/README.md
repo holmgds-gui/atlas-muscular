@@ -34,6 +34,7 @@ node tests/como-fazer-json.js           # sem navegador: pt/en/es do "Como fazer
 node tests/peso.js
 node tests/treinos-prontos.js
 node tests/treino-do-dia.js       # Treinos › + Treino só para hoje (montar e registrar sem o Ao vivo)
+node tests/busca-crossover.js     # Crossover: nome com polia alta/média/baixa e busca (crossover, cross over…)
 node tests/sequencia.js
 node tests/cardio-carga.js              # carga nos Meus treinos e cardio (seletor, Registro, Ao vivo, avulso, Progresso, conquistas)
 node tests/cardio-atlas.js              # Atlas › 🏃 Cardio: ordem por gasto, intensidade/tempo, músculos pintados, + no treino

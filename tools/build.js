@@ -93,7 +93,7 @@ if(errs.length){console.log("ERROS:\n"+errs.join("\n"));process.exit(1)}
 // combos count
 let combos=0;for(const f of F)combos+=f.ax.reduce((a,x)=>a*x[3].length,1);
 console.log("famílias",F.length,"entradas antes",before,"depois",after,"combinações",combos);
-const famOut=F.map(f=>({id:f.id,n:f.n,en:f.en,aka:f.aka,p:f.p,s:f.s,d:f.d,eq0:f.eq0,ax:f.ax.map(([k,l,sp,opts])=>[k,l,sp?1:0,opts.map(o=>{const r={k:o.k,n:o.n};for(const z of ["eq","m","t","nm","suf","q"])if(o[z]!==undefined)r[z]=o[z];return r})])}));
+const famOut=F.map(f=>({id:f.id,n:f.n,en:f.en,aka:f.aka,p:f.p,s:f.s,d:f.d,eq0:f.eq0,ax:f.ax.map(([k,l,sp,opts])=>[k,l,sp?1:0,opts.map(o=>{const r={k:o.k,n:o.n};for(const z of ["eq","m","t","nm","suf","sx","q"])if(o[z]!==undefined)r[z]=o[z];return r})])}));
 const Mtxt="const M = {\n"+Object.entries(out).map(([id,m])=>`  ${id}:{n:${JSON.stringify(m.n)},l:${JSON.stringify(m.l)},c:${JSON.stringify(m.c)},s:${JSON.stringify(m.s)},x:[\n`+m.x.map(e=>"    "+JSON.stringify(e)).join(",\n")+"]}").join(",\n")+"\n};\n";
 fs.writeFileSync("out_M.js",Mtxt);
 fs.writeFileSync("out_FAMS.js","const MC="+JSON.stringify(C)+";\nconst FAMS="+JSON.stringify(famOut)+";\nconst LEGACY="+JSON.stringify(LEG)+";\n");
