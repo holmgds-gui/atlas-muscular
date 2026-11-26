@@ -60,7 +60,7 @@ const cdOn=await p.evaluate(()=>{const t=getComputedStyle(document.documentEleme
 const sb=await p.evaluate(()=>{const b=document.getElementById('b3d'),r=b.getBoundingClientRect();return {cov:document.getElementById('tab-atlas').classList.contains('covered'),w:Math.round(r.width),vis:getComputedStyle(b).display!=='none'}});console.log(' botão pequeno',JSON.stringify(sb));if(!sb.vis||sb.w>50)bad++;
 await p.screenshot({path:`${OUT}/tres-d-${th}-6-cardio.png`});
 // Articulações in 3D: joint marks; tapping one picks it (red) like in 2D
-await p.evaluate(()=>{document.getElementById('clear').click();setMode('art')});await p.waitForTimeout(800);
+await p.evaluate(()=>{document.getElementById('clear').click();setMode('art')});await p.waitForTimeout(1600);
 let a=await p.evaluate(()=>({on:v3on,btn:!document.getElementById('b3d').hidden,j:V3.jointAt('joelho')}));console.log(' articulações',JSON.stringify(a));if(!a.on||!a.btn||!a.j)bad++;
 await p.screenshot({path:`${OUT}/tres-d-${th}-7-juntas.png`});
 await p.touchscreen.tap(a.j.x,a.j.y);await p.waitForTimeout(600);

@@ -1,7 +1,7 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
-   in index.html; the models are 3d/corpo-11.glb (male) and 3d/corpo-f-8.glb (female, owner 0.15–0.17; mannequin head 0.54, plain 0.57, smooth egg 0.58, jaw 0.59–0.60), each with its joint
-   marks (3d/juntas-2.json, 3d/juntas-f-2.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
+   in index.html; the models are 3d/corpo-11.glb (male) and 3d/corpo-f-8.glb (now 3d/corpo-f-9.glb, more feminine in 0.66; female, owner 0.15–0.17; mannequin head 0.54, plain 0.57, smooth egg 0.58, jaw 0.59–0.60), each with its joint
+   marks (3d/juntas-2.json, 3d/juntas-f-3.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
    Atlas muscle keys, A-pose, Classic Physique upper body, proportional legs, skull, skin on hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
    the 2D figure shows for the rest (groups, cardio), and a tap here is passed back to the same code as a tap in 2D.
@@ -200,7 +200,7 @@ export function mount(box, api){
   const mo=new MutationObserver(()=>{readColors();paint()});mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class","style"]});
   const mq=matchMedia("(prefers-color-scheme: dark)"),onMq=()=>{readColors();paint()};mq.addEventListener("change",onMq);
 
-  const FILES={m:["./corpo-11.glb","./juntas-2.json"],f:["./corpo-f-8.glb","./juntas-f-2.json"]};let loadN=0;
+  const FILES={m:["./corpo-11.glb","./juntas-2.json"],f:["./corpo-f-9.glb","./juntas-f-3.json"]};let loadN=0;
   async function load(sx){sx=sx==="f"?"f":"m";if(sx===curSex)return;curSex=sx;const my=++loadN,live=()=>alive&&my===loadN;
     fetch(new URL(FILES[sx][1],import.meta.url)).then(r=>r.json()).then(j=>{if(live()){clearJoints();addJoints(j)}}).catch(()=>{});
     let base;try{base=await getScene(FILES[sx][0],api.progress)}catch(e){if(live())api.fail();return}
@@ -236,7 +236,7 @@ export function mount(box, api){
      "esq" = bone (ivory, baked shadow), "cart" = costal cartilages and intervertebral discs (bluish). Downloaded only when
      Raio-X or Esqueleto is chosen. Raio-X: the muscles turn glassy (front faces only, no depth write) and the deep
      filler/skull/tendon nodes of the body hide (the skeleton replaces them). Esqueleto: only the bones, with an outline. */
-  const SKF={m:"./ossos-1.glb",f:"./ossos-f-1.glb"};
+  const SKF={m:"./ossos-1.glb",f:"./ossos-f-2.glb"};
   const xrOn=()=>XR!=="off"&&!!bones&&bonesSex===curSex&&bones.visible;
   async function loadBones(){if(XR==="off"||!curSex)return;if(bones&&bonesSex===curSex){applyXr();return}
     const sx=curSex,my=++boneN;let base;api.xrProg&&api.xrProg(0);

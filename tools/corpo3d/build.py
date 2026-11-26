@@ -265,18 +265,21 @@ def rot(V,C,s,phi):
 #      A-pose turn, in the original millimetres: the torso is squeezed in x near the shoulders and widened near the hips;
 #      the arm moves in with the shoulder joint and gets thinner around its own axis (hands a little smaller too).
 WR={s:jc(s+" radius",lambda v:v[v[:,2]<v[:,2].min()+18].mean(0)) for s in("right","left")}
-def fg(z):return 1-0.10*sstep(1150,1300,z)*(1-sstep(1390,1450,z))
+# 0.66 (owner: "deixe a mulher bem feminina, o tamanho dos ossos e os músculos"): shoulders 10% → 13% narrower, hips
+#      12% → 17% wider, arms 5% → 7% thinner (shoulders 15%); the skeleton gets its own female touches in fem_bone()
+FG_S,FH_W,ARM_T=0.15,0.17,0.93
+def fg(z):return 1-FG_S*sstep(1100,1290,z)*(1-sstep(1390,1450,z))   # 0.66: starts lower, so the rib cage narrows too
 def fh(z):   # hip widening: most at the hip joints/trochanters, gone by the waist, a little left at the knee
   up=np.exp(-((z-850)/105.0)**2);dn=(0.25+0.75*np.exp(-((z-850)/230.0)**2))*sstep(240,420,z)
   return np.where(z>=850,up,dn)
 def fem(V,arm,n,side,S,H):
   V=V.copy();dS=S[0]*(fg(S[2])-1)
   if (arm>=0.999).all():   # thinner arm: shrink around the shoulder-wrist line
-    a=WR[side]-S;a/=np.linalg.norm(a);r=V-S;t=r@a;P=S+t[:,None]*a[None];V=P+(V-P)*0.95
+    a=WR[side]-S;a/=np.linalg.norm(a);r=V-S;t=r@a;P=S+t[:,None]*a[None];V=P+(V-P)*ARM_T
   Va=V+[dS,0,0];Vt=V.copy();Vt[:,0]*=fg(V[:,2])
   V=arm[:,None]*Va+(1-arm[:,None])*Vt
-  V[:,0]*=1+0.12*fh(V[:,2])*(1-arm)
-  S=S+[dS,0,0];H=H*[1+0.12*fh(np.array([H[2]]))[0],1,1]
+  V[:,0]*=1+FH_W*fh(V[:,2])*(1-arm)
+  S=S+[dS,0,0];H=H*[1+FH_W*fh(np.array([H[2]]))[0],1,1]
   return V,S,H
 def pose(m,n):
   V=m.vertices.copy();cz=V.mean(0)
@@ -423,6 +426,27 @@ if os.environ.get("OSSOS","1")=="1":
     bl.append((n,m,'esq'))
   for a,n in SK_EXTRA:
     if os.path.exists(D+a+'.stl'):bl.append((n,trimesh.load(D+a+'.stl'),'cart' if re.search("cartilage|disk",n) else 'esq'))
+  # ---- female skeleton (0.66, owner: "bem feminina, o tamanho dos ossos"): BodyParts3D is a man, so the female
+  #      skeleton is shaped from it, in the original millimetres before the pose: slimmer long bones (12% thinner around
+  #      their own axis, same length, so the joints stay put), a female pelvis (iliac wings flared out up to 15% above the
+  #      hip joint and the ischia/pubic arch opened up to 12% below it, the hip socket itself stays on the femoral head;
+  #      10% wider sacrum), smaller hands and feet (8% and 6%, around the wrist and the ankle) and a smaller skull (7%,
+  #      around its base, so it stays on the spine).
+  LONGB=r"humerus|radius|ulna|femur|tibia$|fibula|clavicle|metacarpal|metatarsal|phalanx"
+  HANDB=r"scaphoid|lunate|triquetr|pisiform|trapezium|trapezoid|capitate|hamate|metacarpal"
+  FOOTB=r"talus|calcaneus|navicular|cuboid|cuneiform|metatarsal|sesamoid bone of"
+  def fem_bone(m,n):
+    V=m.vertices.copy();c=V.mean(0);side="right" if c[0]<0 else "left"
+    if re.search(LONGB,n) and not (re.search("phalanx",n) and c[2]<150):
+      _,_,vt=np.linalg.svd(V-c,full_matrices=False);a=vt[0];t=(V-c)@a;P=c+t[:,None]*a[None];V=P+(V-P)*0.88
+    if re.search("hip bone",n):
+      Hz=HP[side][2];k=1+0.15*sstep(Hz+15,Hz+120,V[:,2])+0.12*sstep(Hz-10,Hz-90,V[:,2]);V[:,0]*=k
+    if re.search("sacrum",n):V[:,0]*=1.10
+    if re.search(HANDB,n) or (re.search("phalanx",n) and c[2]>500):W=WR[side];V=W+(V-W)*0.92
+    if re.search(FOOTB,n) or (re.search("phalanx",n) and c[2]<150):
+      T=TAL[side];V=T+(V-T)*0.94
+    return trimesh.Trimesh(V,m.faces,process=False)
+  TAL={s:bone(s+" talus").mean(0) for s in("right","left")}
   def tidy(m,n):
     m.merge_vertices();parts_=m.split(only_watertight=False)
     if len(parts_)>1:
@@ -443,9 +467,12 @@ if os.environ.get("OSSOS","1")=="1":
       v,f=fs.simplify(m.vertices.astype(np.float32),m.faces.astype(np.int32),target_reduction=1-tgt/len(m.faces));m2=trimesh.Trimesh(v,f,process=True)
       if m2.edges_unique_length.max()<=lim:m=m2;break
       tgt=int(tgt*1.6)
+    if FEM:m=fem_bone(m,n)
     e_a=m.edges_unique_length.max();m=pose(m,n);e_b=m.edges_unique_length.max();m=waist(m);e_c=m.edges_unique_length.max();m.fix_normals();out[g].append(m)
     if os.environ.get("DBG") and max(e_a,e_b,e_c)>35:print("LONG",n,round(e_a),round(e_b),round(e_c),len(m.faces))
-  out['esq'].append(SKULL.copy())
+  SKs=SKULL.copy()
+  if FEM:b0=SKs.vertices;base=np.array([0,b0[:,1].mean(),b0[:,2].min()+25]);SKs=trimesh.Trimesh(base+(b0-base)*0.93,SKs.faces,process=False)
+  out['esq'].append(SKs)
   E=trimesh.util.concatenate(out['esq']);Cg=trimesh.util.concatenate(out['cart'])
   ALL=trimesh.util.concatenate([E,Cg]);print('skeleton faces',len(E.faces),'cartilage',len(Cg.faces))
   def ao2(V,N,S,n=40,maxd=22):
@@ -459,7 +486,7 @@ if os.environ.get("OSSOS","1")=="1":
   for nm,M_ in (('esq',E),('cart',Cg)):
     a_=np.clip(0.12+0.95*ao2(M_.vertices,M_.vertex_normals,ALL)**1.8,0,1)
     if nm=='esq':   # the solid skull keeps its own deeper shadow (orbits, nose, teeth)
-      ns=len(SKULL.vertices);a_[-ns:]=np.minimum(a_[-ns:],SKULL_AO)
+      ns=len(SKs.vertices);a_[-ns:]=np.minimum(a_[-ns:],SKULL_AO)
     v=M_.vertices;q=trimesh.Trimesh(np.c_[v[:,0],v[:,2],-v[:,1]]/1000.0-ctr,M_.faces,process=False)
     g_=(a_*255).astype(np.uint8);q.visual=trimesh.visual.ColorVisuals(q,vertex_colors=np.c_[g_,g_,g_,np.full(len(g_),255,np.uint8)])
     _=q.vertex_normals;sk.add_geometry(q,node_name=nm,geom_name=nm)

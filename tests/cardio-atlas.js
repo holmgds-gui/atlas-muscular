@@ -11,7 +11,7 @@ for(const [loc,theme,vp] of [["pt-BR","light",{width:390,height:844}],["en-US","
   await p.goto(BASE);await p.evaluate(()=>{localStorage.clear();localStorage.setItem("atlas-intro","1");{const c=JSON.parse(localStorage.getItem("atlas-conf")||"{}");if(!c.fig){c.fig="2d";localStorage.setItem("atlas-conf",JSON.stringify(c))}};localStorage.setItem("atlas-rank",JSON.stringify({bw:80,man:[]}))});await p.reload();await p.waitForTimeout(500);
   if(!await p.isVisible('[data-mode="cd"]'))bad.push(loc+": botão Cardio não aparece");
   await shot("0-inicio");
-  await p.click('[data-mode="cd"]');await p.waitForTimeout(300);
+  await p.click('[data-mode="cd"]');await p.waitForTimeout(300);await p.evaluate(()=>sheetMove('up'));await p.waitForTimeout(300);   // 0.66: Cardio opens with the big figure; the list comes up when the sheet is pulled
   const order=await p.$$eval("[data-cd]",x=>x.map(e=>e.dataset.cd));console.log(loc,"moderado 30 min",order.join(" "));
   if(order.length!==16)bad.push(loc+": lista "+order.length);
   await shot("1-lista");

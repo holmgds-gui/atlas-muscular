@@ -954,7 +954,7 @@ button.brand:hover{background:var(--chip)}
         </div>
         <!-- one button each (owner: simpler): it shows the current view / body and switches on tap -->
         <button class="tgl" id="vTgl" data-notr>Frente</button>
-        <button class="tgl tgl-sex" id="sexTgl" data-notr><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="14.5" r="5.5"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg></button>
+        <!-- 0.66 (owner: "muito botão"): ♂/♀ moved to Configurações › Aparência › Corpo do boneco -->
         <span class="xrw" id="xrW" hidden><button class="tgl tgl-sex tgl-xr" id="xrTgl" type="button" aria-haspopup="menu" aria-expanded="false" data-notr></button>
           <span class="xrpop" id="xrPop" role="menu" hidden data-notr></span></span>
         <div class="zoom">
@@ -2701,7 +2701,7 @@ function drawJoints(){
 buildFigure();
 
 /* ---------------------------------------------------------- atlas state */
-let model=LS.get("atlas-model","det");if(!["det","bas","art"].includes(model))model="det";
+let model=LS.get("atlas-model","det");if(!["det","bas"].includes(model))model="det";   /* 0.66: Articulações is not reopened at start (the Atlas opens on Músculos) */
 let cur=null,curEx=null,curJ=null,eq="all";
 let grp=false,grpOpen=null,grpHi=null,eqOpen=false,grpUp=false;
 let musModel=model==="bas"?"bas":"det";
@@ -2755,7 +2755,7 @@ function setSex(x){
   document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===x));sexTgl();
   buildFigure();setView(view,true);paint();if(typeof v3ui==="function"){v3ui();if(v3on)v3sex()}if(window.P3)P3.sex(x)
 }
-document.getElementById("sexTgl").addEventListener("click",()=>setSex(sex==="m"?"f":"m"));sexTgl();
+sexTgl();
 document.querySelectorAll("[data-sex]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.sex===sex));
 
 function viewsOf(ids){const s=new Set();ids.forEach(i=>(inViews[i]||[]).forEach(v=>s.add(v)));return s}
@@ -2857,9 +2857,12 @@ const XRSVG={off:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke
   esq:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.3" r="2.3"/><path d="M12 7v9M9 9.5h6M9.3 11.6h5.4M9.6 13.7h4.8M9.5 16.5h5M10.5 16.5 9.5 22M13.5 16.5l1 5.5M9 9.5 6.5 15M15 9.5l2.5 5.5"/></svg>'};
 const XRN={off:()=>tx("Músculos","Muscles","Músculos"),raiox:()=>tx("Raio-X","X-ray","Rayos X"),esq:()=>tx("Esqueleto","Skeleton","Esqueleto")};
 const XRS={off:()=>tx("Só os músculos","Muscles only","Solo los músculos"),raiox:()=>tx("Músculos transparentes com os ossos","See-through muscles with the bones","Músculos transparentes con los huesos"),esq:()=>tx("Só os ossos","Bones only","Solo los huesos")};
-function xrUi(){const w=$("xrW"),b=$("xrTgl");w.hidden=!v3on;if(v3on&&xrMode==="esq")$("v3hint").textContent=tx("Arraste para girar","Drag to turn","Arrastra para girar");b.innerHTML=XRSVG[xrMode];b.dataset.xr=xrMode;
+/* owner (0.66): Esqueleto only in Articulações; Músculos, Grupos and Cardio offer Músculos and Raio-X. Leaving
+   Articulações with Esqueleto on turns it into Raio-X (the bones stay in sight). */
+const xrModes=()=>model==="art"?["off","raiox","esq"]:["off","raiox"];
+function xrUi(){const w=$("xrW"),b=$("xrTgl");w.hidden=!v3on;if(!xrModes().includes(xrMode)){xrMode="raiox";if(V3&&V3.xray)V3.xray("raiox")}if(v3on&&xrMode==="esq"&&model!=="art")$("v3hint").textContent=tx("Arraste para girar","Drag to turn","Arrastra para girar");b.innerHTML=XRSVG[xrMode];b.dataset.xr=xrMode;
   b.title=b.ariaLabel=tx("Visão: ","View: ","Vista: ")+XRN[xrMode]();
-  $("xrPop").innerHTML=Object.keys(XRN).map(k=>`<button type="button" role="menuitemradio" aria-checked="${k===xrMode}" data-xr="${k}">${XRSVG[k]}<span>${XRN[k]()}<small>${XRS[k]()}</small></span></button>`).join("")}
+  $("xrPop").innerHTML=xrModes().map(k=>`<button type="button" role="menuitemradio" aria-checked="${k===xrMode}" data-xr="${k}">${XRSVG[k]}<span>${XRN[k]()}<small>${XRS[k]()}</small></span></button>`).join("")}
 function xrClose(){$("xrPop").hidden=true;$("xrTgl").setAttribute("aria-expanded","false")}
 function setXr(m){xrMode=m;v3ui();xrClose();if(V3&&V3.xray)V3.xray(m);if(m!=="off"&&V3&&V3.bonesReady&&!V3.bonesReady())xrLoading(0);buzz()}
 const xrLoading=x=>{const L=$("v3load");if(x==null){if(!v3busy)L.hidden=true;return}L.hidden=false;
@@ -2963,9 +2966,10 @@ let peek=false,lastSel=null,sheetHid=false;
 function updateIdle(){
   const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null)||(grp?"grp":null);if(sel)listOpen=false;
   if(sel!==lastSel){peek=false;sheetHid=false;lastSel=sel}if(listOpen||build)sheetHid=false;
-  $("tab-atlas").classList.toggle("idle",!sel&&!listOpen);
+  const cdLow=cdOn&&!cdUp&&!cdSel;
+  $("tab-atlas").classList.toggle("idle",(!sel&&!listOpen)||cdLow);
   /* the open list (Ver lista) also gets the small figure in the corner, so the list has room (owner: 2–3 items visible) */
-  const cov=(grp?grpUp:(!!sel||listOpen))&&!peek&&!sheetHid;$("tab-atlas").classList.toggle("hid",sheetHid);
+  const cov=(grp?grpUp:cdLow?false:(!!sel||listOpen))&&!peek&&!sheetHid;$("tab-atlas").classList.toggle("hid",sheetHid);
   if(cov&&!$("tab-atlas").classList.contains("covered")&&matchMedia("(max-width:900px)").matches){vb=[...BOX[view]];applyVB()}
   $("tab-atlas").classList.toggle("covered",cov);
   const lb=$("listBtn");lb.hidden=!!sel;lb.textContent=listOpen?"Fechar lista":"Ver lista";
@@ -2973,7 +2977,7 @@ function updateIdle(){
   syncModes();
   /* the small figure enlarges on tap; the button only appears to shrink it back */
   const pb=$("peekBtn");pb.hidden=true;
-  const sw=$("pSwipe");sw.hidden=!!sel||listOpen||!!build;sw.textContent=tx("↑ Arraste para cima para ver a lista","↑ Drag up to see the list","↑ Arrastra hacia arriba para ver la lista");pb.textContent=peek?"Diminuir boneco":"Ampliar boneco";
+  const sw=$("pSwipe");sw.hidden=(!!sel&&!cdLow)||listOpen||!!build;sw.textContent=tx("↑ Arraste para cima para ver a lista","↑ Drag up to see the list","↑ Arrastra hacia arriba para ver la lista");pb.textContent=peek?"Diminuir boneco":"Ampliar boneco";
 }
 function render(){renderPanel();updateIdle();buildBar()}
 function renderPanel(){
@@ -3054,7 +3058,7 @@ $("clear").onclick=()=>{cur=null;curEx=null;curJ=null;cdOn=false;cdSel=null;grp=
 /* ---- Atlas › 🏃 Cardio (owner: a button under "Ver lista" with a cardio list, the ones that burn the most first,
    by intensity and time, and which muscles each one works). Ranking = estimated kcal (kcalOf: MET × body kg × time),
    so it changes with the chosen intensity and minutes. Tapping a cardio paints its muscles: main ones red, helpers orange. */
-let cdOn=false,cdSel=null,cdInt=LS.get("atlas-cdint","m"),cdMin=LS.get("atlas-cdmin",30);
+let cdUp=false,cdOn=false,cdSel=null,cdInt=LS.get("atlas-cdint","m"),cdMin=LS.get("atlas-cdmin",30);
 const LEG=["quad_reto_femoral","quad_vasto_lateral","quad_vasto_medial"],HAM=["isquio_biceps_femoral","isquio_semitendineo"],CALF=["panturrilha_gastro","panturrilha_soleo"];
 const CD_MUS={ /* [main, helpers] */
   walk:[["gluteo_maximo",...CALF],[...LEG,...HAM,"gluteo_medio"]],
@@ -3128,7 +3132,8 @@ const CD_NOTE={
   rugby:["Corrida, arrancadas e contato: gasta muito e pede força no corpo todo. O touch rugby é mais leve.","Running, sprints and contact: burns a lot and needs whole-body strength. Touch rugby is lighter.","Carrera, arranques y contacto: gasta mucho y pide fuerza en todo el cuerpo. El touch rugby es más suave."],
   frisbee:["O ultimate é corrida com arrancadas o jogo todo; só jogar o disco parado gasta pouco.","Ultimate is running and sprinting the whole game; just tossing the disc burns little.","El ultimate es carrera con arranques todo el partido; solo lanzar el disco gasta poco."]
 };
-function openCardioList(){if(model==="art")setModel(musModel);grp=false;cdOn=true;cdSel=null;cur=null;curEx=null;build=null;listOpen=false;paint();render();$("body").scrollTop=0}
+/* owner (0.66): Cardio opens like Músculos — big figure, the sheet down; the list only when it is pulled up (cdUp) */
+function openCardioList(){if(model==="art")setModel(musModel);grp=false;cdOn=true;cdSel=null;cur=null;curEx=null;build=null;listOpen=false;cdUp=false;paint();render();$("body").scrollTop=0}
 $("cdBtn").onclick=openCardioList;
 let cdSp=false;   // Atlas › Cardio: the "Esportes" row is open
 function renderCardio(body){
@@ -3177,9 +3182,10 @@ function stDim(v,anim,all){const st=all?$("tab-atlas"):document.querySelector("#
 /* the element that holds the figure on screen right now: the 3D box or the 2D drawing */
 const figBoxEl=()=>{const v=$("v3");return v&&!v.hidden&&v.offsetParent?v:$("fig")};
 function sheetMove(d,far){const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null);
-  if(d==="up"){if(sheetHid){sheetHid=false;return render()}if(peek){peek=false;return render()}if(grp){if(!grpUp){grpUp=true;updateIdle()}return}if(!sel&&!listOpen&&!build){listOpen=true;updateIdle()}return}
+  if(d==="up"){if(sheetHid){sheetHid=false;return render()}if(peek){peek=false;return render()}if(grp){if(!grpUp){grpUp=true;updateIdle()}return}if(cdOn&&!cdUp&&!cdSel){cdUp=true;return updateIdle()}if(!sel&&!listOpen&&!build){listOpen=true;updateIdle()}return}
   if(build)return;
   /* all the way down = straight to the full-screen figure; coming back up returns to the figure with the sheet open */
+  if(cdOn&&!cdSel&&!far&&!peek&&!sheetHid){if(cdUp){cdUp=false;return updateIdle()}}
   if(far){listOpen=false;grpUp=false;if(sel)peek=true;sheetHid=true;return render()}
   if(listOpen){listOpen=false;return updateIdle()}
   if(grp&&grpUp){grpUp=false;return updateIdle()}
@@ -3190,7 +3196,7 @@ $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.conta
    the header glides to its new place (FLIP); shorter, it springs back; with nothing to open/close it only stretches. */
 (()=>{const P=document.querySelector("#tab-atlas .panel"),B=$("body"),A=$("tab-atlas");let g=null;
   const can=d=>{const sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null);if(build)return false;
-    if(d==="up")return sheetHid||peek||(grp&&!grpUp)||(!grp&&!sel&&!listOpen);
+    if(d==="up")return sheetHid||peek||(grp&&!grpUp)||(cdOn&&!cdUp&&!cdSel)||(!grp&&!sel&&!listOpen);
     return listOpen||(grp&&grpUp)||(!!sel&&!peek)||!sheetHid};
   const noanim=()=>document.documentElement.classList.contains("noanim");
   P.addEventListener("touchstart",e=>{g=null;if(e.touches.length>1||!matchMedia("(max-width:900px)").matches)return;
@@ -4930,7 +4936,8 @@ $("importFile").addEventListener("change",async e=>{
 });
 
 /* ---------------------------------------------------------- tabs + init */
-let tab=LS.get("atlas-tab","atlas");if(tab==="rank"){tab="prog";LS.set("atlas-pview","kg")}if(!["atlas","ficha","treino","prog","conf","ach"].includes(tab))tab="atlas";
+/* owner (0.66): the app always opens on the first page — Atlas › Músculos — not on the last tab used */
+let tab=LS.get("atlas-tab","atlas");if(tab==="rank")LS.set("atlas-pview","kg");tab="atlas";
 /* ---------------------------------------------------------- progress
    Sets done in the period, per muscle: 1 for each target muscle of the
    exercise (the lists it appears in) and 1/2 for each synergist. */
@@ -5771,7 +5778,7 @@ function renderConf(){
   <div class="card cf">
     ${cfRow("Nome ou apelido","Aparece na aba Hoje.",`<input class="inp cf-in" data-cfin="name" maxlength="30" value="${esc(c.name)}" placeholder="Seu nome">`)}
     ${cfRow("Peso corporal","Usado no ranking de força.",`<span class="cf-unit"><input class="inp cf-in sm" data-cfin="bw" inputmode="decimal" value="${rank.bw>0?fkg(toU(rank.bw)):""}" placeholder="${Math.round(toU(RSW[sex]))}"><small>${UNIT}</small></span>`)}
-    ${cfRow("Corpo","Boneco e faixas do ranking.",`<div class="seg sex" role="group" aria-label="Corpo"><button data-cf="sex" data-v="m" aria-pressed="${sex==="m"}" aria-label="Masculino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="14.5" r="5.5"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg></button><button data-cf="sex" data-v="f" aria-pressed="${sex==="f"}" aria-label="Feminino"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="9" r="5.5"/><path d="M12 14.5V22M8.5 18.5h7"/></svg></button></div>`)}
+    <!-- 0.66: Corpo (♂/♀) moved to Aparência, next to Boneco do Atlas -->
     ${cfRow("Idade","Ajusta o ranking de força a partir dos 40.",`<span class="cf-unit"><input class="inp cf-in sm" data-cfin="age" inputmode="numeric" value="${c.age||""}" placeholder="—"><small>anos</small></span>`)}
     ${cfRow("Altura","",`<span class="cf-unit"><input class="inp cf-in sm" data-cfin="height" inputmode="numeric" value="${c.height||""}" placeholder="—"><small>cm</small></span>`)}
     ${cfRow("Experiência","Há quanto tempo você treina.",cfSeg("exp",[["ini","Iniciante"],["int","Intermediário"],["ava","Avançado"]],c.exp,"Experiência"),false,1)}
@@ -5783,6 +5790,7 @@ function renderConf(){
     ${cfRow("Cor de destaque","Troca o vermelho do app todo: título, abas, músculo escolhido (2D e 3D), botões e gráficos. Apagar e avisos continuam vermelhos.",`<div class="cf-dots" role="group" aria-label="Cor de destaque">${ACCENTS.map(([v,t,css])=>`<button data-cf="accent" data-v="${v}" aria-pressed="${c.accent===v}" aria-label="${t}" title="${t}" style="background:${css||v}"></button>`).join("")}</div>`,false,1)}
     ${cfRow("Tamanho da letra","",cfSeg("fs",[["s","Pequena"],["m","Normal"],["l","Grande"]],c.fs,"Tamanho da letra"),false,1)}
     ${cfRow(tx("Boneco do Atlas","Atlas figure","Muñeco del Atlas"),tx("Com 2D e 3D, um botão no canto do boneco troca entre os dois.","With 2D and 3D, a button in the corner of the figure switches between them.","Con 2D y 3D, un botón en la esquina del muñeco cambia entre los dos."),cfSeg("fig",[["2d",tx("Só 2D","2D only","Solo 2D")],["3d",tx("Só 3D","3D only","Solo 3D")],["both",tx("2D e 3D","2D and 3D","2D y 3D")]],c.fig,tx("Boneco do Atlas","Atlas figure","Muñeco del Atlas")),false,1)}
+    ${cfRow(tx("Corpo do boneco","Figure body","Cuerpo del muñeco"),tx("Masculino ou feminino: o boneco 2D e 3D e as faixas do ranking de força.","Male or female: the 2D and 3D figure and the strength ranking bands.","Masculino o femenino: el muñeco 2D y 3D y las franjas del ranking de fuerza."),cfSeg("sex",[["m",tx("♂ Masculino","♂ Male","♂ Masculino")],["f",tx("♀ Feminino","♀ Female","♀ Femenino")]],sex,tx("Corpo do boneco","Figure body","Cuerpo del muñeco")),false,1)}
     ${c.fig!=="2d"?cfRow(tx("Cabeça do boneco 3D","3D figure head","Cabeza del muñeco 3D"),tx("Manequim liso ou a caveira de antes.","Smooth mannequin or the skull from before.","Maniquí liso o la calavera de antes."),cfSeg("head",[["mq",tx("Manequim","Mannequin","Maniquí")],["skull",tx("Caveira","Skull","Calavera")]],c.head==="skull"?"skull":"mq",tx("Cabeça do boneco 3D","3D figure head","Cabeza del muñeco 3D")),false,1):""}
     ${cfRow("Reduzir animações","Desliga as transições.",cfSw("noanim",c.noanim))}
     ${cfRow("Idioma","",`<select class="inp cf-in" data-cfsel="lang" data-notr><option value="pt"${LANG==="pt"?" selected":""}>Português</option><option value="en"${LANG==="en"?" selected":""}>English</option><option value="es"${LANG==="es"?" selected":""}>Español</option></select>`)}
@@ -5884,6 +5892,13 @@ $("confBody").addEventListener("change",e=>{const t=e.target;if(t.dataset.cfsel!
 $("gearBtn").addEventListener("click",()=>setTab("conf"));$("instBtn").addEventListener("click",doInstall);
 /* the title goes back to the home page (Atlas) */
 $("brandBtn").addEventListener("click",()=>setTab("atlas"));
+/* owner (0.66): "quando eu abro o aplicativo, sempre na primeira página". On the iPhone, opening the app from the home
+   screen often just brings it back from the background; after 20 min away it goes back to Atlas › Músculos too —
+   unless a workout is running in Ao vivo or a rest timer is counting (coming back to it must find it where it was). */
+{let hidAt=0;document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden"){hidAt=Date.now();return}
+  if(!hidAt||Date.now()-hidAt<20*60000)return;hidAt=0;
+  if((typeof live!=="undefined"&&live)||(typeof rest!=="undefined"&&rest&&rest.end>Date.now()))return;
+  try{closeModals();if(model==="art")setModel(musModel);cur=null;curEx=null;curJ=null;grp=false;cdOn=false;cdSel=null;build=null;listOpen=false;setTab("atlas");paint();render()}catch(e){}})}
 
 function setTab(t){
   tab=t;LS.set("atlas-tab",t);

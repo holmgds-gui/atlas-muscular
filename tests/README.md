@@ -36,6 +36,7 @@ node tests/treinos-prontos.js
 node tests/treino-do-dia.js       # Treinos › + Treino só para hoje (montar e registrar sem o Ao vivo)
 node tests/busca-crossover.js     # Crossover (exercício próprio, em pé): nomes, busca e troca dos treinos antigos "Crucifixo › polia"
 node tests/esqueleto.js           # 3D › Músculos · Raio-X · Esqueleto (esqueleto dentro do corpo, toque no Raio-X, ♂/♀)
+node tests/abrir-inicio.js        # abre sempre em Atlas › Músculos; Cardio com boneco grande; ♂/♀ em Configurações
 node tests/sequencia.js
 node tests/cardio-carga.js              # carga nos Meus treinos e cardio (seletor, Registro, Ao vivo, avulso, Progresso, conquistas)
 node tests/cardio-atlas.js              # Atlas › 🏃 Cardio: ordem por gasto, intensidade/tempo, músculos pintados, + no treino
