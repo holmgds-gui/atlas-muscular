@@ -19,3 +19,4 @@ tools/corpo3d/ossos.glb
 tools/corpo3d/ossos-f.glb
 tools/corpo3d/rig.json
 tools/corpo3d/rig-f.json
+__pycache__/
