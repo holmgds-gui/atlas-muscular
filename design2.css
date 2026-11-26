@@ -323,3 +323,12 @@ html.d2 #instBtn{order:4}
 html.d2 #gearBtn{order:5}
 @media (max-width:900px){html.d2 #achBtn{margin-left:auto}}
 /* (altura do app instalado no iPhone: corrigida no index.html, fitIOS) */
+
+/* 0.74 (owner): "Meus treinos" in Hoje uses the big title font (same as the page titles: heavy italic condensed, red slanted bar) */
+html.d2 .more-w.hj-list>summary{justify-content:flex-start;align-items:center;gap:0;padding:16px 16px 16px 18px;text-transform:uppercase}
+html.d2 .more-w.hj-list>summary::before{content:"";flex:none;width:6px;height:.78em;font-size:30px;margin-right:11px;background:var(--target);transform:skewX(-14deg);border-radius:1px;box-shadow:0 0 16px color-mix(in srgb,var(--target) 70%,transparent)}
+html.d2 .hj-list .hj-t{font-family:var(--f-display);font-weight:900;font-style:italic;font-size:30px;line-height:.95;letter-spacing:-.005em}
+html.d2 .hj-list .hj-n{font-family:var(--f-display);font-weight:800;font-size:15px;letter-spacing:.1em;color:var(--muted);margin-left:10px;align-self:center}
+html.d2 .more-w.hj-list>summary::after{margin-left:auto}
+html.d2 .card.more-w.hj-list{padding:0}html.d2 .card.more-w.hj-list[open]{padding-bottom:12px}
+html.d2 .hj-list .card.more-w{padding:0}html.d2 .hj-list .card.more-w[open]{padding-bottom:12px}

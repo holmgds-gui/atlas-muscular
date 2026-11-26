@@ -227,6 +227,8 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 
 - **Lista de treinos do Hoje começa fechada (0.73, nov/2026)**: o dono pediu que, no Hoje › Registro, a lista de treinos ficasse fechada como "Meus treinos" e abrisse com um toque. Agora ela é uma caixa `details.hj-list` "Meus treinos (N)", fechada ao entrar; o estado aberto/fechado fica na variável `hjList` e sobrevive aos redesenhos da tela (marcar como feito etc.).
 
+- **Fonte de título em "Meus treinos" (0.74, nov/2026)**: o dono pediu a fonte grande diferente (a dos títulos) na caixa "Meus treinos" do Hoje. Agora o nome usa itálico pesado condensado de 30 px com a barra vermelha inclinada, igual ao título "HOJE" (`.hj-list` em `design2.css`); o número de treinos fica pequeno ao lado.
+
 ## 17. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.

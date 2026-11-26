@@ -3867,7 +3867,7 @@ function renderTreino(){
     /* owner (0.73): the whole list of workouts starts closed ("Meus treinos") and opens with a tap; it stays open while he works in it */
     const inner=main.length?main.map(pcard).join("")+(rest.length?`<details class="card more-w"><summary>${tx(`Outros treinos (${rest.length})`,`Other workouts (${rest.length})`,`Otros entrenos (${rest.length})`)}</summary>${rest.map(pcard).join("")}</details>`:"")
       :list.map(pcard).join("");
-    h+=list.length?`<details class="card more-w hj-list"${hjList?" open":""}><summary>${tx("Meus treinos","My workouts","Mis entrenos")} (${list.length})${isT?"":` · ${esc(dayName)}`}</summary>${inner}</details>`
+    h+=list.length?`<details class="card more-w hj-list"${hjList?" open":""}><summary><span class="hj-t">${tx("Meus treinos","My workouts","Mis entrenos")}</span><span class="hj-n">${list.length}${isT?"":` · ${esc(dayName)}`}</span></summary>${inner}</details>`
       :`<div class="card"><p class="muted">Você ainda não tem treinos montados.</p><div class="row"><button class="btn primary" data-act="goPlans">Montar um treino</button></div></div>`;
     const free=tw.filter(x=>!x.planId||!plans.some(p=>p.id===x.planId));
     h+=(free.length?`<h3 class="section-t">${isT?tx("Também hoje","Also today","También hoy"):tx("Também neste dia","Also on this day","También este día")}</h3>`+free.map(wCard).join(""):"")+
