@@ -153,6 +153,7 @@ details.card.rt-sp{display:block;padding:0!important}details.rt-sp>.rt-in{paddin
 .ckc{font-size:13px;color:var(--muted);margin-top:8px}.ckc b{color:var(--ink)}
 .cq-types{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
 .cq-types button{display:grid;justify-items:center;gap:2px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:8px 4px;font:inherit;font-size:12.5px;font-weight:600;line-height:1.2}
+.cq-sph{margin:2px 0 6px;font-size:13px}.cd-sub{display:grid;gap:8px;margin:0 0 0 10px;padding-left:10px;border-left:2px solid var(--line)}.cd-chev{grid-column:3;justify-self:end;color:var(--muted)}
 .cq-types button span{font-size:22px}.cq-types button[aria-pressed="true"]{border-color:var(--accent,var(--target));box-shadow:inset 0 0 0 1px var(--accent,var(--target))}
 .cbox{display:grid;gap:8px}.cbox .c-big{font-family:var(--f-display);font-size:34px;font-weight:700;line-height:1}.cbox .c-big small{font-size:15px;color:var(--muted);font-weight:600;margin-left:4px}
 .c-charts{display:flex;align-items:flex-end;gap:12px;margin-top:4px}.c-ringbox{flex:none;width:104px;display:grid;justify-items:center;gap:4px;font-size:12px;color:var(--muted);text-align:center;line-height:1.2}
@@ -1742,8 +1743,32 @@ const CARDIO={
   zumba:{i:"🎶",n:["Zumba","Zumba","Zumba"],s:["aula","class","clase"],met:[5.5,6.5,8],a:"zumba aula danca aerobica"},
   dance:{i:"💃",n:["Dança","Dancing","Baile"],s:["salsa, forró, samba, hip hop…","salsa, samba, hip hop…","salsa, bachata, hip hop…"],met:[4.5,6,9.8],a:"danca dance dancing baile forro samba salsa hip hop ballet bachata"},
   step:{i:"👟",n:["Step","Step","Step"],s:["aeróbica","aerobics","aeróbic"],met:[5.5,7.3,9],a:"step aerobica aerobics aerobic jump"},
-  func:{i:"🏋️",n:["Funcional","Functional training","Funcional"],s:["circuito, crossfit","circuit, CrossFit","circuito, crossfit"],met:[3.5,5,7.5],a:"funcional circuito crossfit cross functional circuit treino"}
+  func:{i:"🏋️",n:["Funcional","Functional training","Funcional"],s:["circuito, crossfit","circuit, CrossFit","circuito, crossfit"],met:[3.5,5,7.5],a:"funcional circuito crossfit cross functional circuit treino"},
+  /* sports (owner 0.55: "Esportes" is one option of the cardio list and opens these). sp:1 keeps them out of the
+     plain cardio list. METs from the 2024 Compendium where it has the sport (light = casual/practice, hard = match);
+     beach tennis, padel, futsal and futevôlei have no entry and use the closest sport (docs/FONTES.md 4d). */
+  soccer:{sp:1,i:"⚽",n:["Futebol","Soccer","Fútbol"],s:["campo ou society","field or 7-a-side","cancha o fútbol 7"],met:[5,7,10],a:"futebol bola society pelada soccer football futbol campo"},
+  futsal:{sp:1,i:"🥅",n:["Futsal","Futsal","Fútbol sala"],s:["quadra","indoor court","pista"],met:[6,8,10.5],a:"futsal salao quadra indoor futbol sala"},
+  volley:{sp:1,i:"🏐",n:["Vôlei","Volleyball","Vóley"],s:["quadra","indoor court","pista"],met:[3,4,6],a:"volei voleibol volleyball voley quadra"},
+  bvolley:{sp:1,i:"🏖️",n:["Vôlei de praia","Beach volleyball","Vóley playa"],s:["areia","sand","arena"],met:[5,6.5,8],a:"volei de praia areia beach volleyball voley playa"},
+  btennis:{sp:1,i:"🎾",n:["Beach tennis","Beach tennis","Tenis playa"],s:["areia","sand","arena"],met:[5,6.5,8],a:"beach tennis tenis de praia areia raquete tenis playa"},
+  tennis:{sp:1,i:"🎾",n:["Tênis","Tennis","Tenis"],s:["simples ou duplas","singles or doubles","individual o dobles"],met:[5,7.3,8],a:"tenis tennis raquete quadra saibro"},
+  padel:{sp:1,i:"🏓",n:["Padel","Padel","Pádel"],s:["duplas","doubles","dobles"],met:[5,6,7.5],a:"padel pádel raquete paddle"},
+  basket:{sp:1,i:"🏀",n:["Basquete","Basketball","Baloncesto"],s:["jogo ou arremessos","game or shooting","partido o tiros"],met:[4.5,6.5,8],a:"basquete basquetebol basket basketball baloncesto"},
+  handball:{sp:1,i:"🤾",n:["Handebol","Handball","Balonmano"],s:["quadra","court","pista"],met:[6,8,12],a:"handebol handball balonmano quadra"},
+  footvolley:{sp:1,i:"🦶",n:["Futevôlei","Footvolley","Futvóley"],s:["areia","sand","arena"],met:[5,6.5,8],a:"futevolei futevôlei footvolley futvoley areia praia"},
+  badminton:{sp:1,i:"🏸",n:["Badminton","Badminton","Bádminton"],s:["peteca com raquete","shuttlecock","volante"],met:[4.5,5.5,7],a:"badminton peteca raquete badminton"},
+  pingpong:{sp:1,i:"🏓",n:["Tênis de mesa","Table tennis","Tenis de mesa"],s:["pingue-pongue","ping-pong","ping-pong"],met:[3,4,5.5],a:"tenis de mesa ping pong pingue pongue table tennis"},
+  skate:{sp:1,i:"🛹",n:["Skate","Skateboarding","Skate"],s:["rua ou pista","street or park","calle o pista"],met:[4,5,6],a:"skate skateboard skating patinete"},
+  surf:{sp:1,i:"🏄",n:["Surfe","Surfing","Surf"],s:["remar e pegar onda","paddling and riding","remar y tomar olas"],met:[3,4,5],a:"surf surfe surfing prancha onda bodyboard"},
+  climb:{sp:1,i:"🧗",n:["Escalada","Climbing","Escalada"],s:["boulder ou parede","bouldering or wall","boulder o muro"],met:[5,7.3,8],a:"escalada boulder escalar climbing parede muro"},
+  skating:{sp:1,i:"⛸️",n:["Patinação","Skating","Patinaje"],s:["patins ou gelo","roller or ice","patines o hielo"],met:[5,7,9],a:"patinacao patins roller patinar gelo ice skating patinaje"},
+  rugby:{sp:1,i:"🏉",n:["Rugby","Rugby","Rugby"],s:["também touch rugby","also touch rugby","también touch rugby"],met:[6.3,8.3,10],a:"rugby rugbi touch"},
+  frisbee:{sp:1,i:"🥏",n:["Frisbee","Ultimate frisbee","Frisbee"],s:["ultimate","ultimate","ultimate"],met:[3,5,8],a:"frisbee ultimate disco"}
 };
+/* plain cardio vs sports ("Esportes" opens these) */
+const CKEYS=Object.keys(CARDIO).filter(k=>!CARDIO[k].sp),SKEYS=Object.keys(CARDIO).filter(k=>CARDIO[k].sp);
+const spLbl=()=>tx("Esportes","Sports","Deportes");
 const CINT={l:[["Leve","Light","Suave"],["dá para cantar","you could sing","puedes cantar"]],m:[["Moderado","Moderate","Moderado"],["conversa, mas não canta","you can talk, not sing","hablas, pero no cantas"]],
   f:[["Forte","Hard","Intenso"],["só poucas palavras","only a few words","solo pocas palabras"]]};
 const cRef=ref=>typeof ref==="string"&&ref.startsWith("cardio:")&&CARDIO[ref.slice(7)]?ref.slice(7):null;
@@ -2952,7 +2977,25 @@ const CD_MUS={ /* [main, helpers] */
   zumba:[[...LEG,"gluteo_maximo","panturrilha_gastro","obliquos"],[...HAM,"gluteo_medio","abdomen_supra","ombro_lateral","adutores","abdutores","panturrilha_soleo"]],
   dance:[[...CALF,...LEG,"gluteo_maximo"],["obliquos","abdomen_supra","gluteo_medio","adutores",...HAM,"ombro_lateral"]],
   step:[[...LEG,"gluteo_maximo"],[...HAM,...CALF,"gluteo_medio"]],
-  func:[[...LEG,"gluteo_maximo","peito_medial","abdomen_supra"],["ombro_frontal","triceps_lateral",...HAM,"dorsal_inferior","obliquos",...CALF]]
+  func:[[...LEG,"gluteo_maximo","peito_medial","abdomen_supra"],["ombro_frontal","triceps_lateral",...HAM,"dorsal_inferior","obliquos",...CALF]],
+  soccer:[[...LEG,...HAM,...CALF,"gluteo_maximo"],["adutores","abdutores","gluteo_medio","obliquos","abdomen_supra"]],
+  futsal:[[...LEG,...HAM,...CALF,"gluteo_maximo"],["adutores","abdutores","gluteo_medio","obliquos","abdomen_supra"]],
+  volley:[[...LEG,...CALF,"ombro_frontal","ombro_lateral"],["gluteo_maximo","peito_medial","dorsal_superior","triceps_lateral","abdomen_supra","obliquos","antebraco_flexores"]],
+  bvolley:[[...LEG,...CALF,"gluteo_maximo","ombro_frontal","ombro_lateral"],[...HAM,"gluteo_medio","abdomen_supra","obliquos","dorsal_superior"]],
+  btennis:[["ombro_frontal","ombro_lateral","obliquos",...LEG,...CALF],["peito_medial","triceps_lateral","antebraco_flexores","gluteo_maximo","gluteo_medio","abdomen_supra"]],
+  tennis:[["ombro_frontal","ombro_lateral","obliquos",...LEG,...CALF],["peito_medial","dorsal_superior","triceps_lateral","antebraco_flexores","gluteo_maximo","gluteo_medio"]],
+  padel:[["ombro_frontal","ombro_lateral","obliquos",...LEG,...CALF],["peito_medial","triceps_lateral","antebraco_flexores","gluteo_maximo","gluteo_medio"]],
+  basket:[[...LEG,...CALF,"gluteo_maximo"],[...HAM,"ombro_frontal","triceps_lateral","abdomen_supra","obliquos","antebraco_flexores"]],
+  handball:[[...LEG,"gluteo_maximo","ombro_frontal","ombro_lateral","peito_medial"],[...HAM,...CALF,"triceps_lateral","dorsal_superior","obliquos","serratil"]],
+  footvolley:[[...LEG,...CALF,"gluteo_maximo"],[...HAM,"adutores","abdomen_supra","obliquos","trapezio_superior"]],
+  badminton:[["ombro_frontal","ombro_lateral",...LEG,...CALF],["triceps_lateral","antebraco_flexores","obliquos","gluteo_maximo"]],
+  pingpong:[["ombro_frontal","antebraco_flexores",...CALF],[...LEG,"obliquos","triceps_lateral"]],
+  skate:[[...LEG,"gluteo_maximo",...CALF],[...HAM,"gluteo_medio","adutores","abdomen_supra","obliquos"]],
+  surf:[["dorsal_superior","dorsal_inferior","ombro_posterior","triceps_longa","lombar_eretores"],[...LEG,"gluteo_maximo","peito_medial","trapezio_superior","abdomen_supra"]],
+  climb:[["antebraco_flexores","dorsal_superior","dorsal_inferior","biceps_longa","biceps_curta"],["redondo_maior","trapezio_medio","romboides","ombro_posterior","abdomen_supra",...CALF,...LEG]],
+  skating:[[...LEG,"gluteo_maximo","gluteo_medio","abdutores"],[...HAM,"adutores",...CALF,"lombar_eretores","obliquos"]],
+  rugby:[[...LEG,"gluteo_maximo","peito_medial","ombro_frontal","trapezio_superior"],[...HAM,...CALF,"dorsal_superior","abdomen_supra","obliquos","biceps_longa","triceps_lateral"]],
+  frisbee:[[...LEG,...CALF,"ombro_posterior"],[...HAM,"gluteo_maximo","obliquos","antebraco_flexores","ombro_lateral"]]
 };
 const CD_NOTE={
   walk:["O mais fácil de manter e de fazer todo dia. Na esteira, subir a inclinação gasta bem mais sem precisar correr.","The easiest to keep up and do every day. On a treadmill, raising the incline burns a lot more without running.","El más fácil de mantener y de hacer a diario. En la cinta, subir la inclinación gasta mucho más sin correr."],
@@ -2970,19 +3013,31 @@ const CD_NOTE={
   dance:["Dança de salão lenta gasta pouco; forró, samba, hip hop e dança de balada rápida gastam bem mais. O melhor é a que você não quer parar.","Slow ballroom burns little; fast salsa, samba, hip hop and club dancing burn a lot more. The best one is the one you don't want to stop.","El baile de salón lento gasta poco; salsa, bachata, hip hop o baile de discoteca rápidos gastan mucho más. El mejor es el que no quieres dejar."],
   step:["A altura do step muda tudo: do mais baixo para o mais alto o gasto sobe uns 60%. Desça devagar para poupar o joelho.","Step height changes everything: from the lowest to the highest the burn rises about 60%. Step down slowly to spare your knees.","La altura del step lo cambia todo: del más bajo al más alto el gasto sube un 60%. Baja despacio para cuidar la rodilla."],
   func:["Circuito com pouco descanso junta força e cardio. Com kettlebell e sem pausa vira forte; com pausas longas, fica leve.","A circuit with little rest mixes strength and cardio. With kettlebells and no breaks it's hard; with long breaks it's light.","Un circuito con poco descanso mezcla fuerza y cardio. Con kettlebell y sin pausas es intenso; con pausas largas, suave."],
-  hiit:["Tiros curtos e fortes com pausa. Rende o mesmo resultado em menos tempo, mas normalmente a sessão tem só 10–20 min.","Short hard bursts with rests. Gets similar results in less time, but sessions are usually only 10–20 minutes.","Tiros cortos e intensos con pausas. Da resultados parecidos en menos tiempo, pero la sesión suele durar solo 10–20 min."]
+  hiit:["Tiros curtos e fortes com pausa. Rende o mesmo resultado em menos tempo, mas normalmente a sessão tem só 10–20 min.","Short hard bursts with rests. Gets similar results in less time, but sessions are usually only 10–20 minutes.","Tiros cortos e intensos con pausas. Da resultados parecidos en menos tiempo, pero la sesión suele durar solo 10–20 min."],
+  soccer:["Muita corrida com arrancadas e mudanças de direção: parece um HIIT longo. Pelada com amigos costuma ficar no moderado.","Lots of running with sprints and changes of direction, like a long HIIT. A casual game with friends is usually moderate.","Mucha carrera con arranques y cambios de dirección, como un HIIT largo. Un partido entre amigos suele ser moderado."],
+  futsal:["Quadra menor e jogo mais rápido: menos corrida longa e mais arrancadas curtas, então cansa rápido.","Smaller court and faster game: less long running, more short bursts, so it tires you fast.","Pista más pequeña y juego más rápido: menos carrera larga y más arranques cortos, cansa rápido."],
+  volley:["Saltos e deslocamentos curtos com pausas entre os pontos. Gasta pouco no recreativo e bem mais em jogo competitivo.","Jumps and short moves with breaks between points. Casual play burns little, a competitive match a lot more.","Saltos y desplazamientos cortos con pausas entre puntos. En recreativo gasta poco; en partido competitivo, bastante más."],
+  bvolley:["A areia faz as pernas trabalharem muito mais que na quadra: gasta mais e pega forte em panturrilha e glúteos.","Sand makes the legs work much harder than on a court: it burns more and hits calves and glutes.","La arena hace trabajar mucho más las piernas que en pista: gasta más y trabaja pantorrillas y glúteos."],
+  btennis:["Rally rápido na areia, com muito braço acima da cabeça. Aqueça bem o ombro antes de jogar.","Fast rallies on sand with lots of overhead arm work. Warm up the shoulder well before playing.","Rallies rápidos en la arena con mucho brazo por encima de la cabeza. Calienta bien el hombro antes de jugar."],
+  tennis:["Simples gasta bem mais que duplas. O golpe vem das pernas e do giro do tronco, não só do braço.","Singles burns a lot more than doubles. The shot comes from the legs and trunk rotation, not just the arm.","Individual gasta mucho más que dobles. El golpe viene de las piernas y del giro del tronco, no solo del brazo."],
+  padel:["Mais fácil de aprender que o tênis e com pontos longos. Muito agachamento curto e giro do tronco.","Easier to learn than tennis, with long rallies. Lots of short squats and trunk rotation.","Más fácil de aprender que el tenis y con puntos largos. Muchas flexiones cortas de piernas y giros del tronco."],
+  basket:["Arrancadas, saltos e paradas: trabalha pernas e panturrilhas. Só arremessar gasta pouco; jogo de verdade gasta bem.","Sprints, jumps and stops work legs and calves. Just shooting burns little; a real game burns a lot.","Arranques, saltos y frenadas trabajan piernas y pantorrillas. Solo tirar gasta poco; un partido de verdad, mucho."],
+  handball:["Um dos esportes que mais gastam: corrida, saltos, arremessos e contato o tempo todo.","One of the sports that burns the most: running, jumps, throws and contact all the time.","Uno de los deportes que más gastan: carrera, saltos, lanzamientos y contacto todo el tiempo."],
+  footvolley:["Areia, saltos e muito controle de bola com o corpo. Pega forte em pernas, glúteos e abdômen.","Sand, jumps and lots of ball control with the body. Hits legs, glutes and abs hard.","Arena, saltos y mucho control del balón con el cuerpo. Trabaja fuerte piernas, glúteos y abdomen."],
+  badminton:["Bem mais intenso do que parece: deslocamentos rápidos e muitos golpes acima da cabeça.","Much harder than it looks: fast footwork and lots of overhead shots.","Mucho más intenso de lo que parece: desplazamientos rápidos y muchos golpes por encima de la cabeza."],
+  pingpong:["Gasta pouco, mas treina reflexo e agilidade. Em jogo rápido as pernas trabalham mais do que parece.","Burns little but trains reflexes and agility. In fast play the legs work more than you'd think.","Gasta poco, pero entrena reflejos y agilidad. En juego rápido las piernas trabajan más de lo que parece."],
+  skate:["Equilíbrio o tempo todo: pernas e tronco trabalham para te manter em cima. Use capacete e proteções.","Balance all the time: legs and trunk work to keep you on. Wear a helmet and pads.","Equilibrio todo el tiempo: piernas y tronco trabajan para mantenerte arriba. Usa casco y protecciones."],
+  surf:["A maior parte do tempo é remando: costas, ombros e tríceps. A onda em si dura poucos segundos.","Most of the time is paddling: back, shoulders and triceps. The wave itself lasts a few seconds.","La mayor parte del tiempo es remar: espalda, hombros y tríceps. La ola en sí dura pocos segundos."],
+  climb:["Força de pegada e costas, com as pernas empurrando. Use mais as pernas para poupar os braços.","Grip and back strength, with the legs pushing. Use your legs more to save your arms.","Fuerza de agarre y espalda, con las piernas empujando. Usa más las piernas para ahorrar los brazos."],
+  skating:["Trabalha muito glúteo médio e abdutores (o empurrão para o lado) e o equilíbrio.","Works the gluteus medius and abductors a lot (the sideways push) and balance.","Trabaja mucho el glúteo medio y los abductores (el empuje hacia el lado) y el equilibrio."],
+  rugby:["Corrida, arrancadas e contato: gasta muito e pede força no corpo todo. O touch rugby é mais leve.","Running, sprints and contact: burns a lot and needs whole-body strength. Touch rugby is lighter.","Carrera, arranques y contacto: gasta mucho y pide fuerza en todo el cuerpo. El touch rugby es más suave."],
+  frisbee:["O ultimate é corrida com arrancadas o jogo todo; só jogar o disco parado gasta pouco.","Ultimate is running and sprinting the whole game; just tossing the disc burns little.","El ultimate es carrera con arranques todo el partido; solo lanzar el disco gasta poco."]
 };
 function openCardioList(){if(model==="art")setModel(musModel);grp=false;cdOn=true;cdSel=null;cur=null;curEx=null;build=null;listOpen=false;paint();render();$("body").scrollTop=0}
 $("cdBtn").onclick=openCardioList;
+let cdSp=false;   // Atlas › Cardio: the "Esportes" row is open
 function renderCardio(body){
-  head("Cardio",tx("Cardio que mais gasta","Cardio that burns the most","Cardio que más gasta"),tx("Do que mais gasta para o que menos. Toque num para ver os músculos.","From the biggest burner down. Tap one to see its muscles.","Del que más gasta al que menos. Toca uno para ver los músculos."),true);
-  const L=Object.keys(CARDIO).map(k=>[k,kcalOf(k,cdMin,cdInt)]).sort((a,b)=>b[1]-a[1]),top=L[0][1];
-  const mn=ids=>[...new Set(ids.map(id=>M[id].n))];
-  body.innerHTML=`<div class="cd-ctl">
-    <div class="seg" role="group" aria-label="${tx("Intensidade","Intensity","Intensidad")}">${["l","m","f"].map(x=>`<button data-cdi="${x}" aria-pressed="${x===cdInt}">${esc(p3(CINT[x][0]))}</button>`).join("")}</div>
-    <div class="seg" role="group" aria-label="${tx("Tempo","Time","Tiempo")}">${[15,30,45,60].map(m=>`<button data-cdm="${m}" aria-pressed="${m===cdMin}">${m} min</button>`).join("")}</div>
-    <span class="muted-s" style="margin:0">${esc(p3(CINT[cdInt][0]))}: ${esc(p3(CINT[cdInt][1]))} · ${tx("calorias estimadas para","calories estimated for","calorías estimadas para")} ${fw(bodyKg())}${rank.bw>0?"":tx(" (coloque seu peso em Configurações)"," (enter your weight in Settings)"," (pon tu peso en Ajustes)")}</span></div>
-    <div class="list">${L.map(([k,kc],i)=>{const c=CARDIO[k],open=cdSel===k,[P,S]=CD_MUS[k];
+  const cdRow=([k,kc],i)=>{const c=CARDIO[k],open=cdSel===k,[P,S]=CD_MUS[k];
       return `<div class="ex cd${open?" sel":""}" role="button" tabindex="0" data-cd="${k}" aria-pressed="${open}">
         <span class="rank">${i+1}</span>
         <span class="ex-n"><span class="cd-i" aria-hidden="true">${c.i}</span>${esc(cName(k))}</span>
@@ -2991,12 +3046,26 @@ function renderCardio(body){
         <span class="cd-bar"><span><i style="width:${Math.round(kc/top*100)}%"></i></span><b>≈ ${kc} kcal</b></span>
         ${open?`<p class="cd-note">${esc(p3(CD_NOTE[k]))}</p>`:""}
         <span class="syns"><em>${tx("Mais trabalham","Main muscles","Más trabajan")}</em>${mn(P).map(n=>`<span class="tg">${esc(n)}</span>`).join("")}${open?`<em>${tx("Ajudam","Helpers","Ayudan")}</em>${mn(S).map(n=>`<span>${esc(n)}</span>`).join("")}`:""}</span>
-      </div>`}).join("")}</div>
+      </div>`};
+  head("Cardio",tx("Cardio que mais gasta","Cardio that burns the most","Cardio que más gasta"),tx("Do que mais gasta para o que menos. Toque num para ver os músculos.","From the biggest burner down. Tap one to see its muscles.","Del que más gasta al que menos. Toca uno para ver los músculos."),true);
+  const rk=ks=>ks.map(k=>[k,kcalOf(k,cdMin,cdInt)]).sort((a,b)=>b[1]-a[1]);
+  const L=rk(CKEYS),LS_=rk(SKEYS),top=Math.max(L[0][1],LS_[0][1]);if(cdSel&&CARDIO[cdSel]&&CARDIO[cdSel].sp)cdSp=true;
+  const mn=ids=>[...new Set(ids.map(id=>M[id].n))];
+  body.innerHTML=`<div class="cd-ctl">
+    <div class="seg" role="group" aria-label="${tx("Intensidade","Intensity","Intensidad")}">${["l","m","f"].map(x=>`<button data-cdi="${x}" aria-pressed="${x===cdInt}">${esc(p3(CINT[x][0]))}</button>`).join("")}</div>
+    <div class="seg" role="group" aria-label="${tx("Tempo","Time","Tiempo")}">${[15,30,45,60].map(m=>`<button data-cdm="${m}" aria-pressed="${m===cdMin}">${m} min</button>`).join("")}</div>
+    <span class="muted-s" style="margin:0">${esc(p3(CINT[cdInt][0]))}: ${esc(p3(CINT[cdInt][1]))} · ${tx("calorias estimadas para","calories estimated for","calorías estimadas para")} ${fw(bodyKg())}${rank.bw>0?"":tx(" (coloque seu peso em Configurações)"," (enter your weight in Settings)"," (pon tu peso en Ajustes)")}</span></div>
+    <div class="list">${L.map(cdRow).join("")}
+      <div class="ex cd cd-sp${cdSp?" sel":""}" role="button" tabindex="0" data-cdsp="1" aria-expanded="${cdSp}">
+        <span class="rank">⚽</span><span class="ex-n">${esc(spLbl())}</span><span class="cd-chev" aria-hidden="true">${cdSp?"▴":"▾"}</span>
+        <span class="ex-en">${tx(`${SKEYS.length} esportes: futebol, vôlei, beach tennis, handebol…`,`${SKEYS.length} sports: soccer, volleyball, beach tennis, handball…`,`${SKEYS.length} deportes: fútbol, vóley, tenis playa, balonmano…`)}</span></div>
+      ${cdSp?`<div class="cd-sub">${LS_.map(cdRow).join("")}</div>`:""}</div>
     <div class="card cd-info"><h4>${tx("Qual queima mais gordura?","Which one burns the most fat?","¿Cuál quema más grasa?")}</h4>
       <p>${tx("Para perder gordura, o que mais conta é o <b>gasto total</b> (e a alimentação), não a \"zona de queima\". No leve o corpo usa uma parte maior de gordura, mas no forte gasta mais no total no mesmo tempo.","For fat loss, what counts most is the <b>total burn</b> (and your diet), not a \"fat-burning zone\". At light effort a bigger share comes from fat, but hard effort burns more in total in the same time.","Para perder grasa, lo que más cuenta es el <b>gasto total</b> (y la alimentación), no la \"zona de quema\". En suave el cuerpo usa una parte mayor de grasa, pero en intenso gasta más en total en el mismo tiempo.")}</p>
       <p>${tx("Estudos que compararam HIIT com cardio contínuo moderado acharam perda de gordura parecida ou um pouco maior no HIIT, e em menos tempo. O melhor é o que você consegue fazer toda semana: a OMS indica 150 min moderados (ou 75 fortes).","Studies comparing HIIT with steady moderate cardio found similar or slightly greater fat loss with HIIT, in less time. The best one is the one you can keep doing every week: the WHO suggests 150 moderate minutes (or 75 hard).","Los estudios que compararon HIIT con cardio continuo moderado encontraron una pérdida de grasa parecida o un poco mayor con HIIT, y en menos tiempo. El mejor es el que puedes hacer cada semana: la OMS indica 150 min moderados (o 75 intensos).")}</p>
       <p>${tx("Calorias: estimativa do Compendium of Physical Activities 2024; pode errar uns 20–30%.","Calories: estimate from the 2024 Compendium of Physical Activities; it can be off by 20–30%.","Calorías: estimación del Compendium of Physical Activities 2024; puede fallar un 20–30%.")}</p></div>`;
   body.querySelectorAll("[data-cdi]").forEach(b=>b.onclick=()=>{cdInt=b.dataset.cdi;LS.set("atlas-cdint",cdInt);render()});
+  body.querySelectorAll("[data-cdsp]").forEach(b=>b.onclick=()=>{cdSp=!cdSp;if(!cdSp&&cdSel&&CARDIO[cdSel].sp){cdSel=null;paint()}const y=body.scrollTop;render();body.scrollTop=y});
   body.querySelectorAll("[data-cdm]").forEach(b=>b.onclick=()=>{cdMin=+b.dataset.cdm;LS.set("atlas-cdmin",cdMin);render()});
   body.querySelectorAll("[data-cd]").forEach(c=>c.onclick=e=>{if(e.target.closest(".addx"))return;const k=c.dataset.cd;cdSel=cdSel===k?null:k;
     if(cdSel)ensureVisible(viewsOf([...CD_MUS[k][0],...CD_MUS[k][1]]));paint();const y=body.scrollTop;render();body.scrollTop=y});
@@ -3115,9 +3184,9 @@ const famGroups=f=>{const v=resolveV(f,f.d);return [...new Set(v.p.map(m=>TOB[m]
 function muscleLabel(name,ref){const k=cRef(ref);if(k)return "Cardio"+(cSub(k)?" · "+cSub(k):"");const e=exInfo(name,ref);if(!e)return "Exercício próprio";return [...new Set(e.p.map(m=>BASIC[TOB[m]].n))].join(", ")}
 
 /* picker */
-let pickCb=null,pickG="all",pickOpen=null,pickSel=null;
+let pickCb=null,pickG="all",pickOpen=null,pickSel=null,pickSp=false;
 function openPicker(title,cb){
-  pickCb=cb;pickG="all";pickOpen=null;pickSel=null;$("pTitle").textContent=title;$("pq").value="";
+  pickCb=cb;pickG="all";pickOpen=null;pickSel=null;pickSp=false;$("pTitle").textContent=title;$("pq").value="";
   renderPChips();renderPList();$("picker").hidden=false;
   if(!matchMedia("(max-width:900px)").matches)setTimeout(()=>$("pq").focus(),30);
 }
@@ -3131,8 +3200,9 @@ function renderPList(){
   if(pickG!=="all")items=items.filter(({f})=>famGroups(f).includes(pickG));
   /* cardio: its own chip, and found by name ("esteira", "bike", "corda"…) */
   const toks=t.split(/\s+/).filter(x=>x&&!["de","da","do","na","no","com"].includes(x));
-  const cks=pickG!=="all"&&pickG!=="cardio"?[]:Object.keys(CARDIO).filter(k=>!toks.length?pickG==="cardio"||!raw:(()=>{const c=CARDIO[k],hay=norm([...c.n,...c.s,c.a,"cardio aerobico"].join(" "));return toks.every(x=>hay.includes(x))})());
-  const cHTML=cks.map(k=>`<div class="pfam"><button data-pc="${k}"><span class="pn">${CARDIO[k].i} ${esc(cName(k))}</span><span class="ps">Cardio${cSub(k)?" · "+esc(cSub(k)):""}</span></button></div>`).join("");
+  const cks=pickG!=="all"&&pickG!=="cardio"?[]:Object.keys(CARDIO).filter(k=>!toks.length?(pickG==="cardio"||!raw)&&!CARDIO[k].sp:(()=>{const c=CARDIO[k],hay=norm([...c.n,...c.s,c.a,"cardio aerobico",c.sp?"esporte esportes sport sports deporte deportes":""].join(" "));return toks.every(x=>hay.includes(x))})());
+  const cOne=k=>`<div class="pfam"><button data-pc="${k}"><span class="pn">${CARDIO[k].i} ${esc(cName(k))}</span><span class="ps">${CARDIO[k].sp?esc(spLbl()):"Cardio"}${cSub(k)?" · "+esc(cSub(k)):""}</span></button></div>`;
+  const cHTML=cks.map(cOne).join("")+(toks.length||!cks.length?"":`<div class="pfam${pickSp?" open":""}"><button data-psp="1" aria-expanded="${pickSp}"><span class="pn">⚽ ${esc(spLbl())} ${pickSp?"▴":"▾"}</span><span class="ps">${tx("Futebol, vôlei, beach tennis, handebol e mais","Soccer, volleyball, beach tennis, handball and more","Fútbol, vóley, tenis playa, balonmano y más")}</span></button></div>${pickSp?SKEYS.map(cOne).join(""):""}`);
   let h=raw&&cks.length?cHTML:"";
   const custom=raw?`<button class="custom" data-pick="${esc(raw)}"><span class="pn">Adicionar "${esc(raw)}"</span><span class="ps">Exercício próprio, fora da lista</span></button>`:"";
   if(!items.length)h+=custom;
@@ -3148,6 +3218,7 @@ function renderPList(){
 $("pq").addEventListener("input",()=>{pickOpen=null;renderPList();$("plist").scrollTop=0});
 $("pchips").addEventListener("click",e=>{const b=e.target.closest("[data-pg]");if(!b)return;pickG=b.dataset.pg;pickOpen=null;renderPChips();renderPList();$("plist").scrollTop=0});
 $("plist").addEventListener("click",e=>{
+  const sp=e.target.closest("[data-psp]");if(sp){pickSp=!pickSp;const y=$("plist").scrollTop;renderPList();$("plist").scrollTop=y;return}
   const c=e.target.closest("[data-pick]");if(c){const cb=pickCb;closeModals();if(cb)cb(c.dataset.pick,null);return}
   const pc=e.target.closest("[data-pc]");if(pc){const k=pc.dataset.pc,cb=pickCb;closeModals();if(cb)cb(CARDIO[k].n[0],"cardio:"+k);return}
   const pf=e.target.closest("[data-pf]");if(pf){if(pickOpen===pf.dataset.pf){pickOpen=null}else{const r=parseRef(pf.dataset.ref);pickOpen=r.f.id;pickSel={...r.sel}}const y=$("plist").scrollTop;renderPList();$("plist").scrollTop=y;return}
@@ -3522,7 +3593,9 @@ $("fichaBody").addEventListener("click",e=>{
 /* ---- "+ Registrar cardio" in Hoje: a quick cardio session on the chosen day (counts as done right away) */
 let cq={k:"walk",int:"m",min:"",km:""};
 function cqForm(){const c=CARDIO[cq.k],m=cNum(cq.min);
-  return `<div class="cq-types">${Object.keys(CARDIO).map(k=>`<button data-g="ck" data-k="${k}" aria-pressed="${k===cq.k}"><span>${CARDIO[k].i}</span>${esc(cName(k))}</button>`).join("")}</div>
+  const spOn=cq.sp||CARDIO[cq.k].sp,tb=k=>`<button data-g="ck" data-k="${k}" aria-pressed="${k===cq.k}"><span>${CARDIO[k].i}</span>${esc(cName(k))}</button>`;
+  return `<div class="cq-types">${CKEYS.map(tb).join("")}<button data-g="csp" aria-expanded="${!!spOn}" aria-pressed="${!!CARDIO[cq.k].sp}"><span>⚽</span>${esc(spLbl())} ${spOn?"▴":"▾"}</button></div>
+  ${spOn?`<h4 class="cq-sph">${esc(spLbl())}</h4><div class="cq-types">${SKEYS.map(tb).join("")}</div>`:""}
   <div class="lv-inps${c.km?"":" one"}"><label><span>${tx("Minutos","Minutes","Minutos")}</span><input class="inp" id="cqMin" inputmode="numeric" value="${esc(cq.min)}" placeholder="30"></label>
     ${c.km?`<label><span>${tx("Distância (km)","Distance (km)","Distancia (km)")}</span><input class="inp" id="cqKm" inputmode="decimal" value="${esc(cq.km)}" placeholder="—"></label>`:""}</div>
   <div class="cint" role="group" aria-label="${tx("Intensidade","Intensity","Intensidad")}">${["l","m","f"].map(x=>`<button data-g="ci" data-v="${x}" aria-pressed="${x===cq.int}"><b>${esc(p3(CINT[x][0]))}</b><small>${esc(p3(CINT[x][1]))}</small></button>`).join("")}</div>
@@ -3533,7 +3606,8 @@ function cqRead(){const m=$("cqMin"),k=$("cqKm");if(m)cq.min=m.value.trim();if(k
 function openCardio(date){cq.min="";cq.km="";
   openG(tx("Registrar cardio","Log cardio","Registrar cardio")+(date!==isoDate(new Date())?" · "+fmtDate(date):""),cqForm());
   gAct=(b)=>{const g=b.dataset.g;cqRead();
-    if(g==="ck"){cq.k=b.dataset.k;if(!CARDIO[cq.k].km)cq.km=""}
+    if(g==="ck"){cq.k=b.dataset.k;if(!CARDIO[cq.k].km)cq.km="";if(!CARDIO[cq.k].sp)cq.sp=false}
+    else if(g==="csp"){cq.sp=!(cq.sp||CARDIO[cq.k].sp);if(!cq.sp&&CARDIO[cq.k].sp)cq.k="walk"}
     else if(g==="ci")cq.int=b.dataset.v;
     else if(g==="save"){const m=cNum(cq.min);if(!m){toast(tx("Coloque os minutos","Enter the minutes","Pon los minutos"));$("cqMin").focus();return}
       const c=CARDIO[cq.k];workouts.push({id:uid(),date,title:cName(cq.k),planId:null,done:true,notes:"",

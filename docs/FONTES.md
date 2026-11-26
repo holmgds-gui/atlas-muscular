@@ -208,6 +208,7 @@ Séries por músculo em cada treino seguem as faixas do Progresso (dia: até ~11
 
 ## 4d. Cardio (minutos, intensidade e calorias)
 
+- **Esportes (0.55)**: METs do mesmo Compendium (futebol, vôlei, vôlei de praia, tênis, basquete, handebol, badminton, tênis de mesa, skate, surfe, escalada, patinação, rugby, frisbee/ultimate), leve = recreativo/treino e forte = jogo competitivo. Beach tennis, padel, futsal e futevôlei não têm linha própria: usam o esporte mais parecido (vôlei de praia/tênis/futebol), são estimativas.
 - **Calorias** = MET × peso corporal (kg) × horas. METs do [2024 Adult Compendium of Physical Activities](https://pubmed.ncbi.nlm.nih.gov/38242596/) (Herrmann et al., *Journal of Sport and Health Science*, 2024; tabela em [pacompendium.com](https://pacompendium.com/wp-content/uploads/2024/01/2024-adult-compendium_1_2024.pdf)). Valores usados (leve / moderado / forte):
   - Caminhada 3,0 / 4,8 / 5,5 (17170, 17200, 17220) · Corrida 7,5 / 9,3 / 11,0 (12020, 12050, 12070)
   - Bicicleta ergométrica 4,0 / 6,0 / 10,3 (01214, 01220, 01232) · Elíptico 3,5* / 5,0 / 9,0 (02048, 02049)

@@ -15,6 +15,11 @@ for(const [loc,theme,vp] of [["pt-BR","light",{width:390,height:844}],["en-US","
   const order=await p.$$eval("[data-cd]",x=>x.map(e=>e.dataset.cd));console.log(loc,"moderado 30 min",order.join(" "));
   if(order.length!==16)bad.push(loc+": lista "+order.length);
   await shot("1-lista");
+  // Esportes (0.55): one row that opens 18 sports, each paints its muscles
+  if(!await p.isVisible('[data-cdsp]'))bad.push(loc+": linha Esportes não aparece");
+  await p.click('[data-cdsp]');await p.waitForTimeout(200);const nsp=await p.$$eval(".cd-sub [data-cd]",x=>x.length);console.log(loc,"esportes",nsp);if(nsp!==18)bad.push(loc+": esportes "+nsp);
+  await p.click('[data-cd="handball"]');await p.waitForTimeout(250);if(!await p.evaluate(()=>[...document.querySelectorAll("[data-m].on")].some(e=>e.dataset.m==="ombro_frontal")))bad.push(loc+": handebol não pintou");
+  await shot("1b-esportes");await p.click('[data-cdsp]');await p.waitForTimeout(150);
   await p.click('[data-cdi="l"]');await p.waitForTimeout(100);const o2=await p.$$eval("[data-cd]",x=>x.map(e=>e.dataset.cd));console.log(loc,"leve",o2.join(" "));
   const kc30=await p.$eval('[data-cd] .cd-bar b',e=>e.textContent);await p.click('[data-cdm="60"]');await p.waitForTimeout(100);const kc60=await p.$eval('[data-cd] .cd-bar b',e=>e.textContent);
   console.log(loc,"kcal 30→60",kc30,kc60);if(parseInt(kc60.replace(/\D/g,""))!==2*parseInt(kc30.replace(/\D/g,""))&&Math.abs(parseInt(kc60.replace(/\D/g,""))-2*parseInt(kc30.replace(/\D/g,"")))>1)bad.push(loc+": tempo não dobrou");
