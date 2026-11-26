@@ -44,6 +44,10 @@ for(const [sx,theme] of [["m","light"],["f","dark"]]){const p=await page({sex:sx
       return {k:I&&I.key,hand:Math.max(Math.abs(g('punho_d')[1]-bar[1]),Math.abs(g('punho_e')[1]-bar[1])),sx:HP.sexNow()}});
     ok(r.k===f&&r.sx===sx,`${sx} ${f}: movimento com o corpo certo`);
     ok(r.hand<0.12,`${sx} ${f}: mãos na altura da barra (${(r.hand*100).toFixed(1)} cm)`);
+    /* 0.81: a barra passa por dentro dos dedos fechados e, no terra, não atravessa as pernas em nenhum momento */
+    const g=await p.evaluate(()=>{let gr=0,gap=9;for(let i=0;i<=10;i++){HP.still(i/10);const I=HP.motionInfo();gr=Math.max(gr,I.grip);if(I.legGap!=null)gap=Math.min(gap,I.legGap)}return {gr,gap}});
+    ok(g.gr<0.012,`${sx} ${f}: barra dentro da mão fechada (pior ${(g.gr*100).toFixed(1)} cm)`);
+    if(f==="terra")ok(g.gap>0.01,`${sx} terra: barra na frente das pernas (folga mínima ${(g.gap*100).toFixed(1)} cm)`);
     await p.waitForTimeout(700);await p.screenshot({path:`${OUT}/como-fazer-${sx}-${theme}-${f}.png`});
     await p.evaluate(()=>closeHowPage())}
   /* sem movimento: boneco parado com o alvo */

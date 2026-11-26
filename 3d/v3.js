@@ -539,7 +539,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
            b:{pelve:{pos:[0,-0.40,-0.13],flex:38},coluna:{flex:-4},cervical:{flex:-10},quadril_d:{abd:18,rot:-15},quadril_e:{abd:18,rot:-15},...ARMS_SQ},
            deep:{pelve:{pos:[0,-0.50,-0.10],flex:40},coluna:{flex:-2},cervical:{flex:-10},quadril_d:{abd:22,rot:-18},quadril_e:{abd:22,rot:-18},...ARMS_SQ},
            t:[[0.7,0],[2.0,1],[0.35,1],[1.25,0]],cam:[60,0.86,1.22,0],bar:"costas"},
-    terra:{a:{pelve:{pos:[0,-0.215,-0.22],flex:70},coluna:{flex:0},cervical:{flex:-22},quadril_d:{abd:8,rot:-8},quadril_e:{abd:8,rot:-8},ombro_d:{flex:64,abd:4},ombro_e:{flex:64,abd:4},cotovelo_d:{flex:0},cotovelo_e:{flex:0},antebraco_d:{pron:70},antebraco_e:{pron:70}},
+    terra:{a:{pelve:{pos:[0,-0.232,-0.22],flex:70},coluna:{flex:0},cervical:{flex:-22},quadril_d:{abd:8,rot:-8},quadril_e:{abd:8,rot:-8},ombro_d:{flex:64,abd:4},ombro_e:{flex:64,abd:4},cotovelo_d:{flex:0},cotovelo_e:{flex:0},antebraco_d:{pron:70},antebraco_e:{pron:70}},
            b:{pelve:{pos:[0,-0.012,0],flex:-2},coluna:{flex:-2},cervical:{flex:0},quadril_d:{abd:8,rot:-8},quadril_e:{abd:8,rot:-8},ombro_d:{flex:4,abd:4},ombro_e:{flex:4,abd:4},cotovelo_d:{flex:0},cotovelo_e:{flex:0},antebraco_d:{pron:70},antebraco_e:{pron:70}},
            t:[[0.8,0],[1.4,1],[0.6,1],[1.8,0]],cam:[60,0.62,1.15,0],bar:"chao"},
     supino:{a:{pelve:{pos:[0,-0.42,-0.05],flex:-90},coluna:{flex:-6},cervical:{flex:4},quadril_d:{flex:20,abd:20},quadril_e:{flex:20,abd:20},ombro_d:{flex:86,abd:14,rot:0},ombro_e:{flex:86,abd:14,rot:0},cotovelo_d:{flex:8},cotovelo_e:{flex:8},antebraco_d:{pron:60},antebraco_e:{pron:60}},
@@ -547,14 +547,59 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
             t:[[0.7,0],[2.0,1],[0.3,1],[1.15,0]],cam:[42,0.68,1.38,-0.3],bar:"peito"}};
   const tlen=t=>t.reduce((s,x)=>s+x[0],0);
   function phaseAt(t,T){const L=tlen(T);t=((t%L)+L)%L;let u0=T[T.length-1][1];for(const [d,u] of T){if(t<d)return u0+(u-u0)*sm(t/d);t-=d;u0=u}return u0}
-  function handsTo(P,bar,gx){/* both wrists so the palm centre sits on the bar: two passes (the forearm direction moves a little) */
-    for(let it=0;it<2;it++){P.ik=P.ik||{};for(const [sd,x] of [["d",-gx],["e",gx]]){const w=jp("punho_"+sd),f=w.clone().sub(jp("cotovelo_"+sd)).normalize();
-        P.ik["mao_"+sd]=new THREE.Vector3(x,bar.y,bar.z).sub(f.multiplyScalar(0.075)).toArray()}rigPose(P)}}
-  function frame(u){const m=MOT,d=m.d,P=lerpP(d.a,m.b,u);P.pegada_d=P.pegada_e=1;P.ik={pe_d:m.feet[0],pe_e:m.feet[1]};
+  /* 0.81 (owner: "a mão parece que está segurando o vento na frente da barra"): the grip is placed by the fingers. With the
+     hand closed (pegada 1) the middle finger's knuckle, middle and end joints lie on a circle around the bar: its centre
+     is where the bar must be, and the circle's axis is the bar's direction. Each pass: turn the forearm (pronation, the
+     nearer of the two ways) so that axis lies along the bar, then move the wrist target by what is still missing. */
+  function hook(sd){const a=jp("mcf3_"+sd),b=jp("ifp3_"+sd),c=jp("ifd3_"+sd),ab=b.clone().sub(a),ac=c.clone().sub(a),n=ab.clone().cross(ac),n2=n.lengthSq();
+    const ctr=a.clone().add(n.clone().cross(ab).multiplyScalar(ac.lengthSq()).add(ac.clone().cross(n).multiplyScalar(ab.lengthSq())).multiplyScalar(1/(2*n2)));
+    return {c:ctr,ax:n.normalize()}}
+  const X=new THREE.Vector3(1,0,0);
+  function handsTo(P,bar,gx){P.ik=P.ik||{};
+    for(const [sd,x] of [["d",-gx],["e",gx]]){const w=jp("punho_"+sd),f=w.clone().sub(jp("cotovelo_"+sd)).normalize();
+      P.ik["mao_"+sd]=new THREE.Vector3(x,bar.y,bar.z).sub(f.multiplyScalar(0.075)).toArray()}
+    rigPose(P);
+    for(let it=0;it<4;it++){
+      for(const [sd,x] of [["d",-gx],["e",gx]]){const id="antebraco_"+sd,J=rig.J[id],pm=J&&J.mov.find(m=>m.id==="pron");
+        /* 1) forearm turn: angle (around the forearm) from the hook axis to the bar, folded to −90…90° (the axis has no sign) */
+        if(pm){const fa=jp("punho_"+sd).sub(jp(id)).normalize(),h=hook(sd),pr=v=>v.clone().sub(fa.clone().multiplyScalar(v.dot(fa))).normalize();
+          const a=pr(h.ax),b=pr(X);let ang=Math.atan2(fa.dot(a.clone().cross(b)),a.dot(b));if(ang>Math.PI/2)ang-=Math.PI;if(ang<-Math.PI/2)ang+=Math.PI;
+          const ew=new THREE.Vector3().fromArray(pm.eixo).normalize().applyQuaternion(wq(rig.G[id].parent)),sg=Math.sign(ew.dot(fa))||1;
+          const cur=(P[id]&&P[id].pron!=null)?P[id].pron:pm.repouso;P[id]={...(P[id]||{}),pron:Math.min(pm.max,Math.max(pm.min,cur+sg*THREE.MathUtils.radToDeg(ang)))}}}
+      rigPose(P);
+      /* 2) the wrist goes by what is missing between the hook centre and the bar */
+      let worst=0;for(const [sd,x] of [["d",-gx],["e",gx]]){const h=hook(sd),t=new THREE.Vector3(x,bar.y,bar.z),dv=t.sub(h.c);worst=Math.max(worst,dv.length());
+        P.ik["mao_"+sd]=new THREE.Vector3().fromArray(P.ik["mao_"+sd]).add(dv).toArray()}
+      rigPose(P);if(worst<0.002)break}
+    MOT.grip=Math.max(...[["d",-gx],["e",gx]].map(([sd,x])=>hook(sd).c.distanceTo(new THREE.Vector3(x,bar.y,bar.z))))}
+  /* 0.81 (owner: "no terra a barra está passando por dentro da perna"): the front of the legs, measured once on the body
+     at rest (the most forward point of the shin and of the thigh at each tenth of their length), follows the pose; the
+     deadlift bar stays in front of it (it slides up the shins and thighs, as it should) */
+  function legFront(){const out={};const pts=[];for(const [k,o] of Object.entries(parts)){if(/^(osso|fundo|base|pele|pele_n|cabeca|mama.*|deco)$/.test(k))continue;
+      const a=o.geometry.attributes.position,v=new THREE.Vector3();o.updateWorldMatrix(true,false);const st=Math.max(1,Math.floor(a.count/6000));
+      for(let i=0;i<a.count;i+=st){v.fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);if(v.y<1.0)pts.push(v.x,v.y,v.z)}}
+    for(const sd of ["d","e"])for(const [seg,A,B] of [["coxa","quadril_"+sd,"joelho_"+sd],["perna","joelho_"+sd,"tornozelo_"+sd]]){
+      const a=rig.C0[A],b=rig.C0[B],ab=b.clone().sub(a),L2=ab.lengthSq(),f=new Array(11).fill(0),p=new THREE.Vector3();
+      for(let i=0;i<pts.length;i+=3){p.set(pts[i],pts[i+1],pts[i+2]);const t=p.clone().sub(a).dot(ab)/L2;if(t<0||t>1)continue;const q=a.clone().addScaledVector(ab,t),d=p.clone().sub(q);
+        if(Math.abs(d.x)>0.09||d.length()>0.16)continue;const bin=Math.round(t*10);f[bin]=Math.max(f[bin],d.z)}
+      out[seg+"_"+sd]={A,B,f}}
+    return out}
+  function barClear(m,y){let z=-9;for(const L of Object.values(m.legs)){const g=rig.G[L.A],a=jp(L.A),b=jp(L.B),fr=new THREE.Vector3(0,0,1).applyQuaternion(wq(g));let prev=null;
+      for(let i=0;i<=10;i++){const p=a.clone().lerp(b,i/10).addScaledVector(fr,L.f[i]);if(prev&&(prev.y-y)*(p.y-y)<=0&&prev.y!==p.y){const k=(y-prev.y)/(p.y-prev.y);z=Math.max(z,prev.z+(p.z-prev.z)*k)}prev=p}}
+    return z}
+  /* 0.81: deadlift — hips rise first and stay back (knees straighten and get out of the bar's way), the trunk comes up
+     and the hips come forward in the second half (as coaches teach: "push the floor, then hips through") */
+  const EASE={terra:{"pelve.pos":u=>[u,Math.pow(u,0.75),Math.pow(u,2.4)],"pelve.flex":u=>Math.pow(u,1.8),"coluna.flex":u=>Math.pow(u,1.8),"ombro_d.flex":u=>Math.pow(u,1.6),"ombro_e.flex":u=>Math.pow(u,1.6)}};
+  function easeP(P,d,b,key,u){const E=EASE[key];if(!E)return;for(const [path,f] of Object.entries(E)){const [j,mv]=path.split("."),k=f(u),A=d.a[j]&&d.a[j][mv],B=b[j]&&b[j][mv];if(A==null||B==null)continue;
+      P[j][mv]=Array.isArray(A)?A.map((x,i)=>x+(B[i]-x)*k[i]):A+(B-A)*k}}
+  function frame(u){const m=MOT,d=m.d,P=lerpP(d.a,m.b,u);easeP(P,d,m.b,m.key,u);P.pegada_d=P.pegada_e=1;P.ik={pe_d:m.feet[0],pe_e:m.feet[1]};
     if(m.dy)P.pelve.pos=[P.pelve.pos[0],P.pelve.pos[1]+m.dy,P.pelve.pos[2]];
     rigPose(P);let bar;
     if(d.bar==="costas"){const t1=jp("T1"),up=t1.clone().sub(jp("T6")).normalize(),bk=new THREE.Vector3(0,up.z,-up.y);bar=t1.clone().addScaledVector(bk,m.sex==="f"?0.075:0.085).addScaledVector(up,-0.015);bar.x=0}
-    else if(d.bar==="chao"){let y=0;for(const sd of ["d","e"]){const w=jp("punho_"+sd),f=w.clone().sub(jp("cotovelo_"+sd)).normalize();y+=(w.y+f.y*0.075)/2}bar=new THREE.Vector3(0,Math.max(0.225,y),m.barZ)}
+    else if(d.bar==="chao"){/* 0.81: the bar hangs where the straight arms reach (shoulder → closed hand), not lower; it stays in front of the legs */
+      let by=0.225,bz=m.barZ;for(let it=0;it<3;it++){let y=9;for(const [sd,x] of [["d",-m.gx],["e",m.gx]]){const sh=jp("ombro_"+sd),R=sh.distanceTo(hook(sd).c)*0.9985,dx=x-sh.x,dz=bz-sh.z;
+          y=Math.min(y,sh.y-Math.sqrt(Math.max(0,R*R-dx*dx-dz*dz)))}by=Math.max(0.225,y);bz=Math.max(m.barZ,barClear(m,by)+0.016)}
+      bar=new THREE.Vector3(0,by,bz)}
     else{const k=sm(u);bar=m.top.clone().lerp(m.low,k);bar.z=m.top.z+(m.low.z-m.top.z)*Math.pow(u,0.7)}
     handsTo(P,bar,m.gx);m.bar.position.copy(bar);m.u=u;need=true}
   /* the body's lowest point of the back (lying on the bench) and the chest's highest point, with the pose applied */
@@ -563,14 +608,14 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     const m=MOT={key,d,opt,t:0,last:performance.now(),play:opt.play!==false,speed:opt.speed||1,sex:curSex,b:opt.deep&&d.deep?d.deep:d.b,dy:0,g:new THREE.Group()};
     rigPose({});const A0=jp("tornozelo_d"),A1=jp("tornozelo_e");
     if(key==="agach"){m.feet=[{alvo:[A0.x-0.07,A0.y,A0.z],giro:20},{alvo:[A1.x+0.07,A1.y,A1.z],giro:20}];m.gx=m.sex==="f"?0.31:0.34}
-    else if(key==="terra"){m.feet=[{alvo:A0.toArray(),giro:8},{alvo:A1.toArray(),giro:8}];m.barZ=(A0.z+A1.z)/2+0.06;m.gx=m.sex==="f"?0.22:0.24}
+    else if(key==="terra"){m.legs=legFront();m.feet=[{alvo:A0.toArray(),giro:8},{alvo:A1.toArray(),giro:8}];m.barZ=(A0.z+A1.z)/2+0.06;m.gx=m.sex==="f"?0.22:0.24}
     else{/* lying: put the back on a 44 cm bench, the feet flat on the floor in front */
       m.feet=[null,null];rigPose({...d.b,pegada_d:1,pegada_e:1});const lo=boxOf(["dorsal_superior","dorsal_inferior","trapezio_medio","gluteo_maximo"]).min.y;m.dy=0.445-lo;
       const P={...d.b,pelve:{...d.b.pelve,pos:[0,d.b.pelve.pos[1]+m.dy,d.b.pelve.pos[2]]}};rigPose(P);const pv=jp("pelve");
       m.feet=[{alvo:[-0.30,A0.y,pv.z+0.40]},{alvo:[0.30,A1.y,pv.z+0.40]}];P.ik={pe_d:m.feet[0],pe_e:m.feet[1]};rigPose(P);
       const ch=boxOf(["peito_medial","peito_inferior"]),t6=jp("T6");m.low=new THREE.Vector3(0,ch.max.y+0.016,t6.z+0.03);
       const sd=jp("ombro_d"),se=jp("ombro_e"),la=sd.distanceTo(jp("cotovelo_d"))+jp("cotovelo_d").distanceTo(jp("punho_d"));
-      m.gx=m.sex==="f"?0.33:0.37;{const dx=m.gx-Math.abs(sd.x),reach=la*0.985+0.075;m.top=new THREE.Vector3(0,(sd.y+se.y)/2+Math.sqrt(Math.max(0.01,reach*reach-dx*dx)),(sd.z+se.z)/2+0.01)}
+      m.gx=m.sex==="f"?0.33:0.37;{const dx=m.gx-Math.abs(sd.x),reach=la*0.97+0.075;m.top=new THREE.Vector3(0,(sd.y+se.y)/2+Math.sqrt(Math.max(0.01,reach*reach-dx*dx)),(sd.z+se.z)/2+0.01)}
       m.headZ=jp("cabeca").z;m.pv=pv}
     m.bar=barbell();m.g.add(m.bar);
     /* where the movement starts (for the hook heights) */
@@ -620,7 +665,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     motion(k,o){if(!k){motionStop();return true}return motionStart(k,o)},
     play(on){if(MOT){MOT.play=!!on;MOT.last=performance.now()}},speed(x){if(MOT)MOT.speed=x},
     camPos(){return camera.position.toArray()},
-    still(u){if(MOT){MOT.play=false;frame(u)}},motionInfo(){return MOT?{key:MOT.key,play:MOT.play,speed:MOT.speed,u:MOT.u,t:MOT.t,bar:MOT.bar.position.toArray()}:null},
+    still(u){if(MOT){MOT.play=false;frame(u)}},motionInfo(){return MOT?{key:MOT.key,play:MOT.play,speed:MOT.speed,u:MOT.u,t:MOT.t,bar:MOT.bar.position.toArray(),grip:MOT.grip,legGap:MOT.legs?MOT.bar.position.z-barClear(MOT,MOT.bar.position.y):null}:null},
     /* for checks/prints only: a thin rod between two points (stands in for a barbell until the equipment exists) */
     marca(id,a,b){scene.children.filter(o=>o.name==="mk_"+id).forEach(o=>{scene.remove(o);o.geometry.dispose()});if(!a)return need=true;
       const A=new THREE.Vector3().fromArray(a),B=new THREE.Vector3().fromArray(b),L=A.distanceTo(B);
