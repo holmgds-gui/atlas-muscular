@@ -320,6 +320,17 @@ main{display:grid;grid-template-columns:minmax(0,1fr) 430px;min-height:0}
 .v3 .v3c{display:block;width:100%;height:100%;outline:none;touch-action:none}
 .v3load{position:absolute;inset:0;display:grid;place-items:center;align-content:center;gap:10px;font-size:14px;color:var(--muted);text-align:center;padding:16px}
 .v3load .v3bar{width:180px;height:4px;border-radius:2px;background:var(--line);overflow:hidden}.v3load .v3bar i{display:block;height:100%;width:0;background:var(--target);transition:width .2s}
+/* 0.65: Músculos · Raio-X · Esqueleto (3D only) */
+.xrw{position:relative;display:inline-flex;z-index:40}
+.tgl-xr svg{width:20px;height:20px}
+html .tgl.tgl-xr[data-xr="raiox"],html .tgl.tgl-xr[data-xr="esq"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.xrpop{position:absolute;top:calc(100% + 6px);left:0;z-index:30;display:grid;min-width:180px;padding:6px;border-radius:14px;background:var(--surface);border:1px solid var(--line);box-shadow:0 14px 34px rgba(0,0,0,.22)}
+.xrpop[hidden]{display:none}
+#tab-atlas .stage>.bar:has(.xrpop:not([hidden])){z-index:5}
+.xrpop button{display:flex;align-items:center;gap:10px;border:0;background:none;border-radius:10px;padding:10px 12px;font:600 15px var(--f-body);color:var(--ink);text-align:left}
+.xrpop button svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.xrpop button[aria-checked="true"]{background:var(--chip);color:var(--accent,var(--ink))}
+.xrpop button small{display:block;font-weight:400;font-size:12px;color:var(--muted)}
 .v3cred{position:absolute;right:max(12px,env(safe-area-inset-right,0px));top:8px;font-size:10px;color:var(--muted);opacity:.8;text-decoration:none}
 .v3hint{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);font-size:12px;color:var(--muted);pointer-events:none;white-space:nowrap}
 /* 3D in Progresso/Força (0.18) */
@@ -944,6 +955,8 @@ button.brand:hover{background:var(--chip)}
         <!-- one button each (owner: simpler): it shows the current view / body and switches on tap -->
         <button class="tgl" id="vTgl" data-notr>Frente</button>
         <button class="tgl tgl-sex" id="sexTgl" data-notr><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9.5" cy="14.5" r="5.5"/><path d="M13.5 10.5 20 4M14.5 4H20v5.5"/></svg></button>
+        <span class="xrw" id="xrW" hidden><button class="tgl tgl-sex tgl-xr" id="xrTgl" type="button" aria-haspopup="menu" aria-expanded="false" data-notr></button>
+          <span class="xrpop" id="xrPop" role="menu" hidden data-notr></span></span>
         <div class="zoom">
           <button id="zIn" aria-label="Aproximar">+</button>
           <button id="zOut" aria-label="Afastar">−</button>
@@ -2831,9 +2844,31 @@ async function set3D(on,quiet){v3on=on;v3ui();if(!on)return;if(!quiet)buzz();
       joint:j=>{if(isCovered()){peek=true;render();return}const g=svg.querySelector(`.jt[data-j="${j}"]`);if(g)onFigTap(g);else selectJoint(j,true)},
       tap:k=>{if(isCovered()){peek=true;render();return}if(!k)return;const g=svg.querySelector(`[data-m="${k}"]`);if(g)onFigTap(g);else if(M[k])selectMuscle(k,true)},
       progress:x=>{const b=$("v3bar");if(b)b.style.width=Math.round(x*100)+"%"},
-      ready:()=>{$("v3load").hidden=true;v3busy=false;if(V3){V3.view(view==="back"?"back":"front");v3sync()}},fail})}
+      ready:()=>{$("v3load").hidden=true;v3busy=false;if(V3){V3.view(view==="back"?"back":"front");v3sync();if(xrMode!=="off"&&V3.xrNow&&V3.xrNow()!==xrMode)V3.xray(xrMode)}},fail,
+      xrProg:x=>xrLoading(x),xrFail:()=>{toast(tx("Não deu para carregar o esqueleto. Confira a internet.","Couldn't load the skeleton. Check the internet.","No se pudo cargar el esqueleto. Revisa internet."));xrMode="off";xrUi();if(V3)V3.xray("off")}})}
   catch(e){fail()}}
 $("b3d").addEventListener("click",()=>set3D(!v3on));
+/* ---- 0.65 (owner: "faça o esqueleto, o mais fiel possível, dentro do corpo"; escolheu "os dois", sem nomes dos ossos):
+   in 3D a button next to ♂/♀ opens Músculos · Raio-X (see-through muscles with the bones inside) · Esqueleto (only the
+   bones). The skeleton (3d/ossos-N.glb, ~4 MB) downloads the first time. Not kept between visits: the Atlas opens on Músculos. */
+let xrMode="off";
+const XRSVG={off:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="2.2"/><path d="M8 9.5c1.2-1 2.6-1.4 4-1.4s2.8.4 4 1.4M7.5 10l-2.5 6M16.5 10l2.5 6M9.5 10.5l.5 5.5h4l.5-5.5M10 16l-1 6M14 16l1 6"/></svg>',
+  raiox:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.5" r="2.2" stroke-dasharray="2 2"/><path d="M8 9.5c1.2-1 2.6-1.4 4-1.4s2.8.4 4 1.4M7.5 10l-2.5 6M16.5 10l2.5 6M10 16l-1 6M14 16l1 6" stroke-dasharray="2.2 2"/><path d="M12 8.5v8M10 11h4M10 13.3h4"/></svg>',
+  esq:'<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="4.3" r="2.3"/><path d="M12 7v9M9 9.5h6M9.3 11.6h5.4M9.6 13.7h4.8M9.5 16.5h5M10.5 16.5 9.5 22M13.5 16.5l1 5.5M9 9.5 6.5 15M15 9.5l2.5 5.5"/></svg>'};
+const XRN={off:()=>tx("Músculos","Muscles","Músculos"),raiox:()=>tx("Raio-X","X-ray","Rayos X"),esq:()=>tx("Esqueleto","Skeleton","Esqueleto")};
+const XRS={off:()=>tx("Só os músculos","Muscles only","Solo los músculos"),raiox:()=>tx("Músculos transparentes com os ossos","See-through muscles with the bones","Músculos transparentes con los huesos"),esq:()=>tx("Só os ossos","Bones only","Solo los huesos")};
+function xrUi(){const w=$("xrW"),b=$("xrTgl");w.hidden=!v3on;if(v3on&&xrMode==="esq")$("v3hint").textContent=tx("Arraste para girar","Drag to turn","Arrastra para girar");b.innerHTML=XRSVG[xrMode];b.dataset.xr=xrMode;
+  b.title=b.ariaLabel=tx("Visão: ","View: ","Vista: ")+XRN[xrMode]();
+  $("xrPop").innerHTML=Object.keys(XRN).map(k=>`<button type="button" role="menuitemradio" aria-checked="${k===xrMode}" data-xr="${k}">${XRSVG[k]}<span>${XRN[k]()}<small>${XRS[k]()}</small></span></button>`).join("")}
+function xrClose(){$("xrPop").hidden=true;$("xrTgl").setAttribute("aria-expanded","false")}
+function setXr(m){xrMode=m;v3ui();xrClose();if(V3&&V3.xray)V3.xray(m);if(m!=="off"&&V3&&V3.bonesReady&&!V3.bonesReady())xrLoading(0);buzz()}
+const xrLoading=x=>{const L=$("v3load");if(x==null){if(!v3busy)L.hidden=true;return}L.hidden=false;
+  L.innerHTML=`<span>${tx("Carregando o esqueleto…","Loading the skeleton…","Cargando el esqueleto…")}</span><span class="v3bar"><i style="width:${Math.round(x*100)}%"></i></span><small>${tx("Só na primeira vez (4 MB)","Only the first time (4 MB)","Solo la primera vez (4 MB)")}</small>`};
+$("xrTgl").addEventListener("click",e=>{e.stopPropagation();const p=$("xrPop"),open=p.hidden;p.hidden=!open;$("xrTgl").setAttribute("aria-expanded",String(open))});
+$("xrPop").addEventListener("click",e=>{const b=e.target.closest("[data-xr]");if(b)setXr(b.dataset.xr)});
+document.addEventListener("click",e=>{if(!$("xrPop").hidden&&!e.target.closest(".xrw"))xrClose()});
+{const u0=v3ui;v3ui=function(){u0.apply(this,arguments);xrUi()}}
+xrUi();
 function applyFig(start){if(CONF.fig==="2d"){if(v3on)set3D(false);else v3ui()}else if(!v3on&&(start||CONF.fig==="3d"||!V3))set3D(true,true);else v3ui()}
 setTimeout(()=>applyFig(true),0);
 /* ---- 3D also in Progresso › Músculos, Força and the Stories cards (owner 0.18: "modelo 3D em todo app"; escolhas:

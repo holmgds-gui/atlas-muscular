@@ -15,3 +15,5 @@ tools/corpo3d/juntas-f.json
 google-services.json
 GoogleService-Info.plist
 keystore.properties
+tools/corpo3d/ossos.glb
+tools/corpo3d/ossos-f.glb

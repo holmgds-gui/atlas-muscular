@@ -392,3 +392,76 @@ for sd in("right","left"):
 OUT="corpo-f" if FEM else "corpo"
 json.dump(JT,open(OUT.replace("corpo","juntas")+".json","w"),separators=(",",":"));print("juntas",{k:len(v) for k,v in JT.items()})
 open(OUT+".glb","wb").write(trimesh.exchange.gltf.export_glb(sc,include_normals=True));print('faces',tot,'nodes',len(meshes),'height',allv.max(0)[1]-allv.min(0)[1])
+
+# ---- skeleton (owner 0.65: "faça o esqueleto, o mais fiel possível, e coloque dentro do corpo — liso, como se o osso
+#      tivesse vindo antes do músculo"). The real BodyParts3D bones (CT of a real body, the same dataset and coordinates as
+#      the muscles, so they sit exactly where the muscles attach), plus the costal cartilages and the intervertebral discs,
+#      the hyoid and the foot sesamoids. Each bone: small loose bits dropped, simplified on an area budget, smoothed
+#      (Taubin: removes the CT stair steps without shrinking), then posed exactly like the muscles (same pose(), female
+#      shaping and waist()), so it stays inside them. The skull is the same solid skull as the "caveira" head. Baked shadow
+#      (AO) in the vertex colour. Output ossos.glb / ossos-f.glb with two nodes: "esq" (bone) and "cart" (cartilage).
+#      Skip with OSSOS=0.
+if os.environ.get("OSSOS","1")=="1":
+  # costal cartilages: BP24/BP28 are only the lower ones (8th–10th, the rib margin); the 1st–7th, which join the ribs to
+  # the sternum, come one by one
+  CC=[(i,f"{sd} {o} costal cartilage") for sd,ids in (("right","FMA7875 FMA7886 FMA7913 FMA7976 FMA8070 FMA8194 FMA8248"),("left","FMA8005 FMA8031 FMA8058 FMA8167 FMA8112 FMA8221 FMA8275"))
+      for i,o in zip(ids.split(),"first second third fourth fifth sixth seventh".split())]
+  SK_EXTRA=CC+[("BP24","left costal cartilage"),("BP28","right costal cartilage"),("FMA52749","hyoid bone"),
+    ("FMA45097","sesamoid bone of right foot"),("FMA45098","sesamoid bone of left foot"),("FMA25058","intervertebral disk of axis"),
+    ("FMA13896","intervertebral disk of third cervical vertebra"),("FMA13897","intervertebral disk of fourth cervical vertebra"),
+    ("FMA13898","intervertebral disk of fifth cervical vertebra"),("FMA13899","intervertebral disk of sixth cervical vertebra"),
+    ("FMA13900","intervertebral disk of seventh cervical vertebra"),("FMA10458","intervertebral disk of first thoracic vertebra")]+\
+    [(a,f"intervertebral disk of {o} thoracic vertebra") for a,o in zip("FMA13495 FMA13500 FMA13501 FMA13502 FMA13503 FMA13504 FMA13505 FMA13506 FMA13507 FMA13508 FMA13509".split(),
+      "second third fourth fifth sixth seventh eighth ninth tenth eleventh twelfth".split())]+\
+    [(a,f"intervertebral disk of {o} lumbar vertebra") for a,o in zip("FMA16033 FMA16034 FMA16035 FMA16036 FMA16037".split(),"first second third fourth fifth".split())]
+  SKSKULL=r"frontal bone|occipital|sphenoid|temporal bone|parietal|zygomatic|nasal bone|maxilla|mandible|lacrimal|ethmoid|vomer"
+  bl=[]
+  for a,k,n in parts:
+    if k!='b' or re.search(r"levator scapulae|subscapularis",n):continue   # two muscles are filed as 'b' in sel.tsv
+    m=trimesh.load(D+a+'.stl')
+    if re.search(SKSKULL,n) and m.centroid[2]>=1300 and abs(m.centroid[0])<=200:continue   # in the solid skull
+    bl.append((n,m,'esq'))
+  for a,n in SK_EXTRA:
+    if os.path.exists(D+a+'.stl'):bl.append((n,trimesh.load(D+a+'.stl'),'cart' if re.search("cartilage|disk",n) else 'esq'))
+  def tidy(m,n):
+    m.merge_vertices();parts_=m.split(only_watertight=False)
+    if len(parts_)>1:
+      big=max(len(p.faces) for p in parts_);parts_=[p for p in parts_ if len(p.faces)>=max(30,0.02*big)];m=trimesh.util.concatenate(parts_)
+    return m
+  bl=[(n,tidy(m,n),g) for n,m,g in bl]
+  BUDGET_S=int(os.environ.get("BUDGET_S","130000"));sarea=sum(m.area for n,m,g in bl)
+  out={'esq':[],'cart':[]}
+  for n,m,g in bl:
+    tgt=max(400,int(BUDGET_S*m.area/sarea))
+    # a strong simplification can collapse a small bone into long needles (they showed as dark spikes): try again with
+    # more triangles until no edge is much longer than the longest edge of the original bone
+    # smoothing first, on the full-detail bone (closed surface): on the simplified one it blew up where the
+    # simplification left open edges
+    trimesh.smoothing.filter_taubin(m,lamb=0.5,nu=0.53,iterations=10)
+    lim=max(22.0,1.3*m.edges_unique_length.max(),0.25*np.ptp(m.vertices,0).max())   # long bones: long thin triangles along the shaft are fine
+    while len(m.faces)>tgt:
+      v,f=fs.simplify(m.vertices.astype(np.float32),m.faces.astype(np.int32),target_reduction=1-tgt/len(m.faces));m2=trimesh.Trimesh(v,f,process=True)
+      if m2.edges_unique_length.max()<=lim:m=m2;break
+      tgt=int(tgt*1.6)
+    e_a=m.edges_unique_length.max();m=pose(m,n);e_b=m.edges_unique_length.max();m=waist(m);e_c=m.edges_unique_length.max();m.fix_normals();out[g].append(m)
+    if os.environ.get("DBG") and max(e_a,e_b,e_c)>35:print("LONG",n,round(e_a),round(e_b),round(e_c),len(m.faces))
+  out['esq'].append(SKULL.copy())
+  E=trimesh.util.concatenate(out['esq']);Cg=trimesh.util.concatenate(out['cart'])
+  ALL=trimesh.util.concatenate([E,Cg]);print('skeleton faces',len(E.faces),'cartilage',len(Cg.faces))
+  def ao2(V,N,S,n=40,maxd=22):
+    d=np.random.default_rng(2).normal(size=(n,3));d/=np.linalg.norm(d,axis=1,keepdims=True);occ=np.zeros(len(V));w=np.zeros(len(V))
+    for k in range(n):
+      N=np.nan_to_num(N);Dd=np.repeat(d[k][None],len(V),0);c=(Dd*N).sum(1);Dd[c<0]*=-1;c=np.abs(c);O=V+N*0.4
+      loc,ri,_=S.ray.intersects_location(O,Dd,multiple_hits=False);dist=np.full(len(V),1e9);dist[ri]=np.linalg.norm(loc-O[ri],axis=1)
+      occ+=c*(dist<maxd)*(1-dist.clip(0,maxd)/maxd)**0.5;w+=c
+    return np.nan_to_num(1-occ/np.maximum(w,1e-6),nan=1.0)
+  sk=trimesh.Scene()
+  for nm,M_ in (('esq',E),('cart',Cg)):
+    a_=np.clip(0.12+0.95*ao2(M_.vertices,M_.vertex_normals,ALL)**1.8,0,1)
+    if nm=='esq':   # the solid skull keeps its own deeper shadow (orbits, nose, teeth)
+      ns=len(SKULL.vertices);a_[-ns:]=np.minimum(a_[-ns:],SKULL_AO)
+    v=M_.vertices;q=trimesh.Trimesh(np.c_[v[:,0],v[:,2],-v[:,1]]/1000.0-ctr,M_.faces,process=False)
+    g_=(a_*255).astype(np.uint8);q.visual=trimesh.visual.ColorVisuals(q,vertex_colors=np.c_[g_,g_,g_,np.full(len(g_),255,np.uint8)])
+    _=q.vertex_normals;sk.add_geometry(q,node_name=nm,geom_name=nm)
+  SO="ossos-f" if FEM else "ossos"
+  open(SO+".glb","wb").write(trimesh.exchange.gltf.export_glb(sk,include_normals=True));print('wrote',SO+".glb")

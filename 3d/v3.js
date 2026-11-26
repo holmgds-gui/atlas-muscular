@@ -10,7 +10,9 @@
      api.sex()          — "m" | "f": which body to load first (sex(s) swaps it later)
      api.tap(key|null)  — a tap on a muscle (or on nothing)
      api.covered()      — true when the figure is the small one in the corner (taps only enlarge it, no rotating)
-     api.progress(0..1), api.ready(), api.fail()                                                                     */
+     api.progress(0..1), api.ready(), api.fail()
+     xray("off"|"raiox"|"esq") — 0.65: skeleton (3d/ossos-N.glb, loaded the first time): Raio-X = see-through muscles with
+       the bones inside, Esqueleto = bones only; api.xrProg(0..1|null) shows its loading, api.xrFail() when it could not load */
 import * as THREE from "three";
 import {OrbitControls} from "three/addons/controls/OrbitControls.js";
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
@@ -42,6 +44,7 @@ export function mount(box, api){
   /* owner 0.48 (Atlas, "muito mole, solto"): firm — stops the moment the finger lifts (no inertia), turns sideways and only
      a little up/down (±12°, owner 0.51), and the pinch zooms a bit faster than the fingers */
   if(api.firm){controls.enableDamping=false;controls.minPolarAngle=THREE.MathUtils.degToRad(78);controls.maxPolarAngle=THREE.MathUtils.degToRad(102);controls.zoomSpeed=1.35;controls.rotateSpeed=0.55}   /* 0.51: a little up/down (±12°) follows the mouse/finger again; 0.56: turns slower (owner: "muito rápido o girar", 0.85 → 0.55) */
+  let XR="off",bones=null,bonesSex=null,boneN=0;
   let CLOUD=null,ready=false,BB=new THREE.Box3(new THREE.Vector3(-.4,0,-.2),new THREE.Vector3(.4,1.7,.2)),CY=0.9,need=true,alive=true,curV="front";
   scene.add(new THREE.HemisphereLight(0xffffff,0x9aa0a8,1.25));
   const key=new THREE.DirectionalLight(0xffffff,1.6);key.position.set(0.6,0.8,1);camera.add(key);
@@ -49,7 +52,7 @@ export function mount(box, api){
 
   const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
   const C={};const readColors=()=>{for(const [k,v] of [["m","--v3-m"],["mlo","--v3-mlo"],["bone","--v3-bone"],["sep","--v3-sep"],["fib","--v3-fib"],["base","--v3-base"],["hov","--v3-hov"],["aura","--v3-aura"],["target","--target"],["syn","--syn"],["art","--fig-art"],["art2","--fig-art2"],["surf","--surface"],["thi","--target-hi"]])C[k]=new THREE.Color(css(v)||"#888");
-    C.sepA=parseFloat(css("--v3-sepa"))||.45};readColors();
+    C.sepA=parseFloat(css("--v3-sepa"))||.45;/* skeleton: real bone ivory in both themes (the skull head keeps --v3-bone) */C.osso=new THREE.Color("#e6decd");C.cart=C.osso.clone().lerp(new THREE.Color("#9db3c9"),0.42)};readColors();
 
   const parts={},pickables=[],meshes=[];let state={},hov=null,hovJ=null,root=null,curSex=null;
   /* the female breasts are split by the pectoral part under them ("mama_peito_medial"…): same colour, a tap on them is a tap on that part */
@@ -92,7 +95,10 @@ export function mount(box, api){
     for(const [k0,o] of Object.entries(parts)){if(k0==="mama"){o.material.uniforms.col.value.copy(art?C.art:C.aura);continue}const k=BASEK(k0),s=art?{}:state[k]||{};
     const c=art?(/^(osso|fundo|base|pele|pele_n|cabeca|tend)$/.test(k)?C.art:C.art2):s.on?C.target:s.syn?C.syn:k==="osso"?C.bone:k==="fundo"||k==="base"?C.base:k==="deco"||k==="tend"?C.mlo:/^(pele|pele_n|cabeca)$/.test(k)?C.m:s.c?(s.dim?new THREE.Color(s.c).lerp(C.m,.75):new THREE.Color(s.c)):(k===hov?C.hov:C.m);
     if(o.userData.fu)o.userData.fu.value.copy(C.fib);baseU.value.copy(C.base);
-    o.material.color.copy(c);o.material.emissive.copy(s.on?C.target:s.syn?C.syn:new THREE.Color(0));o.material.emissiveIntensity=s.on||s.syn?0.18:0}
+    o.material.color.copy(c);o.material.emissive.copy(s.on?C.target:s.syn?C.syn:new THREE.Color(0));o.material.emissiveIntensity=s.on||s.syn?0.18:0;
+    /* Raio-X: glassy muscles, the red/orange ones a bit stronger so they still read */
+    if(xrOn()&&XR==="raiox"&&o.material.isMeshStandardMaterial){const dk=C.m.getHSL({}).l<0.42;o.material.opacity=s.on?0.55:s.syn?0.45:/^(pele|cabeca)$/.test(k)?(dk?0.16:0.1):(dk?0.26:0.16)}}
+    if(bones)bones.traverse(o=>{if(o.isMesh)o.material.color.copy(o.userData.k==="cart"?C.cart:C.osso)});
     /* Articulações: the joint marks (ring + dot, like the 2D) show only in that mode; the chosen joint is red */
     jScene.visible=art;for(const j of jMarks){const on=state.__j===j.userData.j;j.userData.fill.material.color.copy(on?C.target:(j.userData.j===hovJ?C.syn:C.surf));j.userData.ring.material.color.copy(on?C.thi:C.syn)}
     need=true}
@@ -124,9 +130,12 @@ export function mount(box, api){
     const dd=camera.position.distanceTo(controls.target);nearU.value=Math.min(1,Math.max(0,(2.5-dd)/1.1));
     sepMat.uniforms.col.value.copy(C.sep);sepMat.uniforms.a.value=C.sepA*Math.min(1,Math.max(0.3,1.5/dd));
     renderer.autoClear=true;renderer.render(scene,camera);if(!meshes.length)return;
-    for(const o of meshes){o.userData.mat=o.material;o.material=o.userData.idm}for(const o of ghosts)o.visible=false;
+    for(const o of meshes){o.userData.mat=o.material;o.material=o.userData.idm}for(const o of ghosts){o.userData.vis=o.visible;o.visible=false}
+    const bv=bones&&bones.visible;if(bv){if(XR==="esq")bones.traverse(o=>{if(o.isMesh){o.userData.mat=o.material;o.material=o.userData.idm}});else bones.visible=false}
     renderer.setRenderTarget(idT);renderer.setClearColor(0x000000,1);renderer.clear();renderer.render(scene,camera);renderer.setRenderTarget(null);renderer.setClearColor(0x000000,0);
-    for(const o of meshes)o.material=o.userData.mat;for(const o of ghosts)o.visible=true;
+    for(const o of meshes)o.material=o.userData.mat;for(const o of ghosts)o.visible=o.userData.vis!==false;
+    if(bv){if(XR==="esq")bones.traverse(o=>{if(o.isMesh)o.material=o.userData.mat});bones.visible=true}
+    if(xrOn()&&XR==="raiox")sepMat.uniforms.a.value*=0.3;
     renderer.autoClear=false;renderer.render(sepScene,sepCam);
     if(jScene.visible){const s=camera.position.distanceTo(controls.target)*0.0085+0.004;for(const g of jMarks){g.quaternion.copy(camera.quaternion);g.scale.setScalar(s)}renderer.render(jScene,camera)}
     renderer.autoClear=true}
@@ -214,15 +223,40 @@ export function mount(box, api){
       {const P=[];g.scene.updateMatrixWorld(true);const v=new THREE.Vector3();
         for(const o of ms){const a=o.geometry.attributes.position,st=Math.max(1,Math.floor(a.count/260));for(let i=0;i<a.count;i+=st){v.fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);P.push(v.x,v.y,v.z)}}
         CLOUD=new Float32Array(P)}
-      applyHead();const first=!ready;ready=true;if(first){resize();view(curV,false)}else{lims();need=true}paint();readyRes&&readyRes();api.ready()}}
+      applyHead();if(XR!=="off")loadBones();const first=!ready;ready=true;if(first){resize();view(curV,false)}else{lims();need=true}paint();readyRes&&readyRes();api.ready()}}
   /* an old model without the mannequin keeps its skull */
   /* with the mannequin, the tops of the upper trapezius and of the deep neck tissue would poke through the back of
      its head (thin ragged bits with outlines): they are clipped a little above the nape (0.58) */
   const CLIPK=new Set(["trapezio_superior","deco","fundo"]),CLIPU={value:99},CLIPP=new THREE.Plane(new THREE.Vector3(0,-1,0),99);
-  function applyHead(){const mq=HEAD!=="skull"&&!!parts.cabeca;if(parts.osso)parts.osso.visible=!mq;if(parts.pele_n)parts.pele_n.visible=!mq;if(parts.cabeca)parts.cabeca.visible=mq;
+  function applyHead(){const mq=HEAD!=="skull"&&!!parts.cabeca;if(parts.osso)parts.osso.visible=!mq;if(parts.pele_n)parts.pele_n.visible=!mq;if(parts.cabeca)parts.cabeca.visible=mq;applyXr();
     let y=99;if(mq){const b=new THREE.Box3().setFromObject(parts.cabeca);y=b.max.y-0.172*(b.max.y-b.min.y)/0.328}
     CLIPU.value=y;CLIPP.constant=y;need=true}
   HEADS.add(applyHead);
+  /* ---- skeleton (owner 0.65): the real BodyParts3D bones, posed like the muscles (tools/corpo3d/build.py → ossos.glb):
+     "esq" = bone (ivory, baked shadow), "cart" = costal cartilages and intervertebral discs (bluish). Downloaded only when
+     Raio-X or Esqueleto is chosen. Raio-X: the muscles turn glassy (front faces only, no depth write) and the deep
+     filler/skull/tendon nodes of the body hide (the skeleton replaces them). Esqueleto: only the bones, with an outline. */
+  const SKF={m:"./ossos-1.glb",f:"./ossos-f-1.glb"};
+  const xrOn=()=>XR!=="off"&&!!bones&&bonesSex===curSex&&bones.visible;
+  async function loadBones(){if(XR==="off"||!curSex)return;if(bones&&bonesSex===curSex){applyXr();return}
+    const sx=curSex,my=++boneN;let base;api.xrProg&&api.xrProg(0);
+    try{base=await getScene(SKF[sx],x=>api.xrProg&&api.xrProg(x))}catch(e){api.xrProg&&api.xrProg(null);if(alive&&my===boneN)api.xrFail&&api.xrFail();return}
+    api.xrProg&&api.xrProg(null);if(!alive||my!==boneN||sx!==curSex)return;
+    if(bones){scene.remove(bones);bones.traverse(o=>{if(o.isMesh){o.material.dispose();o.userData.idm.dispose()}})}
+    bones=base.clone(true);bonesSex=sx;
+    bones.traverse(o=>{if(!o.isMesh)return;const k=(o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"esq").replace(/_\d+$/,"");o.userData.k=k;
+      o.material=new THREE.MeshStandardMaterial({color:k==="cart"?C.cart:C.osso,roughness:k==="cart"?0.42:0.68,metalness:0,vertexColors:!!o.geometry.attributes.color});
+      o.userData.idm=new THREE.ShaderMaterial({uniforms:{clipY:CLIPU,cl:{value:0},id:{value:k==="cart"?240:241},sd:{value:0}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide})});
+    scene.add(bones);applyXr()}
+  function applyXr(){const on=XR!=="off"&&!!bones&&bonesSex===curSex;if(bones)bones.visible=on;
+    for(const [k,o] of Object.entries(parts)){
+      if(on&&(XR==="esq"||/^(fundo|tend|osso|pele_n)$/.test(k)))o.visible=false;
+      else if(k==="osso"||k==="pele_n")o.visible=HEAD==="skull"||!parts.cabeca;
+      else if(k==="cabeca")o.visible=HEAD!=="skull";
+      else o.visible=true;
+      const m=o.material;if(!m||!m.isMeshStandardMaterial)continue;const glass=on&&XR==="raiox";
+      if(m.transparent!==glass){m.transparent=glass;m.depthWrite=!glass;m.side=glass?THREE.FrontSide:THREE.DoubleSide;if(!glass)m.opacity=1;m.needsUpdate=true}}
+    paint()}
   let readyRes=null;const readyP=new Promise(r=>readyRes=r);
   load(api.sex?api.sex():"m");
 
@@ -253,6 +287,13 @@ export function mount(box, api){
       for(const [i,a] of [[0,0],[1,Math.PI]]){const d=fitD()*1.02;controls.target.set(0,CY,0);camera.position.set(Math.sin(a)*d,CY+0.03,Math.cos(a)*d);camera.lookAt(controls.target);camera.updateMatrixWorld();
         draw();g2.drawImage(canvas,i*w,0,w,h)}
       state=sv.st;renderer.setPixelRatio(sv.pr);camera.position.copy(sv.cp);controls.target.copy(sv.ct);lastSz=null;resize();paint();return out},
+    xray(m){XR=m==="raiox"||m==="esq"?m:"off";if(XR==="off")applyXr();else loadBones()},
+    xrNow(){return XR},
+    /* for tests: is this part drawn now; bounding boxes of the skeleton and of the body */
+    visible(k){return !!(parts[k]&&parts[k].visible)},
+    boxes(){if(!bones||!root)return null;const bb=new THREE.Box3().setFromObject(bones),cv=root.visible;const v0=Object.values(parts).map(o=>o.visible);Object.values(parts).forEach(o=>o.visible=true);
+      const cb=new THREE.Box3().setFromObject(root);Object.values(parts).forEach((o,i)=>o.visible=v0[i]);return {bones:{min:bb.min.toArray(),max:bb.max.toArray()},body:{min:cb.min.toArray(),max:cb.max.toArray()}}},
+    bonesReady(){return !!bones&&bonesSex===curSex},
     sexNow(){return curSex},
     refit(){resize();view(curV,true)},
     keys(){return Object.keys(parts)},
