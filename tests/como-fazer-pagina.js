@@ -57,6 +57,12 @@ for(const [sx,theme] of [["m","light"],["f","dark"]]){const p=await page({sex:sx
 for(const loc of ['pt-BR','en-US']){const p=await page({loc,conf:{fig:"3d"}});await p.waitForFunction(()=>window.V3&&V3.rigReady(),null,{timeout:90000});await p.waitForTimeout(600);
   const order=await p.evaluate(()=>[...document.querySelectorAll('#msTrack [data-mode]')].map(b=>b.dataset.mode).join(','));
   ok(order==="mus,grp,art,ex,cd",`${loc} ordem dos modos: ${order}`);
+  /* 0.79 (dono: "quando eu arrasto ou chego em exercícios, ele volta para músculos"): arrastar a faixa de Articulações até Exercícios/Cardio */
+  for(const to of ['ex','cd']){await p.evaluate(()=>setMode("art"));await p.waitForTimeout(1200);
+    await p.evaluate(to=>{const t=document.getElementById('msTrack'),b=t.querySelector(`[data-mode="${to}"]`);t.scrollTo({left:b.offsetLeft-(t.clientWidth-b.offsetWidth)/2,behavior:"smooth"})},to);
+    await p.waitForTimeout(2600);const r=await p.evaluate(()=>{const t=document.getElementById('msTrack'),c=t.scrollLeft+t.clientWidth/2,b=[...t.querySelectorAll('[data-mode]')].find(b=>Math.abs(b.offsetLeft+b.offsetWidth/2-c)<b.offsetWidth/2);return [curMode(),b&&b.dataset.mode]});
+    ok(r[0]===to&&r[1]===to,`${loc} arrastar de Articulações até ${to} fica em ${to} (${r})`)}
+  await p.evaluate(()=>setMode("mus"));await p.waitForTimeout(1200);
   await p.click('#msTrack [data-mode="ex"]');await p.waitForTimeout(1200);
   ok(await p.evaluate(()=>curMode()==="ex"&&!!document.querySelector('#body [data-exf="supino"]')),`${loc} modo Exercícios com a lista`);
   const first=await p.evaluate(()=>[...document.querySelectorAll('#body .exf-h')].map(h=>h.textContent).slice(0,2).join(' | '));

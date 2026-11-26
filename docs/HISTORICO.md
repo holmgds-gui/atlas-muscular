@@ -237,6 +237,8 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 
 - **Modo "Exercícios" no Atlas e ossos aparecendo (0.78, nov/2026)**: o dono pediu, com um print, para colocar "exercícios" antes de Cardio na faixa de modos, com "essa página de exercícios e como mostrar eles, como eles fazer". Agora a faixa é Músculos · Grupos · Articulações · **Exercícios** · Cardio: o boneco grande e, puxando a folha, a lista de todos os exercícios com busca — primeiro os que têm movimento, depois por grupo muscular. Tocar num abre a página "Como fazer". No mesmo print apareciam **ossos brancos por cima dos músculos** (canela, joelho, esterno): era um erro da 0.76 — depois de visitar Articulações (que liga o Esqueleto), os ossos, que agora ficam presos nas articulações, não sumiam mais ao voltar para Músculos. Corrigido.
 
+- **Exercícios voltava sozinho para Músculos (0.79, nov/2026)**: o dono disse que, ao arrastar ou chegar em Exercícios, o Atlas voltava para Músculos. Causa: vindo de Articulações, o app primeiro voltava ao modelo normal e, nesse instante, mandava a faixa rolar suave até "Músculos"; quando a rolagem parava, a faixa trocava o modo. Além disso, a trava da faixa podia ficar presa e ignorar o arrasto seguinte. Agora o modo novo é marcado antes, a rolagem que sobrou é cancelada e a trava é solta (o mesmo valia para Cardio).
+
 ## 17. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.

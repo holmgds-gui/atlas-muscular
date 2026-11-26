@@ -2784,7 +2784,7 @@ document.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click",(
 const MODES=["mus","grp","art","ex","cd"];
 const msT=document.getElementById("msTrack");let msLock=false,msTm=null;
 function msCenter(m,smooth){const b=msT.querySelector(`[data-mode="${m}"]`);clearTimeout(msTm);if(!b||!msT.clientWidth){msLock=false;return}
-  const x=b.offsetLeft-(msT.clientWidth-b.offsetWidth)/2;if(Math.abs(msT.scrollLeft-x)<2)return;
+  const x=b.offsetLeft-(msT.clientWidth-b.offsetWidth)/2;if(Math.abs(msT.scrollLeft-x)<2){msT.scrollTo({left:x,behavior:"auto"});msLock=false;return}   /* 0.79: stops a smooth scroll still going to another mode (owner: "volta para Músculos") */
   msLock=true;msT.scrollTo({left:x,behavior:smooth&&!document.documentElement.classList.contains("noanim")?"smooth":"auto"});clearTimeout(msTm);msTm=setTimeout(()=>{msLock=false},smooth?700:80)}
 /* swipe: when the strip stops, the item in the middle becomes the mode */
 msT.addEventListener("scroll",()=>{if(msLock){clearTimeout(msTm);msTm=setTimeout(()=>{msLock=false},160);return}clearTimeout(msTm);msTm=setTimeout(()=>{if(!msT.clientWidth)return;const c=msT.scrollLeft+msT.clientWidth/2;let best=null,bd=1e9;
@@ -3207,14 +3207,14 @@ const CD_NOTE={
   frisbee:["O ultimate é corrida com arrancadas o jogo todo; só jogar o disco parado gasta pouco.","Ultimate is running and sprinting the whole game; just tossing the disc burns little.","El ultimate es carrera con arranques todo el partido; solo lanzar el disco gasta poco."]
 };
 /* owner (0.66): Cardio opens like Músculos — big figure, the sheet down; the list only when it is pulled up (cdUp) */
-function openCardioList(){if(model==="art")setModel(musModel);grp=false;cdOn=true;cdEx=false;cdSel=null;cur=null;curEx=null;build=null;listOpen=false;cdUp=false;paint();render();$("body").scrollTop=0}
+function openCardioList(){grp=false;cdOn=true;cdEx=false;if(model==="art")setModel(musModel);cdSel=null;cur=null;curEx=null;build=null;listOpen=false;cdUp=false;paint();render();$("body").scrollTop=0}
 $("cdBtn").onclick=openCardioList;
 /* ---- 0.78 (owner: "coloque ali exercícios antes de cardio … essa página de exercícios e como mostrar eles, como eles
    fazer"): Atlas mode "Exercícios" (between Articulações and Cardio). It rides on the Cardio sheet (cdOn + cdEx: big figure,
    list when pulled up); the list = every exercise family, the ones with a movement first, then by muscle group (main
    target of the default variation), with a search; a tap opens the "Como fazer" page with the default variation. */
 let exQ="";
-function openExList(){if(model==="art")setModel(musModel);grp=false;cdOn=true;cdEx=true;exQ="";cdSel=null;cur=null;curEx=null;build=null;listOpen=false;cdUp=false;paint();render();$("body").scrollTop=0}
+function openExList(){grp=false;cdOn=true;cdEx=true;if(model==="art")setModel(musModel);exQ="";cdSel=null;cur=null;curEx=null;build=null;listOpen=false;cdUp=false;paint();render();$("body").scrollTop=0}
 function exGroupOf(f){const p=(resolveV(f,f.d).p||[])[0];return p?TOB[p]:null}
 function exRow(f){const mv=movOf(f,f.d),v=resolveV(f,f.d),tg=[...new Set((v.p||[]).map(m=>M[m]&&M[m].n).filter(Boolean))].slice(0,3);
   return `<div class="ex exf${mv?" mv":""}" role="button" tabindex="0" data-exf="${f.id}">
