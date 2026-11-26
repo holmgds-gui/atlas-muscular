@@ -1,4 +1,4 @@
-const CACHE="atlas-v0.66";
+const CACHE="atlas-v0.67";
 /* the 3D body and Three.js are big and rarely change: they live in their own cache that survives app updates
    (a new model gets a new file name, corpo-11.glb / corpo-f-9.glb, and a new cache name, which drops the old model) */
 const C3D="atlas-3d-12";   // 0.60: corpo-11.glb / corpo-f-8.glb (mannequin head, natural jaw)
