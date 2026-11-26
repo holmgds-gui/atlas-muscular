@@ -49,3 +49,8 @@ node tests/i18n-coleta.js pt && node tests/i18n-coleta.js en && node tests/i18n-
 - Os testes apagam o `localStorage` da página de teste e semeiam dados de exemplo; não use contra o seu celular.
 
 Desde a 0.17 o app abre no 3D: os testes começam em 2D porque o `addInitScript` grava `fig:"2d"` no `atlas-conf` (o `tres-d.js` usa `"both"`). Em teste novo, copie essa linha.
+
+## Segurança (0.61)
+
+- `seguranca-xss.js` — põe texto de ataque (HTML/script) em todos os campos do aparelho e num backup importado, abre todas as telas e confere que nenhum script roda.
+- `seguranca-csp.js` — confere que a política de conteúdo (CSP) do `<head>` não bloqueia nada do app (2D, 3D, Stories, login, apresentação).

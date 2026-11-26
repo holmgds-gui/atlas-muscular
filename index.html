@@ -2,6 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<!-- security (0.61): the page may only run its own code and the Firebase code from Google, and only talk to its own site and Google's login/database; no plugins, no forms to other sites, no changing the base address. localhost is only for the tests (Firebase emulator). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://apis.google.com https://*.googleapis.com; connect-src 'self' blob: data: https://*.googleapis.com https://*.google.com https://www.gstatic.com https://*.firebaseapp.com http://127.0.0.1:* http://localhost:*; frame-src 'self' https://holmgds-gui.github.io https://*.firebaseapp.com https://accounts.google.com https://apis.google.com; img-src 'self' data: blob: https:; media-src 'self' data: blob:; font-src 'self' data:; style-src 'self' 'unsafe-inline'; worker-src 'self' blob:; manifest-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <script type="importmap">{"imports":{"three":"./vendor/three/three.module.min.js","three/addons/":"./vendor/three/addons/"}}</script>
 <title>Muscle Atlas</title>
@@ -2519,7 +2522,20 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const norm=s=>String(s).normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase();
 /* the keys that go to the account when the person is signed in (0.23; see sync.js) */
 const SYNCK=new Set(["atlas-workouts","atlas-plans","atlas-rank","atlas-conf","atlas-ach"]);
-const LS={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+/* security (0.61): data read from storage, from a backup file or from the account is cleaned before use: text never
+   carries < > or " (so a name, note or id can never turn into HTML/script on screen), odd keys (__proto__…) are
+   dropped, very long values are cut, and lists/records get the shapes the app expects (cleanW/cleanP). */
+const SAFEK=new Set(["atlas-plans","atlas-workouts","atlas-rank","atlas-ach","atlas-conf","atlas-live","atlas-ficha"]);
+function clean(v,d=0){if(d>10)return null;
+  if(typeof v==="string")return (v.length>20000?v.slice(0,20000):v).replace(/[<>]/g,"").replace(/"/g,"”");
+  if(Array.isArray(v))return v.slice(0,50000).map(x=>clean(x,d+1));
+  if(v&&typeof v==="object"){const o={};for(const k of Object.keys(v)){if(k==="__proto__"||k==="constructor"||k==="prototype")continue;o[clean(k,d+1)]=clean(v[k],d+1)}return o}
+  return typeof v==="number"&&!isFinite(v)?0:v}
+const isO=x=>x&&typeof x==="object"&&!Array.isArray(x);
+const okD=d=>typeof d==="string"&&/^\d{4}-\d\d-\d\d$/.test(d)&&!isNaN(new Date(d+"T12:00"));
+const cleanW=a=>(Array.isArray(a)?a:[]).filter(w=>isO(w)&&okD(w.date)).map(w=>({...w,items:(Array.isArray(w.items)?w.items:[]).filter(isO).map(it=>({...it,sets:(Array.isArray(it.sets)?it.sets:[]).filter(isO)}))}));
+const cleanP=a=>(Array.isArray(a)?a:[]).filter(isO).map(p=>({...p,days:(Array.isArray(p.days)?p.days:[]).filter(n=>Number.isInteger(n)&&n>=0&&n<7),items:(Array.isArray(p.items)?p.items:[]).filter(isO)}));
+const LS={get(k,d){try{const v=localStorage.getItem(k);if(v===null)return d;const o=JSON.parse(v);return SAFEK.has(k)?clean(o):o}catch(e){return d}},
           set(k,v){try{localStorage.setItem(k,JSON.stringify(v));if(SYNCK.has(k)&&self.__sd)self.__sd();return true}catch(e){return false}}};
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
 /* app settings (Configurações). Some are saved but not active yet; see renderConf. */
@@ -2531,6 +2547,7 @@ function accMix(a,b,t){const h=x=>[1,3,5].map(i=>parseInt(x.slice(i,i+2),16)),A=
 /* the colour the app uses for highlights right now (the accent, or the theme's red) */
 const accNow=()=>getComputedStyle(document.documentElement).getPropertyValue("--target").trim()||"#E8343B";
 function applyConf(){
+  if(CONF.accent&&!/^#[0-9a-fA-F]{6}$/.test(CONF.accent))CONF.accent="";   // security 0.61: only a real colour goes into the CSS
   const r=document.documentElement,c=CONF;
   if(c.theme==="light"||c.theme==="dark")r.setAttribute("data-theme",c.theme);else r.removeAttribute("data-theme");
   const dark=c.theme==="dark"||(c.theme!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
@@ -3480,7 +3497,7 @@ $("aList").addEventListener("click",e=>{
    plans: my workouts, independent of the calendar: {id,name,days:[0..6],items:[{name,sets,reps}]}
    workouts: what was done on a date. done:false = started, not counted; done:true = counted.
    Older logs have no done field and count their filled sets, as before. */
-let workouts=LS.get("atlas-workouts",[]);if(!Array.isArray(workouts))workouts=[];
+let workouts=cleanW(LS.get("atlas-workouts",[]));
 function planFromFicha(f){
   const out=[];if(!f||!Array.isArray(f.days))return out;
   f.days.forEach((d,i)=>{if(!d||!Array.isArray(d.items)||!d.items.length)return;
@@ -3490,7 +3507,7 @@ function planFromFicha(f){
   return out;
 }
 let plans=LS.get("atlas-plans",null);
-if(!Array.isArray(plans)){plans=planFromFicha(LS.get("atlas-ficha",null));LS.set("atlas-plans",plans)}
+if(!Array.isArray(plans)){plans=planFromFicha(LS.get("atlas-ficha",null));LS.set("atlas-plans",plans)}else plans=cleanP(plans);
 function savePlans(){if(!LS.set("atlas-plans",plans))toast("Não foi possível salvar neste aparelho")}
 function saveW(){if(!LS.set("atlas-workouts",workouts))toast("Não foi possível salvar neste aparelho")}
 function newPlan(){const pl={id:uid(),name:"",days:[],items:[]};plans.push(pl);return pl}
@@ -4790,10 +4807,10 @@ function exportBackup(){
 }
 $("importFile").addEventListener("change",async e=>{
   const f=e.target.files[0];e.target.value="";if(!f)return;
-  try{const d=JSON.parse(await f.text());
+  try{if(f.size>30e6)throw 0;const d=clean(JSON.parse(await f.text()));
     if(d.app!=="atlas-muscular"||!Array.isArray(d.workouts))throw 0;
-    const pl=Array.isArray(d.plans)?d.plans.filter(p=>p&&Array.isArray(p.items)&&Array.isArray(p.days)):planFromFicha(d.ficha);
-    pendingImport={plans:pl,workouts:d.workouts,rank:d.rank&&typeof d.rank==="object"&&Array.isArray(d.rank.man)?d.rank:null,conf:d.conf&&typeof d.conf==="object"?d.conf:null};if(tab==="conf")renderConf();else renderTreino();
+    const pl=Array.isArray(d.plans)?cleanP(d.plans.filter(p=>p&&Array.isArray(p.items)&&Array.isArray(p.days))):planFromFicha(d.ficha);
+    pendingImport={plans:pl,workouts:cleanW(d.workouts),rank:d.rank&&typeof d.rank==="object"&&Array.isArray(d.rank.man)?{...d.rank,man:d.rank.man.filter(x=>isO(x)&&okD(x.date))}:null,conf:d.conf&&typeof d.conf==="object"?d.conf:null};if(tab==="conf")renderConf();else renderTreino();
   }catch(_){toast("Esse arquivo não é um backup do Muscle Atlas")}
 });
 
@@ -5269,7 +5286,7 @@ if(LANG==="en")[["Amoeba","Below beginner"],["Rookie","Beginner"],["Chicken","No
 const RPCT=[[0,1],[1,5],[2,20],[3,50],[4,80],[5,95],[6,99]];
 const RPT=[5,15,30,45,60,75,88,96];
 const RB=RPT.map(p=>{for(let i=1;i<RPCT.length;i++)if(p<=RPCT[i][1]){const [s0,p0]=RPCT[i-1],[s1,p1]=RPCT[i];return s0+(p-p0)/(p1-p0)*(s1-s0)}return 6});
-let rank=LS.get("atlas-rank",null);if(!rank||typeof rank!=="object")rank={};if(!Array.isArray(rank.man))rank.man=[];
+let rank=LS.get("atlas-rank",null);if(!rank||typeof rank!=="object")rank={};if(!Array.isArray(rank.man))rank.man=[];rank.man=rank.man.filter(x=>isO(x)&&okD(x.date));
 const saveRank=()=>{if(!LS.set("atlas-rank",rank))toast("Não foi possível salvar neste aparelho")};
 let rForm=null,rOpen=null;
 const rBW=()=>rank.bw>0?rank.bw:RSW[sex];
@@ -5521,8 +5538,8 @@ const SYNC_APP={
     if(id==="rank"){const man=[...(r.man||[])];(l.man||[]).forEach(x=>{if(!man.some(y=>y.id===x.id))man.push(x)});return {...l,...r,bw:r.bw||l.bw,man}}
     if(id==="ach")return {...l,...r,seen:[...new Set([...(r.seen||[]),...(l.seen||[])])],lvMax:Math.max(r.lvMax??-1,l.lvMax??-1),shared:!!(r.shared||l.shared)};
     const o={...l};for(const k in r)if(r[k]!==""&&r[k]!=null)o[k]=r[k];return o},
-  apply(D){workouts=D.w;plans=D.p;
-    if(D.k.rank&&typeof D.k.rank==="object"){rank=D.k.rank;if(!Array.isArray(rank.man))rank.man=[]}
+  apply(D){D={w:cleanW(clean(D.w)),p:cleanP(clean(D.p)),k:clean(D.k||{})};workouts=D.w;plans=D.p;
+    if(D.k.rank&&typeof D.k.rank==="object"){rank=D.k.rank;if(!Array.isArray(rank.man))rank.man=[];rank.man=rank.man.filter(x=>isO(x)&&okD(x.date))}
     if(D.k.ach&&typeof D.k.ach==="object"){ach=D.k.ach;if(!Array.isArray(ach.seen))ach.seen=[];if(!(ach.lvMax>=0))ach.lvMax=-1}
     if(D.k.conf&&typeof D.k.conf==="object"){const f=CONF.fig;CONF={...CONF_DEF,...D.k.conf,lang:CONF.lang};applyConf();if(CONF.fig!==f)try{applyFig()}catch(e){}}
     saveW();savePlans();saveRank();saveAch();saveConf();syncRedraw()},

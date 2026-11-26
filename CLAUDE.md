@@ -19,7 +19,7 @@ Histórico: [docs/HISTORICO.md](docs/HISTORICO.md). Fontes científicas e links:
 ## Como publicar uma mudança
 
 1. Edite os arquivos (o app quase todo está em `index.html`).
-2. **Suba a versão** em `sw.js` (`const CACHE="atlas-v0.60"` → `0.61`; é o número que aparece em Configurações › Versão).
+2. **Suba a versão** em `sw.js` (`const CACHE="atlas-v0.61"` → `0.62`; é o número que aparece em Configurações › Versão).
 3. Registre em `docs/HISTORICO.md` e atualize o trecho da parte mexida em `docs/DETALHES.md`.
 4. Commit na `main` e push (o GitHub Pages publica em ~1 min; o push também gera o app Android pelo workflow "App Android").
 5. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
@@ -51,6 +51,7 @@ Histórico: [docs/HISTORICO.md](docs/HISTORICO.md). Fontes científicas e links:
 - O dono **não quer total de kg levantado** (volume) em lugar nenhum.
 - **Conta**: o Firestore tem regras publicadas no console (só `users/{uid}/w|p|k`, campos `d` e `t`). Se mudar o formato em `sync.js`, as regras precisam mudar no console.
 - **Sem nomes de pessoas nem de marcas** nos treinos prontos (revisão das lojas).
+- **Segurança**: texto de usuário na tela sempre com `esc()`; dado novo guardado no aparelho/backup/conta passa por `clean()`; recurso de outro site precisa entrar na CSP do `<head>`. Rode `tests/seguranca-xss.js` e `tests/seguranca-csp.js` (seção "Segurança" em DETALHES).
 - Animações seguem "Reduzir animações" (`noAnim()`); vibração segue `CONF.vibe`.
 - Decisões que não se desfazem sem perguntar: seção "Decisões já tomadas" em DETALHES (design Arena, corpo, faixas do Progresso, ranking…). Se o dono disser **"volte a tela padrão"**, veja essa seção.
 

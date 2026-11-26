@@ -1,4 +1,4 @@
-const CACHE="atlas-v0.60";
+const CACHE="atlas-v0.61";
 /* the 3D body and Three.js are big and rarely change: they live in their own cache that survives app updates
    (a new model gets a new file name, corpo-11.glb / corpo-f-8.glb, and a new cache name, which drops the old model) */
 const C3D="atlas-3d-12";   // 0.60: corpo-11.glb / corpo-f-8.glb (mannequin head, natural jaw)
@@ -10,7 +10,8 @@ self.addEventListener("fetch",e=>{
   const req=e.request;if(req.method!=="GET")return;
   // network first for the page (so updates arrive), cache fallback offline
   if(req.mode==="navigate"){
-    e.respondWith(fetch(req.url,{cache:"no-cache",credentials:"same-origin"}).then(r=>{if(r.ok){const c=r.clone();caches.open(CACHE).then(k=>k.put("./index.html",c))}return r}).catch(()=>caches.match("./index.html")));
+    const app=/\/(index\.html)?$/.test(new URL(req.url).pathname);   // only the app page itself is kept as the offline copy (0.61)
+    e.respondWith(fetch(req.url,{cache:"no-cache",credentials:"same-origin"}).then(r=>{if(r.ok&&app&&r.type==="basic"){const c=r.clone();caches.open(CACHE).then(k=>k.put("./index.html",c))}return r}).catch(()=>caches.match("./index.html")));
     return;
   }
   if(/\.glb$/.test(req.url)||req.url.includes("/vendor/three/")){
@@ -19,5 +20,5 @@ self.addEventListener("fetch",e=>{
   const u=new URL(req.url);
   if(u.origin!==location.origin&&!/^https:\/\/(www\.gstatic\.com\/firebasejs\/|fonts\.(googleapis|gstatic)\.com\/)/.test(req.url))return;
   // cache first for icons, fonts, the Firebase code and everything else of the app
-  e.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(r=>{const c=r.clone();caches.open(CACHE).then(k=>k.put(req,c));return r})));
+  e.respondWith(caches.match(req).then(hit=>hit||fetch(req).then(r=>{if(r.ok){const c=r.clone();caches.open(CACHE).then(k=>k.put(req,c))}return r})));   // errors are never cached (0.61)
 });

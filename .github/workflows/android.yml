@@ -8,6 +8,8 @@ on:
   push:
     branches: [main]
     paths: ["sw.js", "app/**", ".github/workflows/android.yml"]
+permissions:
+  contents: read   # o build só lê o código (0.61)
 jobs:
   build:
     runs-on: ubuntu-latest

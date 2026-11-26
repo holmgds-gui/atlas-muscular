@@ -19,7 +19,14 @@ const loadState = () => { try { return JSON.parse(fs.readFileSync(stateFile(), "
 const saveState = (w) => { try { const b = w.getNormalBounds(); fs.writeFileSync(stateFile(), JSON.stringify({ ...b, max: w.isMaximized() })); } catch (e) {} };
 
 let win = null;
+// security (0.61): the app never asks for camera, microphone, location etc.; any such request is refused
+function lockPermissions() {
+  const { session } = require("electron");
+  session.defaultSession.setPermissionRequestHandler((wc, perm, cb) => cb(["clipboard-sanitized-write", "fullscreen"].includes(perm)));
+  session.defaultSession.setPermissionCheckHandler((wc, perm) => ["clipboard-sanitized-write", "fullscreen"].includes(perm));
+}
 function create() {
+  lockPermissions();
   const s = loadState();
   win = new BrowserWindow({
     width: s.width || 1280, height: s.height || 820, x: s.x, y: s.y, minWidth: 360, minHeight: 560,
