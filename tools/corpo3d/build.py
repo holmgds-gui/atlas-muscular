@@ -454,7 +454,7 @@ if os.environ.get("OSSOS","1")=="1":
     return m
   bl=[(n,tidy(m,n),g) for n,m,g in bl]
   BUDGET_S=int(os.environ.get("BUDGET_S","130000"));sarea=sum(m.area for n,m,g in bl)
-  out={'esq':[],'cart':[]}
+  items=[]   # (bone name, posed mesh, 'esq' | 'cart')
   for n,m,g in bl:
     tgt=max(400,int(BUDGET_S*m.area/sarea))
     # a strong simplification can collapse a small bone into long needles (they showed as dark spikes): try again with
@@ -468,13 +468,12 @@ if os.environ.get("OSSOS","1")=="1":
       if m2.edges_unique_length.max()<=lim:m=m2;break
       tgt=int(tgt*1.6)
     if FEM:m=fem_bone(m,n)
-    e_a=m.edges_unique_length.max();m=pose(m,n);e_b=m.edges_unique_length.max();m=waist(m);e_c=m.edges_unique_length.max();m.fix_normals();out[g].append(m)
+    e_a=m.edges_unique_length.max();m=pose(m,n);e_b=m.edges_unique_length.max();m=waist(m);e_c=m.edges_unique_length.max();m.fix_normals();items.append((n,m,g))
     if os.environ.get("DBG") and max(e_a,e_b,e_c)>35:print("LONG",n,round(e_a),round(e_b),round(e_c),len(m.faces))
   SKs=SKULL.copy()
   if FEM:b0=SKs.vertices;base=np.array([0,b0[:,1].mean(),b0[:,2].min()+25]);SKs=trimesh.Trimesh(base+(b0-base)*0.93,SKs.faces,process=False)
-  out['esq'].append(SKs)
-  E=trimesh.util.concatenate(out['esq']);Cg=trimesh.util.concatenate(out['cart'])
-  ALL=trimesh.util.concatenate([E,Cg]);print('skeleton faces',len(E.faces),'cartilage',len(Cg.faces))
+  items.append(("skull",SKs,'esq'))
+  ALL=trimesh.util.concatenate([m for n,m,g in items]);print('skeleton faces',sum(len(m.faces) for n,m,g in items if g=='esq'),'cartilage',sum(len(m.faces) for n,m,g in items if g=='cart'))
   def ao2(V,N,S,n=40,maxd=22):
     d=np.random.default_rng(2).normal(size=(n,3));d/=np.linalg.norm(d,axis=1,keepdims=True);occ=np.zeros(len(V));w=np.zeros(len(V))
     for k in range(n):
@@ -482,13 +481,34 @@ if os.environ.get("OSSOS","1")=="1":
       loc,ri,_=S.ray.intersects_location(O,Dd,multiple_hits=False);dist=np.full(len(V),1e9);dist[ri]=np.linalg.norm(loc-O[ri],axis=1)
       occ+=c*(dist<maxd)*(1-dist.clip(0,maxd)/maxd)**0.5;w+=c
     return np.nan_to_num(1-occ/np.maximum(w,1e-6),nan=1.0)
+  # ---- one node per rigid piece (segment) so the app can move them at the joints (0.68, tools/corpo3d/rig.py):
+  #      "o_<segment>" = bone, "c_<segment>" = cartilage; plus 3d/rig(-f)-N.json with the joints
+  import rig,json
+  AOall=np.clip(0.12+0.95*ao2(ALL.vertices,ALL.vertex_normals,ALL)**1.8,0,1);ofs=0;groups={}
+  for n,m,g in items:
+    a_=AOall[ofs:ofs+len(m.vertices)];ofs+=len(m.vertices)
+    if n=="skull":a_=np.minimum(a_,SKULL_AO)   # the solid skull keeps its own deeper shadow (orbits, nose, teeth)
+    sg_=rig.seg_of(n) if n!="skull" else "cabeca"
+    if sg_ is None:print("SEM SEGMENTO",n);sg_="pelve"
+    groups.setdefault((sg_,g),[]).append((m,a_))
   sk=trimesh.Scene()
-  for nm,M_ in (('esq',E),('cart',Cg)):
-    a_=np.clip(0.12+0.95*ao2(M_.vertices,M_.vertex_normals,ALL)**1.8,0,1)
-    if nm=='esq':   # the solid skull keeps its own deeper shadow (orbits, nose, teeth)
-      ns=len(SKs.vertices);a_[-ns:]=np.minimum(a_[-ns:],SKULL_AO)
+  for (sg_,g),L in sorted(groups.items()):
+    M_=trimesh.util.concatenate([m for m,a in L]);a_=np.concatenate([a for m,a in L])
     v=M_.vertices;q=trimesh.Trimesh(np.c_[v[:,0],v[:,2],-v[:,1]]/1000.0-ctr,M_.faces,process=False)
     g_=(a_*255).astype(np.uint8);q.visual=trimesh.visual.ColorVisuals(q,vertex_colors=np.c_[g_,g_,g_,np.full(len(g_),255,np.uint8)])
-    _=q.vertex_normals;sk.add_geometry(q,node_name=nm,geom_name=nm)
+    nm=("c_" if g=="cart" else "o_")+sg_;_=q.vertex_normals;sk.add_geometry(q,node_name=nm,geom_name=nm)
   SO="ossos-f" if FEM else "ossos"
-  open(SO+".glb","wb").write(trimesh.exchange.gltf.export_glb(sk,include_normals=True));print('wrote',SO+".glb")
+  open(SO+".glb","wb").write(trimesh.exchange.gltf.export_glb(sk,include_normals=True));print('wrote',SO+".glb",'nodes',len(groups))
+  posed={n:m for n,m,g in items}
+  to_app=lambda p:(np.array([p[0],p[2],-p[1]])/1000.0-ctr).tolist()
+  dir_app=lambda d:[float(d[0]),float(d[2]),float(-d[1])]
+  JT,CP=rig.build(posed,SKs,to_app,dir_app)
+  segs=sorted({k[0] for k in groups});miss=[x for x in segs if x not in JT]
+  if miss:print("SEGMENTOS SEM ARTICULACAO",miss)
+  # the Articulações marks now sit on the joint centres of the skeleton (0.68): same keys, right side first
+  JM={"pescoco":["C4"],"toracica":["T6"],"lombar":["L3"]}
+  for k,b_ in (("ombro","ombro"),("cotovelo","cotovelo"),("punho","punho"),("quadril","quadril"),("joelho","joelho"),("tornozelo","tornozelo")):JM[k]=[b_+"_d",b_+"_e"]
+  json.dump({k:[[round(x,4) for x in JT[i]["centro"]] for i in v] for k,v in JM.items()},open(OUT.replace("corpo","juntas")+".json","w"),separators=(",",":"));print("juntas do esqueleto")
+  RO="rig-f" if FEM else "rig"
+  json.dump({"v":1,"unid":"metros; eixos do app (x = esquerda do corpo, y = cima, z = frente)","ordem":"rot, depois abd/incl/desv/prot, depois flex (eixos no repouso do pai)",
+    "articulacoes":JT,"acoplamentos":CP},open(RO+".json","w"),ensure_ascii=False,separators=(",",":"));print("rig",len(JT),"articulações")

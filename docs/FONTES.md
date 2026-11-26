@@ -283,6 +283,12 @@ Também na 0.45: um treino de cada músculo nos dois níveis em "Um músculo por
 
 - Modelo: [BodyParts3D](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/), © The Database Center for Life Science (DBCLS), licença [CC BY-SA 2.1 Japão](https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html). Os arquivos `3d/corpo-6.glb` (masculino) e `3d/corpo-f-3.glb` (feminino), com as posições das articulações em `3d/juntas-2.json` e `3d/juntas-f-2.json`, são obras derivadas (peças simplificadas, agrupadas pelos músculos do Atlas, infladas para um físico Classic Physique ou, no feminino, deformadas e infladas para um físico feminino atlético, postas em pose A, com a pele do próprio BodyParts3D só nas mãos, nos pés, e na frente do pescoço (no feminino, também o contorno translúcido dos seios); crânio refeito como um volume só a partir dos ossos e dos dentes do BodyParts3D; gerados por `tools/corpo3d/build.py`) e seguem a mesma licença (CC BY-SA). O crédito aparece no canto do 3D no app.
 - Visualização: [three.js](https://threejs.org/) 0.160.0 (licença MIT), carregado do [jsDelivr](https://www.jsdelivr.com/package/npm/three) só quando o botão 3D é tocado.
+- Esqueleto e articulações (0.65 e 0.68, `tools/corpo3d/build.py` e `rig.py`): os ossos, cartilagens e discos são do mesmo BodyParts3D. Centros e eixos das articulações pelos métodos da biomecânica:
+  - Wu G. et al. (2002), *ISB recommendation on definitions of joint coordinate system… Part I: ankle, hip, and spine*, J Biomech 35:543–548 — e Part II (2005): *shoulder, elbow, wrist and hand*, J Biomech 38:981–992 (centro do quadril e do ombro por esfera na cabeça do osso, eixos do cotovelo e do joelho pelos epicôndilos).
+  - Inman V.T. (1976), *The Joints of the Ankle* (Williams & Wilkins) — eixo do tornozelo logo abaixo das pontas dos maléolos; eixo subtalar 42° acima do plano do pé e 23° para medial.
+  - Inman V.T., Saunders J.B., Abbott L.C. (1944), *Observations on the function of the shoulder joint*, J Bone Joint Surg 26:1–30 — ritmo escapuloumeral (2:1 depois dos primeiros 30°).
+  - White A.A., Panjabi M.M. (1990), *Clinical Biomechanics of the Spine*, 2ª ed. (Lippincott) — amplitude de cada nível da coluna e eixo instantâneo de rotação na metade de trás do disco.
+  - Greene W.B., Heckman J.D. (1994), *The Clinical Measurement of Joint Motion*, American Academy of Orthopaedic Surgeons — amplitudes (ROM) dos membros.
 
 ## 6. Publicação e ferramentas
 

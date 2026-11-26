@@ -1,7 +1,7 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
    in index.html; the models are 3d/corpo-11.glb (male) and 3d/corpo-f-8.glb (now 3d/corpo-f-9.glb, more feminine in 0.66; female, owner 0.15–0.17; mannequin head 0.54, plain 0.57, smooth egg 0.58, jaw 0.59–0.60), each with its joint
-   marks (3d/juntas-2.json, 3d/juntas-f-3.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
+   marks (3d/juntas-3.json, 3d/juntas-f-4.json — on the skeleton's joint centres since 0.68) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
    Atlas muscle keys, A-pose, Classic Physique upper body, proportional legs, skull, skin on hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
    the 2D figure shows for the rest (groups, cardio), and a tap here is passed back to the same code as a tap in 2D.
@@ -68,7 +68,7 @@ export function mount(box, api){
   function clearJoints(){for(const g of jMarks){jScene.remove(g);g.children.forEach(c=>c.material.dispose())}jMarks.length=0;jFills.length=0}
   function addJoints(JT){for(const [j,pts] of Object.entries(JT))for(const p of pts){const g=new THREE.Group();g.position.set(p[0],p[1],p[2]);
     const mk=(geo,o)=>{const m=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({depthTest:false,depthWrite:false,transparent:true}));m.renderOrder=o;g.add(m);return m};
-    const fill=mk(dotG,10),ring=mk(ringG,11);fill.userData.j=j;g.userData={j,fill,ring};jMarks.push(g);jFills.push(fill);jScene.add(g)}paint()}
+    const fill=mk(dotG,10),ring=mk(ringG,11);fill.userData.j=j;g.userData={j,fill,ring,i:pts.indexOf(p)};jMarks.push(g);jFills.push(fill);jScene.add(g)}paint()}
   const ro=new ResizeObserver(()=>{resize();need=true});ro.observe(box);
   let lastSz=null;
   function resize(){const r=box.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();need=true;
@@ -98,7 +98,7 @@ export function mount(box, api){
     o.material.color.copy(c);o.material.emissive.copy(s.on?C.target:s.syn?C.syn:new THREE.Color(0));o.material.emissiveIntensity=s.on||s.syn?0.18:0;
     /* Raio-X: glassy muscles, the red/orange ones a bit stronger so they still read */
     if(xrOn()&&XR==="raiox"&&o.material.isMeshStandardMaterial){const dk=C.m.getHSL({}).l<0.42;o.material.opacity=s.on?0.55:s.syn?0.45:/^(pele|cabeca)$/.test(k)?(dk?0.16:0.1):(dk?0.26:0.16)}}
-    if(bones)bones.traverse(o=>{if(o.isMesh)o.material.color.copy(o.userData.k==="cart"?C.cart:C.osso)});
+    if(bones)bones.traverse(o=>{if(o.isMesh&&o.userData.k)o.material.color.copy(isCart(o.userData.k)?C.cart:C.osso)});
     /* Articulações: the joint marks (ring + dot, like the 2D) show only in that mode; the chosen joint is red */
     jScene.visible=art;for(const j of jMarks){const on=state.__j===j.userData.j;j.userData.fill.material.color.copy(on?C.target:(j.userData.j===hovJ?C.syn:C.surf));j.userData.ring.material.color.copy(on?C.thi:C.syn)}
     need=true}
@@ -131,10 +131,10 @@ export function mount(box, api){
     sepMat.uniforms.col.value.copy(C.sep);sepMat.uniforms.a.value=C.sepA*Math.min(1,Math.max(0.3,1.5/dd));
     renderer.autoClear=true;renderer.render(scene,camera);if(!meshes.length)return;
     for(const o of meshes){o.userData.mat=o.material;o.material=o.userData.idm}for(const o of ghosts){o.userData.vis=o.visible;o.visible=false}
-    const bv=bones&&bones.visible;if(bv){if(XR==="esq")bones.traverse(o=>{if(o.isMesh){o.userData.mat=o.material;o.material=o.userData.idm}});else bones.visible=false}
+    const bv=bones&&bones.visible;if(bv){if(XR==="esq")bones.traverse(o=>{if(o.isMesh&&o.userData.idm){o.userData.mat=o.material;o.material=o.userData.idm}});else bones.visible=false}
     renderer.setRenderTarget(idT);renderer.setClearColor(0x000000,1);renderer.clear();renderer.render(scene,camera);renderer.setRenderTarget(null);renderer.setClearColor(0x000000,0);
     for(const o of meshes)o.material=o.userData.mat;for(const o of ghosts)o.visible=o.userData.vis!==false;
-    if(bv){if(XR==="esq")bones.traverse(o=>{if(o.isMesh)o.material=o.userData.mat});bones.visible=true}
+    if(bv){if(XR==="esq")bones.traverse(o=>{if(o.isMesh&&o.userData.idm)o.material=o.userData.mat});bones.visible=true}
     if(xrOn()&&XR==="raiox")sepMat.uniforms.a.value*=0.3;
     renderer.autoClear=false;renderer.render(sepScene,sepCam);
     if(jScene.visible){const s=camera.position.distanceTo(controls.target)*0.0085+0.004;for(const g of jMarks){g.quaternion.copy(camera.quaternion);g.scale.setScalar(s)}renderer.render(jScene,camera)}
@@ -200,7 +200,7 @@ export function mount(box, api){
   const mo=new MutationObserver(()=>{readColors();paint()});mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class","style"]});
   const mq=matchMedia("(prefers-color-scheme: dark)"),onMq=()=>{readColors();paint()};mq.addEventListener("change",onMq);
 
-  const FILES={m:["./corpo-11.glb","./juntas-2.json"],f:["./corpo-f-9.glb","./juntas-f-3.json"]};let loadN=0;
+  const FILES={m:["./corpo-11.glb","./juntas-3.json"],f:["./corpo-f-9.glb","./juntas-f-4.json"]};let loadN=0;
   async function load(sx){sx=sx==="f"?"f":"m";if(sx===curSex)return;curSex=sx;const my=++loadN,live=()=>alive&&my===loadN;
     fetch(new URL(FILES[sx][1],import.meta.url)).then(r=>r.json()).then(j=>{if(live()){clearJoints();addJoints(j)}}).catch(()=>{});
     let base;try{base=await getScene(FILES[sx][0],api.progress)}catch(e){if(live())api.fail();return}
@@ -236,18 +236,80 @@ export function mount(box, api){
      "esq" = bone (ivory, baked shadow), "cart" = costal cartilages and intervertebral discs (bluish). Downloaded only when
      Raio-X or Esqueleto is chosen. Raio-X: the muscles turn glassy (front faces only, no depth write) and the deep
      filler/skull/tendon nodes of the body hide (the skeleton replaces them). Esqueleto: only the bones, with an outline. */
-  const SKF={m:"./ossos-1.glb",f:"./ossos-f-2.glb"};
+  const SKF={m:"./ossos-2.glb",f:"./ossos-f-3.glb"},RIGF={m:"./rig-1.json",f:"./rig-f-1.json"};
   const xrOn=()=>XR!=="off"&&!!bones&&bonesSex===curSex&&bones.visible;
+  const isCart=k=>k==="cart"||k.startsWith("c_");
   async function loadBones(){if(XR==="off"||!curSex)return;if(bones&&bonesSex===curSex){applyXr();return}
-    const sx=curSex,my=++boneN;let base;api.xrProg&&api.xrProg(0);
+    const sx=curSex,my=++boneN;let base,R=null;api.xrProg&&api.xrProg(0);
+    const rp=fetch(new URL(RIGF[sx],import.meta.url)).then(r=>r.ok?r.json():null).catch(()=>null);
     try{base=await getScene(SKF[sx],x=>api.xrProg&&api.xrProg(x))}catch(e){api.xrProg&&api.xrProg(null);if(alive&&my===boneN)api.xrFail&&api.xrFail();return}
-    api.xrProg&&api.xrProg(null);if(!alive||my!==boneN||sx!==curSex)return;
+    R=await rp;api.xrProg&&api.xrProg(null);if(!alive||my!==boneN||sx!==curSex)return;
     if(bones){scene.remove(bones);bones.traverse(o=>{if(o.isMesh){o.material.dispose();o.userData.idm.dispose()}})}
     bones=base.clone(true);bonesSex=sx;
-    bones.traverse(o=>{if(!o.isMesh)return;const k=(o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"esq").replace(/_\d+$/,"");o.userData.k=k;
-      o.material=new THREE.MeshStandardMaterial({color:k==="cart"?C.cart:C.osso,roughness:k==="cart"?0.42:0.68,metalness:0,vertexColors:!!o.geometry.attributes.color});
-      o.userData.idm=new THREE.ShaderMaterial({uniforms:{clipY:CLIPU,cl:{value:0},id:{value:k==="cart"?240:241},sd:{value:0}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide})});
+    bones.traverse(o=>{if(!o.isMesh)return;const k=o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"esq";o.userData.k=k;
+      o.material=new THREE.MeshStandardMaterial({color:isCart(k)?C.cart:C.osso,roughness:isCart(k)?0.42:0.68,metalness:0,vertexColors:!!o.geometry.attributes.color});
+      o.userData.idm=new THREE.ShaderMaterial({uniforms:{clipY:CLIPU,cl:{value:0},id:{value:isCart(k)?240:241},sd:{value:0}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide})});
+    rig=R?buildRig(R,bones):null;
     scene.add(bones);applyXr()}
+  /* ---- joints of the skeleton (0.68, stage 1 of the animations; tools/corpo3d/rig.py → 3d/rig-N.json): one group per
+     joint at its centre of rotation, nested like the body (pelvis → spine → head; shoulder girdle → arm → hand → fingers;
+     hip → knee → ankle → foot → toes); each bone piece ("o_<joint>", "c_<joint>") hangs from the joint that moves it.
+     pose({joint:{movement:degrees}}) takes anatomical angles (0 = anatomical position) and turns each joint by
+     (angle − the angle the A-pose already has), kept inside the joint's range; order: rotation about the bone, then
+     the side-to-side movement, then flexion. "coluna" / "lombar" / "toracica" / "cervical" spread a movement over the
+     levels in proportion to each level's range. Couplings: scapulohumeral rhythm, patella, knee screw-home. */
+  let rig=null;
+  function buildRig(R,root){const J=R.articulacoes,G={},C0={};
+    const mk=id=>{if(G[id])return G[id];const j=J[id];const g=new THREE.Group();g.name="j_"+id;C0[id]=new THREE.Vector3().fromArray(j.centro);
+      const par=j.pai&&J[j.pai]?mk(j.pai):root;g.position.copy(C0[id]);if(j.pai&&J[j.pai])g.position.sub(C0[j.pai]);par.add(g);G[id]=g;return g};
+    Object.keys(J).forEach(mk);
+    const ms=[];root.traverse(o=>{if(o.isMesh)ms.push(o)});
+    for(const o of ms){const seg=o.userData.k.replace(/^[oc]_/,"");const id=G[seg]?seg:"pelve";const g=G[id];
+      o.updateMatrixWorld(true);const w=o.matrixWorld.clone();o.parent.remove(o);g.add(o);
+      /* the piece keeps its place: its new local matrix = (joint at rest)⁻¹ × old world */
+      const inv=new THREE.Matrix4().makeTranslation(-C0[id].x,-C0[id].y,-C0[id].z);o.matrix.copy(inv.multiply(w));o.matrix.decompose(o.position,o.quaternion,o.scale)}
+    return {J,G,C0,CP:R.acoplamentos||[],ang:{}}}
+  const SPINE={lombar:/^L\d$/,toracica:/^T\d+$/,cervical:/^C[2-7]$/,coluna:/^([LT]\d+|C[2-7])$/};
+  function rigPose(P){if(!rig)return;const A={};
+    for(const [id,v] of Object.entries(P||{})){const re=SPINE[id];
+      if(re){for(const [mv,deg] of Object.entries(v)){const lv=Object.keys(rig.J).filter(k=>re.test(k));
+          const w=lv.map(k=>{const d=rig.J[k].mov.find(m=>m.id===mv);return d?(deg>=0?d.max:-d.min):0}),sw=w.reduce((a,b)=>a+b,0)||1;
+          lv.forEach((k,i)=>{(A[k]||(A[k]={}))[mv]=((A[k]||{})[mv]||0)+deg*w[i]/sw})}}
+      else A[id]={...(A[id]||{}),...v}}
+    const get=(id,mv)=>{const d=rig.J[id]&&rig.J[id].mov.find(m=>m.id===mv);return d?(A[id]&&A[id][mv]!=null?A[id][mv]:d.repouso):0};
+    for(const c of rig.CP){const [sid,smv]=c.de.split("."),sd=rig.J[sid]&&rig.J[sid].mov.find(m=>m.id===smv);if(!sd)continue;
+      const f=x=>c.apos!=null?Math.max(0,x-c.apos):Math.max(0,c.ate-x),dv=f(get(sid,smv))-f(sd.repouso);if(!dv)continue;
+      for(const [tg,k] of c.para){const [tid,tmv]=tg.split(".");const td=rig.J[tid]&&rig.J[tid].mov.find(m=>m.id===tmv);if(!td)continue;
+        (A[tid]||(A[tid]={}))[tmv]=get(tid,tmv)+k*dv}}
+    rig.ang=A;
+    const q=new THREE.Quaternion(),t=new THREE.Quaternion(),ax=new THREE.Vector3();
+    for(const [id,j] of Object.entries(rig.J)){const g=rig.G[id];q.identity();
+      const ord=[...j.mov].sort((a,b)=>(a.id==="rot"||a.id==="pron"?0:a.id==="flex"||a.id==="elev"?2:1)-(b.id==="rot"||b.id==="pron"?0:b.id==="flex"||b.id==="elev"?2:1));
+      for(const d of ord){const val=Math.min(d.max,Math.max(d.min,get(id,d.id)));const dl=THREE.MathUtils.degToRad(val-d.repouso);if(!dl)continue;
+        t.setFromAxisAngle(ax.fromArray(d.eixo).normalize(),dl);q.premultiply(t)}
+      g.quaternion.copy(q)}
+    /* the arm angles asked for are against the trunk (as in an exam): the shoulder blade and collarbone move with the
+       scapulohumeral rhythm, and the glenohumeral takes only what is left, so the arm ends exactly where it was asked */
+    for(const s of ["d","e"]){const gh=rig.G["ombro_"+s],tr=rig.G.T4,sc=rig.G["esc_"+s];if(!gh||!tr||!sc)continue;
+      tr.updateWorldMatrix(true,false);sc.updateWorldMatrix(true,false);
+      const qt=new THREE.Quaternion(),qs=new THREE.Quaternion();tr.getWorldQuaternion(qt);sc.getWorldQuaternion(qs);
+      const rel=qt.clone().invert().multiply(qs);gh.quaternion.premultiply(rel.invert())}
+    /* the Articulações marks follow their joint */
+    const MK={pescoco:["C4"],toracica:["T6"],lombar:["L3"]};for(const k of ["ombro","cotovelo","punho","quadril","joelho","tornozelo"])MK[k]=[k+"_d",k+"_e"];
+    for(const g of jMarks){const id=(MK[g.userData.j]||[])[g.userData.i],G=id&&rig.G[id];if(!G)continue;G.updateWorldMatrix(true,false);G.getWorldPosition(g.position)}
+    need=true}
+  /* for screenshots and checks: dots at the joint centres and short lines along each axis (flexion red, side-to-side
+     green, rotation blue) */
+  let rigDbg=null;
+  function rigDebug(on){if(rigDbg){for(const g of rigDbg){g.parent&&g.parent.remove(g);g.traverse(o=>{o.geometry&&o.geometry.dispose();o.material&&o.material.dispose()})}rigDbg=null}
+    if(!on||!rig)return need=true;rigDbg=[];const sg=new THREE.SphereGeometry(0.0055,10,8);
+    for(const [id,j] of Object.entries(rig.J)){const g=new THREE.Group();rig.G[id].add(g);
+      const dot=new THREE.Mesh(sg,new THREE.MeshBasicMaterial({color:0xff7a00,depthTest:false,transparent:true}));dot.renderOrder=20;g.add(dot);
+      for(const d of j.mov){const c=d.id==="flex"||d.id==="elev"?0xe8202a:d.id==="rot"||d.id==="pron"?0x2a6cf0:0x22a05a,L=/^(mcf|ifp|ifd|if1|mtf|ifpp|ifdp|ifh)/.test(id)?0.014:0.035;
+        const v=new THREE.Vector3().fromArray(d.eixo).normalize().multiplyScalar(L);
+        const ln=new THREE.Line(new THREE.BufferGeometry().setFromPoints([v.clone().negate(),v]),new THREE.LineBasicMaterial({color:c,depthTest:false,transparent:true}));ln.renderOrder=21;g.add(ln)}
+      rigDbg.push(g)}
+    need=true}
   function applyXr(){const on=XR!=="off"&&!!bones&&bonesSex===curSex;if(bones)bones.visible=on;
     for(const [k,o] of Object.entries(parts)){
       if(on&&(XR==="esq"||/^(fundo|tend|osso|pele_n)$/.test(k)))o.visible=false;
@@ -289,6 +351,10 @@ export function mount(box, api){
       state=sv.st;renderer.setPixelRatio(sv.pr);camera.position.copy(sv.cp);controls.target.copy(sv.ct);lastSz=null;resize();paint();return out},
     xray(m){XR=m==="raiox"||m==="esq"?m:"off";if(XR==="off")applyXr();else loadBones()},
     xrNow(){return XR},
+    /* 0.68: the skeleton's joints (Esqueleto/Raio-X loaded): pose({ombro_d:{flex:90},coluna:{flex:30}…}), rig info, debug marks */
+    pose(P){rigPose(P)},rigReady(){return !!rig},rigJoints(){return rig?Object.fromEntries(Object.entries(rig.J).map(([k,j])=>[k,{nome:j.nome,pai:j.pai,mov:j.mov.map(m=>[m.id,m.min,m.max,m.repouso])}])):null},
+    rigDebug(on){rigDebug(on)},
+    jointPos(id){if(!rig||!rig.G[id])return null;const v=new THREE.Vector3();rig.G[id].getWorldPosition(v);return v.toArray()},
     /* for tests: is this part drawn now; bounding boxes of the skeleton and of the body */
     visible(k){return !!(parts[k]&&parts[k].visible)},
     boxes(){if(!bones||!root)return null;const bb=new THREE.Box3().setFromObject(bones),cv=root.visible;const v0=Object.values(parts).map(o=>o.visible);Object.values(parts).forEach(o=>o.visible=true);
