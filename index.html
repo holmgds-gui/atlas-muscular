@@ -910,6 +910,51 @@ button.brand:hover{background:var(--chip)}
 .rk-inps{display:grid;grid-template-columns:1fr 1fr;gap:8px}.rk-inps label{display:grid;gap:4px;font-size:12px;color:var(--muted);align-content:start}
 .rfig{max-height:min(56vh,480px)}
 @media (max-width:430px){.rk-big{font-size:44px}}
+/* 0.77: the "Como fazer" page (owner: "uma nova página de como fazer"; 3D body on top, the guide in a sheet that drags) */
+.hpg{position:fixed;inset:0;z-index:60;background:var(--bg);color:var(--ink)}
+.hpg[hidden]{display:none}
+.hpg:not([hidden]){animation:hpIn .42s var(--ios)}@keyframes hpIn{from{transform:translateX(100%)}}
+html.noanim .hpg:not([hidden]){animation:none}
+.hpg-in{position:absolute;inset:0;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px);--sh:44%}
+.hpg-top{display:flex;align-items:center;gap:6px;padding:8px max(12px,env(safe-area-inset-right,0px)) 6px max(8px,env(safe-area-inset-left,0px));flex:none;min-height:54px}
+.hpg-back{display:inline-flex;align-items:center;gap:2px;flex:none;border:0;background:none;color:var(--accent,var(--ink));font:600 17px var(--f-body);padding:8px 8px 8px 4px;border-radius:10px;cursor:pointer}
+.hpg-back b{font-size:28px;line-height:0;margin-top:-3px;font-weight:400}
+.hpg-tt{min-width:0}.hpg-tt small{display:block;font:700 11px var(--f-display);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.hpg-tt h2{margin:0;font:800 italic 22px/1.05 var(--f-display);letter-spacing:.01em;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.hpg-stage{position:relative;flex:1 1 auto;min-height:120px;overflow:hidden;
+  background:radial-gradient(80% 60% at 50% 45%,color-mix(in srgb,var(--ink) 5%,transparent),transparent 70%)}
+.hpg-stage::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--gridl,var(--line)) 1px,transparent 1px),linear-gradient(90deg,var(--gridl,var(--line)) 1px,transparent 1px);background-size:28px 28px;
+  -webkit-mask-image:radial-gradient(70% 60% at 50% 60%,#000 20%,transparent 75%);mask-image:radial-gradient(70% 60% at 50% 60%,#000 20%,transparent 75%);opacity:.8}
+.hpg-box{position:absolute;inset:0}
+.hpg-ctl{position:absolute;left:max(12px,env(safe-area-inset-left,0px));bottom:12px;z-index:3;display:flex;align-items:center;gap:8px}
+.hpg-ctl .hp-pl{width:46px;height:46px;border-radius:50%;border:0;background:var(--ink);color:var(--bg);display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.2)}
+.hpg-ctl .hp-pl svg{width:20px;height:20px;fill:currentColor}
+.hpg-ctl .seg{background:color-mix(in srgb,var(--surface) 88%,transparent);box-shadow:0 1px 6px rgba(0,0,0,.12)}
+.hpg-ctl .seg button{padding:6px 12px}
+.hp-soon{font:700 13px var(--f-display);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:color-mix(in srgb,var(--surface) 88%,transparent);border:1px solid var(--line);border-radius:999px;padding:6px 12px}
+.hpg-sh{flex:0 0 var(--sh);min-height:0;display:flex;flex-direction:column;background:var(--surface);border-radius:20px 20px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.12);border-top:1px solid var(--line);transition:flex-basis .38s var(--ios)}
+.hpg-in.drag .hpg-sh{transition:none}
+html.noanim .hpg-sh{transition:none}
+.hpg-grab{display:flex;justify-content:center;padding:9px 0 7px;cursor:grab;touch-action:none;flex:none}
+.hpg-grab i{width:42px;height:5px;border-radius:3px;background:var(--line2,var(--line))}
+.hpg-body{overflow:auto;-webkit-overflow-scrolling:touch;padding:2px max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));font-size:15px;line-height:1.45;overscroll-behavior:contain}
+.hpg-body .how-l{display:block;margin:14px 0 4px;font:700 13px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.hpg-body ol,.hpg-body ul{margin:2px 0 6px;padding-left:22px;display:grid;gap:5px}
+.hpg-body p{margin:2px 0 6px}
+.hpg-body .how-v{background:color-mix(in srgb,var(--target) 8%,transparent);border-radius:12px;padding:2px 12px 6px;margin-top:6px}
+.hpg-body .how-c{background:color-mix(in srgb,#E0B800 14%,transparent);border-radius:12px;padding:8px 12px}
+.hp-mus{display:flex;flex-wrap:wrap;gap:5px;margin:4px 0 2px}
+.hp-mus em{font-style:normal;font-size:12px;color:var(--muted);width:100%;margin-top:4px}
+.hp-mus span{font-size:13px;border-radius:7px;padding:3px 9px;background:var(--syn-soft);color:var(--ink)}
+.hp-mus span.tg{background:color-mix(in srgb,var(--target) 18%,transparent)}
+@media (min-width:901px){.hpg-in{display:grid;grid-template-columns:minmax(0,1fr) min(440px,40vw);grid-template-rows:auto 1fr}
+  .hpg-top{grid-column:1/-1}.hpg-stage{grid-column:1;grid-row:2}.hpg-sh{grid-column:2;grid-row:2;border-radius:0;border-top:0;border-left:1px solid var(--line);box-shadow:none}
+  .hpg-grab{display:none}.hpg-body{padding-top:14px}}
+/* the card's "Como fazer" box: a button that opens the page */
+details.how summary{display:flex;align-items:center;gap:8px;list-style:none}details.how summary::-webkit-details-marker{display:none}
+details.how summary::before{content:"▸";display:inline-block;transition:transform .2s;color:var(--muted)}details.how[open] summary::before{transform:rotate(90deg)}
+.how-pg{margin-left:auto;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:5px 12px;font:700 13px var(--f-display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
+.how-pg.mv{background:var(--ink);color:var(--bg);border-color:var(--ink)}
 </style>
 <script>document.documentElement.classList.add("d2")</script>
 <link rel="stylesheet" href="design2.css"><script defer src="design2.js"></script>
@@ -1041,6 +1086,16 @@ button.brand:hover{background:var(--chip)}
   <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="gTitle">
     <div class="sheet-h"><h3 id="gTitle"></h3><button class="btn" data-close>Fechar</button></div>
     <div class="helpb" id="gBody"></div>
+  </div>
+</div>
+<div class="hpg" id="howPg" hidden data-noswipe>
+  <div class="hpg-in" id="hpIn" role="dialog" aria-modal="true" aria-labelledby="hpT">
+    <div class="hpg-top"><button class="hpg-back" id="hpBack" type="button"></button><div class="hpg-tt"><small id="hpK"></small><h2 id="hpT"></h2></div></div>
+    <div class="hpg-stage" id="hpStage" data-notr>
+      <div class="v3 hpg-box" id="hpBox"><div class="v3load" hidden></div><a class="v3cred" href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" target="_blank" rel="noopener">BodyParts3D · CC BY-SA</a></div>
+      <div class="p3tip" id="hpTip" hidden></div><div class="hpg-ctl" id="hpCtl"></div>
+    </div>
+    <div class="hpg-sh" id="hpSh"><div class="hpg-grab" id="hpGrab" role="button" tabindex="0"><i></i></div><div class="hpg-body" id="hpBody"></div></div>
   </div>
 </div>
 <div class="intro login" id="login" hidden data-notr><div class="in-box" role="dialog" aria-modal="true" aria-labelledby="lgT"><div class="lg-s" id="lgBox"></div></div></div>
@@ -4194,7 +4249,65 @@ function howInner(fid,sel){const h=HOW&&HOW[fid];
     ${h.c?`<p class="how-c">⚠️ <b>${p3(HOWL.c)}:</b> ${esc(h.c)}</p>`:""}`}
 function howHTML(it,open){const r=it.f?{f:it.f,sel:it.sel}:parseRef(it.ref)||parseRef(refByName(it.name));if(!r)return "";
   const sel=r.sel||r.f.d;if(!HOW)loadHow();
-  return `<details class="how" data-hf="${r.f.id}" data-hs="${esc(JSON.stringify(sel))}"${open?" open":""}><summary>${tx("Como fazer","How to do it","Cómo hacerlo")}</summary><div class="how-b">${howInner(r.f.id,sel)}</div></details>`}
+  return `<details class="how" data-hf="${r.f.id}" data-hs="${esc(JSON.stringify(sel))}"${open?" open":""}><summary>${tx("Como fazer","How to do it","Cómo hacerlo")}${howPgBtn(r.f,sel)}</summary><div class="how-b">${howInner(r.f.id,sel)}</div></details>`}
+/* ---- 0.77 (owner "3,4" → "será que uma nova página de como fazer ficaria legal?"; choices: the card's box stays too,
+   body on top + sheet below that drags, exercises without a movement show the still body with the muscles): the
+   "Como fazer" page. Its own 3D viewer (HP, mounted once, like P3) plays the movement (3d/v3.js motion(): bar, plates,
+   bench/stands; repeats, ▶/❚❚, 0,5×/1×; "Reduzir animações" opens it paused) or shows the still body with the target red
+   and the synergists orange and "Movimento em breve". The guide (howInner) is in the sheet. Only 3 movements for now:
+   back squat with the bar, conventional deadlift with the bar, flat bench press with the bar (default width/grip). */
+const MOVK={agach:s=>s.e==="ba"&&s.pe==="md",terra:s=>s.st==="co"&&s.e==="ba",supino:s=>s.b==="re"&&s.e==="ba"&&s.w==="md"&&s.g==="pr"};
+function movOf(f,sel){if(!f)return null;const s={...f.d,...(sel||{})},t=MOVK[f.id];return t&&t(s)?{k:f.id,deep:f.id==="agach"&&s.am==="pr"}:null}
+let HP=null,HPbusy=false,HPbad=false,HPcur=null,HPplay=true,HPspd=1;
+const HPSV={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>',pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg>'};
+function hpMus(){const c=HPcur;if(!c)return {p:[],s:[]};const v=resolveV(c.f,c.sel);return {p:v.p||[],s:(v.s||[]).filter(k=>!(v.p||[]).includes(k))}}
+function hpState(){const st={},m=hpMus();m.s.forEach(k=>st[k]={syn:true});m.p.forEach(k=>st[k]={on:true});return st}
+function hpCtl(){const c=HPcur,el=$("hpCtl");if(!c)return;
+  if(!c.mv){el.innerHTML=`<span class="hp-soon">${tx("Movimento em breve","Movement coming soon","Movimiento pronto")}</span>`;return}
+  el.innerHTML=`<button type="button" class="hp-pl" data-hp="pl" aria-label="${HPplay?tx("Pausar","Pause","Pausar"):tx("Continuar","Play","Reproducir")}">${HPplay?HPSV.pause:HPSV.play}</button>
+    <div class="seg" role="group" aria-label="${tx("Velocidade","Speed","Velocidad")}">${[[0.5,"0,5×"],[1,"1×"]].map(([v,t])=>`<button type="button" data-hpspd="${v}" aria-pressed="${HPspd===v}">${LANG==="en"?t.replace(",","."):t}</button>`).join("")}</div>`}
+function hpBody(){const c=HPcur;if(!c)return;const m=hpMus(),nm=k=>M[k]?esc(M[k].n):"";
+  $("hpBody").innerHTML=`<div class="hp-mus"><em>${tx("Alvo","Target","Objetivo")}</em>${m.p.map(k=>`<span class="tg">${nm(k)}</span>`).join("")}
+    <em>${tx("Sinergistas","Synergists","Sinergistas")}</em>${m.s.length?m.s.map(k=>`<span>${nm(k)}</span>`).join(""):`<span>${tx("Isolado","Isolated","Aislado")}</span>`}</div>${howInner(c.f.id,c.sel)}`}
+function hpApply(){const c=HPcur;if(!HP||!c||$("howPg").hidden)return;
+  if(HP.sexNow&&HP.sexNow()!==sex){HP.sex(sex);return}   /* ready() comes again when the other body is in */
+  HP.sync(hpState());
+  if(c.mv)HP.motion(c.mv.k,{deep:c.mv.deep,play:HPplay,speed:HPspd});
+  else{HP.motion(null);const vs=viewsOf(hpMus().p);HP.view(vs.size&&!vs.has("front")?"back":"front")}}
+function hpTip(k){const t=$("hpTip");clearTimeout(hpTip.t);t.hidden=!k||!M[k];if(!t.hidden){t.textContent=M[k].n;hpTip.t=setTimeout(()=>t.hidden=true,1800)}}
+function hpMount(){if(HP||HPbusy)return;HPbusy=true;const L=$("hpBox").querySelector(".v3load");L.hidden=false;
+  L.innerHTML=`<span>${tx("Carregando o corpo 3D…","Loading the 3D body…","Cargando el cuerpo 3D…")}</span><span class="v3bar"><i></i></span>`;
+  const fail=()=>{HPbad=true;HPbusy=false;if(HP){HP.dispose();HP=null}L.hidden=false;L.innerHTML=`<span>${tx("Não deu para carregar o 3D. Confira a internet e abra de novo.","Couldn't load the 3D body. Check the internet and open it again.","No se pudo cargar el 3D. Revisa internet y ábrelo otra vez.")}</span>`};
+  import("./3d/v3.js").then(mod=>{mod.setHead&&mod.setHead(CONF.head);
+    HP=mod.mount($("hpBox"),{covered:()=>false,sex:()=>sex,name:k=>M[k]?M[k].n:"",jname:()=>"",joint:()=>{},tap:k=>hpTip(k),
+      progress:x=>{const b=L.querySelector(".v3bar i");if(b)b.style.width=Math.round(x*100)+"%"},
+      ready:()=>{L.hidden=true;HPbusy=false;hpApply()},fail})}).catch(fail)}
+/* the sheet: drag the handle (or tap it) between low (body big) and high (guide big) */
+const HPSN=[0.44,0.8];let hpHi=false;
+function hpSheet(hi,instant){hpHi=hi;const el=$("hpIn");if(instant)el.classList.add("drag");el.style.setProperty("--sh",(HPSN[hi?1:0]*100)+"%");if(instant)requestAnimationFrame(()=>el.classList.remove("drag"))}
+{const g=$("hpGrab");let d=null;
+  g.addEventListener("pointerdown",e=>{const H=$("hpIn").getBoundingClientRect().height;d={y:e.clientY,h:$("hpSh").getBoundingClientRect().height,H,t:performance.now(),moved:false};g.setPointerCapture(e.pointerId);$("hpIn").classList.add("drag")});
+  g.addEventListener("pointermove",e=>{if(!d)return;const dy=e.clientY-d.y;if(Math.abs(dy)>6)d.moved=true;const h=Math.min(d.H*0.9,Math.max(d.H*0.22,d.h-dy));$("hpIn").style.setProperty("--sh",h+"px");d.last=dy;d.lt=performance.now()});
+  const up=e=>{if(!d)return;const o=d;d=null;$("hpIn").classList.remove("drag");
+    if(!o.moved){hpSheet(!hpHi);return}const h=$("hpSh").getBoundingClientRect().height/o.H,v=(o.last||0)/Math.max(1,(o.lt||0)-o.t);
+    hpSheet(Math.abs(v)>0.5?v<0:h>(HPSN[0]+HPSN[1])/2)};
+  g.addEventListener("pointerup",up);g.addEventListener("pointercancel",up);
+  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();hpSheet(!hpHi)}})}
+function openHowPage(f,sel){if(!f)return;sel={...f.d,...(sel||{})};HPcur={f,sel,mv:movOf(f,sel)};HPplay=!noAnim();
+  $("hpBack").innerHTML=`<b aria-hidden="true">‹</b>${tx("Voltar","Back","Volver")}`;$("hpK").textContent=tx("Como fazer","How to do it","Cómo hacerlo");$("hpT").textContent=vName(f,sel);
+  $("hpGrab").setAttribute("aria-label",tx("Arrastar o guia","Drag the guide","Arrastrar la guía"));
+  hpSheet(false,true);hpBody();hpCtl();if(!HOW)loadHow().then(hpBody).catch(()=>hpBody());
+  $("howPg").hidden=false;$("hpBody").scrollTop=0;buzz();
+  if(HP)hpApply();else if(!HPbad)hpMount();else{HPbad=false;hpMount()}}
+function closeHowPage(){if($("howPg").hidden)return;$("howPg").hidden=true;$("hpTip").hidden=true;if(HP)HP.motion(null)}
+$("hpBack").addEventListener("click",closeHowPage);
+addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("howPg").hidden){e.stopImmediatePropagation();closeHowPage()}},true);
+$("hpCtl").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!HP)return;
+  if(b.dataset.hp==="pl"){HPplay=!HPplay;HP.play(HPplay)}else if(b.dataset.hpspd){HPspd=+b.dataset.hpspd;HP.speed(HPspd)}buzz();hpCtl()});
+/* the card's button: opens the page (capture: the card under it must not react) */
+document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".how-pg");if(!b)return;e.preventDefault();e.stopPropagation();
+  let sel={};try{sel=JSON.parse(b.dataset.hps)}catch(_){}openHowPage(FAMBY[b.dataset.hpf],sel)},true);
+const howPgBtn=(f,sel)=>{const mv=movOf(f,sel);return `<button type="button" class="how-pg${mv?" mv":""}" data-hpf="${f.id}" data-hps="${esc(JSON.stringify(sel))}">${mv?tx("▶ Ver movimento","▶ See the movement","▶ Ver movimiento"):tx("Ver no boneco","See on the body","Ver en el muñeco")}</button>`};
 /* remember whether the guide was open, so it stays open when the card is redrawn (variation changed, set done) */
 document.addEventListener("toggle",e=>{if(e.target.matches&&e.target.matches("details.how"))howOpen=e.target.open;if(e.target.matches&&e.target.matches("details.hj-list"))hjList=e.target.open},true);
 
@@ -6109,6 +6222,7 @@ function goPage(i,dir,still){const p=PAGES[pageAt(i)];if(!p)return;
     return `<h6>${esc(nm)}</h6>`+I("＋",tx("Adicionar a um treino","Add to a workout","Agregar a un entreno"),()=>openAddSheet(nm,ref))
       +I("▶",tx("Treinar agora","Train now","Entrenar ahora"),()=>live1(nm,[planItem(nm,ref)]))
       +I("ⓘ",tx("Como fazer","How to do it","Cómo hacerlo"),()=>{howOpen=true;curEx=null;selectExercise(i);setTimeout(()=>{const c=document.querySelector(`.ex[data-i="${i}"] details.how`);if(c){c.open=true;c.scrollIntoView({block:"nearest"})}},60)})
+      +I("◉",movOf(x.f,x.sel)?tx("Ver movimento","See the movement","Ver movimiento"):tx("Ver no boneco","See on the body","Ver en el muñeco"),()=>openHowPage(x.f,x.sel))
       +I("⇄",tx("Trocar variação","Change variation","Cambiar variación"),()=>{curEx=null;selectExercise(i);setTimeout(()=>{const c=document.querySelector(`.ex[data-i="${i}"] .vars`);if(c)c.scrollIntoView({block:"nearest"})},60)})
       +I("↗",tx("Ver evolução da carga","See load progress","Ver evolución de la carga"),()=>goKg(nm))}
   function planItems(p){

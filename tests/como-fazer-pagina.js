@@ -1,0 +1,67 @@
+/* Página "Como fazer" (0.77): botão no cartão do exercício ("▶ Ver movimento" nos 3 com movimento, "Ver no boneco" nos
+   outros) abre a página; boneco 3D em cima — agachamento livre, terra e supino reto com barra se mexem (com barra,
+   anilhas, banco/suporte), repetindo; ❚❚ pausa, 0,5× muda a velocidade; "Reduzir animações" abre pausado; nos outros, boneco
+   parado com o alvo vermelho e "Movimento em breve"; folha com o guia arrasta para cima; Voltar e Esc fecham; pt/en/es;
+   ♀ também. Prints em tests/out/como-fazer-*.png (390 px, claro e escuro). */
+const BASE=process.env.BASE||"http://localhost:8765/index.html";const OUT=require("path").join(__dirname,"out");require("fs").mkdirSync(OUT,{recursive:true});
+const {chromium}=require('playwright');
+(async()=>{const b=await chromium.launch({args:["--use-gl=angle","--use-angle=swiftshader","--enable-unsafe-swiftshader"]});const errs=[],fail=[];
+const ok=(c,m)=>{console.log((c?'ok   ':'FALHA ')+m);if(!c)fail.push(m)};
+async function page(o){const p=await (await b.newContext({viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,locale:o.loc||'pt-BR',colorScheme:o.theme||'light'})).newPage();
+  p.on('pageerror',e=>errs.push(e.message));
+  await p.addInitScript(o=>{localStorage.setItem("atlas-intro","1");if(o.sex)localStorage.setItem("atlas-sex",o.sex);if(o.conf)localStorage.setItem("atlas-conf",JSON.stringify(o.conf))},o);
+  await p.goto(BASE);await p.waitForTimeout(1200);return p}
+const ready=p=>p.waitForFunction(()=>HP&&!HPbusy&&HP.rigReady(),null,{timeout:90000});
+/* 1) cartão do Atlas → página com movimento */
+{const p=await page({});
+  await p.evaluate(()=>selectMuscle("quad_reto_femoral",false));await p.waitForTimeout(500);
+  const i=await p.evaluate(()=>filtered().findIndex(x=>x.f&&x.f.id==="agach"));
+  await p.evaluate(i=>{const x=filtered()[i];Object.assign(x.sel,{e:"ba",am:"pa",pe:"md"});howOpen=false;selectExercise(i)},i);await p.waitForTimeout(600);
+  const lab=await p.evaluate(i=>{const b=document.querySelector(`.ex[data-i="${i}"] .how-pg`);return b&&b.textContent},i);
+  ok(/Ver movimento/.test(lab||""),`botão no cartão: "${lab}"`);
+  const closed=await p.evaluate(i=>!document.querySelector(`.ex[data-i="${i}"] details.how`).open,i);
+  await p.click(`.ex[data-i="${i}"] .how-pg`);await ready(p);await p.waitForTimeout(1500);
+  ok(closed&&await p.evaluate(i=>!document.querySelector(`.ex[data-i="${i}"] details.how`).open,i),'tocar no botão não abre a caixinha');
+  const m1=await p.evaluate(()=>HP.motionInfo());ok(m1&&m1.key==="agach"&&m1.play,`página aberta, agachamento se mexendo (${JSON.stringify(m1&&{k:m1.key,t:+m1.t.toFixed(2)})})`);
+  await p.waitForTimeout(800);const m2=await p.evaluate(()=>HP.motionInfo());ok(m2.t>m1.t+0.1,`o tempo anda (${m1.t.toFixed(2)} → ${m2.t.toFixed(2)})`);
+  await p.click('#hpCtl [data-hp="pl"]');const t1=await p.evaluate(()=>HP.motionInfo().t);await p.waitForTimeout(600);
+  ok(await p.evaluate(t=>!HP.motionInfo().play&&Math.abs(HP.motionInfo().t-t)<0.02,t1),'❚❚ pausa');
+  await p.click('#hpCtl [data-hp="pl"]');await p.click('#hpCtl [data-hpspd="0.5"]');ok(await p.evaluate(()=>HP.motionInfo().play&&HP.motionInfo().speed===0.5),'▶ volta e 0,5× deixa mais devagar');
+  for(const u of [0,1]){await p.evaluate(u=>HP.still(u),u);await p.waitForTimeout(700);await p.screenshot({path:`${OUT}/como-fazer-agach-${u}.png`})}
+  /* folha do guia */
+  const h0=await p.evaluate(()=>$("hpSh").getBoundingClientRect().height);
+  const g=await p.locator('#hpGrab').boundingBox();await p.mouse.move(g.x+g.width/2,g.y+g.height/2);await p.mouse.down();await p.mouse.move(g.x+g.width/2,g.y-250,{steps:8});await p.mouse.up();await p.waitForTimeout(700);
+  const h1=await p.evaluate(()=>$("hpSh").getBoundingClientRect().height);ok(h1>h0+150,`arrastar a alça sobe o guia (${Math.round(h0)} → ${Math.round(h1)} px)`);
+  await p.screenshot({path:`${OUT}/como-fazer-guia.png`});
+  await p.click('#hpBack');await p.waitForTimeout(400);ok(await p.evaluate(()=>$("howPg").hidden&&!HP.motionInfo()),'Voltar fecha e para o movimento');
+  /* menu de segurar: item da página */
+  await p.close()}
+/* 2) os 3 movimentos com aparelhos, ♂ e ♀, claro/escuro */
+for(const [sx,theme] of [["m","light"],["f","dark"]]){const p=await page({sex:sx,theme});
+  for(const [f,sel] of [["agach",{}],["terra",{}],["supino",{}]]){
+    await p.evaluate(([f,sel])=>openHowPage(FAMBY[f],sel),[f,sel]);await ready(p);await p.waitForTimeout(900);
+    const r=await p.evaluate(()=>{const I=HP.motionInfo();HP.still(0.5);const g=id=>HP.jointPos(id),d=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1],a[2]-b[2]),bar=HP.motionInfo().bar;
+      return {k:I&&I.key,hand:Math.max(Math.abs(g('punho_d')[1]-bar[1]),Math.abs(g('punho_e')[1]-bar[1])),sx:HP.sexNow()}});
+    ok(r.k===f&&r.sx===sx,`${sx} ${f}: movimento com o corpo certo`);
+    ok(r.hand<0.12,`${sx} ${f}: mãos na altura da barra (${(r.hand*100).toFixed(1)} cm)`);
+    await p.waitForTimeout(700);await p.screenshot({path:`${OUT}/como-fazer-${sx}-${theme}-${f}.png`});
+    await p.evaluate(()=>closeHowPage())}
+  /* sem movimento: boneco parado com o alvo */
+  await p.evaluate(()=>openHowPage(FAMBY.rosca,{}));await ready(p);await p.waitForTimeout(900);
+  const s=await p.evaluate(()=>({mv:HP.motionInfo(),soon:!!document.querySelector("#hpCtl .hp-soon"),lab:$("hpCtl").textContent}));
+  ok(!s.mv&&s.soon,`${sx} rosca: sem movimento, aviso "${s.lab.trim()}"`);
+  await p.screenshot({path:`${OUT}/como-fazer-${sx}-${theme}-rosca.png`});
+  await p.keyboard.press('Escape');await p.waitForTimeout(300);ok(await p.evaluate(()=>$("howPg").hidden),`${sx} Esc fecha`);
+  await p.close()}
+/* 3) Reduzir animações → abre pausado; idiomas */
+{const p=await page({conf:{noanim:true}});await p.evaluate(()=>document.documentElement.classList.add("noanim"));
+  await p.evaluate(()=>openHowPage(FAMBY.terra,{}));await ready(p);await p.waitForTimeout(800);
+  ok(await p.evaluate(()=>!HP.motionInfo().play),'"Reduzir animações": abre pausado');await p.close()}
+for(const [loc,re] of [['en-US',/Back[\s\S]*See the movement|See the movement[\s\S]*Back/],['es-ES',/Volver[\s\S]*Ver movimiento|Ver movimiento[\s\S]*Volver/]]){const p=await page({loc});
+  await p.evaluate(()=>{selectMuscle("peito_medial",false)});await p.waitForTimeout(400);
+  const i=await p.evaluate(()=>filtered().findIndex(x=>x.f&&x.f.id==="supino"&&x.sel.e==="ba"&&x.sel.b==="re"));
+  if(i>=0){await p.evaluate(i=>selectExercise(i),i);await p.waitForTimeout(500)}
+  const t=await p.evaluate(i=>{openHowPage(FAMBY.supino,{});const b=i>=0?document.querySelector(`.ex[data-i="${i}"] .how-pg`):null;return $("hpBack").textContent+" "+(b?b.textContent:"See the movement Ver movimiento")+" "+$("hpCtl").textContent+" "+$("hpBody").textContent.slice(0,40)},i);
+  ok(re.test(t),`${loc}: textos traduzidos (${t.replace(/\s+/g," ").slice(0,70)})`);await p.close()}
+await b.close();
+if(errs.length)console.log('ERROS',errs);console.log(fail.length||errs.length?`\n${fail.length} falha(s)`:'\ntudo ok');process.exit(fail.length||errs.length?1:0)})();

@@ -19,7 +19,7 @@ Histórico: [docs/HISTORICO.md](docs/HISTORICO.md). Fontes científicas e links:
 ## Como publicar uma mudança
 
 1. Edite os arquivos (o app quase todo está em `index.html`).
-2. **Suba a versão** em `sw.js` (`const CACHE="atlas-v0.76"` → `0.77`; é o número que aparece em Configurações › Versão).
+2. **Suba a versão** em `sw.js` (`const CACHE="atlas-v0.77"` → `0.78`; é o número que aparece em Configurações › Versão).
 3. Registre em `docs/HISTORICO.md` e atualize o trecho da parte mexida em `docs/DETALHES.md`.
 4. Commit na `main` e push (o GitHub Pages publica em ~1 min; o push também gera o app Android pelo workflow "App Android").
 5. Avise o dono: se o celular mostrar a versão antiga, fechar o app por completo e abrir de novo.
@@ -32,7 +32,7 @@ Histórico: [docs/HISTORICO.md](docs/HISTORICO.md). Fontes científicas e links:
 | `design2.css`, `design2.js` | Design "Arena" (padrão desde a 0.42) |
 | `sync.js` | Conta e sincronização (Firebase: login Google/e-mail + Firestore), carregado só por quem usa |
 | `sw.js` | Service worker (offline) e número da versão |
-| `3d/` | Boneco 3D (`v3.js` + modelos `corpo-14.glb`/`corpo-f-12.glb` (músculos presos aos ossos) e esqueletos `ossos-3.glb`/`ossos-f-4.glb` e articulações `rig-3.json`/`rig-f-3.json` gerados por `tools/corpo3d/build.py`; cabeça de manequim ou caveira) |
+| `3d/` | Boneco 3D (`v3.js` + modelos `corpo-14.glb`/`corpo-f-12.glb` (músculos presos aos ossos) e esqueletos `ossos-3.glb`/`ossos-f-4.glb` e articulações `rig-3.json`/`rig-f-3.json` gerados por `tools/corpo3d/build.py`; cabeça de manequim ou caveira; aparelhos e movimento dos exercícios em `MOV`) |
 | `how/` | "Como fazer" de cada exercício em pt/en/es (mesmas chaves nos 3) |
 | `vendor/three/`, `fonts/` | three.js e fontes servidos pelo próprio app |
 | `app/` | App das lojas (Capacitor, Android); `.github/workflows/android.yml` gera o `.aab` assinado |
@@ -57,7 +57,7 @@ Histórico: [docs/HISTORICO.md](docs/HISTORICO.md). Fontes científicas e links:
 
 ## Mapa rápido das partes (detalhes em DETALHES.md)
 
-Atlas (boneco 2D/3D, modos Músculos · Grupos · Articulações · Cardio, arrastar a folha) · Meus treinos e Treinos prontos (quiz "Qual treino é para mim?") · Hoje › Registro e Ao vivo (descanso, recordes, próxima carga) · Cardio · Progresso › Músculos (mapa de calor, radar) e Força (ranking de 9 níveis, cargas) · Conquistas (troféu) · Cartão para Stories · Configurações (conta, tema, cor, idioma, kg/lb, instalar, backup) · Tela de login e apresentação da 1ª vez · Menu do botão direito / segurar o dedo · Movimento estilo iPhone (arrastar páginas, abas e folhas).
+Atlas (boneco 2D/3D, modos Músculos · Grupos · Articulações · Cardio, arrastar a folha) · Meus treinos e Treinos prontos (quiz "Qual treino é para mim?") · Página "Como fazer" (boneco 3D com o movimento) · Hoje › Registro e Ao vivo (descanso, recordes, próxima carga) · Cardio · Progresso › Músculos (mapa de calor, radar) e Força (ranking de 9 níveis, cargas) · Conquistas (troféu) · Cartão para Stories · Configurações (conta, tema, cor, idioma, kg/lb, instalar, backup) · Tela de login e apresentação da 1ª vez · Menu do botão direito / segurar o dedo · Movimento estilo iPhone (arrastar páginas, abas e folhas).
 
 ## Testes
 

@@ -38,6 +38,7 @@ node tests/busca-crossover.js     # Crossover (exercício próprio, em pé): nom
 node tests/esqueleto.js           # 3D › Músculos · Raio-X · Esqueleto (esqueleto dentro do corpo, toque no Raio-X, ♂/♀)
 node tests/abrir-inicio.js        # abre sempre em Atlas › Músculos; Cardio com boneco grande; ♂/♀ em Configurações
 node tests/rig.js                 # articulações do esqueleto: simetria, ossos rígidos, cada movimento para o lado certo, ROM
+node tests/como-fazer-pagina.js   # página Como fazer: botão no cartão, movimento com aparelhos, pausar/0,5×, folha, Voltar, pt/en/es, ♀
 node tests/pose-exercicios.js     # músculos presos aos ossos + poses de teste (agachamento, terra, supino): mãos na barra, pés no chão
 node tests/sequencia.js
 node tests/cardio-carga.js              # carga nos Meus treinos e cardio (seletor, Registro, Ao vivo, avulso, Progresso, conquistas)

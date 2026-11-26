@@ -80,21 +80,22 @@ vec4 mv=modelViewMatrix*vec4(transformed,1.0);vN=normalize(normalMatrix*normal);
   function resize(){const r=box.getBoundingClientRect();if(!r.width||!r.height)return;renderer.setSize(r.width,r.height,false);camera.aspect=r.width/r.height;camera.updateProjectionMatrix();need=true;
     /* the box changed shape (small figure in the corner, sheet up/down): fit the whole body again, keeping the side it is seen from */
     if(lastSz&&ready&&(Math.abs(r.width/lastSz[0]-1)>.15||Math.abs(r.height/lastSz[1]-1)>.15)){const dir=camera.position.clone().sub(controls.target).normalize();
-      controls.target.set(0,CY,0);camera.position.copy(controls.target).add(dir.multiplyScalar(fitD()))}
-    lastSz=[r.width,r.height];if(ready)lims()}
+      if(MOT){controls.target.copy(MOT.tgt);camera.position.copy(MOT.tgt).add(dir.multiplyScalar(fitD()*MOT.dk))}
+      else{controls.target.set(0,CY,0);camera.position.copy(controls.target).add(dir.multiplyScalar(fitD()))}}
+    lastSz=[r.width,r.height];if(ready&&!MOT)lims()}
   /* owner (0.14, tighter in 0.19): not far away (1.1× the framing, was 1.3×) and not too close (0.5×, was 0.3 m) */
   function lims(){const f=fitD();controls.maxDistance=f*1.1;controls.minDistance=f*0.5}
   const reduce=()=>document.documentElement.classList.contains("noanim")||matchMedia("(prefers-reduced-motion: reduce)").matches;
   let BW=1.2,BH=1.7;
   /* the whole body fits the box with a small margin, whatever its shape */
   const fitD=()=>{const t=Math.tan(THREE.MathUtils.degToRad(camera.fov/2));return Math.max(BH*1.06/(2*t),BW*1.08/(2*t*camera.aspect))};
-  function view(v,anim=true){curV=v;const d=fitD(),a=v==="back"?Math.PI:0;
+  function view(v,anim=true){curV=v;if(MOT)return;const d=fitD(),a=v==="back"?Math.PI:0;
     const to=new THREE.Vector3(Math.sin(a)*d,CY+0.03,Math.cos(a)*d),tt=new THREE.Vector3(0,CY,0);
     if(!anim||reduce()){camera.position.copy(to);controls.target.copy(tt);need=true;return}
     const from=camera.position.clone(),t0=performance.now(),ft=controls.target.clone();
     /* turn around the body instead of cutting through it */
     const fa=Math.atan2(from.x,from.z),fd=Math.hypot(from.x,from.z);let da=a-fa;da=Math.atan2(Math.sin(da),Math.cos(da));
-    (function step(){if(!alive)return;const k=Math.min(1,(performance.now()-t0)/550),e=1-Math.pow(1-k,3),ang=fa+da*e,dd=fd+(d-fd)*e;
+    (function step(){if(!alive||MOT)return;const k=Math.min(1,(performance.now()-t0)/550),e=1-Math.pow(1-k,3),ang=fa+da*e,dd=fd+(d-fd)*e;
       camera.position.set(Math.sin(ang)*dd,from.y+(to.y-from.y)*e,Math.cos(ang)*dd);controls.target.lerpVectors(ft,tt,e);need=true;if(k<1)requestAnimationFrame(step)})()}
 
   function paint(){const art=!!state.__art;
@@ -143,10 +144,10 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     const dd=camera.position.distanceTo(controls.target);nearU.value=Math.min(1,Math.max(0,(2.5-dd)/1.1));
     sepMat.uniforms.col.value.copy(C.sep);sepMat.uniforms.a.value=C.sepA*Math.min(1,Math.max(0.3,1.5/dd));
     renderer.autoClear=true;renderer.render(scene,camera);if(!meshes.length)return;
-    for(const o of meshes){o.userData.mat=o.material;o.material=o.userData.idm}for(const o of ghosts){o.userData.vis=o.visible;o.visible=false}
+    for(const o of meshes)o.userData.mat=o.material,o.material=o.userData.idm;for(const o of eqMeshes)o.userData.mat=o.material,o.material=o.userData.idm;for(const o of ghosts){o.userData.vis=o.visible;o.visible=false}
     const bv=bones&&bones.visible;if(bv){if(XR==="esq")bones.traverse(o=>{if(o.isMesh&&o.userData.idm){o.userData.mat=o.material;o.material=o.userData.idm}});else bones.visible=false}
     renderer.setRenderTarget(idT);renderer.setClearColor(0x000000,1);renderer.clear();renderer.render(scene,camera);renderer.setRenderTarget(null);renderer.setClearColor(0x000000,0);
-    for(const o of meshes)o.material=o.userData.mat;for(const o of ghosts)o.visible=o.userData.vis!==false;
+    for(const o of meshes)o.material=o.userData.mat;for(const o of eqMeshes)o.material=o.userData.mat;for(const o of ghosts)o.visible=o.userData.vis!==false;
     if(bv){if(XR==="esq")bones.traverse(o=>{if(o.isMesh&&o.userData.idm)o.material=o.userData.mat});bones.visible=true}
     if(xrOn()&&XR==="raiox")sepMat.uniforms.a.value*=0.3;
     renderer.autoClear=false;renderer.render(sepScene,sepCam);
@@ -245,7 +246,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       {const P=[];g.scene.updateMatrixWorld(true);const v=new THREE.Vector3();
         for(const o of ms){const a=o.geometry.attributes.position,st=Math.max(1,Math.floor(a.count/260));for(let i=0;i<a.count;i+=st){v.fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);P.push(v.x,v.y,v.z)}}
         CLOUD=new Float32Array(P)}
-      applyHead();if(XR!=="off")loadBones();const first=!ready;ready=true;if(first){resize();view(curV,false)}else{lims();need=true}paint();readyRes&&readyRes();api.ready()}}
+      applyHead();if(XR!=="off")loadBones();const first=!ready;ready=true;if(first){resize();view(curV,false)}else{lims();need=true}paint();if(MOT){const o=MOT;MOT=null;motionStart(o.key,{...o.opt,play:o.play,speed:o.speed})}readyRes&&readyRes();api.ready()}}
   /* an old model without the mannequin keeps its skull */
   /* with the mannequin, the tops of the upper trapezius and of the deep neck tissue would poke through the back of
      its head (thin ragged bits with outlines): they are clipped a little above the nape (0.58) */
@@ -326,7 +327,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
   const wpos=g=>{g.updateWorldMatrix(true,false);return new THREE.Vector3().setFromMatrixPosition(g.matrixWorld)};
   const wq=g=>{g.updateWorldMatrix(true,false);return g.getWorldQuaternion(new THREE.Quaternion())};
   function setWorldQ(g,q){const pq=wq(g.parent);g.quaternion.copy(pq.invert().multiply(q));g.updateWorldMatrix(false,true)}
-  /* two-bone IK (hip–knee–ankle, shoulder–elbow–wrist): law of cosines for the middle joint (turned about its own
+  /* two-bone IK (hip–knee–ankle, shoulder–elbow–wrist): law of cosines for the middle joint (bent about its own
      anatomical axis), then the shortest turn of the first joint that puts the end on the target */
   function ik2(A,B,E,T,midId,axWant){if(!A||!B||!E)return;
     const a=wpos(A),b=wpos(B),e=wpos(E),l1=a.distanceTo(b),l2=b.distanceTo(e);
@@ -334,8 +335,11 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     const inner=()=>{const b2=wpos(B),e2=wpos(E),a2=wpos(A);return a2.sub(b2).angleTo(e2.sub(b2))};
     const want=Math.acos(Math.min(1,Math.max(-1,(l1*l1+l2*l2-d*d)/(2*l1*l2))));
     const fx=rig.J[midId].mov.find(m=>m.id==="flex"),ax=new THREE.Vector3().fromArray(fx.eixo).normalize().applyQuaternion(wq(B.parent));
-    const turn=ang=>{const qd=new THREE.Quaternion().setFromAxisAngle(ax,ang);setWorldQ(B,qd.multiply(wq(B)))};
-    const d0=inner()-want;turn(d0);if(Math.abs(inner()-want)>Math.abs(d0)*0.5+1e-3)turn(-2*d0);
+    /* 0.77: the bend is found by bisection on the joint's own flexion (0 … max): the inner angle only shrinks as it flexes,
+       so it never bends backwards and it is exact even when the axis is not square to the limb */
+    const axL=new THREE.Vector3().fromArray(fx.eixo).normalize(),rep=fx.repouso;
+    const setF=deg=>{B.quaternion.setFromAxisAngle(axL,THREE.MathUtils.degToRad(deg-rep));B.updateWorldMatrix(false,true)};
+    let lo=Math.max(0,fx.min),hi=fx.max;for(let i=0;i<22;i++){const mid=(lo+hi)/2;setF(mid);if(inner()>want)lo=mid;else hi=mid}setF((lo+hi)/2);
     const e2=wpos(E),from=e2.sub(a).normalize(),to=T.clone().sub(a).normalize();
     setWorldQ(A,new THREE.Quaternion().setFromUnitVectors(from,to).multiply(wq(A)));
     /* pole: the shortest turn can twist the limb (knees crossing or bending backwards); spin it about hip/shoulder→target
@@ -418,15 +422,105 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
   let readyRes=null;const readyP=new Promise(r=>readyRes=r);
   load(api.sex?api.sex():"m");
 
+  /* ---- 0.77 (owner "3,4"): gym equipment (etapa 3) and the exercise movement (etapa 4).
+     Equipment = real sizes: Olympic bar (2,2 m, grip 28 mm, sleeves 50 mm), 45 cm plates (2 each side), flat bench with the
+     pad top at 44 cm and uprights, squat stands. Drawn in the outline pass with their own ids (251–254) so the lines of the
+     body stop at the bar. The movement: two poses (start u=0, other end u=1) mixed along a timeline (hold, go, hold, come
+     back: down slow ~2 s, up ~1,2 s), feet planted by IK, the bar placed from the body each frame (on the back, over the
+     midfoot, over the chest) and both hands put on it by IK (palm centre ~7,5 cm past the wrist along the forearm). */
+  const EQID={bar:251,plate:252,pad:253,frame:254},eqMeshes=[];let MOT=null,PLATE=null;
+  const eqMat=(c,m,r)=>new THREE.MeshStandardMaterial({color:c,metalness:m,roughness:r});
+  function eqMesh(geo,mat,idk,parent){const o=new THREE.Mesh(geo,mat);o.castShadow=false;
+    o.userData.idm=new THREE.ShaderMaterial({uniforms:{clipY:CLIPU,cl:{value:0},id:{value:EQID[idk]},sd:{value:0}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
+    parent.add(o);eqMeshes.push(o);return o}
+  function plateGeo(){if(PLATE)return PLATE;const t=0.045,y0=-t/2,y1=t/2,rc=0.006,P=[[0.026,y0],[0.07,y0],[0.08,y0+rc],[0.198,y0+rc],[0.206,y0],[0.219,y0],[0.225,y0+0.007],[0.225,y1-0.007],[0.219,y1],[0.206,y1],[0.198,y1-rc],[0.08,y1-rc],[0.07,y1],[0.026,y1],[0.026,y0]];
+    PLATE=new THREE.LatheGeometry(P.map(p=>new THREE.Vector2(p[0],p[1])),56);PLATE.rotateZ(Math.PI/2);PLATE.computeVertexNormals();return PLATE}
+  function barbell(){const g=new THREE.Group(),st=eqMat(0xc9cdd3,.6,.3),dk=eqMat(0x9ea3aa,.6,.42),ru=eqMat(0x2a2d32,0,.72);
+    const cyl=(r,len,x,mat,seg=24)=>{const geo=new THREE.CylinderGeometry(r,r,len,seg);geo.rotateZ(Math.PI/2);const o=eqMesh(geo,mat,"bar",g);o.position.x=x;return o};
+    cyl(0.014,0.42,0,st);for(const s of [-1,1]){cyl(0.0142,0.445,s*0.4325,dk);   /* knurled grip parts a little darker */
+      cyl(0.037,0.03,s*0.67,st,28);cyl(0.025,0.415,s*0.8925,st);
+      for(const x of [0.7125,0.7575]){const p=eqMesh(plateGeo(),ru,"plate",g);p.position.x=s*x}
+      cyl(0.033,0.022,s*0.791,dk,24)}
+    return g}
+  const ebox=(g,sx,sy,sz,x,y,z,mat,idk)=>{const o=eqMesh(new THREE.BoxGeometry(sx,sy,sz),mat,idk,g);o.position.set(x,y,z);return o};
+  /* an upright with a flat foot and a J-hook facing +dir (z) at hookY */
+  function upright(g,x,z,dir,hookY,fr,st){const H=hookY+0.16;ebox(g,0.055,H,0.055,x,H/2,z,fr,"frame");ebox(g,0.07,0.035,0.55,x,0.0175,z,fr,"frame");ebox(g,0.4,0.035,0.07,x,0.0175,z,fr,"frame");
+    ebox(g,0.062,0.025,0.085,x,hookY-0.0125,z+dir*0.07,st,"frame");ebox(g,0.062,0.055,0.016,x,hookY+0.012,z+dir*0.112,st,"frame")}
+  function flatBench(g,topY,z0,z1){const pad=eqMat(0x1e2125,0,.6),fr=eqMat(0x33373d,.45,.45),len=z1-z0,zc=(z0+z1)/2,w=0.13,h=0.03,r=0.018,bs=0.009;
+    const sh=new THREE.Shape();sh.moveTo(-w+r,-h);sh.lineTo(w-r,-h);sh.quadraticCurveTo(w,-h,w,-h+r);sh.lineTo(w,h-r);sh.quadraticCurveTo(w,h,w-r,h);sh.lineTo(-w+r,h);sh.quadraticCurveTo(-w,h,-w,h-r);sh.lineTo(-w,-h+r);sh.quadraticCurveTo(-w,-h,-w+r,-h);
+    const geo=new THREE.ExtrudeGeometry(sh,{depth:len-2*bs,bevelEnabled:true,bevelThickness:bs,bevelSize:bs,bevelSegments:3,curveSegments:5});geo.translate(0,0,-(len-2*bs)/2);
+    const p=eqMesh(geo,pad,"pad",g);p.position.set(0,topY-h-bs,zc);const pb=topY-2*(h+bs);
+    ebox(g,0.2,0.02,len*0.86,0,pb-0.01,zc,fr,"frame");
+    for(const zz of [z0+0.16,z1-0.16]){ebox(g,0.06,pb-0.02,0.06,0,(pb-0.02)/2,zz,fr,"frame");ebox(g,0.46,0.04,0.06,0,0.02,zz,fr,"frame")}
+    ebox(g,0.05,0.05,z1-z0-0.32,0,0.09,zc,fr,"frame")}
+  function clearEq(){if(!MOT||!MOT.g)return;scene.remove(MOT.g);MOT.g.traverse(o=>{if(o.isMesh){o.geometry!==PLATE&&o.geometry.dispose();o.material.dispose();o.userData.idm.dispose()}});eqMeshes.length=0;MOT.g=null;need=true}
+
+  const lerpP=(a,b,u)=>{if(typeof a==="number")return a+((b==null?a:b)-a)*u;if(Array.isArray(a))return a.map((x,i)=>x+(b[i]-x)*u);const o={};for(const k in a)o[k]=lerpP(a[k],b?b[k]:a[k],u);return o};
+  const sm=x=>x*x*(3-2*x);
+  const V=a=>new THREE.Vector3().fromArray(a);
+  const jp=id=>{const v=new THREE.Vector3();rig.G[id].getWorldPosition(v);return v};
+  /* the movements. a/b = poses at u=0 / u=1; t = timeline [seconds, u to reach] (hold = same u); cam = [degrees around,
+     target height, distance × framing, target z]. Same keys in a and b. */
+  const ARMS_SQ={ombro_d:{abd:80,flex:10,rot:-70},ombro_e:{abd:80,flex:10,rot:-70},cotovelo_d:{flex:110},cotovelo_e:{flex:110},antebraco_d:{pron:-40},antebraco_e:{pron:-40}};
+  const MOV={
+    agach:{a:{pelve:{pos:[0,-0.035,-0.01],flex:4},coluna:{flex:-3},cervical:{flex:0},quadril_d:{abd:12,rot:-12},quadril_e:{abd:12,rot:-12},...ARMS_SQ},
+           b:{pelve:{pos:[0,-0.40,-0.13],flex:38},coluna:{flex:-4},cervical:{flex:-10},quadril_d:{abd:18,rot:-15},quadril_e:{abd:18,rot:-15},...ARMS_SQ},
+           deep:{pelve:{pos:[0,-0.50,-0.10],flex:40},coluna:{flex:-2},cervical:{flex:-10},quadril_d:{abd:22,rot:-18},quadril_e:{abd:22,rot:-18},...ARMS_SQ},
+           t:[[0.7,0],[2.0,1],[0.35,1],[1.25,0]],cam:[60,0.86,1.22,0],bar:"costas"},
+    terra:{a:{pelve:{pos:[0,-0.215,-0.22],flex:70},coluna:{flex:0},cervical:{flex:-22},quadril_d:{abd:8,rot:-8},quadril_e:{abd:8,rot:-8},ombro_d:{flex:64,abd:4},ombro_e:{flex:64,abd:4},cotovelo_d:{flex:0},cotovelo_e:{flex:0},antebraco_d:{pron:70},antebraco_e:{pron:70}},
+           b:{pelve:{pos:[0,-0.012,0],flex:-2},coluna:{flex:-2},cervical:{flex:0},quadril_d:{abd:8,rot:-8},quadril_e:{abd:8,rot:-8},ombro_d:{flex:4,abd:4},ombro_e:{flex:4,abd:4},cotovelo_d:{flex:0},cotovelo_e:{flex:0},antebraco_d:{pron:70},antebraco_e:{pron:70}},
+           t:[[0.8,0],[1.4,1],[0.6,1],[1.8,0]],cam:[60,0.62,1.15,0],bar:"chao"},
+    supino:{a:{pelve:{pos:[0,-0.42,-0.05],flex:-90},coluna:{flex:-6},cervical:{flex:4},quadril_d:{flex:20,abd:20},quadril_e:{flex:20,abd:20},ombro_d:{flex:86,abd:14,rot:0},ombro_e:{flex:86,abd:14,rot:0},cotovelo_d:{flex:8},cotovelo_e:{flex:8},antebraco_d:{pron:60},antebraco_e:{pron:60}},
+            b:{pelve:{pos:[0,-0.42,-0.05],flex:-90},coluna:{flex:-6},cervical:{flex:4},quadril_d:{flex:20,abd:20},quadril_e:{flex:20,abd:20},ombro_d:{flex:10,abd:65,rot:20},ombro_e:{flex:10,abd:65,rot:20},cotovelo_d:{flex:95},cotovelo_e:{flex:95},antebraco_d:{pron:60},antebraco_e:{pron:60}},
+            t:[[0.7,0],[2.0,1],[0.3,1],[1.15,0]],cam:[42,0.68,1.38,-0.3],bar:"peito"}};
+  const tlen=t=>t.reduce((s,x)=>s+x[0],0);
+  function phaseAt(t,T){const L=tlen(T);t=((t%L)+L)%L;let u0=T[T.length-1][1];for(const [d,u] of T){if(t<d)return u0+(u-u0)*sm(t/d);t-=d;u0=u}return u0}
+  function handsTo(P,bar,gx){/* both wrists so the palm centre sits on the bar: two passes (the forearm direction moves a little) */
+    for(let it=0;it<2;it++){P.ik=P.ik||{};for(const [sd,x] of [["d",-gx],["e",gx]]){const w=jp("punho_"+sd),f=w.clone().sub(jp("cotovelo_"+sd)).normalize();
+        P.ik["mao_"+sd]=new THREE.Vector3(x,bar.y,bar.z).sub(f.multiplyScalar(0.075)).toArray()}rigPose(P)}}
+  function frame(u){const m=MOT,d=m.d,P=lerpP(d.a,m.b,u);P.pegada_d=P.pegada_e=1;P.ik={pe_d:m.feet[0],pe_e:m.feet[1]};
+    if(m.dy)P.pelve.pos=[P.pelve.pos[0],P.pelve.pos[1]+m.dy,P.pelve.pos[2]];
+    rigPose(P);let bar;
+    if(d.bar==="costas"){const t1=jp("T1"),up=t1.clone().sub(jp("T6")).normalize(),bk=new THREE.Vector3(0,up.z,-up.y);bar=t1.clone().addScaledVector(bk,m.sex==="f"?0.075:0.085).addScaledVector(up,-0.015);bar.x=0}
+    else if(d.bar==="chao"){let y=0;for(const sd of ["d","e"]){const w=jp("punho_"+sd),f=w.clone().sub(jp("cotovelo_"+sd)).normalize();y+=(w.y+f.y*0.075)/2}bar=new THREE.Vector3(0,Math.max(0.225,y),m.barZ)}
+    else{const k=sm(u);bar=m.top.clone().lerp(m.low,k);bar.z=m.top.z+(m.low.z-m.top.z)*Math.pow(u,0.7)}
+    handsTo(P,bar,m.gx);m.bar.position.copy(bar);m.u=u;need=true}
+  /* the body's lowest point of the back (lying on the bench) and the chest's highest point, with the pose applied */
+  const boxOf=ks=>{const b=new THREE.Box3();root.updateMatrixWorld(true);for(const k of ks)if(parts[k])b.expandByObject(parts[k],true);return b};
+  function motionStart(key,opt){motionStop(true);if(!rig||!MOV[key])return false;const d=MOV[key];opt=opt||{};
+    const m=MOT={key,d,opt,t:0,last:performance.now(),play:opt.play!==false,speed:opt.speed||1,sex:curSex,b:opt.deep&&d.deep?d.deep:d.b,dy:0,g:new THREE.Group()};
+    rigPose({});const A0=jp("tornozelo_d"),A1=jp("tornozelo_e");
+    if(key==="agach"){m.feet=[{alvo:[A0.x-0.07,A0.y,A0.z],giro:20},{alvo:[A1.x+0.07,A1.y,A1.z],giro:20}];m.gx=m.sex==="f"?0.31:0.34}
+    else if(key==="terra"){m.feet=[{alvo:A0.toArray(),giro:8},{alvo:A1.toArray(),giro:8}];m.barZ=(A0.z+A1.z)/2+0.06;m.gx=m.sex==="f"?0.22:0.24}
+    else{/* lying: put the back on a 44 cm bench, the feet flat on the floor in front */
+      m.feet=[null,null];rigPose({...d.b,pegada_d:1,pegada_e:1});const lo=boxOf(["dorsal_superior","dorsal_inferior","trapezio_medio","gluteo_maximo"]).min.y;m.dy=0.445-lo;
+      const P={...d.b,pelve:{...d.b.pelve,pos:[0,d.b.pelve.pos[1]+m.dy,d.b.pelve.pos[2]]}};rigPose(P);const pv=jp("pelve");
+      m.feet=[{alvo:[-0.30,A0.y,pv.z+0.40]},{alvo:[0.30,A1.y,pv.z+0.40]}];P.ik={pe_d:m.feet[0],pe_e:m.feet[1]};rigPose(P);
+      const ch=boxOf(["peito_medial","peito_inferior"]),t6=jp("T6");m.low=new THREE.Vector3(0,ch.max.y+0.016,t6.z+0.03);
+      const sd=jp("ombro_d"),se=jp("ombro_e"),la=sd.distanceTo(jp("cotovelo_d"))+jp("cotovelo_d").distanceTo(jp("punho_d"));
+      m.top=new THREE.Vector3(0,(sd.y+se.y)/2+la*0.985+0.075,(sd.z+se.z)/2+0.01);m.gx=m.sex==="f"?0.27:0.30;
+      m.headZ=jp("cabeca").z;m.pv=pv}
+    m.bar=barbell();m.g.add(m.bar);
+    /* where the movement starts (for the hook heights) */
+    frame(0);
+    if(key==="agach")for(const s of [-1,1])upright(m.g,s*0.6,m.bar.position.z+0.85,-1,m.bar.position.y-0.06,eqMat(0x33373d,.45,.45),eqMat(0xc9cdd3,.6,.3));
+    if(key==="supino"){flatBench(m.g,0.445,m.headZ-0.16,m.pv.z+0.22);for(const s of [-1,1])upright(m.g,s*0.56,m.headZ-0.1,1,m.top.y-0.12,eqMat(0x33373d,.45,.45),eqMat(0xc9cdd3,.6,.3))}
+    scene.add(m.g);
+    const [deg,ty,dk,tz]=d.cam,a=THREE.MathUtils.degToRad(deg);m.tgt=new THREE.Vector3(0,ty,tz);m.dk=dk;
+    controls.target.copy(m.tgt);const dd=fitD()*dk;camera.position.set(Math.sin(a)*dd,ty+0.08,tz+Math.cos(a)*dd);controls.maxDistance=fitD()*1.6;controls.minDistance=fitD()*0.45;
+    need=true;return true}
+  function motionStop(keepCam){if(!MOT)return;clearEq();MOT=null;if(rig)rigPose({});if(!keepCam&&ready){lims();view(curV,false)}need=true}
+
   renderer.setAnimationLoop(()=>{if(!box.offsetParent)return;   /* hidden (2D or another tab): no drawing */
     controls.enabled=!api.covered();
+    if(MOT&&MOT.play){const now=performance.now(),dt=Math.min(0.1,(now-MOT.last)/1000);MOT.last=now;MOT.t+=dt*MOT.speed;frame(phaseAt(MOT.t,MOT.d.t))}else if(MOT)MOT.last=performance.now();
     if(controls.update())need=true;
     /* the point it turns around stays near the middle of the body (owner 0.19: "mais centralizado") */
-    const t=controls.target,c=t.clone().clamp(BB.min,BB.max);c.x=Math.max(-BW*0.2,Math.min(BW*0.2,c.x));c.z=Math.max(-0.08,Math.min(0.08,c.z));if(!c.equals(t)){camera.position.add(c.clone().sub(t));t.copy(c);need=true}
+    const t=controls.target,c=MOT?t.clone().clamp(MOT.tgt.clone().subScalar(0.5),MOT.tgt.clone().addScalar(0.5)):t.clone().clamp(BB.min,BB.max);if(!MOT){c.x=Math.max(-BW*0.2,Math.min(BW*0.2,c.x));c.z=Math.max(-0.08,Math.min(0.08,c.z))}if(!c.equals(t)){camera.position.add(c.clone().sub(t));t.copy(c);need=true}
     if(need){keepOut();need=false;draw()}});
   /* owner: zoom must not go inside the body — if the camera gets closer than ~13 cm to the surface, it backs off */
   const camP=new THREE.Vector3(),awayV=new THREE.Vector3();
-  function keepOut(){if(!CLOUD)return;const R=0.13,R2=R*R;
+  function keepOut(){if(!CLOUD||MOT)return;const R=0.13,R2=R*R;
     for(let it=0;it<4;it++){const p=camera.position;let m=Infinity;
       for(let i=0;i<CLOUD.length;i+=3){const dx=CLOUD[i]-p.x,dy=CLOUD[i+1]-p.y,dz=CLOUD[i+2]-p.z,d=dx*dx+dy*dy+dz*dz;if(d<m)m=d}
       if(m>=R2)return;awayV.copy(p).sub(controls.target);const L=awayV.length()||1;awayV.multiplyScalar((R-Math.sqrt(m)+0.01)/L);p.add(awayV)}}
@@ -449,6 +543,12 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     xrNow(){return XR},
     /* 0.68: the skeleton's joints (Esqueleto/Raio-X loaded): pose({ombro_d:{flex:90},coluna:{flex:30}…}), rig info, debug marks */
     pose(P){rigPose(P)},rigReady(){return !!rig},
+    /* 0.77: the exercise movement — motion("agach"|"terra"|"supino", {deep, play, speed}) → false if the body is not
+       ready; motion(null) stops (back to the A pose and the usual framing); play(on), speed(0.5|1); still(u) = still frame */
+    motion(k,o){if(!k){motionStop();return true}return motionStart(k,o)},
+    play(on){if(MOT){MOT.play=!!on;MOT.last=performance.now()}},speed(x){if(MOT)MOT.speed=x},
+    camPos(){return camera.position.toArray()},
+    still(u){if(MOT){MOT.play=false;frame(u)}},motionInfo(){return MOT?{key:MOT.key,play:MOT.play,speed:MOT.speed,u:MOT.u,t:MOT.t,bar:MOT.bar.position.toArray()}:null},
     /* for checks/prints only: a thin rod between two points (stands in for a barbell until the equipment exists) */
     marca(id,a,b){scene.children.filter(o=>o.name==="mk_"+id).forEach(o=>{scene.remove(o);o.geometry.dispose()});if(!a)return need=true;
       const A=new THREE.Vector3().fromArray(a),B=new THREE.Vector3().fromArray(b),L=A.distanceTo(B);
