@@ -1,6 +1,6 @@
 /* Muscle Atlas — 3D body (owner, nov/2026: "adicione o modelo 3D no app com um botão 3D").
    Loaded only when the 3D button is tapped (import("./3d/v3.js")). Three.js comes from jsDelivr through the import map
-   in index.html; the models are 3d/corpo-8.glb (male) and 3d/corpo-f-5.glb (female, owner 0.15–0.17; mannequin head 0.54, plain 0.57), each with its joint
+   in index.html; the models are 3d/corpo-9.glb (male) and 3d/corpo-f-6.glb (female, owner 0.15–0.17; mannequin head 0.54, plain 0.57, smooth egg 0.58), each with its joint
    marks (3d/juntas-2.json, 3d/juntas-f-2.json) (BodyParts3D, © DBCLS, CC BY-SA 2.1 JP, simplified, grouped by the
    Atlas muscle keys, A-pose, Classic Physique upper body, proportional legs, skull, skin on hands/feet — built by tools/corpo3d/build.py, see docs/FONTES.md).
    The 2D figure stays the source of truth: the app tells this viewer which key is red (on), orange (syn) and what colour
@@ -30,7 +30,7 @@ function getScene(file,onProg){
   return SCN[file]}
 export function mount(box, api){
   const canvas=document.createElement("canvas");canvas.className="v3c";box.prepend(canvas);
-  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});
+  const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true});renderer.localClippingEnabled=true;
   renderer.setPixelRatio(Math.min(devicePixelRatio,2));
   const scene=new THREE.Scene(),camera=new THREE.PerspectiveCamera(32,1,0.05,20);
   const controls=new OrbitControls(camera,canvas);
@@ -100,8 +100,8 @@ export function mount(box, api){
   /* separation lines: every mesh is drawn once more with its own id into an off-screen buffer; a full-screen pass draws a
      thin dark line wherever neighbouring pixels have different ids (where muscles meet, at bones, around the outline) */
   const idT=new THREE.WebGLRenderTarget(2,2,{minFilter:THREE.NearestFilter,magFilter:THREE.NearestFilter});
-  const idVS=`varying float vx;void main(){vec4 w=modelMatrix*vec4(position,1.0);vx=w.x;gl_Position=projectionMatrix*viewMatrix*w;}`;
-  const idFS=`uniform float id;uniform float sd;varying float vx;void main(){gl_FragColor=gl_FrontFacing?vec4(id/255.0,sd>0.5?(vx>0.0?1.0:0.5):0.5,0.0,1.0):vec4(1.0,0.25,0.0,1.0);}`;
+  const idVS=`varying float vx;varying float vy;void main(){vec4 w=modelMatrix*vec4(position,1.0);vx=w.x;vy=w.y;gl_Position=projectionMatrix*viewMatrix*w;}`;
+  const idFS=`uniform float id;uniform float sd;uniform float clipY;uniform float cl;varying float vx;varying float vy;void main(){if(cl>0.5&&vy>clipY)discard;gl_FragColor=gl_FrontFacing?vec4(id/255.0,sd>0.5?(vx>0.0?1.0:0.5):0.5,0.0,1.0):vec4(1.0,0.25,0.0,1.0);}`;
   /* inflated muscles overlap a little; the outer layer always wins the depth test */
   const LAYER={trapezio_superior:-3,trapezio_medio:-3,trapezio_inferior:-3,ombro_frontal:-3,ombro_lateral:-3,ombro_posterior:-3,peito_superior:-3,peito_medial:-3,peito_inferior:-3,
     dorsal_superior:-2,dorsal_inferior:-2,gluteo_maximo:-3,obliquos:-1,abdomen_supra:-2,abdomen_infra:-2,biceps_longa:-2,biceps_curta:-2,triceps_longa:-2,triceps_lateral:-2,
@@ -191,7 +191,7 @@ export function mount(box, api){
   const mo=new MutationObserver(()=>{readColors();paint()});mo.observe(document.documentElement,{attributes:true,attributeFilter:["data-theme","class","style"]});
   const mq=matchMedia("(prefers-color-scheme: dark)"),onMq=()=>{readColors();paint()};mq.addEventListener("change",onMq);
 
-  const FILES={m:["./corpo-8.glb","./juntas-2.json"],f:["./corpo-f-5.glb","./juntas-f-2.json"]};let loadN=0;
+  const FILES={m:["./corpo-9.glb","./juntas-2.json"],f:["./corpo-f-6.glb","./juntas-f-2.json"]};let loadN=0;
   async function load(sx){sx=sx==="f"?"f":"m";if(sx===curSex)return;curSex=sx;const my=++loadN,live=()=>alive&&my===loadN;
     fetch(new URL(FILES[sx][1],import.meta.url)).then(r=>r.json()).then(j=>{if(live()){clearJoints();addJoints(j)}}).catch(()=>{});
     let base;try{base=await getScene(FILES[sx][0],api.progress)}catch(e){if(live())api.fail();return}
@@ -203,8 +203,9 @@ export function mount(box, api){
       const ms=[];g.scene.traverse(o=>{if(o.isMesh)ms.push(o)});
       ms.forEach(o=>{const k=(o.name&&o.name!=="mesh"?o.name:(o.parent&&o.parent.name)||"deco").replace(/_\d+$/,"");
         o.material=new THREE.MeshStandardMaterial({color:0x999999,roughness:k==="osso"?0.75:k==="cabeca"?0.62:0.55,metalness:0,side:THREE.DoubleSide,vertexColors:!!o.geometry.attributes.color});   /* skull: baked shadow in the orbits, nose and teeth */
+        if(CLIPK.has(k))o.material.clippingPlanes=[CLIPP];
         shade(o,!!o.geometry.attributes.uv&&k!=="osso"&&k!=="fundo");o.userData.k=k;parts[k]=o;pickables.push(o);
-        o.userData.idm=new THREE.ShaderMaterial({uniforms:{id:{value:k.startsWith("mama_")?250:meshes.length+1},sd:{value:/^(osso|fundo|base|pele|pele_n|cabeca|tend|mama_.*)$/.test(k)?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
+        o.userData.idm=new THREE.ShaderMaterial({uniforms:{clipY:CLIPU,cl:{value:CLIPK.has(k)?1:0},id:{value:k.startsWith("mama_")?250:meshes.length+1},sd:{value:/^(osso|fundo|base|pele|pele_n|cabeca|tend|mama_.*)$/.test(k)?0:1}},vertexShader:idVS,fragmentShader:idFS,side:THREE.DoubleSide});
         if(k==="mama"){o.material=ghostMat();o.renderOrder=5;
           pickables.splice(pickables.indexOf(o),1);ghosts.push(o);return}
         lay(o.material,k);lay(o.userData.idm,k);meshes.push(o)});
@@ -215,7 +216,12 @@ export function mount(box, api){
         CLOUD=new Float32Array(P)}
       applyHead();const first=!ready;ready=true;if(first){resize();view(curV,false)}else{lims();need=true}paint();readyRes&&readyRes();api.ready()}}
   /* an old model without the mannequin keeps its skull */
-  function applyHead(){const mq=HEAD!=="skull"&&!!parts.cabeca;if(parts.osso)parts.osso.visible=!mq;if(parts.pele_n)parts.pele_n.visible=!mq;if(parts.cabeca)parts.cabeca.visible=mq;need=true}
+  /* with the mannequin, the tops of the upper trapezius and of the deep neck tissue would poke through the back of
+     its head (thin ragged bits with outlines): they are clipped a little above the nape (0.58) */
+  const CLIPK=new Set(["trapezio_superior","deco","fundo"]),CLIPU={value:99},CLIPP=new THREE.Plane(new THREE.Vector3(0,-1,0),99);
+  function applyHead(){const mq=HEAD!=="skull"&&!!parts.cabeca;if(parts.osso)parts.osso.visible=!mq;if(parts.pele_n)parts.pele_n.visible=!mq;if(parts.cabeca)parts.cabeca.visible=mq;
+    let y=99;if(mq){const b=new THREE.Box3().setFromObject(parts.cabeca);y=b.max.y-0.172*(b.max.y-b.min.y)/0.328}
+    CLIPU.value=y;CLIPP.constant=y;need=true}
   HEADS.add(applyHead);
   let readyRes=null;const readyP=new Promise(r=>readyRes=r);
   load(api.sex?api.sex():"m");

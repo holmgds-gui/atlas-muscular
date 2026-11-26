@@ -1,7 +1,7 @@
-const CACHE="atlas-v0.57";
+const CACHE="atlas-v0.58";
 /* the 3D body and Three.js are big and rarely change: they live in their own cache that survives app updates
-   (a new model gets a new file name, corpo-8.glb / corpo-f-5.glb, and a new cache name, which drops the old model) */
-const C3D="atlas-3d-9";   // 0.57: corpo-8.glb / corpo-f-5.glb (plain mannequin head)
+   (a new model gets a new file name, corpo-9.glb / corpo-f-6.glb, and a new cache name, which drops the old model) */
+const C3D="atlas-3d-10";   // 0.58: corpo-9.glb / corpo-f-6.glb (smooth egg mannequin head)
 // (before)   // 0.43: Three.js now comes from the app itself (vendor/three); same cache name so the models are not downloaded again
 const CORE=["./","./index.html","./manifest.webmanifest","./icon-180.png","./icon-192.png","./icon-512.png","./icon-mask-512.png","./logo.png","./design2.css","./design2.js","./logo-m.png","./how/pt.json","./how/en.json","./how/es.json","./sync.js","./fonts/fonts.css","./fonts/barlow-condensed-latin-500-normal.woff2","./fonts/barlow-condensed-latin-600-normal.woff2","./fonts/barlow-condensed-latin-700-italic.woff2","./fonts/barlow-condensed-latin-700-normal.woff2","./fonts/barlow-condensed-latin-800-italic.woff2","./fonts/barlow-condensed-latin-800-normal.woff2","./fonts/barlow-condensed-latin-900-italic.woff2","./fonts/barlow-condensed-latin-900-normal.woff2","./fonts/barlow-latin-400-normal.woff2","./fonts/barlow-latin-500-normal.woff2","./fonts/barlow-latin-600-normal.woff2","./fonts/barlow-latin-700-normal.woff2"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(CORE)).then(()=>self.skipWaiting()))});
