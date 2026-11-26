@@ -14,7 +14,23 @@ const CASES=[
   ["canoinha","Canoinha (hollow)","hollow",{},["abdomen_supra","abdomen_infra"],["abdomen_supra","abdomen_infra"]],
   ["escalador","Escalador (mountain climber)","escalador",{},["abdomen_supra"],["abdomen_supra"]],
   ["kelso","Encolhimento Kelso","kelso",{},["trapezio_medio","romboides"],["trapezio_medio","romboides"]],
-  ["seal row","Seal row","remapoiada",{e:"sb"},["trapezio_medio","dorsal_superior"],[]]];
+  ["seal row","Seal row","remapoiada",{e:"sb"},["trapezio_medio","dorsal_superior"],[]],
+  // 0.56 (owner: "pesquise mais exercícios que não tem")
+  ["svend","Svend press","svend",{},["peito_medial"],["peito_medial"]],
+  ["floor press","Supino no chão","supino",{b:"ch"},["peito_medial"],["peito_medial"]],
+  ["z press","Desenvolvimento Z","desenv",{p:"zp"},["ombro_frontal"],[]],
+  ["bananeira","Flexão plantando bananeira","hspu",{},["ombro_frontal"],["ombro_frontal"]],
+  ["tate","Tate press","tate",{},["triceps_lateral"],["triceps_lateral"]],
+  ["pendlay","Remada Pendlay","pendlay",{},["dorsal_superior"],["dorsal_superior"]],
+  ["renegade","Remada em prancha (renegade row)","renegade",{},["obliquos"],["obliquos"]],
+  ["muscle up","Muscle-up","muscleup",{},["dorsal_superior"],["dorsal_superior"]],
+  ["l sit","L-sit","lsit",{},["abdomen_infra"],["abdomen_infra"]],
+  ["pull through","Pull-through na polia","pullthrough",{},["gluteo_maximo"],["gluteo_maximo"]],
+  ["hiperextensao reversa","Hiperextensão reversa","revhyper",{},["gluteo_maximo"],["gluteo_maximo"]],
+  ["afundo cruzado","Afundo cruzado","afundo",{dir:"cz"},["gluteo_maximo"],["gluteo_medio"]],
+  ["zercher","Agachamento Zercher","agach",{e:"ze"},["quad_vasto_lateral"],[]],
+  ["toes to bar","Pés até a barra","elevpernas",{j:"tb"},["abdomen_infra"],[]],
+  ["frog pump","Frog pump","hipthrust",{ap:"fp",e:"co"},["gluteo_maximo"],["gluteo_maximo"]]];
 (async()=>{const b=await chromium.launch();const errs=[];let bad=0;const ok=(c,m)=>{console.log((c?' ok  ':' ERRO')+' '+m);if(!c)bad++};
 for(const [loc,th] of [["pt-BR","dark"],["en-US","light"],["es-ES","light"]]){
   const ctx=await b.newContext({viewport:{width:390,height:844},isMobile:true,hasTouch:true,deviceScaleFactor:2,colorScheme:th,locale:loc});
@@ -31,7 +47,7 @@ for(const [loc,th] of [["pt-BR","dark"],["en-US","light"],["es-ES","light"]]){
       ok(r.top.includes(fid),`busca "${q}" acha ${fid} (${r.top.join(",")})`);
       ok(r.targets.length===tg.length,`${fid}: alvos ${tg.join(",")} → ${r.targets.join(",")} · sinergistas ${r.syn.join(",")}`);
       ok(r.inLists.length===lists.length,`${fid}: nas listas ${lists.join(",")||"(card já existente)"}`);
-    }else ok(r.name!==name||["Dead bug","Seal row"].includes(name),`${loc} traduzido: ${r.name}`);
+    }else ok(r.name!==name||["Dead bug","Seal row","Tate press","Muscle-up","L-sit","Svend press","Frog pump"].includes(name),`${loc} traduzido: ${r.name}`);
   }
   // open Dead bug in the Atlas list of lower abs, with its Como fazer
   await p.evaluate(()=>{setTab("atlas");selectMuscle("abdomen_infra")});await p.waitForTimeout(400);

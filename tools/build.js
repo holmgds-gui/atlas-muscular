@@ -63,7 +63,20 @@ const NEW2=[
   ["trapezio_superior","remalta",{w:"tr"},"E","pegada aberta: mais trapézio (McAllister 2013)"],["trapezio_medio","remalta",{w:"tr"},"E"],
   ["abdomen_supra","deadbug",{},"E"],["abdomen_infra","deadbug",{},"E"],["obliquos","deadbug",{},"E"],
   ["abdomen_supra","hollow",{},"B"],["abdomen_infra","hollow",{},"B"],["abdomen_supra","escalador",{},"B"],["abdomen_infra","escalador",{},"B"],
-  ["trapezio_medio","kelso",{},"B"],["romboides","kelso",{},"B"]];
+  ["trapezio_medio","kelso",{},"B"],["romboides","kelso",{},"B"],
+  /* 0.56 (owner: "pesquise mais exercícios que não tem"): new families and new split variations, biomechanics only */
+  ["peito_medial","svend",{},"B"],["peito_superior","svend",{},"B"],
+  ["peito_medial","supino",{b:"ch"},"B"],["triceps_lateral","supino",{b:"ch",w:"fe"},"B"],
+  ["ombro_frontal","hspu",{},"B"],["ombro_lateral","hspu",{},"B"],
+  ["triceps_lateral","tate",{},"B"],["triceps_medial","tate",{},"B"],
+  ["dorsal_superior","pendlay",{},"B"],["dorsal_inferior","pendlay",{},"B"],["trapezio_medio","pendlay",{},"B"],["romboides","pendlay",{},"B"],
+  ["dorsal_superior","renegade",{},"B"],["obliquos","renegade",{},"B"],
+  ["dorsal_superior","muscleup",{},"B"],["dorsal_inferior","muscleup",{},"B"],["triceps_longa","muscleup",{},"B"],
+  ["abdomen_infra","lsit",{},"B"],["abdomen_supra","lsit",{},"B"],
+  ["gluteo_maximo","pullthrough",{},"B"],["isquio_biceps_femoral","pullthrough",{},"B"],
+  ["gluteo_maximo","revhyper",{},"B"],["lombar_eretores","revhyper",{},"B"],
+  ["gluteo_medio","afundo",{dir:"cz"},"B"],["adutores","afundo",{dir:"cz"},"B"],
+  ["gluteo_maximo","hipthrust",{ap:"fp",e:"co"},"B"]];
 for(const [mid,fid,sel0,ev,note] of NEW2){const f=FB[fid];const sel={...f.d,...sel0};const r=resolve(f,sel);
   if(!r.p.includes(RC[mid])&&!r.s.includes(RC[mid])){errs.push(`novo ${fid} não envolve ${mid}`);continue}
   const xs=out[mid].x,sk=splitKey(f,sel);
