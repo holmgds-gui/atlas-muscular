@@ -693,9 +693,9 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       t:[[0.5,0],[0.9,1],[0.6,1],[1.5,0]],cam:[62,0.6,1.2,0.25],con:1,err:{b:{...both("joelho",{flex:50})}}},
     /* 45° leg press: back on the reclined pad, feet flat on the sled; the sled runs down its rails toward the chest */
     legpress:{setup:"legpress",hands:"fk",eq:["legpress"],pegada:0.85,
-      a:{pelve:{pos:[0,0,0],flex:-58},coluna:{flex:0},cervical:{flex:10},...both("quadril",{flex:42,abd:10}),...both("joelho",{flex:12}),...both("ombro",{flex:30,abd:30}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:30})},
-      b:{pelve:{pos:[0,0,0],flex:-58},coluna:{flex:0},cervical:{flex:10},...both("quadril",{flex:105,abd:14}),...both("joelho",{flex:95}),...both("ombro",{flex:30,abd:30}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:30})},
-      t:[[0.5,0],[1.4,1],[0.3,1],[1.1,0]],cam:[72,0.75,1.4,0.35],con:0,err:{joelho:22}},
+      a:{pelve:{pos:[0,0,0],flex:-58},coluna:{flex:0},cervical:{flex:10},...both("quadril",{flex:74,abd:10}),...both("joelho",{flex:10}),...both("ombro",{flex:30,abd:30}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:30})},
+      b:{pelve:{pos:[0,0,0],flex:-58},coluna:{flex:0},cervical:{flex:10},...both("quadril",{flex:118,abd:14}),...both("joelho",{flex:100}),...both("ombro",{flex:30,abd:30}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:30})},
+      t:[[0.5,0],[1.4,1],[0.3,1],[1.1,0]],cam:[112,0.8,1.45,0.3],con:0,err:{joelho:22}},
     /* seated dumbbell shoulder press, bench upright (~80°) */
     desenv_h:{setup:"inclinado",inc:80,hands:"db",db:"ohp",gx:[0.06,0.055],eq:["banco_inc"],
       a:{pelve:{pos:[0,0,0],flex:-10},coluna:{flex:-2},cervical:{flex:0},...both("quadril",{flex:82,abd:16}),...both("joelho",{flex:85}),...both("ombro",{flex:20,abd:80,rot:-60}),...both("cotovelo",{flex:100}),...both("antebraco",{pron:50})},
@@ -1057,7 +1057,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       return {d:best,p:bp}},
     lowest(ks){updW();const v=new THREE.Vector3();let best=null;for(const k of ks||Object.keys(parts)){const o=parts[k];if(!o)continue;const n=o.geometry.attributes.position.count;
       for(let i=0;i<n;i++){o.getVertexPosition(i,v);v.applyMatrix4(o.matrixWorld);if(!best||v.y<best.p[1])best={k,p:v.toArray()}}}return best},
-    eqInfo(){const m=MOT;if(!m)return null;const a=v=>v&&v.toArray?v.toArray().map(x=>+x.toFixed(3)):v;return {pulley:a(m.pulley),plate:a(m.plate),plateZ:m.plateZ,plateN:a(m.plateN),seatZ:m.seatZ,top:a(m.top),low:a(m.low),knot:a(m.knot),cab:m.cab?{p:a(m.cab.position),len:+m.cab.scale.y.toFixed(3)}:null}},
+    eqInfo(){const m=MOT;if(!m)return null;const a=v=>v&&v.toArray?v.toArray().map(x=>+x.toFixed(3)):v;return {rail:a(m.rail),travel:m.travel,sled:m.sled&&a(m.sled.position),pulley:a(m.pulley),plate:a(m.plate),plateZ:m.plateZ,plateN:a(m.plateN),seatZ:m.seatZ,top:a(m.top),low:a(m.low),knot:a(m.knot),cab:m.cab?{p:a(m.cab.position),len:+m.cab.scale.y.toFixed(3)}:null}},
     bar(){return MOT&&MOT.barPt?MOT.barPt.toArray():MOT&&MOT.bar?MOT.bar.position.toArray():null},
     partBoxes(){updW();const r={};for(const [k,o] of Object.entries(parts)){const b=new THREE.Box3().expandByObject(o,true);r[k]={min:b.min.toArray(),max:b.max.toArray()}}return r},
     boxes(){if(!bones||!root)return null;const bb=new THREE.Box3();for(const o of boneMs)if(o.visible)bb.expandByObject(o);const cv=root.visible;const v0=Object.values(parts).map(o=>o.visible);Object.values(parts).forEach(o=>o.visible=true);

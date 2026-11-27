@@ -65,7 +65,7 @@ for(const [sx,theme] of [["m","light"],["f","dark"]]){const p=await page({sex:sx
   await p.close()}
 /* 2a) 0.83: todos os movimentos (♂ todos, ♀ alguns): o corpo certo, a barra/os halteres dentro da mão fechada em 11 momentos,
    a barra na frente das pernas quando pendurada; fase na tela, erro comum e ângulos */
-for(const [sx,only] of [["m",null],["f",["remcurv","supino_inc_h","desenv_h","elevlat","barrafixa","flexao","crunch","hipthrust","bulgaro","pant","pushdown","puxada","rembaixa"]]]){const p=await page({sex:sx});
+for(const [sx,only] of [["m",null],["f",["remcurv","supino_inc_h","desenv_h","elevlat","barrafixa","flexao","crunch","hipthrust","bulgaro","pant","pushdown","puxada","rembaixa","extensora","flexora","legpress"]]]){const p=await page({sex:sx});
   const L=await p.evaluate(()=>MOVV().map(x=>({k:x.k,f:x.f.id,sel:x.sel})));ok(L.length>=12,`${sx}: ${L.length} movimentos na lista`);
   for(const x of L){if(only&&!only.includes(x.k))continue;
     await p.evaluate(x=>openHowPage(FAMBY[x.f],x.sel),x);await ready(p);await p.waitForTimeout(600);
