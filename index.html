@@ -4318,7 +4318,8 @@ const MOVK=[["agach",s=>s.e==="ba"&&s.pe==="md","agach"],["terra",s=>s.st==="co"
   ["rosca",s=>s.e==="ba"&&s.g==="su"&&s.w==="md"&&s.p==="fr"&&s.l==="bi","rosca"],["rosca",s=>s.e==="ha"&&s.g==="su"&&s.p==="fr"&&s.l==="bi","rosca_h"],
   ["rosca",s=>s.e==="ha"&&s.g==="ne"&&s.p==="fr"&&s.l==="bi","martelo"],["elevlat",s=>s.e==="ha"&&s.p==="pe"&&s.c==="es"&&s.l==="bi","elevlat"],
   ["barrafixa",s=>s.g==="pr"&&s.w==="md"&&s.e==="co","barrafixa"],["flexao",s=>s.b==="ch"&&s.w==="md"&&s.e==="co","flexao"],["crunch",s=>s.e==="co"&&s.v==="tr","crunch"],
-  ["hipthrust",s=>s.ap==="bc"&&s.e==="ba"&&s.l==="bi","hipthrust"],["afundo",s=>s.dir==="bu"&&s.e==="ha","bulgaro"],["pant",s=>s.p==="pe"&&s.e==="ha"&&s.j==="es"&&s.l==="bi","pant"]];
+  ["hipthrust",s=>s.ap==="bc"&&s.e==="ba"&&s.l==="bi","hipthrust"],["afundo",s=>s.dir==="bu"&&s.e==="ha","bulgaro"],["pant",s=>s.p==="pe"&&s.e==="ha"&&s.j==="es"&&s.l==="bi","pant"],
+  ["pushdown",s=>s.g==="co"&&s.l==="bi","pushdown"],["puxada",s=>s.g==="pr"&&s.w==="md"&&s.e==="po"&&s.l==="bi","puxada"],["rembaixa",s=>s.e==="po"&&s.g==="ne"&&s.w==="md"&&s.l==="bi","rembaixa"]];
 function movOf(f,sel){if(!f)return null;const s={...f.d,...(sel||{})},r=MOVK.find(([fid,t])=>fid===f.id&&t(s));return r?{k:r[2],deep:r[2]==="agach"&&s.am==="pr"}:null}
 /* the variations that have a movement, one per MOVK rule (cached): [{f, sel, k}] — the Exercícios list shows each one */
 const MOVV=(()=>{let L=null;return ()=>{if(L)return L;L=[];for(const [fid,t,k] of MOVK){const f=FAMBY[fid];if(!f)continue;const ax=f.ax.map(a=>[a[0],a[3].map(o=>o.k)]);
@@ -4343,7 +4344,10 @@ const FASES={agach:[F_UP,F_DOWN,["embaixo","bottom","abajo"],["sobe","going up",
   crunch:[["deitado","lying down","acostado"],["enrola o tronco","curl up","enrolla el tronco"],["contrai","squeeze","contrae"],["desce devagar","lower slowly","baja despacio"]],
   hipthrust:[["quadril embaixo","hips down","cadera abajo"],["empurra o quadril","drive the hips up","empuja la cadera"],["aperta o glúteo","squeeze the glutes","aprieta el glúteo"],["desce devagar","lower slowly","baja despacio"]],
   bulgaro:[F_UP,F_DOWN,["embaixo","bottom","abajo"],["sobe","going up","sube"]],
-  pant:[["calcanhares embaixo","heels down","talones abajo"],["sobe na ponta","up on the toes","sube de puntillas"],["segura em cima","hold at the top","mantén arriba"],["desce devagar","lower slowly","baja despacio"]]};
+  pant:[["calcanhares embaixo","heels down","talones abajo"],["sobe na ponta","up on the toes","sube de puntillas"],["segura em cima","hold at the top","mantén arriba"],["desce devagar","lower slowly","baja despacio"]],
+  pushdown:[["cotovelos dobrados","elbows bent","codos doblados"],["estica os braços","straighten the arms","estira los brazos"],["abre a corda embaixo","spread the rope at the bottom","abre la cuerda abajo"],["volta devagar","return slowly","vuelve despacio"]],
+  puxada:[F_STR,["puxa","pull","tira"],["barra no peito","bar to the chest","barra al pecho"],["sobe devagar","let it up slowly","sube despacio"]],
+  rembaixa:[F_STR,["puxa","pull","tira"],["na barriga","to the belly","a la barriga"],["volta devagar","return slowly","vuelve despacio"]]};
 FASES.rosca_h=FASES.martelo=FASES.rosca;
 const ERRS={agach:["Joelhos para dentro","Knees caving in","Rodillas hacia dentro"],terra:["Costas curvadas","Rounded back","Espalda curvada"],
   supino:["Cotovelos a 90° e barra no pescoço","Elbows flared to 90° and bar to the neck","Codos a 90° y barra al cuello"],
@@ -4357,7 +4361,10 @@ const ERRS={agach:["Joelhos para dentro","Knees caving in","Rodillas hacia dentr
   crunch:["Puxar o pescoço com as mãos","Pulling the neck with the hands","Tirar del cuello con las manos"],
   hipthrust:["Arquear a lombar em vez de estender o quadril","Arching the lower back instead of extending the hips","Arquear la zona lumbar en vez de extender la cadera"],
   bulgaro:["Tronco caindo para a frente","Trunk falling forward","Tronco cayendo hacia delante"],
-  pant:["Joelhos dobrando e subida curta","Bending the knees, short range","Doblar las rodillas y subir poco"]};
+  pant:["Joelhos dobrando e subida curta","Bending the knees, short range","Doblar las rodillas y subir poco"],
+  pushdown:["Cotovelos saindo do lado do corpo","Elbows leaving the sides","Codos separándose del cuerpo"],
+  puxada:["Jogar o tronco para trás para puxar","Throwing the trunk back to pull","Echar el tronco atrás para tirar"],
+  rembaixa:["Balançar o tronco (curva na frente, joga para trás)","Swinging the trunk (rounding forward, leaning back)","Balancear el tronco (curvar adelante, echarse atrás)"]};
 ERRS.rosca_h=ERRS.martelo=ERRS.rosca;
 const HPANG=[["frente",20,["Frente","Front","Frente"]],["lado",65,["Lado","Side","Lado"]],["costas",180,["Costas","Back","Espalda"]]];
 const HPSV={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>',pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg>'};
