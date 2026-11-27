@@ -65,13 +65,19 @@ for(const [sx,theme] of [["m","light"],["f","dark"]]){const p=await page({sex:sx
   await p.close()}
 /* 2a) 0.83: todos os movimentos (♂ todos, ♀ alguns): o corpo certo, a barra/os halteres dentro da mão fechada em 11 momentos,
    a barra na frente das pernas quando pendurada; fase na tela, erro comum e ângulos */
-for(const [sx,only] of [["m",null],["f",["remcurv","supino_inc_h","desenv_h","elevlat"]]]){const p=await page({sex:sx});
+for(const [sx,only] of [["m",null],["f",["remcurv","supino_inc_h","desenv_h","elevlat","barrafixa","flexao","crunch","hipthrust","bulgaro","pant"]]]){const p=await page({sex:sx});
   const L=await p.evaluate(()=>MOVV().map(x=>({k:x.k,f:x.f.id,sel:x.sel})));ok(L.length>=12,`${sx}: ${L.length} movimentos na lista`);
   for(const x of L){if(only&&!only.includes(x.k))continue;
     await p.evaluate(x=>openHowPage(FAMBY[x.f],x.sel),x);await ready(p);await p.waitForTimeout(600);
     const r=await p.evaluate(()=>{const I=HP.motionInfo();let gr=0,gap=9;for(let i=0;i<=10;i++){HP.still(i/10);const J=HP.motionInfo();gr=Math.max(gr,J.grip||0);if(J.legGap!=null)gap=Math.min(gap,J.legGap)}return {k:I&&I.key,gr,gap,sx:HP.sexNow()}});
     ok(r.k===x.k&&r.sx===sx,`${sx} ${x.k}: movimento certo`);ok(r.gr<0.012,`${sx} ${x.k}: mãos no equipamento (pior ${(r.gr*100).toFixed(1)} cm)`);
     if(r.gap<9)ok(r.gap>0.01,`${sx} ${x.k}: barra na frente das pernas (${(r.gap*100).toFixed(1)} cm)`);
+    /* 0.84: peso do corpo — nada atravessa o chão (no chão/flexão; sem contar a pele das mãos/pés, que no JS é linear e afunda nos dedos dobrados); pendurado, os pés longe do chão e a cabeça sem bater na barra */
+    if(["flexao","crunch","barrafixa","hipthrust","bulgaro","pant"].includes(x.k)){const c=await p.evaluate(k=>{let lo=9,lk="",hd=9;const ks=Object.keys(HP.partBoxes()).filter(n=>n!=="pele");for(const e of [false,true]){HP.motion(k,{play:false,erro:e});for(let i=0;i<=10;i++){HP.still(i/10);const l=HP.lowest(ks);if(l.p[1]<lo){lo=l.p[1];lk=l.k}
+        if(k==="barrafixa"){const b=HP.bar();hd=Math.min(hd,HP.nearest(["cabeca","pele_n","osso"],[-0.15,b[1],b[2]],[0.15,b[1],b[2]]).d)}
+        if(k==="hipthrust"){const b=HP.bar();hd=Math.min(hd,HP.nearest(ks,[-0.2,b[1],b[2]],[0.2,b[1],b[2]]).d)}}}HP.motion(k,{play:false});return {lo,lk,hd}},x.k);
+      if(x.k==="barrafixa")ok(c.lo>0.03&&c.hd>0.03,`${sx} barra fixa: pés fora do chão (${(c.lo*100).toFixed(0)} cm) e cabeça longe da barra (${(c.hd*100).toFixed(1)} cm)`);
+      else{if(x.k==="hipthrust")ok(c.hd>0.025&&c.hd<0.07,`${sx} hip thrust: barra apoiada no quadril, sem entrar (${(c.hd*100).toFixed(1)} cm do eixo)`);ok(c.lo>-0.012,`${sx} ${x.k}: nada atravessa o chão, certo e errado (mais baixo ${c.lk} ${(c.lo*100).toFixed(1)} cm)`)}}
     if(!only){await p.evaluate(()=>HP.play(true));await p.waitForTimeout(400);
       const ph=await p.evaluate(()=>({t:$("hpPh").querySelector("b").textContent,h:$("hpPh").hidden}));ok(!ph.h&&ph.t.length>1,`${sx} ${x.k}: fase na tela ("${ph.t}")`);
       await p.screenshot({path:`${OUT}/como-fazer-mov-${x.k}.png`})}
@@ -80,7 +86,10 @@ for(const [sx,only] of [["m",null],["f",["remcurv","supino_inc_h","desenv_h","el
     await p.click('[data-hp="err"]');await p.waitForTimeout(700);const e=await p.evaluate(()=>({err:HP.erro(),cls:$("hpPh").classList.contains("err"),t:$("hpPh").textContent,b:document.querySelector('[data-hp="err"]').textContent}));
     ok(e.err&&e.cls&&/Errado/.test(e.t)&&/certo/.test(e.b),`erro comum: liga e mostra "${e.t.slice(0,40)}"`);
     await p.click('[data-hp="err"]');await p.waitForTimeout(500);ok(await p.evaluate(()=>!HP.erro()),'erro comum: desliga');
-    const c0=await p.evaluate(()=>HP.camPos());await p.click('[data-hpang="costas"]');await p.waitForTimeout(900);const c1=await p.evaluate(()=>HP.camPos());
+    const c0=await p.evaluate(()=>HP.camPos());const labs=[await p.textContent('#hpAng')];
+    /* 0.84: um botão só, cada toque vai para a próxima vista: Frente → Lado → Costas → Frente */
+    for(let i=0;i<4;i++){await p.click('[data-hpang="next"]');await p.waitForTimeout(i===2?900:300);labs.push(await p.textContent('#hpAng'));if(i===2)var c1=await p.evaluate(()=>HP.camPos())}
+    ok(labs.join(",")==="Vista,Frente,Lado,Costas,Frente"&&await p.evaluate(()=>$("hpAng").querySelectorAll("button").length===1),`ângulo: um botão que roda (${labs.join(" → ")})`);
     ok(c1[2]<c0[2]-1,`ângulo Costas leva a câmera para trás (z ${c0[2].toFixed(1)} → ${c1[2].toFixed(1)})`);
     await p.evaluate(()=>closeHowPage());ok(await p.evaluate(()=>$("hpPh").hidden||$("howPg").hidden),'fechar a página para a fase')}
   await p.close()}
