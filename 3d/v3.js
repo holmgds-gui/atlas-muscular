@@ -652,7 +652,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     /* 0.84: hip thrust — the upper back on the edge of a bench (sideways), feet flat, a padded bar on the hips; the hips go
        from low to the top where trunk and thighs make a line (solve() keeps the back on the edge, the feet stay put) */
     hipthrust:{setup:"ponte",hands:"bar",bar:"quadril",gx:[0.3,0.27],eq:["banco_x"],
-      a:{pelve:{pos:[0,0,0],flex:-48},coluna:{flex:6},cervical:{flex:18},...both("quadril",{flex:75,abd:8}),...both("joelho",{flex:80}),...both("ombro",{flex:30,abd:22}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:60})},
+      a:{pelve:{pos:[0,0,0],flex:-56},coluna:{flex:6},cervical:{flex:18},...both("quadril",{flex:64,abd:10}),...both("joelho",{flex:80}),...both("ombro",{flex:30,abd:22}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:60})},
       b:{pelve:{pos:[0,0,0],flex:-92},coluna:{flex:4},cervical:{flex:30},...both("quadril",{flex:2,abd:8}),...both("joelho",{flex:90}),...both("ombro",{flex:30,abd:22}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:60})},
       t:[[0.5,0],[0.9,1],[0.7,1],[1.3,0]],cam:[72,0.4,1.25,0.2],con:1,err:{b:{lombar:{flex:-20},...both("quadril",{flex:16,abd:8})}}},
     /* Bulgarian split squat with dumbbells — the back foot on a bench behind, the front foot well ahead; straight down and up */
@@ -820,7 +820,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       m.solve(m,1,PB);rigPose(PB);const ka=jp("tornozelo_d"),kb=jp("tornozelo_e");m.feet=[{alvo:[ka.x,A0.y,ka.z]},{alvo:[kb.x,A1.y,kb.z]}];
       /* the bar sits on the hip crease: offset from the pelvis, found at the top pose */
       const hc=jp("quadril_d").add(jp("quadril_e")).multiplyScalar(0.5),qp=wq(rig.G.pelve),pu=new THREE.Vector3(0,1,0).applyQuaternion(qp),pf=new THREE.Vector3(0,0,1).applyQuaternion(qp),hp=skinAt(["abdomen_infra","quad_reto_femoral","sartorio","adutores","deco"],hc,pu,pf,0.035);
-      hp.addScaledVector(pf,0.044);hp.x=hc.x;m.hipOff=hp.sub(jp("pelve")).applyQuaternion(wq(rig.G.pelve).invert());
+      hp.addScaledVector(pf,0.05);hp.x=hc.x;m.hipOff=hp.sub(jp("pelve")).applyQuaternion(wq(rig.G.pelve).invert());
       pose0()}
     else if(d.setup==="bulgaro"){/* front (right) foot ahead, the back (left) foot's instep on a 45 cm bench behind */
       m.feet=[{alvo:[A0.x+0.01,A0.y,A0.z+0.36]},{alvo:[A1.x-0.02,0.45+0.055,A1.z-0.58],plano:false}];m.benchZ=A1.z-0.58-0.03;m.reach=0;pose0()}
@@ -939,7 +939,6 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       return {d:best,p:bp}},
     lowest(ks){root.updateMatrixWorld(true);const v=new THREE.Vector3();let best=null;for(const k of ks||Object.keys(parts)){const o=parts[k];if(!o)continue;const n=o.geometry.attributes.position.count;
       for(let i=0;i<n;i++){o.getVertexPosition(i,v);v.applyMatrix4(o.matrixWorld);if(!best||v.y<best.p[1])best={k,p:v.toArray()}}}return best},
-    _dbg(){return {lift:MOT&&MOT.lift,pron:[rig.ang.antebraco_d,rig.ang.antebraco_e],hk:[hook('d').ax.toArray(),hook('e').ax.toArray()],fa:jp('punho_d').sub(jp('antebraco_d')).normalize().toArray()}},
     bar(){return MOT&&MOT.barPt?MOT.barPt.toArray():MOT&&MOT.bar?MOT.bar.position.toArray():null},
     partBoxes(){root.updateMatrixWorld(true);const r={};for(const [k,o] of Object.entries(parts)){const b=new THREE.Box3().expandByObject(o,true);r[k]={min:b.min.toArray(),max:b.max.toArray()}}return r},
     boxes(){if(!bones||!root)return null;const bb=new THREE.Box3();for(const o of boneMs)if(o.visible)bb.expandByObject(o);const cv=root.visible;const v0=Object.values(parts).map(o=>o.visible);Object.values(parts).forEach(o=>o.visible=true);

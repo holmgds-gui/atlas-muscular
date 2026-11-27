@@ -86,7 +86,10 @@ for(const [sx,only] of [["m",null],["f",["remcurv","supino_inc_h","desenv_h","el
     await p.click('[data-hp="err"]');await p.waitForTimeout(700);const e=await p.evaluate(()=>({err:HP.erro(),cls:$("hpPh").classList.contains("err"),t:$("hpPh").textContent,b:document.querySelector('[data-hp="err"]').textContent}));
     ok(e.err&&e.cls&&/Errado/.test(e.t)&&/certo/.test(e.b),`erro comum: liga e mostra "${e.t.slice(0,40)}"`);
     await p.click('[data-hp="err"]');await p.waitForTimeout(500);ok(await p.evaluate(()=>!HP.erro()),'erro comum: desliga');
-    const c0=await p.evaluate(()=>HP.camPos());await p.click('[data-hpang="costas"]');await p.waitForTimeout(900);const c1=await p.evaluate(()=>HP.camPos());
+    const c0=await p.evaluate(()=>HP.camPos());const labs=[await p.textContent('#hpAng')];
+    /* 0.84: um botão só, cada toque vai para a próxima vista: Frente → Lado → Costas → Frente */
+    for(let i=0;i<4;i++){await p.click('[data-hpang="next"]');await p.waitForTimeout(i===2?900:300);labs.push(await p.textContent('#hpAng'));if(i===2)var c1=await p.evaluate(()=>HP.camPos())}
+    ok(labs.join(",")==="Vista,Frente,Lado,Costas,Frente"&&await p.evaluate(()=>$("hpAng").querySelectorAll("button").length===1),`ângulo: um botão que roda (${labs.join(" → ")})`);
     ok(c1[2]<c0[2]-1,`ângulo Costas leva a câmera para trás (z ${c0[2].toFixed(1)} → ${c1[2].toFixed(1)})`);
     await p.evaluate(()=>closeHowPage());ok(await p.evaluate(()=>$("hpPh").hidden||$("howPg").hidden),'fechar a página para a fase')}
   await p.close()}
