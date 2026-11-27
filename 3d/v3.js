@@ -654,7 +654,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     hipthrust:{setup:"ponte",hands:"bar",bar:"quadril",gx:[0.3,0.27],eq:["banco_x"],
       a:{pelve:{pos:[0,0,0],flex:-56},coluna:{flex:6},cervical:{flex:18},...both("quadril",{flex:64,abd:10}),...both("joelho",{flex:80}),...both("ombro",{flex:30,abd:22}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:60})},
       b:{pelve:{pos:[0,0,0],flex:-92},coluna:{flex:4},cervical:{flex:30},...both("quadril",{flex:2,abd:8}),...both("joelho",{flex:90}),...both("ombro",{flex:30,abd:22}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:60})},
-      t:[[0.5,0],[0.9,1],[0.7,1],[1.3,0]],cam:[72,0.4,1.25,0.2],con:1,err:{b:{lombar:{flex:-20},...both("quadril",{flex:16,abd:8})}}},
+      t:[[0.5,0],[0.9,1],[0.7,1],[1.3,0]],cam:[32,0.42,1.3,0.2],con:1,err:{b:{lombar:{flex:-20},...both("quadril",{flex:16,abd:8})}}},
     /* Bulgarian split squat with dumbbells — the back foot on a bench behind, the front foot well ahead; straight down and up */
     bulgaro:{setup:"bulgaro",hands:"db",db:"hang",eq:["banco_tras"],
       a:{pelve:{pos:[0,-0.12,-0.06],flex:6},coluna:{flex:2},cervical:{flex:-4},...both("ombro",{flex:0,abd:8}),...both("cotovelo",{flex:6}),...both("antebraco",{pron:0}),tornozelo_e:{flex:-45}},
