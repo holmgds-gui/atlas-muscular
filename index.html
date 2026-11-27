@@ -937,6 +937,7 @@ html.noanim .hpg:not([hidden]){animation:none}
 html.noanim .hpg-sh{transition:none}
 .hpg-grab{display:flex;justify-content:center;padding:9px 0 7px;cursor:grab;touch-action:none;flex:none}
 .hpg-grab i{width:42px;height:5px;border-radius:3px;background:var(--line2,var(--line))}
+.hpg-in.hp-hid .hpg-body{visibility:hidden}.hpg-in.hp-hid .hpg-sh{box-shadow:0 -2px 12px rgba(0,0,0,.1)}
 .hpg-body{overflow:auto;-webkit-overflow-scrolling:touch;padding:2px max(16px,env(safe-area-inset-right,0px)) calc(24px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));font-size:15px;line-height:1.45;overscroll-behavior:contain}
 .hpg-body .how-l{display:block;margin:14px 0 4px;font:700 13px var(--f-display);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
 .hpg-body ol,.hpg-body ul{margin:2px 0 6px;padding-left:22px;display:grid;gap:5px}
@@ -3313,13 +3314,18 @@ $("pGrab").addEventListener("click",()=>{const up=$("tab-atlas").classList.conta
       /* owner (0.52): pulling the list down, the small figure in the corner grows with the finger toward its big size.
          Its big place is measured by trying the next layout for a moment (no paint happens in between). */
       if(A.classList.contains("covered")&&dy>0&&can("down")){const ST=A.querySelector(".stage"),F=figBoxEl(),a=ST.getBoundingClientRect(),aF=F.getBoundingClientRect(),sel=(model==="art"?curJ:cur)||(cdOn?"cardio":null)||(grp?"grp":null),idle=A.classList.contains("idle");
-        A.classList.remove("covered");A.classList.toggle("idle",!sel);const bF=F.getBoundingClientRect();A.classList.add("covered");A.classList.toggle("idle",idle);
+        /* 0.82 (owner: "quando eu abaixar não fique tudo cortado, feio, e o boneco sem acompanhar"): Cardio/Exercícios go back
+           to the idle layout (big figure, low sheet), so that is the layout measured; the title also slides from its place
+           beside the small figure to its place on the low sheet, and the figure grows over the same distance the title travels */
+        const HD=P.querySelector(".p-head"),aH=HD.getBoundingClientRect();
+        A.classList.remove("covered");A.classList.toggle("idle",!sel||(cdOn&&!cdSel));const bF=F.getBoundingClientRect(),bH=HD.getBoundingClientRect();A.classList.add("covered");A.classList.toggle("idle",idle);
+        if(bH.top-aH.top>40)g.head={el:HD,dx:bH.left-aH.left,D:bH.top-aH.top};
         /* the figure itself (not the box around it, which also holds the buttons) goes from its small size to its big one */
         if(aF.height>20&&bF.height>aF.height+20){const K=bF.height/aF.height,rx=aF.left+aF.width/2-a.left,ry=aF.top+aF.height/2-a.top;
-          g.grow={ST,F,K,D:Math.max(120,bF.bottom-aF.bottom),tx:bF.left+bF.width/2-a.left-K*rx,ty:bF.top+bF.height/2-a.top-K*ry};
+          g.grow={ST,F,K,D:g.head?Math.max(120,g.head.D*0.6):Math.max(120,bF.bottom-aF.bottom),tx:bF.left+bF.width/2-a.left-K*rx,ty:bF.top+bF.height/2-a.top-K*ry};
           ST.style.transition="none";ST.style.transformOrigin="0 0";ST.style.willChange="transform"}}}
     if(g.lock!=="v")return;e.preventDefault();g.dy=dy;{const y=e.touches[0].clientY,now=Date.now();g.v=(y-g.ly)/Math.max(1,now-g.lt);g.ly=y;g.lt=now}
-    const m=can(dy<0?"up":"down")?dy:rubber(dy,90);g.els.forEach(x=>{x.style.transform=`translateY(${m}px)`;x.style.setProperty("--pd",g.pre?"0px":Math.max(0,-m)+"px")});
+    const m=can(dy<0?"up":"down")?dy:rubber(dy,90),th=g.head?Math.max(0,Math.min(1,m/g.head.D)):0;g.els.forEach(x=>{x.style.transform=g.head&&x===g.head.el?`translate(${g.head.dx*th}px,${m}px)`:`translateY(${m}px)`;x.style.setProperty("--pd",g.pre?"0px":Math.max(0,-m)+"px")});
     if(g.pre){P.style.height=(g.h0+Math.max(0,-m))+"px";stDim(Math.min(.6,.6*Math.max(0,-m)/(A.clientHeight*.45)),false,true)}
     if(g.grow){const G=g.grow,t=Math.max(0,Math.min(1,m/G.D)),k=1+(G.K-1)*t;G.ST.style.transform=`translate(${G.tx*t}px,${G.ty*t}px) scale(${k})`}},{passive:false});
   const unpre=back=>{A.classList.remove("pre","pre0");P.style.height="";if(back&&g0unhid)A.classList.add("hid")};let g0unhid=false;
@@ -4315,21 +4321,25 @@ function hpMount(){if(HP||HPbusy)return;HPbusy=true;const L=$("hpBox").querySele
     HP=mod.mount($("hpBox"),{covered:()=>false,sex:()=>sex,name:k=>M[k]?M[k].n:"",jname:()=>"",joint:()=>{},tap:k=>hpTip(k),
       progress:x=>{const b=L.querySelector(".v3bar i");if(b)b.style.width=Math.round(x*100)+"%"},
       ready:()=>{L.hidden=true;HPbusy=false;hpApply()},fail})}).catch(fail)}
-/* the sheet: drag the handle (or tap it) between low (body big) and high (guide big) */
-const HPSN=[0.44,0.8];let hpHi=false;
-function hpSheet(hi,instant){hpHi=hi;const el=$("hpIn");if(instant)el.classList.add("drag");el.style.setProperty("--sh",(HPSN[hi?1:0]*100)+"%");if(instant)requestAnimationFrame(()=>el.classList.remove("drag"))}
+/* the sheet: drag the handle (or tap it) between hidden (0.82, owner: "dar para baixar a descrição para ficar em tela
+   cheia" — only the handle stays at the bottom), low (body big) and high (guide big) */
+const HPSN=[null,0.44,0.8];let hpLv=1;
+function hpSheet(lv,instant){hpLv=Math.max(0,Math.min(2,lv));const el=$("hpIn");if(instant)el.classList.add("drag");el.classList.toggle("hp-hid",hpLv===0);
+  el.style.setProperty("--sh",hpLv===0?"calc(30px + env(safe-area-inset-bottom,0px))":(HPSN[hpLv]*100)+"%");if(instant)requestAnimationFrame(()=>el.classList.remove("drag"))}
 {const g=$("hpGrab");let d=null;
   g.addEventListener("pointerdown",e=>{const H=$("hpIn").getBoundingClientRect().height;d={y:e.clientY,h:$("hpSh").getBoundingClientRect().height,H,t:performance.now(),moved:false};g.setPointerCapture(e.pointerId);$("hpIn").classList.add("drag")});
-  g.addEventListener("pointermove",e=>{if(!d)return;const dy=e.clientY-d.y;if(Math.abs(dy)>6)d.moved=true;const h=Math.min(d.H*0.9,Math.max(d.H*0.22,d.h-dy));$("hpIn").style.setProperty("--sh",h+"px");d.last=dy;d.lt=performance.now()});
+  g.addEventListener("pointermove",e=>{if(!d)return;const dy=e.clientY-d.y;if(Math.abs(dy)>6)d.moved=true;const h=Math.min(d.H*0.9,Math.max(30,d.h-dy));$("hpIn").style.setProperty("--sh",h+"px");d.last=dy;d.lt=performance.now()});
   const up=e=>{if(!d)return;const o=d;d=null;$("hpIn").classList.remove("drag");
-    if(!o.moved){hpSheet(!hpHi);return}const h=$("hpSh").getBoundingClientRect().height/o.H,v=(o.last||0)/Math.max(1,(o.lt||0)-o.t);
-    hpSheet(Math.abs(v)>0.5?v<0:h>(HPSN[0]+HPSN[1])/2)};
+    if(!o.moved){hpSheet(hpLv===0?1:hpLv===1?2:1);buzz();return}
+    const f=$("hpSh").getBoundingClientRect().height/o.H,v=(o.last||0)/Math.max(1,(o.lt||0)-o.t);
+    let lv;if(Math.abs(v)>0.5)lv=hpLv+(v<0?1:-1);else{const L=[0.04,HPSN[1],HPSN[2]];lv=L.reduce((b,x,i)=>Math.abs(x-f)<Math.abs(L[b]-f)?i:b,0)}
+    hpSheet(lv);buzz()};
   g.addEventListener("pointerup",up);g.addEventListener("pointercancel",up);
-  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();hpSheet(!hpHi)}})}
+  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();hpSheet(hpLv===0?1:hpLv===1?2:1)}})}
 function openHowPage(f,sel){if(!f)return;sel={...f.d,...(sel||{})};HPcur={f,sel,mv:movOf(f,sel)};HPplay=!noAnim();
   $("hpBack").innerHTML=`<b aria-hidden="true">‹</b>${tx("Voltar","Back","Volver")}`;$("hpK").textContent=tx("Como fazer","How to do it","Cómo hacerlo");$("hpT").textContent=vName(f,sel);
   $("hpGrab").setAttribute("aria-label",tx("Arrastar o guia","Drag the guide","Arrastrar la guía"));
-  hpSheet(false,true);hpBody();hpCtl();if(!HOW)loadHow().then(hpBody).catch(()=>hpBody());
+  hpSheet(1,true);hpBody();hpCtl();if(!HOW)loadHow().then(hpBody).catch(()=>hpBody());
   $("howPg").hidden=false;$("hpBody").scrollTop=0;buzz();
   if(HP)hpApply();else if(!HPbad)hpMount();else{HPbad=false;hpMount()}}
 function closeHowPage(){if($("howPg").hidden)return;$("howPg").hidden=true;$("hpTip").hidden=true;if(HP)HP.motion(null)}

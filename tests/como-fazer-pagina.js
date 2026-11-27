@@ -33,6 +33,12 @@ const ready=p=>p.waitForFunction(()=>HP&&!HPbusy&&HP.rigReady(),null,{timeout:90
   const g=await p.locator('#hpGrab').boundingBox();await p.mouse.move(g.x+g.width/2,g.y+g.height/2);await p.mouse.down();await p.mouse.move(g.x+g.width/2,g.y-250,{steps:8});await p.mouse.up();await p.waitForTimeout(700);
   const h1=await p.evaluate(()=>$("hpSh").getBoundingClientRect().height);ok(h1>h0+150,`arrastar a alça sobe o guia (${Math.round(h0)} → ${Math.round(h1)} px)`);
   await p.screenshot({path:`${OUT}/como-fazer-guia.png`});
+  /* 0.82 (dono: "dar para baixar a descrição para ficar em tela cheia"): arrastar para baixo esconde o guia (fica só a alça) */
+  for(let k=0;k<2;k++){const g2=await p.locator('#hpGrab').boundingBox();await p.mouse.move(g2.x+g2.width/2,g2.y+g2.height/2);await p.mouse.down();await p.mouse.move(g2.x+g2.width/2,g2.y+g2.height/2+700,{steps:10});await p.mouse.up();await p.waitForTimeout(700)}
+  const hid=await p.evaluate(()=>({h:$("hpSh").getBoundingClientRect().height,st:$("hpStage").getBoundingClientRect().height,cls:$("hpIn").classList.contains("hp-hid")}));
+  ok(hid.cls&&hid.h<80&&hid.st>600,`arrastar para baixo deixa o boneco em tela cheia (guia ${Math.round(hid.h)} px, boneco ${Math.round(hid.st)} px)`);
+  await p.screenshot({path:`${OUT}/como-fazer-tela-cheia.png`});
+  await p.click('#hpGrab');await p.waitForTimeout(800);{const r=await p.evaluate(()=>({lv:hpLv,h:Math.round($("hpSh").getBoundingClientRect().height)}));ok(r.lv===1&&r.h>250,`tocar na alça traz o guia de volta (${JSON.stringify(r)})`)}
   await p.click('#hpBack');await p.waitForTimeout(400);ok(await p.evaluate(()=>$("howPg").hidden&&!HP.motionInfo()),'Voltar fecha e para o movimento');
   /* menu de segurar: item da página */
   await p.close()}

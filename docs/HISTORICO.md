@@ -243,6 +243,8 @@ Depois, a pedido do dono ("estude mais e continue dando upgrade"):
 
 - **Mãos na barra e barra atravessando a perna (0.81, nov/2026)**: o dono gostou da espessura dos braços, mas "a mão parece que está segurando o vento na frente da barra" e "no terra a barra está passando por dentro da perna, como se o boneco fosse intangível". Agora a pegada é feita pelos dedos: com a mão fechada, as juntas do dedo médio formam um círculo em volta da barra — o app gira o antebraço para esse círculo ficar alinhado com a barra e leva o punho até a barra passar pelo centro dele. No terra, a frente da coxa e da canela é medida no próprio corpo e a barra fica sempre na frente delas (sobe raspando nas pernas); o quadril sobe primeiro e o joelho sai do caminho, e a altura da barra vem do alcance real dos braços esticados (antes ela ficava baixa demais e a mão não chegava).
 
+- **Guia em tela cheia e folha do Atlas mais suave (0.82, nov/2026)**: o dono pediu para "baixar a descrição do exercício para ficar em tela cheia" e, com prints, que ao abaixar a lista do modo Exercícios não ficasse "tudo cortado, feio e o boneco sem acompanhar". Na página "Como fazer", arrastar a alça para baixo agora esconde o guia (fica só a alça) e o boneco ocupa a tela; tocar na alça traz de volta. No Atlas, ao puxar a lista para baixo, o título desliza do lado do boneco pequeno até o seu lugar e o boneco cresce junto com o dedo; antes, em Exercícios e Cardio, o app media o tamanho errado (o da tela com a lista) e o boneco quase não crescia, ficando por cima do texto.
+
 ## 17. Perguntas que o dono fez (respostas resumidas)
 
 - **Atualizações**: o dono pede no Claude, o Claude edita o repositório e o GitHub Pages publica. Se o celular mostrar a versão velha, é só fechar o app por completo.
