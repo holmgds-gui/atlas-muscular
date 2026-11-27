@@ -681,6 +681,21 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       a:{pelve:{pos:[0,0,0],flex:4},coluna:{flex:4},cervical:{flex:-4},...both("quadril",{flex:84,abd:5}),...both("joelho",{flex:32}),...both("tornozelo",{flex:18}),...both("ombro",{flex:70,abd:6}),...both("cotovelo",{flex:6}),...both("antebraco",{pron:0})},
       b:{pelve:{pos:[0,0,0],flex:-4},coluna:{flex:-4},cervical:{flex:-4},...both("quadril",{flex:76,abd:5}),...both("joelho",{flex:32}),...both("tornozelo",{flex:18}),...both("ombro",{flex:-30,abd:14}),...both("cotovelo",{flex:105}),...both("antebraco",{pron:0})},
       t:[[0.6,0],[1.0,1],[0.4,1],[1.7,0]],cam:[68,0.7,1.2,0.25],con:1,err:{a:{coluna:{flex:30},cervical:{flex:8}},b:{pelve:{pos:[0,0,0],flex:-20},coluna:{flex:-10},...both("quadril",{flex:60,abd:5})}}},
+    /* 0.86: machines. Leg extension: seated, back on the pad, the roller on the front of the shins; only the knees move */
+    extensora:{setup:"maquina",seat:0.5,hands:"fk",eq:["extensora"],pegada:0.85,
+      a:{pelve:{pos:[0,0,0],flex:-12},coluna:{flex:0},cervical:{flex:-4},...both("quadril",{flex:84,abd:6}),...both("joelho",{flex:92}),...both("tornozelo",{flex:4}),...both("ombro",{flex:22,abd:22}),...both("cotovelo",{flex:30}),...both("antebraco",{pron:30})},
+      b:{pelve:{pos:[0,0,0],flex:-12},coluna:{flex:0},cervical:{flex:-4},...both("quadril",{flex:84,abd:6}),...both("joelho",{flex:2}),...both("tornozelo",{flex:4}),...both("ombro",{flex:22,abd:22}),...both("cotovelo",{flex:30}),...both("antebraco",{pron:30})},
+      t:[[0.5,0],[0.9,1],[0.6,1],[1.5,0]],cam:[62,0.6,1.2,0.25],con:1,err:{b:{...both("joelho",{flex:40})}}},
+    /* seated leg curl: legs out straight, the roller behind the ankles, the thighs under a pad; the knees bend back */
+    flexora:{setup:"maquina",seat:0.5,hands:"fk",eq:["flexora"],pegada:0.85,
+      a:{pelve:{pos:[0,0,0],flex:-12},coluna:{flex:0},cervical:{flex:-4},...both("quadril",{flex:88,abd:6}),...both("joelho",{flex:4}),...both("tornozelo",{flex:8}),...both("ombro",{flex:22,abd:22}),...both("cotovelo",{flex:30}),...both("antebraco",{pron:30})},
+      b:{pelve:{pos:[0,0,0],flex:-12},coluna:{flex:0},cervical:{flex:-4},...both("quadril",{flex:88,abd:6}),...both("joelho",{flex:100}),...both("tornozelo",{flex:8}),...both("ombro",{flex:22,abd:22}),...both("cotovelo",{flex:30}),...both("antebraco",{pron:30})},
+      t:[[0.5,0],[0.9,1],[0.6,1],[1.5,0]],cam:[62,0.6,1.2,0.25],con:1,err:{b:{...both("joelho",{flex:50})}}},
+    /* 45° leg press: back on the reclined pad, feet flat on the sled; the sled runs down its rails toward the chest */
+    legpress:{setup:"legpress",hands:"fk",eq:["legpress"],pegada:0.85,
+      a:{pelve:{pos:[0,0,0],flex:-58},coluna:{flex:0},cervical:{flex:10},...both("quadril",{flex:74,abd:10}),...both("joelho",{flex:10}),...both("ombro",{flex:30,abd:30}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:30})},
+      b:{pelve:{pos:[0,0,0],flex:-58},coluna:{flex:0},cervical:{flex:10},...both("quadril",{flex:118,abd:14}),...both("joelho",{flex:100}),...both("ombro",{flex:30,abd:30}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:30})},
+      t:[[0.5,0],[1.4,1],[0.3,1],[1.1,0]],cam:[112,0.8,1.45,0.3],con:0,err:{joelho:22}},
     /* seated dumbbell shoulder press, bench upright (~80°) */
     desenv_h:{setup:"inclinado",inc:80,hands:"db",db:"ohp",gx:[0.06,0.055],eq:["banco_inc"],
       a:{pelve:{pos:[0,0,0],flex:-10},coluna:{flex:-2},cervical:{flex:0},...both("quadril",{flex:82,abd:16}),...both("joelho",{flex:85}),...both("ombro",{flex:20,abd:80,rot:-60}),...both("cotovelo",{flex:100}),...both("antebraco",{pron:50})},
@@ -809,6 +824,12 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       return ["d","e"].map((sd,i)=>{const S=jp("ombro_"+sd);return S.add(new THREE.Vector3(0,-m.reach,0)).add(new THREE.Vector3(i?0.05:-0.05,0,0.02))})}
     const k=sm(u);return [0,1].map(i=>m.dbA[i].clone().lerp(m.dbB[i],k))}
   function placeHeld(m){const d=m.d;
+    if(m.lever){/* machine lever: pivot at the knee axis beside the seat, the roller against the shin (front) or behind the ankle */
+      const sd="d",kn=jp("joelho_"+sd),an=jp("tornozelo_"+sd),sh=an.clone().sub(kn),L=sh.length();sh.normalize();
+      const fr=sh.clone().cross(X).normalize();/* front of the shin */
+      const r=kn.clone().addScaledVector(sh,L*0.86).addScaledVector(fr,m.lever.side*0.075);r.x=0;m.lever.roller.position.copy(r);
+      const pv=new THREE.Vector3(0.27,kn.y,kn.z);for(const s of [-1,1]){const a=new THREE.Vector3(s*0.27,pv.y,pv.z),b=new THREE.Vector3(s*0.27,r.y,r.z);setCyl(m.lever.arms[s<0?0:1],a,b)}}
+    if(m.sled){const k=m.sledK||0;m.sled.position.copy(m.sled0).addScaledVector(m.rail,-m.travel*k)}
     if(m.db)["d","e"].forEach((sd,i)=>{const h=hook(sd);m.db[i].position.copy(h.c);m.db[i].quaternion.setFromUnitVectors(X,h.ax)});
     if(m.rope){const a=hook("d").c,b=hook("e").c,k=a.clone().add(b).multiplyScalar(0.5).add(new THREE.Vector3(0,0.075,0.015));m.rope.userData.set(k,a,b);m.knot=k}
     if(m.cab){const e=m.knot||(m.bar&&(d.bar==="vpega"?m.bar.position.clone().add(new THREE.Vector3(0,0,0.11)):m.bar.position));if(e)setCyl(m.cab,m.pulley,e)}
@@ -816,8 +837,8 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
   function frame(u){const m=MOT,d=m.d,P=lerpP(m.A,m.B,u);easeP(P,{...d,a:m.A},m.B,u);P.pegada_d=P.pegada_e=d.pegada!=null?d.pegada:1;P.ik=m.feet?{pe_d:m.feet[0],pe_e:m.feet[1]}:{};
     if(m.err&&d.err.joelho&&m.feet)P.ik={pe_d:{...m.feet[0],joelho:d.err.joelho*sm(u)},pe_e:{...m.feet[1],joelho:d.err.joelho*sm(u)}};
     if(m.dy||m.dz)P.pelve.pos=[P.pelve.pos[0],P.pelve.pos[1]+(m.dy||0),P.pelve.pos[2]+(m.dz||0)];
-    if(m.solve)m.solve(m,u,P);
-    rigPose(P);
+    let posed=false;if(m.solve){m.solve(m,u,P);if(P.ik===null){posed=true;P.ik={}}}
+    if(!posed)rigPose(P);
     if(d.hands==="bar"){const bar=barAt(m,u),gd=d.bar==="vpega"?Y:X;gripTo(P,[["d",new THREE.Vector3(-m.gx,bar.y,bar.z),gd],["e",new THREE.Vector3(m.gx,bar.y,bar.z),gd]]);if(m.bar){m.bar.position.copy(bar);m.bar.quaternion.identity()}}
     else if(d.hands==="db"){const p=dbAt(m,u),ax=d.db==="hang"?Z:X;gripTo(P,[["d",p[0],ax],["e",p[1],ax]])}
     else if(d.hands==="chao"){P.pegada_d=P.pegada_e=0;P.ik={...P.ik,mao_d:m.hand[0].toArray(),mao_e:m.hand[1].toArray()};rigPose(P);palmsFlat();MOT.grip=Math.max(jp("punho_d").distanceTo(m.hand[0]),jp("punho_e").distanceTo(m.hand[1]))}
@@ -832,6 +853,11 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       const B0=new THREE.Matrix4().makeBasis(f0,x0b,n0),B1=new THREE.Matrix4().makeBasis(f1,x1b,n1),q=new THREE.Quaternion().setFromRotationMatrix(B1.multiply(B0.invert()));setWorldQ(rig.G["punho_"+sd],q)}}
   /* toe contact point (tip of the big toe) */
   const toeTip=sd=>{const a=jp("ifh_"+sd),b=jp("mtf1_"+sd);return a.clone().addScaledVector(a.clone().sub(b).normalize(),0.022)};
+  /* the back pad lies on the back, at the trunk's own angle; the seat under the glutes, to seatFront (or 36 cm) */
+  function backSeat(g,seatFront,backLen){const t2=trunkFrame(),ang=THREE.MathUtils.radToDeg(Math.atan2(t2.up.y,-t2.up.z)),a=THREE.MathUtils.degToRad(ang),nrm=new THREE.Vector3(0,Math.cos(a),Math.sin(a));
+    const bk=farthest(BACKK,nrm.clone().negate()),gl=farthest(GLUTK,new THREE.Vector3(0,-1,0)),seatTop=gl.p.y;
+    const pz=bk.p.z-Math.cos(a)*(seatTop-bk.p.y)/Math.max(0.2,Math.sin(a));
+    adjBench(g,seatTop,pz-0.02,seatFront!=null?Math.max(pz+0.2,seatFront):pz+0.36,new THREE.Vector3(0,seatTop,pz),ang,backLen)}
   function motionStart(key,opt){motionStop(true);if(!rig||!MOV[key])return false;const d=MOV[key];opt=opt||{};
     const m=MOT={key,d,opt,t:0,last:performance.now(),play:opt.play!==false,speed:opt.speed||1,sex:curSex,b:opt.deep&&d.deep?d.deep:d.b,dy:0,dz:0,g:new THREE.Group(),err:!!(opt.erro&&d.err)};
     m.A=m.err?merge(d.a,d.err.a):d.a;m.B=m.err?merge(m.b,d.err.b):m.b;
@@ -879,6 +905,16 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     else if(d.setup==="remo"){/* seated cable row: glutes on a 42 cm seat, the legs by their angles, the feet on a plate where they are */
       m.feet=null;pose0();m.dy=0.42-farthest(GLUTK,new THREE.Vector3(0,-1,0)).p.y;pose0();const am=jp("tornozelo_d").add(jp("tornozelo_e")).multiplyScalar(0.5),sh=new THREE.Vector3(0,-1,0).applyQuaternion(wq(rig.G.tornozelo_d));sh.x=0;sh.normalize();
       /* the foot plate flat against the soles (the sole's normal = rest "down" turned with the foot) */m.plateN=sh;m.feet=[{alvo:jp("tornozelo_d").toArray(),plano:false},{alvo:jp("tornozelo_e").toArray(),plano:false}];m.plate=skinAt(["pele"],am,X,sh,0.4,0.4);m.plate.x=0;m.plateZ=m.plate.z;m.seatZ=farthest(GLUTK,new THREE.Vector3(0,-1,0)).p.z}
+    else if(d.setup==="maquina"){/* seated on a machine: glutes on the seat, legs by their angles (no IK: the machine moves them) */
+      m.feet=null;pose0();m.dy=(d.seat||0.5)-farthest(GLUTK,new THREE.Vector3(0,-1,0)).p.y;pose0()}
+    else if(d.setup==="legpress"){/* the sled line goes from the ankles at the start pose to the ankles at the end pose; the feet
+        stay flat on the sled (soles facing up the rails) and the legs follow by IK */
+      m.feet=null;pose0();m.dy=0.5-farthest(GLUTK,new THREE.Vector3(0,-1,0)).p.y;pose0();const fa=["d","e"].map(sd=>jp("tornozelo_"+sd));
+      {const P=lerpP(m.A,m.B,1);P.pelve.pos=[P.pelve.pos[0],P.pelve.pos[1]+m.dy,P.pelve.pos[2]];P.ik={};rigPose(P)}const fb=["d","e"].map(sd=>jp("tornozelo_"+sd));
+      m.rail=fa[0].clone().add(fa[1]).sub(fb[0]).sub(fb[1]).normalize();m.travel=fa[0].clone().add(fa[1]).sub(fb[0]).sub(fb[1]).length()/2;m.fa=fa;
+      const th=Math.atan2(m.rail.z,m.rail.y);/* sole normal = rest "down" turned about x so that it points up the rails */m.footQ=new THREE.Quaternion().setFromAxisAngle(X,-Math.PI+th);
+      m.solve=(m,u,P)=>{const k=sm(u),j=m.err&&d.err.joelho?d.err.joelho*k:0;P.ik={pe_d:{alvo:m.fa[0].clone().addScaledVector(m.rail,-m.travel*k).toArray(),plano:false,joelho:j},pe_e:{alvo:m.fa[1].clone().addScaledVector(m.rail,-m.travel*k).toArray(),plano:false,joelho:j}};
+        m.sledK=k;rigPose(P);for(const sd of ["d","e"])setWorldQ(rig.G["tornozelo_"+sd],m.footQ);P.ik=null};pose0()}
     else if(d.setup==="inclinado"){/* seated on an adjustable bench: glutes on a 47 cm seat, feet flat on the floor where the shins point */
       m.feet=null;pose0();m.dy=(d.seat||0.47)-farthest(GLUTK,new THREE.Vector3(0,-1,0)).p.y;pose0();
       /* feet on the floor right under the knees (thighs level on the seat, shins upright), a little wider */
@@ -921,15 +957,27 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     if(E.includes("polia_baixa")){const pad=eqMat(0x1e2125,0,.6),fr=eqMat(0x33373d,.45,.45);ebox(m.g,0.34,0.07,0.46,0,0.385,m.seatZ+0.04,pad,"pad");for(const zz of [m.seatZ-0.12,m.seatZ+0.2])ebox(m.g,0.06,0.35,0.06,0,0.175,zz,fr,"frame");
       ebox(m.g,0.05,0.05,Math.max(0.2,m.pulley.z-m.seatZ+0.1),0,0.08,(m.seatZ+m.pulley.z)/2,fr,"frame");
       const pc=m.plate.clone().addScaledVector(m.plateN,0.016),pl=ebox(m.g,0.5,0.34,0.03,0,0,0,fr,"frame");pl.position.copy(pc);pl.quaternion.setFromUnitVectors(Z,m.plateN);ebox(m.g,0.05,pc.y,0.05,0,pc.y/2,pc.z+0.06,fr,"frame");cableTower(m.g,m.pulley,m.pulley.z+0.28,false)}
+    if(E.includes("extensora")||E.includes("flexora")){/* the seat ends just behind the knees, the back pad on the back, a lever with a roller */
+      const kn=jp("joelho_d"),pad=eqMat(0x1e2125,0,.6),st=eqMat(0xc9cdd3,.6,.3),fr=eqMat(0x33373d,.45,.45);backSeat(m.g,kn.z-0.07,0.7);
+      const roller=eqMesh(new THREE.CylinderGeometry(0.05,0.05,0.42,24).rotateZ(Math.PI/2),pad,"pad",m.g);
+      m.lever={side:E.includes("extensora")?1:-1,roller,arms:[0,1].map(()=>eqMesh(new THREE.BoxGeometry(0.04,1,0.04),fr,"frame",m.g))};
+      for(const s of [-1,1]){const c=eqMesh(new THREE.CylinderGeometry(0.035,0.035,0.05,20).rotateZ(Math.PI/2),st,"frame",m.g);c.position.set(s*0.27,kn.y,kn.z);ebox(m.g,0.05,kn.y,0.05,s*0.27,kn.y/2,kn.z-0.02,fr,"frame")}
+      if(E.includes("flexora")){const top=boxOf(["quad_reto_femoral","quad_vasto_lateral"]).max.y;const tp=eqMesh(new THREE.CylinderGeometry(0.05,0.05,0.42,24).rotateZ(Math.PI/2),pad,"pad",m.g);tp.position.set(0,top+0.05,kn.z-0.12);
+        for(const s of [-1,1])ebox(m.g,0.04,0.22,0.04,s*0.24,top+0.0,kn.z-0.12,fr,"frame")}}
+    if(E.includes("legpress")){const pad=eqMat(0x1e2125,0,.6),fr=eqMat(0x33373d,.45,.45),st=eqMat(0xc9cdd3,.6,.3);backSeat(m.g,null,0.8);
+      /* sled: a plate under the soles, square to the rails; two rails from the floor up past the start */
+      const c=m.fa[0].clone().add(m.fa[1]).multiplyScalar(0.5),n=m.rail,sole=c.clone().addScaledVector(n,0.085);m.sled=new THREE.Group();m.g.add(m.sled);
+      const pl=ebox(m.sled,0.7,0.5,0.04,0,0,0,fr,"frame");pl.quaternion.setFromUnitVectors(Z,n);pl.position.copy(n.clone().multiplyScalar(0.02));
+      for(const s of [-1,1]){const h=ebox(m.sled,0.06,0.06,0.3,s*0.33,0,0,st,"frame");h.quaternion.setFromUnitVectors(Z,n);h.position.copy(n.clone().multiplyScalar(0.17)).add(new THREE.Vector3(s*0.33,0,0))}
+      m.sled0=sole.clone();m.sled.position.copy(sole);
+      for(const s of [-1,1]){const a=sole.clone().addScaledVector(n,0.25).add(new THREE.Vector3(s*0.4,-0.05,0)),b=sole.clone().addScaledVector(n,-m.travel-0.35);b.x=s*0.4;b.y=Math.max(0.05,b.y-0.05);const r=eqMesh(new THREE.BoxGeometry(0.06,1,0.06),fr,"frame",m.g);setCyl(r,b,a);
+        ebox(m.g,0.06,Math.max(0.05,a.y),0.06,s*0.4,Math.max(0.05,a.y)/2,a.z,fr,"frame")}}
     if(m.pulley){m.cab=cableMesh(m.g);placeHeld(m)}
+    if(m.lever||m.sled)placeHeld(m);
     if(E.includes("banco_x")){const sub=new THREE.Group();flatBench(sub,m.E.y-0.004,-0.62,0.62);sub.rotation.y=Math.PI/2;sub.position.set(0,0,m.E.z-0.13);m.g.add(sub)}
     if(E.includes("banco_tras")){const sub=new THREE.Group();flatBench(sub,0.45,-0.55,0.55);sub.rotation.y=Math.PI/2;sub.position.set(0,0,m.benchZ-0.04);m.g.add(sub)}
     if(m.d.bar==="quadril"&&m.bar){const pad=eqMesh(new THREE.CylinderGeometry(0.042,0.042,0.4,28).rotateZ(Math.PI/2),eqMat(0x2a2d32,0,.85),"pad",m.bar)}
-    if(E.includes("banco_inc")){/* the back pad lies on the back, at the trunk's own angle; the seat under the glutes */
-      const t2=trunkFrame(),ang=THREE.MathUtils.radToDeg(Math.atan2(t2.up.y,-t2.up.z)),a=THREE.MathUtils.degToRad(ang),nrm=new THREE.Vector3(0,Math.cos(a),Math.sin(a));
-      const bk=farthest(BACKK,nrm.clone().negate()),gl=farthest(GLUTK,new THREE.Vector3(0,-1,0)),seatTop=gl.p.y;
-      const pz=bk.p.z-Math.cos(a)*(seatTop-bk.p.y)/Math.max(0.2,Math.sin(a));
-      adjBench(m.g,seatTop,pz-0.02,pz+0.36,new THREE.Vector3(0,seatTop,pz),ang,0.78)}
+    if(E.includes("banco_inc"))backSeat(m.g,null,0.78);
     addShadow(m);scene.add(m.g);
     const [deg,ty,dk,tz]=d.cam,a=THREE.MathUtils.degToRad(deg);m.tgt=new THREE.Vector3(0,ty,tz);m.dk=dk;
     controls.target.copy(m.tgt);const dd=fitD()*dk;camera.position.set(Math.sin(a)*dd,ty+0.08,tz+Math.cos(a)*dd);controls.maxDistance=fitD()*1.6;controls.minDistance=fitD()*0.45;
@@ -1009,7 +1057,7 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       return {d:best,p:bp}},
     lowest(ks){updW();const v=new THREE.Vector3();let best=null;for(const k of ks||Object.keys(parts)){const o=parts[k];if(!o)continue;const n=o.geometry.attributes.position.count;
       for(let i=0;i<n;i++){o.getVertexPosition(i,v);v.applyMatrix4(o.matrixWorld);if(!best||v.y<best.p[1])best={k,p:v.toArray()}}}return best},
-    eqInfo(){const m=MOT;if(!m)return null;const a=v=>v&&v.toArray?v.toArray().map(x=>+x.toFixed(3)):v;return {pulley:a(m.pulley),plate:a(m.plate),plateZ:m.plateZ,plateN:a(m.plateN),seatZ:m.seatZ,top:a(m.top),low:a(m.low),knot:a(m.knot),cab:m.cab?{p:a(m.cab.position),len:+m.cab.scale.y.toFixed(3)}:null}},
+    eqInfo(){const m=MOT;if(!m)return null;const a=v=>v&&v.toArray?v.toArray().map(x=>+x.toFixed(3)):v;return {rail:a(m.rail),travel:m.travel,sled:m.sled&&a(m.sled.position),pulley:a(m.pulley),plate:a(m.plate),plateZ:m.plateZ,plateN:a(m.plateN),seatZ:m.seatZ,top:a(m.top),low:a(m.low),knot:a(m.knot),cab:m.cab?{p:a(m.cab.position),len:+m.cab.scale.y.toFixed(3)}:null}},
     bar(){return MOT&&MOT.barPt?MOT.barPt.toArray():MOT&&MOT.bar?MOT.bar.position.toArray():null},
     partBoxes(){updW();const r={};for(const [k,o] of Object.entries(parts)){const b=new THREE.Box3().expandByObject(o,true);r[k]={min:b.min.toArray(),max:b.max.toArray()}}return r},
     boxes(){if(!bones||!root)return null;const bb=new THREE.Box3();for(const o of boneMs)if(o.visible)bb.expandByObject(o);const cv=root.visible;const v0=Object.values(parts).map(o=>o.visible);Object.values(parts).forEach(o=>o.visible=true);

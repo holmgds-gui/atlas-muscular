@@ -38,7 +38,7 @@ const ready=p=>p.waitForFunction(()=>HP&&!HPbusy&&HP.rigReady(),null,{timeout:90
   const hid=await p.evaluate(()=>({h:$("hpSh").getBoundingClientRect().height,st:$("hpStage").getBoundingClientRect().height,cls:$("hpIn").classList.contains("hp-hid")}));
   ok(hid.cls&&hid.h<80&&hid.st>600,`arrastar para baixo deixa o boneco em tela cheia (guia ${Math.round(hid.h)} px, boneco ${Math.round(hid.st)} px)`);
   await p.screenshot({path:`${OUT}/como-fazer-tela-cheia.png`});
-  await p.click('#hpGrab');await p.waitForTimeout(800);{const r=await p.evaluate(()=>({lv:hpLv,h:Math.round($("hpSh").getBoundingClientRect().height)}));ok(r.lv===1&&r.h>250,`tocar na alça traz o guia de volta (${JSON.stringify(r)})`)}
+  await p.click('#hpGrab');await p.waitForTimeout(1400);{const r=await p.evaluate(()=>({lv:hpLv,h:Math.round($("hpSh").getBoundingClientRect().height)}));ok(r.lv===1&&r.h>250,`tocar na alça traz o guia de volta (${JSON.stringify(r)})`)}
   await p.click('#hpBack');await p.waitForTimeout(400);ok(await p.evaluate(()=>$("howPg").hidden&&!HP.motionInfo()),'Voltar fecha e para o movimento');
   /* menu de segurar: item da página */
   await p.close()}
@@ -65,7 +65,7 @@ for(const [sx,theme] of [["m","light"],["f","dark"]]){const p=await page({sex:sx
   await p.close()}
 /* 2a) 0.83: todos os movimentos (♂ todos, ♀ alguns): o corpo certo, a barra/os halteres dentro da mão fechada em 11 momentos,
    a barra na frente das pernas quando pendurada; fase na tela, erro comum e ângulos */
-for(const [sx,only] of [["m",null],["f",["remcurv","supino_inc_h","desenv_h","elevlat","barrafixa","flexao","crunch","hipthrust","bulgaro","pant","pushdown","puxada","rembaixa"]]]){const p=await page({sex:sx});
+for(const [sx,only] of [["m",null],["f",["remcurv","supino_inc_h","desenv_h","elevlat","barrafixa","flexao","crunch","hipthrust","bulgaro","pant","pushdown","puxada","rembaixa","extensora","flexora","legpress"]]]){const p=await page({sex:sx});
   const L=await p.evaluate(()=>MOVV().map(x=>({k:x.k,f:x.f.id,sel:x.sel})));ok(L.length>=12,`${sx}: ${L.length} movimentos na lista`);
   for(const x of L){if(only&&!only.includes(x.k))continue;
     await p.evaluate(x=>openHowPage(FAMBY[x.f],x.sel),x);await ready(p);await p.waitForTimeout(600);
