@@ -872,8 +872,9 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     else if(d.setup==="bulgaro"){/* front (right) foot ahead, the back (left) foot's instep on a 45 cm bench behind */
       m.feet=[{alvo:[A0.x+0.01,A0.y,A0.z+0.36]},{alvo:[A1.x-0.02,0.45+0.055,A1.z-0.58],plano:false}];m.benchZ=A1.z-0.58-0.03;m.reach=0;pose0()}
     else if(d.setup==="ponta"){/* calf raise: no leg IK; the body is moved so the balls of the feet stay where they are */
-      m.feet=null;rigPose({});const b0=jp("mtf1_d").add(jp("mtf1_e")).multiplyScalar(0.5);m.ball=b0;
-      m.solve=(m,u,P)=>{P.ik={};for(const sd of ["d","e"]){const t=(P["tornozelo_"+sd]||{}).flex;if(t!=null)for(let i=1;i<=5;i++)P["mtf"+i+"_"+sd]={flex:t+8.8}}rigPose(P);const b=jp("mtf1_d").add(jp("mtf1_e")).multiplyScalar(0.5);const lf=m.lift?m.lift[0]+(m.lift[1]-m.lift[0])*sm(u):0;P.pelve.pos=[P.pelve.pos[0],P.pelve.pos[1]+m.ball.y-b.y+lf,P.pelve.pos[2]+m.ball.z-b.z]};
+      m.feet=null;rigPose({});const b0=jp("mtf1_d").add(jp("mtf1_e")).multiplyScalar(0.5);m.ball=b0;m.foot0={d:jp("mtf1_d").sub(jp("tornozelo_d")),e:jp("mtf1_e").sub(jp("tornozelo_e"))};
+      m.solve=(m,u,P)=>{P.ik={};rigPose(P);/* the toes bend back by as much as the foot tips forward (measured, so bent knees count too) */
+        for(const sd of ["d","e"]){const v=jp("mtf1_"+sd).sub(jp("tornozelo_"+sd)),r=m.foot0[sd],pt=Math.atan2(v.y,Math.hypot(v.x,v.z))-Math.atan2(r.y,Math.hypot(r.x,r.z));for(let i=1;i<=5;i++)P["mtf"+i+"_"+sd]={flex:THREE.MathUtils.radToDeg(pt)}}rigPose(P);const b=jp("mtf1_d").add(jp("mtf1_e")).multiplyScalar(0.5);const lf=m.lift?m.lift[0]+(m.lift[1]-m.lift[0])*sm(u):0;P.pelve.pos=[P.pelve.pos[0],P.pelve.pos[1]+m.ball.y-b.y+lf,P.pelve.pos[2]+m.ball.z-b.z]};
       m.lift=[0,0];pose0()}
     else if(d.setup==="remo"){/* seated cable row: glutes on a 42 cm seat, the legs by their angles, the feet on a plate where they are */
       m.feet=null;pose0();m.dy=0.42-farthest(GLUTK,new THREE.Vector3(0,-1,0)).p.y;pose0();const am=jp("tornozelo_d").add(jp("tornozelo_e")).multiplyScalar(0.5),sh=new THREE.Vector3(0,-1,0).applyQuaternion(wq(rig.G.tornozelo_d));sh.x=0;sh.normalize();
