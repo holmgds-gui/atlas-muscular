@@ -963,6 +963,19 @@ details.how summary::before{content:"▸";display:inline-block;transition:transf
 .exf-mv,.exf-go{grid-column:2;grid-row:1;align-self:center;justify-self:end}
 .exf-mv{width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:12px;padding-left:2px}
 .exf-go{color:var(--muted);font-size:22px;line-height:1}
+.hp-ph{position:absolute;left:max(12px,env(safe-area-inset-left,0px));top:10px;z-index:3;min-width:150px;max-width:62%;padding:8px 12px 9px;border-radius:12px;background:color-mix(in srgb,var(--surface) 90%,transparent);border:1px solid var(--line);box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.hp-ph[hidden]{display:none}
+.hp-ph b{display:block;font:800 italic 19px/1.05 var(--f-display);letter-spacing:.02em;text-transform:uppercase;color:var(--ink)}
+.hp-ph small{display:block;margin-top:2px;font:600 12px var(--f-body);color:var(--muted)}
+.hp-ph i{display:block;height:4px;border-radius:2px;background:var(--line);margin-top:7px;overflow:hidden}.hp-ph i s{display:block;height:100%;width:0;background:var(--target)}
+.hp-ph.err{border-color:var(--danger,#d33);background:color-mix(in srgb,var(--danger,#d33) 14%,var(--surface))}.hp-ph.err b{color:var(--danger,#d33)}
+.hp-ang{position:absolute;right:max(10px,env(safe-area-inset-right,0px));top:34px;z-index:3;display:flex;flex-direction:column;gap:6px}
+.hp-ang[hidden]{display:none}
+.hp-ang button{border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 90%,transparent);color:var(--ink);border-radius:10px;padding:6px 10px;font:700 12px var(--f-display);letter-spacing:.08em;text-transform:uppercase;cursor:pointer}
+.hp-ang button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.hpg-ctl .hp-err{border:1px solid var(--line);background:color-mix(in srgb,var(--surface) 90%,transparent);color:var(--ink);border-radius:999px;padding:8px 12px;font:700 12px var(--f-display);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;box-shadow:0 1px 6px rgba(0,0,0,.12)}
+.hpg-ctl .hp-err[aria-pressed="true"]{background:var(--danger,#d33);border-color:var(--danger,#d33);color:#fff}
+html.noanim .hp-ph i s{transition:none}
 </style>
 <script>document.documentElement.classList.add("d2")</script>
 <link rel="stylesheet" href="design2.css"><script defer src="design2.js"></script>
@@ -1102,7 +1115,7 @@ details.how summary::before{content:"▸";display:inline-block;transition:transf
     <div class="hpg-top"><button class="hpg-back" id="hpBack" type="button"></button><div class="hpg-tt"><small id="hpK"></small><h2 id="hpT"></h2></div></div>
     <div class="hpg-stage" id="hpStage" data-notr>
       <div class="v3 hpg-box" id="hpBox"><div class="v3load" hidden></div><a class="v3cred" href="https://dbarchive.biosciencedbc.jp/en/bodyparts3d/lic.html" target="_blank" rel="noopener">BodyParts3D · CC BY-SA</a></div>
-      <div class="p3tip" id="hpTip" hidden></div><div class="hpg-ctl" id="hpCtl"></div>
+      <div class="p3tip" id="hpTip" hidden></div><div class="hp-ph" id="hpPh" hidden><b></b><i><s></s></i></div><div class="hp-ang" id="hpAng" hidden></div><div class="hpg-ctl" id="hpCtl"></div>
     </div>
     <div class="hpg-sh" id="hpSh"><div class="hpg-grab" id="hpGrab" role="button" tabindex="0"><i></i></div><div class="hpg-body" id="hpBody"></div></div>
   </div>
@@ -3217,21 +3230,23 @@ $("cdBtn").onclick=openCardioList;
 let exQ="";
 function openExList(){grp=false;cdOn=true;cdEx=true;if(model==="art")setModel(musModel);exQ="";cdSel=null;cur=null;curEx=null;build=null;listOpen=false;cdUp=false;paint();render();$("body").scrollTop=0}
 function exGroupOf(f){const p=(resolveV(f,f.d).p||[])[0];return p?TOB[p]:null}
-function exRow(f){const mv=movOf(f,f.d),v=resolveV(f,f.d),tg=[...new Set((v.p||[]).map(m=>M[m]&&M[m].n).filter(Boolean))].slice(0,3);
-  return `<div class="ex exf${mv?" mv":""}" role="button" tabindex="0" data-exf="${f.id}">
-    <span class="ex-n">${esc(f.n)}</span>${mv?`<span class="exf-mv" aria-hidden="true">▶</span>`:`<span class="exf-go" aria-hidden="true">›</span>`}
+function exRow(f,sel){const s0=sel||f.d,mv=!!movOf(f,s0)||(!sel&&!!movSel(f)),v=resolveV(f,s0),tg=[...new Set((v.p||[]).map(m=>M[m]&&M[m].n).filter(Boolean))].slice(0,3);
+  return `<div class="ex exf${mv?" mv":""}" role="button" tabindex="0" data-exf="${f.id}"${sel?` data-exs="${esc(JSON.stringify(sel))}"`:""}>
+    <span class="ex-n">${esc(sel?vName(f,sel):f.n)}</span>${mv?`<span class="exf-mv" aria-hidden="true">▶</span>`:`<span class="exf-go" aria-hidden="true">›</span>`}
     <span class="ex-en">${esc(tg.join(" · "))}</span></div>`}
 function exListHTML(){const q=norm(exQ.trim()),hit=f=>!q||[f.n,f.en,...(f.aka||[])].some(s=>s&&norm(s).includes(q));
-  const fs=FAMS.filter(hit);if(!fs.length)return `<p class="muted">${tx("Nenhum exercício encontrado.","No exercise found.","No se encontró ningún ejercicio.")}</p>`;
-  const mv=fs.filter(f=>movOf(f,f.d)),by={};fs.forEach(f=>{const g=exGroupOf(f)||"_";(by[g]||(by[g]=[])).push(f)});
+  const fs=FAMS.filter(hit);
+  const mv=MOVV().filter(x=>hit(x.f)||(q&&norm(vName(x.f,x.sel)).includes(q))),by={};if(!fs.length&&!mv.length)return `<p class="muted">${tx("Nenhum exercício encontrado.","No exercise found.","No se encontró ningún ejercicio.")}</p>`;fs.forEach(f=>{const g=exGroupOf(f)||"_";(by[g]||(by[g]=[])).push(f)});
   const sec=(t,L)=>L.length?`<h4 class="exf-h">${t}</h4><div class="list">${L.map(exRow).join("")}</div>`:"";
-  return sec(tx("Com movimento","With movement","Con movimiento"),mv)+Object.keys(BASIC).map(g=>sec(esc(BASIC[g].n),(by[g]||[]).filter(f=>!movOf(f,f.d)))).join("")+sec(tx("Outros","Others","Otros"),(by._||[]).filter(f=>!movOf(f,f.d)))}
+  const secV=(t,L)=>L.length?`<h4 class="exf-h">${t}</h4><div class="list">${L.map(x=>exRow(x.f,x.sel)).join("")}</div>`:"";
+  return secV(tx("Com movimento","With movement","Con movimiento"),mv)+Object.keys(BASIC).map(g=>sec(esc(BASIC[g].n),by[g]||[])).join("")+sec(tx("Outros","Others","Otros"),by._||[])}
 function renderExList(body){
   head(tx("Exercícios","Exercises","Ejercicios"),tx("Como fazer cada exercício","How to do each exercise","Cómo hacer cada ejercicio"),tx("Toque num exercício para ver o boneco fazendo.","Tap an exercise to see the body doing it.","Toca un ejercicio para ver al muñeco haciéndolo."),true);
   body.innerHTML=`<div class="exf-s"><input class="inp" id="exQ" type="search" autocomplete="off" placeholder="${tx("Buscar exercício","Search exercise","Buscar ejercicio")}" aria-label="${tx("Buscar exercício","Search exercise","Buscar ejercicio")}" value="${esc(exQ)}"></div><div id="exL">${exListHTML()}</div>`;
   $("exQ").oninput=e=>{exQ=e.target.value;$("exL").innerHTML=exListHTML()}}
-$("body").addEventListener("click",e=>{if(!cdOn||!cdEx)return;const r=e.target.closest("[data-exf]");if(r)openHowPage(FAMBY[r.dataset.exf],{})});
-$("body").addEventListener("keydown",e=>{if(!cdOn||!cdEx||(e.key!=="Enter"&&e.key!==" "))return;const r=e.target.closest("[data-exf]");if(r){e.preventDefault();openHowPage(FAMBY[r.dataset.exf],{})}});
+$("body").addEventListener("click",e=>{if(!cdOn||!cdEx)return;const r=e.target.closest("[data-exf]");if(r)exOpen(r)});
+$("body").addEventListener("keydown",e=>{if(!cdOn||!cdEx||(e.key!=="Enter"&&e.key!==" "))return;const r=e.target.closest("[data-exf]");if(r){e.preventDefault();exOpen(r)}});
+function exOpen(r){const f=FAMBY[r.dataset.exf];let sel=null;try{sel=r.dataset.exs?JSON.parse(r.dataset.exs):null}catch(_){}openHowPage(f,sel||movSel(f)||{})}
 
 let cdSp=false;   // Atlas › Cardio: the "Esportes" row is open
 function renderCardio(body){
@@ -4295,23 +4310,58 @@ function howHTML(it,open){const r=it.f?{f:it.f,sel:it.sel}:parseRef(it.ref)||par
    bench/stands; repeats, ▶/❚❚, 0,5×/1×; "Reduzir animações" opens it paused) or shows the still body with the target red
    and the synergists orange and "Movimento em breve". The guide (howInner) is in the sheet. Only 3 movements for now:
    back squat with the bar, conventional deadlift with the bar, flat bench press with the bar (default width/grip). */
-const MOVK={agach:s=>s.e==="ba"&&s.pe==="md",terra:s=>s.st==="co"&&s.e==="ba",supino:s=>s.b==="re"&&s.e==="ba"&&s.w==="md"&&s.g==="pr"};
-function movOf(f,sel){if(!f)return null;const s={...f.d,...(sel||{})},t=MOVK[f.id];return t&&t(s)?{k:f.id,deep:f.id==="agach"&&s.am==="pr"}:null}
-let HP=null,HPbusy=false,HPbad=false,HPcur=null,HPplay=true,HPspd=1;
+/* family → movement in 3d/v3.js (MOV): [family, test on the chosen variation, movement key]; 0.83 grew the list */
+const MOVK=[["agach",s=>s.e==="ba"&&s.pe==="md","agach"],["terra",s=>s.st==="co"&&s.e==="ba","terra"],
+  ["supino",s=>s.b==="re"&&s.e==="ba"&&s.w==="md"&&s.g==="pr","supino"],["supino",s=>s.b==="in"&&s.e==="ha"&&s.w==="md"&&s.g==="pr","supino_inc_h"],
+  ["remcurv",s=>s.e==="ba"&&s.g==="pr"&&s.w==="md","remcurv"],["stiff",s=>s.e==="ba"&&s.l==="bi","stiff"],
+  ["desenv",s=>s.e==="ba"&&s.p==="pe"&&s.g==="pr"&&s.l==="bi","desenv_ba"],["desenv",s=>s.e==="ha"&&s.p==="se"&&s.g==="pr"&&s.l==="bi","desenv_h"],
+  ["rosca",s=>s.e==="ba"&&s.g==="su"&&s.w==="md"&&s.p==="fr"&&s.l==="bi","rosca"],["rosca",s=>s.e==="ha"&&s.g==="su"&&s.p==="fr"&&s.l==="bi","rosca_h"],
+  ["rosca",s=>s.e==="ha"&&s.g==="ne"&&s.p==="fr"&&s.l==="bi","martelo"],["elevlat",s=>s.e==="ha"&&s.p==="pe"&&s.c==="es"&&s.l==="bi","elevlat"]];
+function movOf(f,sel){if(!f)return null;const s={...f.d,...(sel||{})},r=MOVK.find(([fid,t])=>fid===f.id&&t(s));return r?{k:r[2],deep:r[2]==="agach"&&s.am==="pr"}:null}
+/* the variations that have a movement, one per MOVK rule (cached): [{f, sel, k}] — the Exercícios list shows each one */
+const MOVV=(()=>{let L=null;return ()=>{if(L)return L;L=[];for(const [fid,t,k] of MOVK){const f=FAMBY[fid];if(!f)continue;const ax=f.ax.map(a=>[a[0],a[3].map(o=>o.k)]);
+  const rec=(i,sel)=>{if(i===ax.length)return t(sel)?sel:null;const ord=[f.d[ax[i][0]],...ax[i][1].filter(x=>x!==f.d[ax[i][0]])];for(const o of ord){const r=rec(i+1,{...sel,[ax[i][0]]:o});if(r)return r}return null};
+  const sel=rec(0,{});if(sel)L.push({f,sel,k})}return L}})();
+const movSel=f=>{if(movOf(f,f.d))return f.d;const v=MOVV().find(x=>x.f===f);return v?v.sel:null};
+let HP=null,HPbusy=false,HPbad=false,HPcur=null,HPplay=true,HPspd=1,HPerr=false,HPang=null;
+/* 0.83: the phase on screen (one per step of the timeline in 3d/v3.js, same order) and the common mistake of each movement */
+const F_UP=["em cima","top","arriba"],F_DOWN=["desce","going down","baja"],F_STR=["braços esticados","arms straight","brazos estirados"];
+const FASES={agach:[F_UP,F_DOWN,["embaixo","bottom","abajo"],["sobe","going up","sube"]],
+  terra:[["no chão","on the floor","en el suelo"],["sobe","going up","sube"],F_UP,F_DOWN],
+  supino:[F_UP,F_DOWN,["no peito","on the chest","en el pecho"],["empurra","push","empuja"]],
+  remcurv:[F_STR,["puxa","pull","tira"],["na barriga","to the belly","a la barriga"],F_DOWN],
+  stiff:[["em pé","standing","de pie"],["quadril para trás","hips back","cadera atrás"],["embaixo","bottom","abajo"],["sobe","going up","sube"]],
+  desenv_ba:[["nos ombros","at the shoulders","en los hombros"],["empurra","push","empuja"],F_STR,F_DOWN],
+  rosca:[F_STR,["sobe","going up","sube"],["contrai","squeeze","contrae"],["desce devagar","lower slowly","baja despacio"]],
+  elevlat:[["braços ao lado","arms at the sides","brazos al lado"],["sobe","going up","sube"],["na altura do ombro","at shoulder height","a la altura del hombro"],["desce devagar","lower slowly","baja despacio"]],
+  supino_inc_h:[F_STR,F_DOWN,["embaixo","bottom","abajo"],["empurra","push","empuja"]],
+  desenv_h:[["halteres nos ombros","dumbbells at the shoulders","mancuernas en los hombros"],["empurra","push","empuja"],F_STR,F_DOWN]};
+FASES.rosca_h=FASES.martelo=FASES.rosca;
+const ERRS={agach:["Joelhos para dentro","Knees caving in","Rodillas hacia dentro"],terra:["Costas curvadas","Rounded back","Espalda curvada"],
+  supino:["Cotovelos a 90° e barra no pescoço","Elbows flared to 90° and bar to the neck","Codos a 90° y barra al cuello"],
+  remcurv:["Tronco subindo para roubar","Trunk coming up to cheat","Tronco subiendo para hacer trampa"],stiff:["Costas curvadas","Rounded back","Espalda curvada"],
+  desenv_ba:["Inclinar para trás arqueando a lombar","Leaning back, arching the lower back","Inclinarse atrás arqueando la zona lumbar"],
+  rosca:["Balançar o tronco e levar os cotovelos à frente","Swinging the trunk, elbows forward","Balancear el tronco, codos adelante"],
+  elevlat:["Subir acima do ombro com o braço reto","Raising above the shoulder, arms straight","Subir por encima del hombro, brazo recto"],
+  supino_inc_h:["Cotovelos abertos a 90°","Elbows flared to 90°","Codos abiertos a 90°"],desenv_h:["Arquear as costas","Arching the back","Arquear la espalda"]};
+ERRS.rosca_h=ERRS.martelo=ERRS.rosca;
+const HPANG=[["frente",20,["Frente","Front","Frente"]],["lado",65,["Lado","Side","Lado"]],["costas",180,["Costas","Back","Espalda"]]];
 const HPSV={play:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>',pause:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4h4.5v16H6zM13.5 4H18v16h-4.5z"/></svg>'};
 function hpMus(){const c=HPcur;if(!c)return {p:[],s:[]};const v=resolveV(c.f,c.sel);return {p:v.p||[],s:(v.s||[]).filter(k=>!(v.p||[]).includes(k))}}
 function hpState(){const st={},m=hpMus();m.s.forEach(k=>st[k]={syn:true});m.p.forEach(k=>st[k]={on:true});return st}
 function hpCtl(){const c=HPcur,el=$("hpCtl");if(!c)return;
-  if(!c.mv){el.innerHTML=`<span class="hp-soon">${tx("Movimento em breve","Movement coming soon","Movimiento pronto")}</span>`;return}
+  if(!c.mv){$("hpAng").hidden=true;$("hpPh").hidden=true;el.innerHTML=`<span class="hp-soon">${tx("Movimento em breve","Movement coming soon","Movimiento pronto")}</span>`;return}
   el.innerHTML=`<button type="button" class="hp-pl" data-hp="pl" aria-label="${HPplay?tx("Pausar","Pause","Pausar"):tx("Continuar","Play","Reproducir")}">${HPplay?HPSV.pause:HPSV.play}</button>
-    <div class="seg" role="group" aria-label="${tx("Velocidade","Speed","Velocidad")}">${[[0.5,"0,5×"],[1,"1×"]].map(([v,t])=>`<button type="button" data-hpspd="${v}" aria-pressed="${HPspd===v}">${LANG==="en"?t.replace(",","."):t}</button>`).join("")}</div>`}
+    <div class="seg" role="group" aria-label="${tx("Velocidade","Speed","Velocidad")}">${[[0.5,"0,5×"],[1,"1×"]].map(([v,t])=>`<button type="button" data-hpspd="${v}" aria-pressed="${HPspd===v}">${LANG==="en"?t.replace(",","."):t}</button>`).join("")}</div>
+    ${ERRS[c.mv.k]?`<button type="button" class="hp-err" data-hp="err" aria-pressed="${HPerr}">${HPerr?tx("✓ Ver o certo","✓ See it right","✓ Ver lo correcto"):tx("⚠ Erro comum","⚠ Common mistake","⚠ Error común")}</button>`:""}`;
+  $("hpAng").hidden=false;$("hpAng").innerHTML=HPANG.map(([k,,t])=>`<button type="button" data-hpang="${k}" aria-pressed="${HPang===k}">${p3(t)}</button>`).join("")}
 function hpBody(){const c=HPcur;if(!c)return;const m=hpMus(),nm=k=>M[k]?esc(M[k].n):"";
   $("hpBody").innerHTML=`<div class="hp-mus"><em>${tx("Alvo","Target","Objetivo")}</em>${m.p.map(k=>`<span class="tg">${nm(k)}</span>`).join("")}
     <em>${tx("Sinergistas","Synergists","Sinergistas")}</em>${m.s.length?m.s.map(k=>`<span>${nm(k)}</span>`).join(""):`<span>${tx("Isolado","Isolated","Aislado")}</span>`}</div>${howInner(c.f.id,c.sel)}`}
 function hpApply(){const c=HPcur;if(!HP||!c||$("howPg").hidden)return;
   if(HP.sexNow&&HP.sexNow()!==sex){HP.sex(sex);return}   /* ready() comes again when the other body is in */
   HP.sync(hpState());
-  if(c.mv)HP.motion(c.mv.k,{deep:c.mv.deep,play:HPplay,speed:HPspd});
+  if(c.mv){HP.motion(c.mv.k,{deep:c.mv.deep,play:HPplay,speed:HPspd,erro:HPerr});hpPhLoop()}
   else{HP.motion(null);const vs=viewsOf(hpMus().p);HP.view(vs.size&&!vs.has("front")?"back":"front")}}
 function hpTip(k){const t=$("hpTip");clearTimeout(hpTip.t);t.hidden=!k||!M[k];if(!t.hidden){t.textContent=M[k].n;hpTip.t=setTimeout(()=>t.hidden=true,1800)}}
 function hpMount(){if(HP||HPbusy)return;HPbusy=true;const L=$("hpBox").querySelector(".v3load");L.hidden=false;
@@ -4336,17 +4386,28 @@ function hpSheet(lv,instant){hpLv=Math.max(0,Math.min(2,lv));const el=$("hpIn");
     hpSheet(lv);buzz()};
   g.addEventListener("pointerup",up);g.addEventListener("pointercancel",up);
   g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();hpSheet(hpLv===0?1:hpLv===1?2:1)}})}
-function openHowPage(f,sel){if(!f)return;sel={...f.d,...(sel||{})};HPcur={f,sel,mv:movOf(f,sel)};HPplay=!noAnim();
+function openHowPage(f,sel){if(!f)return;sel={...f.d,...(sel||{})};HPcur={f,sel,mv:movOf(f,sel)};HPplay=!noAnim();HPerr=false;HPang=null;$("hpPh").hidden=true;$("hpAng").hidden=true;
   $("hpBack").innerHTML=`<b aria-hidden="true">‹</b>${tx("Voltar","Back","Volver")}`;$("hpK").textContent=tx("Como fazer","How to do it","Cómo hacerlo");$("hpT").textContent=vName(f,sel);
   $("hpGrab").setAttribute("aria-label",tx("Arrastar o guia","Drag the guide","Arrastrar la guía"));
   hpSheet(1,true);hpBody();hpCtl();if(!HOW)loadHow().then(hpBody).catch(()=>hpBody());
   $("howPg").hidden=false;$("hpBody").scrollTop=0;buzz();
   if(HP)hpApply();else if(!HPbad)hpMount();else{HPbad=false;hpMount()}}
-function closeHowPage(){if($("howPg").hidden)return;$("howPg").hidden=true;$("hpTip").hidden=true;if(HP)HP.motion(null)}
+function closeHowPage(){if($("howPg").hidden)return;$("howPg").hidden=true;$("hpTip").hidden=true;cancelAnimationFrame(hpPhRaf);if(HP)HP.motion(null)}
 $("hpBack").addEventListener("click",closeHowPage);
 addEventListener("keydown",e=>{if(e.key==="Escape"&&!$("howPg").hidden){e.stopImmediatePropagation();closeHowPage()}},true);
 $("hpCtl").addEventListener("click",e=>{const b=e.target.closest("button");if(!b||!HP)return;
-  if(b.dataset.hp==="pl"){HPplay=!HPplay;HP.play(HPplay)}else if(b.dataset.hpspd){HPspd=+b.dataset.hpspd;HP.speed(HPspd)}buzz();hpCtl()});
+  if(b.dataset.hp==="pl"){HPplay=!HPplay;HP.play(HPplay)}else if(b.dataset.hpspd){HPspd=+b.dataset.hpspd;HP.speed(HPspd)}
+  else if(b.dataset.hp==="err"){HPerr=!HPerr;const c=HPcur;if(c&&c.mv){HP.motion(c.mv.k,{deep:c.mv.deep,play:HPplay,speed:HPspd,erro:HPerr});if(HPang){const a=HPANG.find(x=>x[0]===HPang);if(a)HP.orbit(a[1])}}}buzz();hpCtl()});
+$("hpAng").addEventListener("click",e=>{const b=e.target.closest("[data-hpang]");if(!b||!HP)return;const a=HPANG.find(x=>x[0]===b.dataset.hpang);HPang=a[0];HP.orbit(a[1]);buzz();
+  $("hpAng").querySelectorAll("button").forEach(x=>x.setAttribute("aria-pressed",String(x===b)))});
+/* the phase chip follows the movement (step name, its seconds, a bar for how far into it); red with the mistake's name */
+let hpPhRaf=0;function hpPhLoop(){cancelAnimationFrame(hpPhRaf);const el=$("hpPh"),c=HPcur;if(!c||!c.mv||$("howPg").hidden||!HP){el.hidden=true;return}
+  const I=HP.motionInfo();if(I&&I.step){const L=FASES[I.key]||[],[i,f]=I.step,lab=L[i]?p3(L[i]):"",secs=I.T[i][0]/(I.speed||1);
+    el.hidden=false;el.classList.toggle("err",!!I.err);
+    const h=(I.err?`${tx("Errado","Wrong","Incorrecto")}: ${p3(ERRS[I.key])}`:lab)+"";if(el.dataset.h!==h+i){el.dataset.h=h+i;el.querySelector("b").textContent=I.err?h:lab;let sm=el.querySelector("small");if(!sm){sm=document.createElement("small");el.insertBefore(sm,el.querySelector("i"))}
+      sm.textContent=I.err?lab:`${tx("passo","step","paso")} ${i+1}/${L.length||I.steps} · ${secs.toLocaleString(LANG==="en"?"en":"pt",{maximumFractionDigits:1})} s`}
+    el.querySelector("i s").style.width=Math.round(f*100)+"%"}
+  hpPhRaf=requestAnimationFrame(hpPhLoop)}
 /* the card's button: opens the page (capture: the card under it must not react) */
 document.addEventListener("click",e=>{const b=e.target.closest&&e.target.closest(".how-pg");if(!b)return;e.preventDefault();e.stopPropagation();
   let sel={};try{sel=JSON.parse(b.dataset.hps)}catch(_){}openHowPage(FAMBY[b.dataset.hpf],sel)},true);

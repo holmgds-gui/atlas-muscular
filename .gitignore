@@ -22,3 +22,4 @@ tools/corpo3d/rig-f.json
 __pycache__/
 tools/corpo3d/corpo-skin.pkl
 tools/corpo3d/corpo-f-skin.pkl
+tests/_*.js

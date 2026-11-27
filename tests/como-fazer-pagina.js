@@ -57,11 +57,32 @@ for(const [sx,theme] of [["m","light"],["f","dark"]]){const p=await page({sex:sx
     await p.waitForTimeout(700);await p.screenshot({path:`${OUT}/como-fazer-${sx}-${theme}-${f}.png`});
     await p.evaluate(()=>closeHowPage())}
   /* sem movimento: boneco parado com o alvo */
-  await p.evaluate(()=>openHowPage(FAMBY.rosca,{}));await ready(p);await p.waitForTimeout(900);
+  await p.evaluate(()=>openHowPage(FAMBY.pant,{}));await ready(p);await p.waitForTimeout(900);
   const s=await p.evaluate(()=>({mv:HP.motionInfo(),soon:!!document.querySelector("#hpCtl .hp-soon"),lab:$("hpCtl").textContent}));
-  ok(!s.mv&&s.soon,`${sx} rosca: sem movimento, aviso "${s.lab.trim()}"`);
-  await p.screenshot({path:`${OUT}/como-fazer-${sx}-${theme}-rosca.png`});
+  ok(!s.mv&&s.soon,`${sx} panturrilha: sem movimento, aviso "${s.lab.trim()}"`);
+  await p.screenshot({path:`${OUT}/como-fazer-${sx}-${theme}-sem-movimento.png`});
   await p.keyboard.press('Escape');await p.waitForTimeout(300);ok(await p.evaluate(()=>$("howPg").hidden),`${sx} Esc fecha`);
+  await p.close()}
+/* 2a) 0.83: todos os movimentos (♂ todos, ♀ alguns): o corpo certo, a barra/os halteres dentro da mão fechada em 11 momentos,
+   a barra na frente das pernas quando pendurada; fase na tela, erro comum e ângulos */
+for(const [sx,only] of [["m",null],["f",["remcurv","supino_inc_h","desenv_h","elevlat"]]]){const p=await page({sex:sx});
+  const L=await p.evaluate(()=>MOVV().map(x=>({k:x.k,f:x.f.id,sel:x.sel})));ok(L.length>=12,`${sx}: ${L.length} movimentos na lista`);
+  for(const x of L){if(only&&!only.includes(x.k))continue;
+    await p.evaluate(x=>openHowPage(FAMBY[x.f],x.sel),x);await ready(p);await p.waitForTimeout(600);
+    const r=await p.evaluate(()=>{const I=HP.motionInfo();let gr=0,gap=9;for(let i=0;i<=10;i++){HP.still(i/10);const J=HP.motionInfo();gr=Math.max(gr,J.grip||0);if(J.legGap!=null)gap=Math.min(gap,J.legGap)}return {k:I&&I.key,gr,gap,sx:HP.sexNow()}});
+    ok(r.k===x.k&&r.sx===sx,`${sx} ${x.k}: movimento certo`);ok(r.gr<0.012,`${sx} ${x.k}: mãos no equipamento (pior ${(r.gr*100).toFixed(1)} cm)`);
+    if(r.gap<9)ok(r.gap>0.01,`${sx} ${x.k}: barra na frente das pernas (${(r.gap*100).toFixed(1)} cm)`);
+    if(!only){await p.evaluate(()=>HP.play(true));await p.waitForTimeout(400);
+      const ph=await p.evaluate(()=>({t:$("hpPh").querySelector("b").textContent,h:$("hpPh").hidden}));ok(!ph.h&&ph.t.length>1,`${sx} ${x.k}: fase na tela ("${ph.t}")`);
+      await p.screenshot({path:`${OUT}/como-fazer-mov-${x.k}.png`})}
+    await p.evaluate(()=>closeHowPage())}
+  if(sx==="m"){await p.evaluate(()=>openHowPage(FAMBY.agach,{}));await ready(p);await p.waitForTimeout(500);
+    await p.click('[data-hp="err"]');await p.waitForTimeout(700);const e=await p.evaluate(()=>({err:HP.erro(),cls:$("hpPh").classList.contains("err"),t:$("hpPh").textContent,b:document.querySelector('[data-hp="err"]').textContent}));
+    ok(e.err&&e.cls&&/Errado/.test(e.t)&&/certo/.test(e.b),`erro comum: liga e mostra "${e.t.slice(0,40)}"`);
+    await p.click('[data-hp="err"]');await p.waitForTimeout(500);ok(await p.evaluate(()=>!HP.erro()),'erro comum: desliga');
+    const c0=await p.evaluate(()=>HP.camPos());await p.click('[data-hpang="costas"]');await p.waitForTimeout(900);const c1=await p.evaluate(()=>HP.camPos());
+    ok(c1[2]<c0[2]-1,`ângulo Costas leva a câmera para trás (z ${c0[2].toFixed(1)} → ${c1[2].toFixed(1)})`);
+    await p.evaluate(()=>closeHowPage());ok(await p.evaluate(()=>$("hpPh").hidden||$("howPg").hidden),'fechar a página para a fase')}
   await p.close()}
 /* 2b) 0.78: Atlas › Exercícios (entre Articulações e Cardio) → lista com busca → página; e os ossos somem ao sair de Articulações */
 for(const loc of ['pt-BR','en-US']){const p=await page({loc,conf:{fig:"3d"}});await p.waitForFunction(()=>window.V3&&V3.rigReady(),null,{timeout:90000});await p.waitForTimeout(600);

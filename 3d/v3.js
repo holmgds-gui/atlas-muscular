@@ -21,6 +21,10 @@ import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js";
    "candy wrapper". Here each bone's matrix is turned into a dual quaternion (skinBody(): skeleton.update writes them
    into the first 8 floats of each bone's slot in the bone texture) and the shader blends those, which keeps the volume.
    All the SkinnedMeshes of the app are this body, so the chunks are replaced for every material. */
+THREE.ShaderChunk.skinning_pars_vertex=THREE.ShaderChunk.skinning_pars_vertex.replace("uniform mat4 bindMatrix;","uniform mat4 bindMatrix;\n\tattribute float skinDq;");
+/* 0.83: each vertex mixes the two ways (skinDq, from skinBody → dqShare()): 1 = dual quaternion (forearm twist, elbow, knee
+   keep their volume), 0 = linear (the "sheets" that stretch from the trunk to a limb — armpit, chest, back, hip — which
+   with dual quaternions swing out on an arc and fold inside out when the arm goes overhead) */
 THREE.ShaderChunk.skinbase_vertex=`#ifdef USE_SKINNING
 	mat4 dqmX=getBoneMatrix(skinIndex.x),dqmY=getBoneMatrix(skinIndex.y),dqmZ=getBoneMatrix(skinIndex.z),dqmW=getBoneMatrix(skinIndex.w);
 	vec4 dqR=dqmX[0]*skinWeight.x,dqD=dqmX[1]*skinWeight.x;
@@ -29,15 +33,23 @@ THREE.ShaderChunk.skinbase_vertex=`#ifdef USE_SKINNING
 	dqs=dot(dqmX[0],dqmW[0])<0.0?-1.0:1.0;dqR+=dqmW[0]*skinWeight.w*dqs;dqD+=dqmW[1]*skinWeight.w*dqs;
 	float dqL=max(length(dqR),1e-6);dqR/=dqL;dqD/=dqL;
 #endif`;
+THREE.ShaderChunk.skinning_pars_vertex+=`
+#ifdef USE_SKINNING
+	vec3 dqRot(vec4 r,vec3 p){return p+2.0*cross(r.xyz,cross(r.xyz,p)+r.w*p);}
+	vec3 dqTr(vec4 r,vec4 d){return 2.0*(r.w*d.xyz-d.w*r.xyz+cross(r.xyz,d.xyz));}
+	vec3 dqLin(mat4 a,mat4 b,mat4 c,mat4 e,vec4 w,vec3 p){
+		return w.x*(dqRot(a[0],p)+dqTr(a[0],a[1]))+w.y*(dqRot(b[0],p)+dqTr(b[0],b[1]))+w.z*(dqRot(c[0],p)+dqTr(c[0],c[1]))+w.w*(dqRot(e[0],p)+dqTr(e[0],e[1]));}
+	vec3 dqLinN(mat4 a,mat4 b,mat4 c,mat4 e,vec4 w,vec3 n){return w.x*dqRot(a[0],n)+w.y*dqRot(b[0],n)+w.z*dqRot(c[0],n)+w.w*dqRot(e[0],n);}
+#endif`;
 THREE.ShaderChunk.skinning_vertex=`#ifdef USE_SKINNING
 	vec3 dqp=(bindMatrix*vec4(transformed,1.0)).xyz;
-	dqp+=2.0*cross(dqR.xyz,cross(dqR.xyz,dqp)+dqR.w*dqp)+2.0*(dqR.w*dqD.xyz-dqD.w*dqR.xyz+cross(dqR.xyz,dqD.xyz));
-	transformed=(bindMatrixInverse*vec4(dqp,1.0)).xyz;
+	vec3 dqA=dqRot(dqR,dqp)+dqTr(dqR,dqD),dqB=dqLin(dqmX,dqmY,dqmZ,dqmW,skinWeight,dqp);
+	transformed=(bindMatrixInverse*vec4(mix(dqB,dqA,skinDq),1.0)).xyz;
 #endif`;
 THREE.ShaderChunk.skinnormal_vertex=`#ifdef USE_SKINNING
-	vec3 dqn=mat3(bindMatrix)*objectNormal;dqn+=2.0*cross(dqR.xyz,cross(dqR.xyz,dqn)+dqR.w*dqn);objectNormal=mat3(bindMatrixInverse)*dqn;
+	vec3 dqn=mat3(bindMatrix)*objectNormal;dqn=normalize(mix(dqLinN(dqmX,dqmY,dqmZ,dqmW,skinWeight,dqn),dqRot(dqR,dqn),skinDq));objectNormal=mat3(bindMatrixInverse)*dqn;
 	#ifdef USE_TANGENT
-		vec3 dqt=mat3(bindMatrix)*objectTangent;dqt+=2.0*cross(dqR.xyz,cross(dqR.xyz,dqt)+dqR.w*dqt);objectTangent=mat3(bindMatrixInverse)*dqt;
+		vec3 dqt=mat3(bindMatrix)*objectTangent;dqt=mix(dqLinN(dqmX,dqmY,dqmZ,dqmW,skinWeight,dqt),dqRot(dqR,dqt),skinDq);objectTangent=mat3(bindMatrixInverse)*dqt;
 	#endif
 #endif`;
 const _dqM=new THREE.Matrix4(),_dqQ=new THREE.Quaternion();
@@ -357,8 +369,10 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
       if(!g.attributes.skinIndex){const n=si.count,I=new Uint16Array(n*4),W=new Float32Array(n*4);
         for(let i=0;i<n;i++){I[i*4]=si.getX(i);I[i*4+1]=si.getY(i);I[i*4+2]=si.getZ(i);I[i*4+3]=si.getW(i);
           const a=sw.getX(i),b=sw.getY(i),c=sw.getZ(i),d=sw.getW(i),t=(a+b+c+d)||1;W[i*4]=a/t;W[i*4+1]=b/t;W[i*4+2]=c/t;W[i*4+3]=d/t}
+        for(const sd of ["d","e"])shoulderSpread(g,o,I,W,sd);
         for(const sd of ["d","e"]){hingeSpread(g,o,I,W,"quadril_"+sd,["joelho_"+sd],"joelho_"+sd,"tornozelo_"+sd,0.055);hingeSpread(g,o,I,W,"ombro_"+sd,["cotovelo_"+sd,"antebraco_"+sd],"cotovelo_"+sd,"punho_"+sd,0.045)}
         twistSpread(g,o,I,W);
+        g.setAttribute("skinDq",new THREE.Float32BufferAttribute(dqShare(I,W),1));
         g.setAttribute("skinIndex",new THREE.Uint16BufferAttribute(I,4));g.setAttribute("skinWeight",new THREE.Float32BufferAttribute(W,4))}
       const s=new THREE.SkinnedMesh(g,o.material);s.name=o.name;s.userData=o.userData;s.position.copy(o.position);s.quaternion.copy(o.quaternion);s.scale.copy(o.scale);
       s.frustumCulled=false;const par=o.parent;par.add(s);par.remove(o);s.updateMatrixWorld(true);s.bind(sk,s.matrixWorld);return s})}
@@ -369,6 +383,29 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
   /* 0.80: knee and elbow — the share between the bone above (thigh / upper arm) and the one below (shin / forearm) follows
      the line of the lower bone: all "above" a few cm before the joint, all "below" a few cm after (w), smooth in between.
      The weights by distance to the bones mixed over a wide band and the shin/forearm folded and thinned when bent. */
+  /* 0.83: how much of each vertex is skinned by dual quaternions: the share of the limb joints that bend or twist
+     (elbow, forearm, wrist, fingers, knee, ankle, toes), doubled — so the elbow and knee bands are fully DQ and the
+     shoulder/hip/trunk blends are linear */
+  const DQJ=/^(cotovelo|antebraco|punho|mcf|ifp|ifd|cmc1|mcf1|if1|joelho|patela|tornozelo|subtalar|mtf|ifh|ifpp|ifdp)/;
+  function dqShare(I,W){const L=rig.R.pele,isD=L.map(k=>DQJ.test(k)),n=I.length/4,out=new Float32Array(n);
+    for(let i=0;i<n;i++){let d=0;for(let k=0;k<4;k++)if(isD[I[i*4+k]])d+=W[i*4+k];out[i]=Math.min(1,d*2)}return out}
+  /* 0.83: the shoulder. Within SH.R of the shoulder joint the share that follows the arm depends on the direction from
+     the joint (along the arm's line at rest = arm, toward the trunk = trunk, smooth between), fading into the old weights
+     toward SH.R; those vertices are skinned linearly (dqShare), so the armpit stretches like a web instead of folding */
+  const SH={R:0.15,R0:0.07,a0:40,a1:105};
+  function shoulderSpread(g,o,I,W,sd){const L=rig.R.pele,arm=["ombro_","cotovelo_","antebraco_"].map(k=>L.indexOf(k+sd)),io=arm[0];if(io<0)return;
+    o.updateWorldMatrix(true,false);const G=rig.C0["ombro_"+sd],ax=rig.C0["cotovelo_"+sd].clone().sub(G).normalize(),pa=g.attributes.position,v=new THREE.Vector3();
+    const c0=Math.cos(THREE.MathUtils.degToRad(SH.a0)),c1=Math.cos(THREE.MathUtils.degToRad(SH.a1)),ie=L.indexOf("esc_"+sd);
+    for(let i=0;i<pa.count;i++){v.fromBufferAttribute(pa,i).applyMatrix4(o.matrixWorld).sub(G);const r=v.length();if(r>SH.R||r<1e-4||(v.x+G.x)*G.x<0)continue;
+      let a=0,ja=-1;for(let k=0;k<4;k++){const b=I[i*4+k];if(arm.includes(b)){a+=W[i*4+k];if(b===io)ja=k}}
+      let cone=(v.dot(ax)/r-c1)/(c0-c1);cone=Math.min(1,Math.max(0,cone));cone=cone*cone*(3-2*cone);
+      let lam=(SH.R-r)/(SH.R-SH.R0);lam=Math.min(1,Math.max(0,lam));lam=lam*lam*(3-2*lam);
+      const a2=a+lam*(cone-a);if(Math.abs(a2-a)<1e-3)continue;
+      const fa=a>1e-6?a2/a:0,ft=(1-a)>1e-6?(1-a2)/(1-a):0;
+      for(let k=0;k<4;k++){const b=I[i*4+k];W[i*4+k]*=arm.includes(b)?fa:ft}
+      if(a<=1e-6){if(ja<0){let m=-1,mw=9;for(let k=0;k<4;k++)if(W[i*4+k]<mw){mw=W[i*4+k];m=k}ja=m;I[i*4+ja]=io;W[i*4+ja]=0}W[i*4+ja]+=a2}
+      if((1-a)<=1e-6&&ie>=0){let m=-1,mw=9;for(let k=0;k<4;k++)if(k!==ja&&W[i*4+k]<mw){mw=W[i*4+k];m=k}if(m>=0){I[i*4+m]=ie;W[i*4+m]=1-a2}}
+      let s=0;for(let k=0;k<4;k++)s+=W[i*4+k];for(let k=0;k<4;k++)W[i*4+k]/=s||1}}
   function hingeSpread(g,o,I,W,par,kids,jid,eid,w){const L=rig.R.pele,ip=L.indexOf(par),ik=kids.map(k=>L.indexOf(k)),i0=ik[0];if(ip<0||i0<0)return;
     o.updateWorldMatrix(true,false);const J=rig.C0[jid],ax=rig.C0[eid].clone().sub(J).normalize(),pa=g.attributes.position,v=new THREE.Vector3();
     for(let i=0;i<pa.count;i++){let sp=0,sk=0,jp=-1,jk=-1;for(let k=0;k<4;k++){const b=I[i*4+k];if(b===ip){sp+=W[i*4+k];jp=k}else if(ik.includes(b)){sk+=W[i*4+k];if(b===i0)jk=k}}
@@ -463,7 +500,8 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     if(P&&P.ik)for(const [k,t] of Object.entries(P.ik)){const m=/^(pe|mao)_([de])$/.exec(k);if(!m||!t)continue;const sd=m[2],leg=m[1]==="pe";
       const T=new THREE.Vector3().fromArray(Array.isArray(t)?t:t.alvo);
       const flat=leg&&!(t&&t.plano===false),qf=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),THREE.MathUtils.degToRad((t&&t.giro||0)*(sd==="d"?-1:1)));
-      const kw=flat?new THREE.Vector3().fromArray(rig.J["joelho_"+sd].mov.find(m=>m.id==="flex").eixo).normalize().applyQuaternion(qf):null;
+      const qk=new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0),THREE.MathUtils.degToRad(((t&&t.giro||0)-(t&&t.joelho||0))*(sd==="d"?-1:1)));
+      const kw=flat?new THREE.Vector3().fromArray(rig.J["joelho_"+sd].mov.find(m=>m.id==="flex").eixo).normalize().applyQuaternion(qk):null;
       ik2(rig.G[(leg?"quadril_":"ombro_")+sd],rig.G[(leg?"joelho_":"cotovelo_")+sd],rig.G[(leg?"tornozelo_":"punho_")+sd],T,(leg?"joelho_":"cotovelo_")+sd,kw);
       if(flat)setWorldQ(rig.G["tornozelo_"+sd],qf)}
     /* the Articulações marks follow their joint */
@@ -525,56 +563,136 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     ebox(g,0.2,0.02,len*0.86,0,pb-0.01,zc,fr,"frame");
     for(const zz of [z0+0.16,z1-0.16]){ebox(g,0.06,pb-0.02,0.06,0,(pb-0.02)/2,zz,fr,"frame");ebox(g,0.46,0.04,0.06,0,0.02,zz,fr,"frame")}
     ebox(g,0.05,0.05,z1-z0-0.32,0,0.09,zc,fr,"frame")}
-  function clearEq(){if(!MOT||!MOT.g)return;scene.remove(MOT.g);MOT.g.traverse(o=>{if(o.isMesh){o.geometry!==PLATE&&o.geometry.dispose();o.material.dispose();o.userData.idm.dispose()}});eqMeshes.length=0;MOT.g=null;need=true}
+  function clearEq(){if(!MOT||!MOT.g)return;scene.remove(MOT.g);MOT.g.traverse(o=>{if(o.isMesh){o.geometry!==PLATE&&o.geometry.dispose();o.material.dispose();o.userData.idm&&o.userData.idm.dispose()}});eqMeshes.length=0;MOT.g=null;need=true}
 
   const lerpP=(a,b,u)=>{if(typeof a==="number")return a+((b==null?a:b)-a)*u;if(Array.isArray(a))return a.map((x,i)=>x+(b[i]-x)*u);const o={};for(const k in a)o[k]=lerpP(a[k],b?b[k]:a[k],u);return o};
   const sm=x=>x*x*(3-2*x);
   const V=a=>new THREE.Vector3().fromArray(a);
   const jp=id=>{const v=new THREE.Vector3();rig.G[id].getWorldPosition(v);return v};
-  /* the movements. a/b = poses at u=0 / u=1; t = timeline [seconds, u to reach] (hold = same u); cam = [degrees around,
-     target height, distance × framing, target z]. Same keys in a and b. */
+  /* ---- 0.83 engine (owner: "comece a fazer … faça minuciosamente"): each movement says how the body is placed
+     (setup: "pe" standing, "deitado" on a flat bench, "inclinado" reclined on an adjustable bench at `inc`°, "sentado"
+     upright on it, "barra_fixa" hanging), where the feet go, what the hands hold (bar: a barbell — hands on it by the
+     finger hook; db: two dumbbells; fk: the hands follow the angles and the equipment follows the hands) and where it
+     travels (place(m,u) after a first pass with the angles). a/b = the angles at u=0 / u=1 (same keys); t = timeline
+     [seconds, u to reach]; cam = [degrees around, target height, distance × framing, target z]. */
   const ARMS_SQ={ombro_d:{abd:72,flex:8,rot:-50},ombro_e:{abd:72,flex:8,rot:-50},cotovelo_d:{flex:110},cotovelo_e:{flex:110},antebraco_d:{pron:-40},antebraco_e:{pron:-40}};
+  const both=(j,v)=>({[j+"_d"]:v,[j+"_e"]:v});
+  const SUP_LEGS={...both("quadril",{flex:20,abd:20}),...both("joelho",{flex:80})};
+  const STAND=(o={})=>({pelve:{pos:[0,-0.012,0],flex:0},coluna:{flex:0},cervical:{flex:0},...both("quadril",{abd:6,rot:-6}),...o});
   const MOV={
-    agach:{a:{pelve:{pos:[0,-0.035,-0.01],flex:4},coluna:{flex:-3},cervical:{flex:0},quadril_d:{abd:12,rot:-12},quadril_e:{abd:12,rot:-12},...ARMS_SQ},
-           b:{pelve:{pos:[0,-0.40,-0.13],flex:38},coluna:{flex:-4},cervical:{flex:-10},quadril_d:{abd:18,rot:-15},quadril_e:{abd:18,rot:-15},...ARMS_SQ},
-           deep:{pelve:{pos:[0,-0.50,-0.10],flex:40},coluna:{flex:-2},cervical:{flex:-10},quadril_d:{abd:22,rot:-18},quadril_e:{abd:22,rot:-18},...ARMS_SQ},
-           t:[[0.7,0],[2.0,1],[0.35,1],[1.25,0]],cam:[60,0.86,1.22,0],bar:"costas"},
-    terra:{a:{pelve:{pos:[0,-0.232,-0.22],flex:70},coluna:{flex:0},cervical:{flex:-22},quadril_d:{abd:8,rot:-8},quadril_e:{abd:8,rot:-8},ombro_d:{flex:64,abd:4},ombro_e:{flex:64,abd:4},cotovelo_d:{flex:0},cotovelo_e:{flex:0},antebraco_d:{pron:70},antebraco_e:{pron:70}},
-           b:{pelve:{pos:[0,-0.012,0],flex:-2},coluna:{flex:-2},cervical:{flex:0},quadril_d:{abd:8,rot:-8},quadril_e:{abd:8,rot:-8},ombro_d:{flex:4,abd:4},ombro_e:{flex:4,abd:4},cotovelo_d:{flex:0},cotovelo_e:{flex:0},antebraco_d:{pron:70},antebraco_e:{pron:70}},
-           t:[[0.8,0],[1.4,1],[0.6,1],[1.8,0]],cam:[60,0.62,1.15,0],bar:"chao"},
-    supino:{a:{pelve:{pos:[0,-0.42,-0.05],flex:-90},coluna:{flex:-6},cervical:{flex:4},quadril_d:{flex:20,abd:20},quadril_e:{flex:20,abd:20},ombro_d:{flex:86,abd:14,rot:0},ombro_e:{flex:86,abd:14,rot:0},cotovelo_d:{flex:8},cotovelo_e:{flex:8},antebraco_d:{pron:60},antebraco_e:{pron:60}},
-            b:{pelve:{pos:[0,-0.42,-0.05],flex:-90},coluna:{flex:-6},cervical:{flex:4},quadril_d:{flex:20,abd:20},quadril_e:{flex:20,abd:20},ombro_d:{flex:10,abd:65,rot:20},ombro_e:{flex:10,abd:65,rot:20},cotovelo_d:{flex:95},cotovelo_e:{flex:95},antebraco_d:{pron:60},antebraco_e:{pron:60}},
-            t:[[0.7,0],[2.0,1],[0.3,1],[1.15,0]],cam:[42,0.68,1.38,-0.3],bar:"peito"}};
+    agach:{setup:"pe",feet:{wide:0.07,giro:20},hands:"bar",bar:"costas",gx:[0.34,0.31],eq:["stands"],
+      a:{pelve:{pos:[0,-0.035,-0.01],flex:4},coluna:{flex:-3},cervical:{flex:0},quadril_d:{abd:12,rot:-12},quadril_e:{abd:12,rot:-12},...ARMS_SQ},
+      b:{pelve:{pos:[0,-0.40,-0.13],flex:38},coluna:{flex:-4},cervical:{flex:-10},quadril_d:{abd:18,rot:-15},quadril_e:{abd:18,rot:-15},...ARMS_SQ},
+      deep:{pelve:{pos:[0,-0.50,-0.10],flex:40},coluna:{flex:-2},cervical:{flex:-10},quadril_d:{abd:22,rot:-18},quadril_e:{abd:22,rot:-18},...ARMS_SQ},
+      t:[[0.7,0],[2.0,1],[0.35,1],[1.25,0]],cam:[60,0.86,1.22,0],con:0,err:{joelho:26}},
+    terra:{setup:"pe",feet:{giro:8},hands:"bar",bar:"pend",floor:true,legs:true,gx:[0.24,0.22],
+      a:{pelve:{pos:[0,-0.232,-0.22],flex:70},coluna:{flex:0},cervical:{flex:-22},...both("quadril",{abd:8,rot:-8}),...both("ombro",{flex:64,abd:4}),...both("cotovelo",{flex:0}),...both("antebraco",{pron:70})},
+      b:{pelve:{pos:[0,-0.012,0],flex:-2},coluna:{flex:-2},cervical:{flex:0},...both("quadril",{abd:8,rot:-8}),...both("ombro",{flex:4,abd:4}),...both("cotovelo",{flex:0}),...both("antebraco",{pron:70})},
+      ease:{"pelve.pos":u=>[u,Math.pow(u,0.75),Math.pow(u,2.4)],"pelve.flex":u=>Math.pow(u,1.8),"coluna.flex":u=>Math.pow(u,1.8),"ombro_d.flex":u=>Math.pow(u,1.6),"ombro_e.flex":u=>Math.pow(u,1.6)},
+      t:[[0.8,0],[1.4,1],[0.6,1],[1.8,0]],cam:[60,0.62,1.15,0],con:1,err:{a:{coluna:{flex:36},cervical:{flex:-4}}}},
+    supino:{setup:"deitado",hands:"bar",bar:"peito",gx:[0.37,0.33],eq:["banco","suportes"],
+      a:{pelve:{pos:[0,-0.42,-0.05],flex:-90},coluna:{flex:-6},cervical:{flex:4},...SUP_LEGS,...both("ombro",{flex:86,abd:14,rot:0}),...both("cotovelo",{flex:8}),...both("antebraco",{pron:60})},
+      b:{pelve:{pos:[0,-0.42,-0.05],flex:-90},coluna:{flex:-6},cervical:{flex:4},...SUP_LEGS,...both("ombro",{flex:10,abd:65,rot:20}),...both("cotovelo",{flex:95}),...both("antebraco",{pron:60})},
+      t:[[0.7,0],[2.0,1],[0.3,1],[1.15,0]],cam:[42,0.68,1.38,-0.3],con:0,err:{b:{...both("ombro",{flex:0,abd:88,rot:20})},low:-0.12}},
+    /* 0.83: bent-over row with the bar — trunk ~45°, knees soft, bar from straight arms to the belly */
+    remcurv:{setup:"pe",feet:{giro:8},hands:"bar",bar:"remo",legs:true,gx:[0.27,0.24],
+      a:{pelve:{pos:[0,-0.09,-0.17],flex:64},coluna:{flex:4},cervical:{flex:-24},...both("quadril",{abd:6,rot:-6}),...both("ombro",{flex:66,abd:8}),...both("cotovelo",{flex:5}),...both("antebraco",{pron:70})},
+      b:{pelve:{pos:[0,-0.09,-0.17],flex:64},coluna:{flex:2},cervical:{flex:-24},...both("quadril",{abd:6,rot:-6}),...both("ombro",{flex:-25,abd:28,rot:10}),...both("cotovelo",{flex:100}),...both("antebraco",{pron:70})},
+      t:[[0.6,0],[1.0,1],[0.35,1],[1.7,0]],cam:[65,0.75,1.12,0],con:1,err:{b:{pelve:{pos:[0,-0.06,-0.12],flex:34},coluna:{flex:-4}}}},
+    /* Romanian deadlift: from standing, hips go back with soft knees, the bar slides down the thighs to below the knees */
+    stiff:{setup:"pe",feet:{giro:6},hands:"bar",bar:"pend",legs:true,gx:[0.24,0.22],
+      a:{...STAND(),...both("ombro",{flex:4,abd:4}),...both("cotovelo",{flex:0}),...both("antebraco",{pron:70})},
+      b:{pelve:{pos:[0,-0.06,-0.17],flex:78},coluna:{flex:2},cervical:{flex:-20},...both("quadril",{abd:6,rot:-6}),...both("ombro",{flex:72,abd:4}),...both("cotovelo",{flex:0}),...both("antebraco",{pron:70})},
+      ease:{"pelve.pos":u=>[u,Math.pow(u,0.8),Math.pow(u,0.85)]},
+      t:[[0.7,0],[2.2,1],[0.3,1],[1.3,0]],cam:[62,0.7,1.15,0],con:0,err:{b:{coluna:{flex:34},cervical:{flex:-30}}}},
+    /* standing barbell press: from the front of the shoulders to straight arms overhead; the bar goes up in front of the face */
+    desenv_ba:{setup:"pe",feet:{giro:6},hands:"bar",bar:"press",gx:[0.27,0.245],
+      a:{...STAND(),cervical:{flex:-6},...both("ombro",{flex:55,abd:55,rot:-40}),...both("cotovelo",{flex:125}),...both("antebraco",{pron:40})},
+      b:{...STAND(),cervical:{flex:4},...both("ombro",{flex:165,abd:18,rot:0}),...both("cotovelo",{flex:10}),...both("antebraco",{pron:40})},
+      t:[[0.6,0],[1.1,1],[0.35,1],[1.8,0]],cam:[40,1.05,1.12,0],con:1,err:{b:{pelve:{pos:[0,-0.012,0.02],flex:-6},coluna:{flex:-16}}}},
+    /* standing barbell curl: upper arms still at the sides, the bar follows the hands */
+    rosca:{setup:"pe",feet:{giro:6},hands:"fk",holds:"bar",
+      a:{...STAND(),...both("ombro",{flex:4,abd:8}),...both("cotovelo",{flex:12}),...both("antebraco",{pron:-72})},
+      b:{...STAND(),...both("ombro",{flex:16,abd:8}),...both("cotovelo",{flex:138}),...both("antebraco",{pron:-72})},
+      t:[[0.5,0],[1.0,1],[0.3,1],[2.0,0]],cam:[40,0.95,1.05,0],con:1,err:{b:{pelve:{pos:[0,-0.012,0],flex:-8},coluna:{flex:-14},...both("ombro",{flex:42,abd:8})}}},
+    rosca_h:{setup:"pe",feet:{giro:6},hands:"fk",holds:"db",
+      a:{...STAND(),...both("ombro",{flex:0,abd:20,rot:-8}),...both("cotovelo",{flex:12}),...both("antebraco",{pron:-75})},
+      b:{...STAND(),...both("ombro",{flex:12,abd:16,rot:-8}),...both("cotovelo",{flex:138}),...both("antebraco",{pron:-75})},
+      t:[[0.5,0],[1.0,1],[0.3,1],[2.0,0]],cam:[40,0.95,1.05,0],con:1,err:{b:{pelve:{pos:[0,-0.012,0],flex:-8},coluna:{flex:-14},...both("ombro",{flex:40,abd:16,rot:-8})}}},
+    martelo:{setup:"pe",feet:{giro:6},hands:"fk",holds:"db",
+      a:{...STAND(),...both("ombro",{flex:0,abd:16}),...both("cotovelo",{flex:12}),...both("antebraco",{pron:0})},
+      b:{...STAND(),...both("ombro",{flex:12,abd:13}),...both("cotovelo",{flex:135}),...both("antebraco",{pron:0})},
+      t:[[0.5,0],[1.0,1],[0.3,1],[2.0,0]],cam:[45,0.95,1.05,0],con:1,err:{b:{pelve:{pos:[0,-0.012,0],flex:-8},coluna:{flex:-14},...both("ombro",{flex:40,abd:13})}}},
+    /* lateral raise: the arms go out to shoulder height, elbows a little bent */
+    elevlat:{setup:"pe",feet:{giro:6},hands:"fk",holds:"db",
+      a:{...STAND(),...both("ombro",{flex:8,abd:17,rot:10}),...both("cotovelo",{flex:16}),...both("antebraco",{pron:20})},
+      b:{...STAND(),...both("ombro",{flex:14,abd:88,rot:10}),...both("cotovelo",{flex:20}),...both("antebraco",{pron:20})},
+      t:[[0.5,0],[1.0,1],[0.25,1],[1.8,0]],cam:[20,1.0,1.05,0],con:1,err:{b:{...both("ombro",{flex:14,abd:118,rot:10}),...both("cotovelo",{flex:6})}}},
+    /* incline dumbbell press, bench at 35° */
+    supino_inc_h:{setup:"inclinado",inc:35,hands:"db",db:"press",gx:[0.07,0.065],eq:["banco_inc"],
+      a:{pelve:{pos:[0,0,0],flex:-55},coluna:{flex:-4},cervical:{flex:8},...both("quadril",{flex:40,abd:16}),...both("joelho",{flex:85}),...both("ombro",{flex:88,abd:10}),...both("cotovelo",{flex:12}),...both("antebraco",{pron:60})},
+      b:{pelve:{pos:[0,0,0],flex:-55},coluna:{flex:-4},cervical:{flex:8},...both("quadril",{flex:40,abd:16}),...both("joelho",{flex:85}),...both("ombro",{flex:15,abd:70,rot:15}),...both("cotovelo",{flex:100}),...both("antebraco",{pron:60})},
+      t:[[0.6,0],[2.0,1],[0.3,1],[1.2,0]],cam:[55,0.85,1.3,-0.15],con:0,err:{b:{...both("ombro",{flex:0,abd:92,rot:15})},dbLat:0.1}},
+    /* seated dumbbell shoulder press, bench upright (~80°) */
+    desenv_h:{setup:"inclinado",inc:80,hands:"db",db:"ohp",gx:[0.06,0.055],eq:["banco_inc"],
+      a:{pelve:{pos:[0,0,0],flex:-10},coluna:{flex:-2},cervical:{flex:0},...both("quadril",{flex:82,abd:16}),...both("joelho",{flex:85}),...both("ombro",{flex:20,abd:80,rot:-60}),...both("cotovelo",{flex:100}),...both("antebraco",{pron:50})},
+      b:{pelve:{pos:[0,0,0],flex:-10},coluna:{flex:-2},cervical:{flex:0},...both("quadril",{flex:82,abd:16}),...both("joelho",{flex:85}),...both("ombro",{flex:20,abd:165,rot:-10}),...both("cotovelo",{flex:12}),...both("antebraco",{pron:50})},
+      t:[[0.6,0],[1.1,1],[0.3,1],[1.8,0]],cam:[35,1.0,1.2,-0.1],con:1,err:{b:{coluna:{flex:-16},cervical:{flex:-10}}}}};
+  /* the dumbbell (≈ 20 kg, rubber hexagon heads) — the handle along x */
+  function dumbbell(){const g=new THREE.Group(),st=eqMat(0xc9cdd3,.6,.3),dk=eqMat(0x9ea3aa,.6,.42),ru=eqMat(0x2a2d32,0,.72);
+    const cyl=(r,len,x,mat,seg=20,idk="bar")=>{const geo=new THREE.CylinderGeometry(r,r,len,seg);geo.rotateZ(Math.PI/2);const o=eqMesh(geo,mat,idk,g);o.position.x=x;return o};
+    cyl(0.016,0.13,0,dk);for(const s of [-1,1]){cyl(0.024,0.012,s*0.071,st);const h=cyl(0.075,0.09,s*0.122,ru,6,"plate");h.rotation.x=Math.PI/6;cyl(0.03,0.006,s*0.17,st,20)}
+    return g}
+  /* adjustable bench: seat (flat) + back pad at `ang`° from horizontal, built to touch the body (seat under the glutes,
+     back pad along the back) */
+  function adjBench(g,seatTop,seatZ0,seatZ1,pivot,ang,backLen){const pad=eqMat(0x1e2125,0,.6),fr=eqMat(0x33373d,.45,.45),w=0.13,h=0.03,r=0.018,bs=0.009;
+    const padGeo=len=>{const sh=new THREE.Shape();sh.moveTo(-w+r,-h);sh.lineTo(w-r,-h);sh.quadraticCurveTo(w,-h,w,-h+r);sh.lineTo(w,h-r);sh.quadraticCurveTo(w,h,w-r,h);sh.lineTo(-w+r,h);sh.quadraticCurveTo(-w,h,-w,h-r);sh.lineTo(-w,-h+r);sh.quadraticCurveTo(-w,-h,-w+r,-h);
+      const geo=new THREE.ExtrudeGeometry(sh,{depth:len-2*bs,bevelEnabled:true,bevelThickness:bs,bevelSize:bs,bevelSegments:3,curveSegments:5});geo.translate(0,0,-(len-2*bs)/2);return geo};
+    const sl=seatZ1-seatZ0,seat=eqMesh(padGeo(sl),pad,"pad",g);seat.position.set(0,seatTop-h-bs,(seatZ0+seatZ1)/2);
+    /* back pad: its top face passes through pivot (y,z) and goes back/up at ang */
+    const a=THREE.MathUtils.degToRad(ang),dir=new THREE.Vector3(0,Math.sin(a),-Math.cos(a)),nrm=new THREE.Vector3(0,Math.cos(a),Math.sin(a));
+    const back=eqMesh(padGeo(backLen),pad,"pad",g);back.rotation.x=a;back.position.set(0,pivot.y,pivot.z).addScaledVector(dir,backLen/2+0.02).addScaledVector(nrm,-(h+bs));
+    /* frame: seat post, a rail on the floor, a strut under the back pad */
+    const sb=seatTop-2*(h+bs),zc=(seatZ0+seatZ1)/2;ebox(g,0.06,sb-0.03,0.06,0,(sb-0.03)/2,zc,fr,"frame");
+    const zb=pivot.z-Math.cos(a)*backLen*0.55,yb=pivot.y+Math.sin(a)*backLen*0.55-(h+bs)*2;
+    ebox(g,0.06,0.04,Math.abs(zb-zc)+0.5,0,0.02,(zb+zc)/2,fr,"frame");ebox(g,0.46,0.04,0.06,0,0.02,zc+0.2,fr,"frame");ebox(g,0.46,0.04,0.06,0,0.02,zb-0.15,fr,"frame");
+    const sh2=new THREE.Vector3(0,Math.max(0.1,yb),zb),bot=new THREE.Vector3(0,0.04,zb-0.05),mid=sh2.clone().add(bot).multiplyScalar(0.5),L=sh2.distanceTo(bot);
+    const st=ebox(g,0.05,L,0.05,0,mid.y,mid.z,fr,"frame");st.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),sh2.clone().sub(bot).normalize())}
+  /* points of the body's surface: the farthest along a direction (CPU skinning of a sample of the vertices) */
+  function farthest(keys,dir){let best=-9,bp=null;const v=new THREE.Vector3();root.updateMatrixWorld(true);
+    for(const k of keys){const o=parts[k];if(!o)continue;const n=o.geometry.attributes.position.count,st=Math.max(1,Math.floor(n/1500));
+      for(let i=0;i<n;i+=st){o.getVertexPosition(i,v);v.applyMatrix4(o.matrixWorld);const d=v.dot(dir);if(d>best){best=d;bp=v.clone()}}}
+    return {d:best,p:bp}}
+  const BACKK=["dorsal_superior","dorsal_inferior","trapezio_medio","trapezio_inferior","eretores","infraespinhal","redondo_maior"],GLUTK=["gluteo_maximo","isquio_biceps_femoral","isquio_semi"];
+  const merge=(a,b)=>{if(!b)return a;const o={...a};for(const k in b)o[k]=b[k]&&typeof b[k]==="object"&&!Array.isArray(b[k])&&a[k]?merge(a[k],b[k]):b[k];return o};
   const tlen=t=>t.reduce((s,x)=>s+x[0],0);
   function phaseAt(t,T){const L=tlen(T);t=((t%L)+L)%L;let u0=T[T.length-1][1];for(const [d,u] of T){if(t<d)return u0+(u-u0)*sm(t/d);t-=d;u0=u}return u0}
+  /* which step of the timeline is playing (for the phase label): index into T and the fraction of it */
+  function stepAt(t,T){const L=tlen(T);t=((t%L)+L)%L;for(let i=0;i<T.length;i++){if(t<T[i][0])return [i,t/T[i][0]];t-=T[i][0]}return [T.length-1,1]}
   /* 0.81 (owner: "a mão parece que está segurando o vento na frente da barra"): the grip is placed by the fingers. With the
      hand closed (pegada 1) the middle finger's knuckle, middle and end joints lie on a circle around the bar: its centre
      is where the bar must be, and the circle's axis is the bar's direction. Each pass: turn the forearm (pronation, the
-     nearer of the two ways) so that axis lies along the bar, then move the wrist target by what is still missing. */
+     nearer of the two ways) so that axis lies along the bar/handle, then move the wrist target by what is still missing.
+     0.83: any target point and handle direction per hand (barbell, dumbbells). */
   function hook(sd){const a=jp("mcf3_"+sd),b=jp("ifp3_"+sd),c=jp("ifd3_"+sd),ab=b.clone().sub(a),ac=c.clone().sub(a),n=ab.clone().cross(ac),n2=n.lengthSq();
     const ctr=a.clone().add(n.clone().cross(ab).multiplyScalar(ac.lengthSq()).add(ac.clone().cross(n).multiplyScalar(ab.lengthSq())).multiplyScalar(1/(2*n2)));
     return {c:ctr,ax:n.normalize()}}
   const X=new THREE.Vector3(1,0,0);
-  function handsTo(P,bar,gx){P.ik=P.ik||{};
-    for(const [sd,x] of [["d",-gx],["e",gx]]){const w=jp("punho_"+sd),f=w.clone().sub(jp("cotovelo_"+sd)).normalize();
-      P.ik["mao_"+sd]=new THREE.Vector3(x,bar.y,bar.z).sub(f.multiplyScalar(0.075)).toArray()}
+  function gripTo(P,T){P.ik=P.ik||{};
+    for(const [sd,pt] of T){const w=jp("punho_"+sd),f=w.clone().sub(jp("cotovelo_"+sd)).normalize();P.ik["mao_"+sd]=pt.clone().sub(f.multiplyScalar(0.075)).toArray()}
     rigPose(P);
     for(let it=0;it<4;it++){
-      for(const [sd,x] of [["d",-gx],["e",gx]]){const id="antebraco_"+sd,J=rig.J[id],pm=J&&J.mov.find(m=>m.id==="pron");
-        /* 1) forearm turn: angle (around the forearm) from the hook axis to the bar, folded to −90…90° (the axis has no sign) */
+      for(const [sd,,dir] of T){const id="antebraco_"+sd,J=rig.J[id],pm=J&&J.mov.find(m=>m.id==="pron");
         if(pm){const fa=jp("punho_"+sd).sub(jp(id)).normalize(),h=hook(sd),pr=v=>v.clone().sub(fa.clone().multiplyScalar(v.dot(fa))).normalize();
-          const a=pr(h.ax),b=pr(X);let ang=Math.atan2(fa.dot(a.clone().cross(b)),a.dot(b));if(ang>Math.PI/2)ang-=Math.PI;if(ang<-Math.PI/2)ang+=Math.PI;
+          const a=pr(h.ax),b=pr(dir);let ang=Math.atan2(fa.dot(a.clone().cross(b)),a.dot(b));if(ang>Math.PI/2)ang-=Math.PI;if(ang<-Math.PI/2)ang+=Math.PI;
           const ew=new THREE.Vector3().fromArray(pm.eixo).normalize().applyQuaternion(wq(rig.G[id].parent)),sg=Math.sign(ew.dot(fa))||1;
           const cur=(P[id]&&P[id].pron!=null)?P[id].pron:pm.repouso;P[id]={...(P[id]||{}),pron:Math.min(pm.max,Math.max(pm.min,cur+sg*THREE.MathUtils.radToDeg(ang)))}}}
       rigPose(P);
-      /* 2) the wrist goes by what is missing between the hook centre and the bar */
-      let worst=0;for(const [sd,x] of [["d",-gx],["e",gx]]){const h=hook(sd),t=new THREE.Vector3(x,bar.y,bar.z),dv=t.sub(h.c);worst=Math.max(worst,dv.length());
-        P.ik["mao_"+sd]=new THREE.Vector3().fromArray(P.ik["mao_"+sd]).add(dv).toArray()}
+      let worst=0;for(const [sd,pt] of T){const dv=pt.clone().sub(hook(sd).c);worst=Math.max(worst,dv.length());P.ik["mao_"+sd]=new THREE.Vector3().fromArray(P.ik["mao_"+sd]).add(dv).toArray()}
       rigPose(P);if(worst<0.002)break}
-    MOT.grip=Math.max(...[["d",-gx],["e",gx]].map(([sd,x])=>hook(sd).c.distanceTo(new THREE.Vector3(x,bar.y,bar.z))))}
-  /* 0.81 (owner: "no terra a barra está passando por dentro da perna"): the front of the legs, measured once on the body
-     at rest (the most forward point of the shin and of the thigh at each tenth of their length), follows the pose; the
-     deadlift bar stays in front of it (it slides up the shins and thighs, as it should) */
+    MOT.grip=Math.max(...T.map(([sd,pt])=>hook(sd).c.distanceTo(pt)))}
+  /* 0.81: the front of the legs, measured once on the body at rest (the most forward point of the shin and of the thigh
+     at each tenth of their length), follows the pose; a hanging bar stays in front of it */
   function legFront(){const out={};const pts=[];for(const [k,o] of Object.entries(parts)){if(/^(osso|fundo|base|pele|pele_n|cabeca|mama.*|deco)$/.test(k))continue;
       const a=o.geometry.attributes.position,v=new THREE.Vector3();o.updateWorldMatrix(true,false);const st=Math.max(1,Math.floor(a.count/6000));
       for(let i=0;i<a.count;i+=st){v.fromBufferAttribute(a,i).applyMatrix4(o.matrixWorld);if(v.y<1.0)pts.push(v.x,v.y,v.z)}}
@@ -587,50 +705,96 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
   function barClear(m,y){let z=-9;for(const L of Object.values(m.legs)){const g=rig.G[L.A],a=jp(L.A),b=jp(L.B),fr=new THREE.Vector3(0,0,1).applyQuaternion(wq(g));let prev=null;
       for(let i=0;i<=10;i++){const p=a.clone().lerp(b,i/10).addScaledVector(fr,L.f[i]);if(prev&&(prev.y-y)*(p.y-y)<=0&&prev.y!==p.y){const k=(y-prev.y)/(p.y-prev.y);z=Math.max(z,prev.z+(p.z-prev.z)*k)}prev=p}}
     return z}
-  /* 0.81: deadlift — hips rise first and stay back (knees straighten and get out of the bar's way), the trunk comes up
-     and the hips come forward in the second half (as coaches teach: "push the floor, then hips through") */
-  const EASE={terra:{"pelve.pos":u=>[u,Math.pow(u,0.75),Math.pow(u,2.4)],"pelve.flex":u=>Math.pow(u,1.8),"coluna.flex":u=>Math.pow(u,1.8),"ombro_d.flex":u=>Math.pow(u,1.6),"ombro_e.flex":u=>Math.pow(u,1.6)}};
-  function easeP(P,d,b,key,u){const E=EASE[key];if(!E)return;for(const [path,f] of Object.entries(E)){const [j,mv]=path.split("."),k=f(u),A=d.a[j]&&d.a[j][mv],B=b[j]&&b[j][mv];if(A==null||B==null)continue;
+  function easeP(P,d,b,u){const E=d.ease;if(!E)return;for(const [path,f] of Object.entries(E)){const [j,mv]=path.split("."),k=f(u),A=d.a[j]&&d.a[j][mv],B=b[j]&&b[j][mv];if(A==null||B==null)continue;
       P[j][mv]=Array.isArray(A)?A.map((x,i)=>x+(B[i]-x)*k[i]):A+(B-A)*k}}
-  function frame(u){const m=MOT,d=m.d,P=lerpP(d.a,m.b,u);easeP(P,d,m.b,m.key,u);P.pegada_d=P.pegada_e=1;P.ik={pe_d:m.feet[0],pe_e:m.feet[1]};
-    if(m.dy)P.pelve.pos=[P.pelve.pos[0],P.pelve.pos[1]+m.dy,P.pelve.pos[2]];
-    rigPose(P);let bar;
-    if(d.bar==="costas"){const t1=jp("T1"),up=t1.clone().sub(jp("T6")).normalize(),bk=new THREE.Vector3(0,up.z,-up.y);bar=t1.clone().addScaledVector(bk,m.sex==="f"?0.075:0.085).addScaledVector(up,-0.015);bar.x=0}
-    else if(d.bar==="chao"){/* 0.81: the bar hangs where the straight arms reach (shoulder → closed hand), not lower; it stays in front of the legs */
-      let by=0.225,bz=m.barZ;for(let it=0;it<3;it++){let y=9;for(const [sd,x] of [["d",-m.gx],["e",m.gx]]){const sh=jp("ombro_"+sd),R=sh.distanceTo(hook(sd).c)*0.9985,dx=x-sh.x,dz=bz-sh.z;
-          y=Math.min(y,sh.y-Math.sqrt(Math.max(0,R*R-dx*dx-dz*dz)))}by=Math.max(0.225,y);bz=Math.max(m.barZ,barClear(m,by)+0.016)}
-      bar=new THREE.Vector3(0,by,bz)}
-    else{const k=sm(u);bar=m.top.clone().lerp(m.low,k);bar.z=m.top.z+(m.low.z-m.top.z)*Math.pow(u,0.7)}
-    handsTo(P,bar,m.gx);m.bar.position.copy(bar);m.u=u;need=true}
-  /* the body's lowest point of the back (lying on the bench) and the chest's highest point, with the pose applied */
+  /* a hanging bar: where the straight arms reach (shoulder → closed hand), in front of the legs (and on the floor at most) */
+  function hangBar(m,zMin,floor){let by=floor?0.225:0,bz=zMin;for(let it=0;it<3;it++){let y=9;for(const [sd,x] of [["d",-m.gx],["e",m.gx]]){const sh=jp("ombro_"+sd),R=sh.distanceTo(hook(sd).c)*0.9985,dx=x-sh.x,dz=bz-sh.z;
+        y=Math.min(y,sh.y-Math.sqrt(Math.max(0,R*R-dx*dx-dz*dz)))}by=floor?Math.max(0.225,y):y;bz=m.legs?Math.max(zMin,barClear(m,by)+0.016):zMin}
+    return new THREE.Vector3(0,by,bz)}
+  function barAt(m,u){const d=m.d;
+    if(d.bar==="costas"){const t1=jp("T1"),up=t1.clone().sub(jp("T6")).normalize(),bk=new THREE.Vector3(0,up.z,-up.y);const b=t1.clone().addScaledVector(bk,m.sex==="f"?0.075:0.085).addScaledVector(up,-0.015);b.x=0;return b}
+    if(d.bar==="pend")return hangBar(m,m.barZ,!!d.floor);
+    if(d.bar==="remo"){const k=sm(u);return m.hang.clone().lerp(m.belly,k)}
+    if(d.bar==="press"){const y=m.low.y+(m.top.y-m.low.y)*sm(u),t=Math.min(1,Math.max(0,(u-0.45)/0.55)),z=m.low.z+(m.top.z-m.low.z)*sm(t);return new THREE.Vector3(0,y,z)}
+    const k=sm(u),b=m.top.clone().lerp(m.low,k);b.z=m.top.z+(m.low.z-m.top.z)*Math.pow(u,0.7);return b}
+  function dbAt(m,u){const k=sm(u);return [0,1].map(i=>m.dbA[i].clone().lerp(m.dbB[i],k))}
+  function placeHeld(m){const d=m.d;
+    if(m.db)["d","e"].forEach((sd,i)=>{const h=hook(sd);m.db[i].position.copy(h.c);m.db[i].quaternion.setFromUnitVectors(X,h.ax)});
+    if(d.hands==="fk"&&m.bar){const a=hook("d").c,b=hook("e").c;m.bar.position.copy(a).add(b).multiplyScalar(0.5);m.bar.quaternion.setFromUnitVectors(X,b.clone().sub(a).normalize())}}
+  function frame(u){const m=MOT,d=m.d,P=lerpP(m.A,m.B,u);easeP(P,{...d,a:m.A},m.B,u);P.pegada_d=P.pegada_e=1;P.ik=m.feet?{pe_d:m.feet[0],pe_e:m.feet[1]}:{};
+    if(m.err&&d.err.joelho&&m.feet)P.ik={pe_d:{...m.feet[0],joelho:d.err.joelho*sm(u)},pe_e:{...m.feet[1],joelho:d.err.joelho*sm(u)}};
+    if(m.dy||m.dz)P.pelve.pos=[P.pelve.pos[0],P.pelve.pos[1]+(m.dy||0),P.pelve.pos[2]+(m.dz||0)];
+    rigPose(P);
+    if(d.hands==="bar"){const bar=barAt(m,u);gripTo(P,[["d",new THREE.Vector3(-m.gx,bar.y,bar.z),X],["e",new THREE.Vector3(m.gx,bar.y,bar.z),X]]);m.bar.position.copy(bar);m.bar.quaternion.identity()}
+    else if(d.hands==="db"){const p=dbAt(m,u);gripTo(P,[["d",p[0],X],["e",p[1],X]])}
+    else MOT.grip=0;
+    placeHeld(m);m.u=u;need=true}
   const boxOf=ks=>{const b=new THREE.Box3();root.updateMatrixWorld(true);for(const k of ks)if(parts[k])b.expandByObject(parts[k],true);return b};
+  /* the trunk's frame at the current pose: up along the spine (L3→T1), front, and the side */
+  function trunkFrame(){const up=jp("T1").sub(jp("L3")).normalize(),side=new THREE.Vector3(1,0,0),front=side.clone().cross(up).normalize();return {up,front}}
   function motionStart(key,opt){motionStop(true);if(!rig||!MOV[key])return false;const d=MOV[key];opt=opt||{};
-    const m=MOT={key,d,opt,t:0,last:performance.now(),play:opt.play!==false,speed:opt.speed||1,sex:curSex,b:opt.deep&&d.deep?d.deep:d.b,dy:0,g:new THREE.Group()};
-    rigPose({});const A0=jp("tornozelo_d"),A1=jp("tornozelo_e");
-    if(key==="agach"){m.feet=[{alvo:[A0.x-0.07,A0.y,A0.z],giro:20},{alvo:[A1.x+0.07,A1.y,A1.z],giro:20}];m.gx=m.sex==="f"?0.31:0.34}
-    else if(key==="terra"){m.legs=legFront();m.feet=[{alvo:A0.toArray(),giro:8},{alvo:A1.toArray(),giro:8}];m.barZ=(A0.z+A1.z)/2+0.06;m.gx=m.sex==="f"?0.22:0.24}
-    else{/* lying: put the back on a 44 cm bench, the feet flat on the floor in front */
-      m.feet=[null,null];rigPose({...d.b,pegada_d:1,pegada_e:1});const lo=boxOf(["dorsal_superior","dorsal_inferior","trapezio_medio","gluteo_maximo"]).min.y;m.dy=0.445-lo;
-      const P={...d.b,pelve:{...d.b.pelve,pos:[0,d.b.pelve.pos[1]+m.dy,d.b.pelve.pos[2]]}};rigPose(P);const pv=jp("pelve");
-      m.feet=[{alvo:[-0.30,A0.y,pv.z+0.40]},{alvo:[0.30,A1.y,pv.z+0.40]}];P.ik={pe_d:m.feet[0],pe_e:m.feet[1]};rigPose(P);
-      const ch=boxOf(["peito_medial","peito_inferior"]),t6=jp("T6");m.low=new THREE.Vector3(0,ch.max.y+0.016,t6.z+0.03);
-      const sd=jp("ombro_d"),se=jp("ombro_e"),la=sd.distanceTo(jp("cotovelo_d"))+jp("cotovelo_d").distanceTo(jp("punho_d"));
-      m.gx=m.sex==="f"?0.33:0.37;{const dx=m.gx-Math.abs(sd.x),reach=la*0.97+0.075;m.top=new THREE.Vector3(0,(sd.y+se.y)/2+Math.sqrt(Math.max(0.01,reach*reach-dx*dx)),(sd.z+se.z)/2+0.01)}
-      m.headZ=jp("cabeca").z;m.pv=pv}
-    m.bar=barbell();m.g.add(m.bar);
-    /* where the movement starts (for the hook heights) */
+    const m=MOT={key,d,opt,t:0,last:performance.now(),play:opt.play!==false,speed:opt.speed||1,sex:curSex,b:opt.deep&&d.deep?d.deep:d.b,dy:0,dz:0,g:new THREE.Group(),err:!!(opt.erro&&d.err)};
+    m.A=m.err?merge(d.a,d.err.a):d.a;m.B=m.err?merge(m.b,d.err.b):m.b;
+    m.gx=d.gx?d.gx[m.sex==="f"?1:0]:0.25;
+    rigPose({});const A0=jp("tornozelo_d"),A1=jp("tornozelo_e");m.barZ=(A0.z+A1.z)/2+0.06;
+    const pose0=()=>{const P={...m.A,pegada_d:1,pegada_e:1};P.pelve={...m.A.pelve,pos:[m.A.pelve.pos[0],m.A.pelve.pos[1]+m.dy,m.A.pelve.pos[2]+m.dz]};P.ik=m.feet?{pe_d:m.feet[0],pe_e:m.feet[1]}:{};rigPose(P);return P};
+    if(d.setup==="pe"){const f=d.feet||{},w=f.wide||0;m.feet=[{alvo:[A0.x-w,A0.y,A0.z],giro:f.giro||0},{alvo:[A1.x+w,A1.y,A1.z],giro:f.giro||0}];if(d.legs)m.legs=legFront()}
+    else if(d.setup==="deitado"){/* lying: the back on a 44,5 cm bench, the feet flat on the floor in front */
+      m.feet=null;rigPose({...m.B,pegada_d:1,pegada_e:1});m.dy=0.445-boxOf(["dorsal_superior","dorsal_inferior","trapezio_medio","gluteo_maximo"]).min.y;
+      pose0();const pv=jp("pelve");m.feet=[{alvo:[-0.30,A0.y,pv.z+0.40]},{alvo:[0.30,A1.y,pv.z+0.40]}];pose0();m.pv=pv;m.headZ=jp("cabeca").z}
+    else if(d.setup==="inclinado"){/* seated on an adjustable bench: glutes on a 47 cm seat, feet flat on the floor where the shins point */
+      m.feet=null;pose0();m.dy=0.47-farthest(GLUTK,new THREE.Vector3(0,-1,0)).p.y;pose0();
+      /* feet on the floor right under the knees (thighs level on the seat, shins upright), a little wider */
+      const ka=jp("joelho_d"),kb=jp("joelho_e");m.feet=[{alvo:[ka.x-0.05,A0.y,ka.z+0.04]},{alvo:[kb.x+0.05,A1.y,kb.z+0.04]}];pose0()}
+    /* references of the path, at the starting pose */
+    pose0();const tf=trunkFrame(),sd=jp("ombro_d"),se=jp("ombro_e"),la=sd.distanceTo(jp("cotovelo_d"))+jp("cotovelo_d").distanceTo(jp("punho_d"));
+    if(d.bar==="peito"){const ch=boxOf(["peito_medial","peito_inferior"]),t6=jp("T6");m.low=new THREE.Vector3(0,ch.max.y+0.016,t6.z+0.03+(m.err&&d.err.low||0));
+      const dx=m.gx-Math.abs(sd.x),reach=la*0.97+0.075;m.top=new THREE.Vector3(0,(sd.y+se.y)/2+Math.sqrt(Math.max(0.01,reach*reach-dx*dx)),(sd.z+se.z)/2+0.01)}
+    if(d.bar==="remo"){m.legs=m.legs||legFront();m.hang=hangBar(m,(sd.z+se.z)/2+0.02,false);const bl=farthest(["abdomen_supra","abdomen_infra"],tf.front);m.belly=bl.p.clone().addScaledVector(tf.front,0.03);m.belly.x=0}
+    if(d.bar==="press"){const fr=farthest(["peito_superior"],new THREE.Vector3(0,0,1));const sy=(sd.y+se.y)/2,sz=(sd.z+se.z)/2;
+      m.low=new THREE.Vector3(0,sy+0.02,Math.max(fr.d+0.03,sz+0.12));const dx=m.gx-Math.abs(sd.x),reach=la*0.97+0.075;m.top=new THREE.Vector3(0,sy+Math.sqrt(Math.max(0.01,reach*reach-dx*dx)),sz-0.01)}
+    if(d.db==="press"||d.db==="ohp"){const reach=la*0.97+0.06;m.dbA=[];m.dbB=[];
+      for(const [S,s] of [[sd,-1],[se,1]]){const lat=new THREE.Vector3(s,0,0);
+        if(d.db==="press"){m.dbA.push(S.clone().add(new THREE.Vector3(0,reach,0)).addScaledVector(lat,-0.04));m.dbB.push(S.clone().addScaledVector(tf.front,0.09).addScaledVector(tf.up,-0.02).addScaledVector(lat,0.17+(m.err&&d.err.dbLat||0)))}
+        else{m.dbA.push(S.clone().addScaledVector(lat,0.12).addScaledVector(tf.up,0.09).addScaledVector(tf.front,0.03));m.dbB.push(S.clone().addScaledVector(tf.up,reach).addScaledVector(lat,-0.03))}}}
+    if(d.hands==="bar"||d.holds==="bar"){m.bar=barbell();m.g.add(m.bar)}
+    if(d.hands==="db"||d.holds==="db"){m.db=[dumbbell(),dumbbell()];m.db.forEach(x=>m.g.add(x))}
     frame(0);
-    if(key==="agach")for(const s of [-1,1])upright(m.g,s*0.6,m.bar.position.z+0.85,-1,m.bar.position.y-0.06,eqMat(0x33373d,.45,.45),eqMat(0xc9cdd3,.6,.3));
-    if(key==="supino"){flatBench(m.g,0.445,m.headZ-0.16,m.pv.z+0.22);for(const s of [-1,1])upright(m.g,s*0.56,m.headZ-0.1,1,m.top.y-0.12,eqMat(0x33373d,.45,.45),eqMat(0xc9cdd3,.6,.3))}
-    scene.add(m.g);
+    const E=d.eq||[],FR=()=>eqMat(0x33373d,.45,.45),ST=()=>eqMat(0xc9cdd3,.6,.3);
+    if(E.includes("stands"))for(const s of [-1,1])upright(m.g,s*0.6,m.bar.position.z+0.85,-1,m.bar.position.y-0.06,FR(),ST());
+    if(E.includes("banco"))flatBench(m.g,0.445,m.headZ-0.16,m.pv.z+0.22);
+    if(E.includes("suportes"))for(const s of [-1,1])upright(m.g,s*0.56,m.headZ-0.1,1,m.top.y-0.12,FR(),ST());
+    if(E.includes("banco_inc")){/* the back pad lies on the back, at the trunk's own angle; the seat under the glutes */
+      const t2=trunkFrame(),ang=THREE.MathUtils.radToDeg(Math.atan2(t2.up.y,-t2.up.z)),a=THREE.MathUtils.degToRad(ang),nrm=new THREE.Vector3(0,Math.cos(a),Math.sin(a));
+      const bk=farthest(BACKK,nrm.clone().negate()),gl=farthest(GLUTK,new THREE.Vector3(0,-1,0)),seatTop=gl.p.y;
+      const pz=bk.p.z-Math.cos(a)*(seatTop-bk.p.y)/Math.max(0.2,Math.sin(a));
+      adjBench(m.g,seatTop,pz-0.02,pz+0.36,new THREE.Vector3(0,seatTop,pz),ang,0.78)}
+    addShadow(m);scene.add(m.g);
     const [deg,ty,dk,tz]=d.cam,a=THREE.MathUtils.degToRad(deg);m.tgt=new THREE.Vector3(0,ty,tz);m.dk=dk;
     controls.target.copy(m.tgt);const dd=fitD()*dk;camera.position.set(Math.sin(a)*dd,ty+0.08,tz+Math.cos(a)*dd);controls.maxDistance=fitD()*1.6;controls.minDistance=fitD()*0.45;
     need=true;return true}
+  /* 0.83: the target muscles glow a little stronger while they work hardest (the step that moves toward `con`, the
+     concentric end), softer while lowering and at rest */
+  function effort(m){const T=m.d.t,[i,f]=stepAt(m.t,T),u0=T[(i+T.length-1)%T.length][1],u1=T[i][1],c=m.d.con;
+    if(u0===u1)return u1===c?0.55:0.15;return u1===c?0.55+0.45*Math.sin(Math.PI*Math.min(1,f*1.15)):0.3}
+  function glowStep(){const m=MOT;if(!m)return;const e=effort(m);m.glow=(m.glow==null?e:m.glow+(e-m.glow)*0.12);
+    for(const [k0,o] of Object.entries(parts)){const s=state[BASEK(k0)];if(!s||!s.on||!o.material||!o.material.emissive)continue;o.material.emissiveIntensity=0.1+0.42*m.glow}need=true}
+  /* 0.83: turn the camera around the movement to an angle (0 = in front, 90 = from the side, 180 = behind) */
+  function orbit(deg){const m=MOT,t=m?m.tgt:controls.target,o=camera.position.clone().sub(t),r=Math.hypot(o.x,o.z),y=o.y,a0=Math.atan2(o.x,o.z),a1=THREE.MathUtils.degToRad(deg);
+    let da=a1-a0;da=Math.atan2(Math.sin(da),Math.cos(da));if(reduce()){camera.position.set(t.x+Math.sin(a1)*r,t.y+y,t.z+Math.cos(a1)*r);need=true;return}
+    const t0=performance.now();(function step(){if(!alive)return;const k=Math.min(1,(performance.now()-t0)/500),e=1-Math.pow(1-k,3),a=a0+da*e;camera.position.set(t.x+Math.sin(a)*r,t.y+y,t.z+Math.cos(a)*r);need=true;if(k<1)requestAnimationFrame(step)})()}
+  /* 0.83: a soft shadow on the floor under the scene (not in the outline pass) */
+  let SHT=null;function shadowTex(){if(SHT)return SHT;const c=document.createElement("canvas");c.width=c.height=128;const g=c.getContext("2d"),gr=g.createRadialGradient(64,64,4,64,64,64);
+    gr.addColorStop(0,"rgba(0,0,0,0.34)");gr.addColorStop(0.55,"rgba(0,0,0,0.16)");gr.addColorStop(1,"rgba(0,0,0,0)");g.fillStyle=gr;g.fillRect(0,0,128,128);SHT=new THREE.CanvasTexture(c);return SHT}
+  function addShadow(m){const b=new THREE.Box3();for(const id of ["pelve","tornozelo_d","tornozelo_e","cabeca","punho_d","punho_e"])b.expandByPoint(jp(id));m.g.updateMatrixWorld(true);
+    m.g.traverse(o=>{if(o.isMesh&&o.geometry){o.geometry.computeBoundingBox&&o.geometry.computeBoundingBox();const bb=o.geometry.boundingBox.clone().applyMatrix4(o.matrixWorld);if(bb.max.y<1.2){b.expandByPoint(new THREE.Vector3(bb.min.x,0,bb.min.z));b.expandByPoint(new THREE.Vector3(bb.max.x,0,bb.max.z))}}});
+    const w=Math.max(0.9,b.max.x-b.min.x+0.5),l=Math.max(0.9,b.max.z-b.min.z+0.5);
+    const sh=new THREE.Mesh(new THREE.PlaneGeometry(w,l),new THREE.MeshBasicMaterial({map:shadowTex(),transparent:true,depthWrite:false}));sh.rotation.x=-Math.PI/2;sh.position.set((b.min.x+b.max.x)/2,0.002,(b.min.z+b.max.z)/2);sh.renderOrder=-1;sh.name="sombra";m.g.add(sh);m.shadow=sh}
   function motionStop(keepCam){if(!MOT)return;clearEq();MOT=null;if(rig)rigPose({});if(!keepCam&&ready){lims();view(curV,false)}need=true}
 
   renderer.setAnimationLoop(()=>{if(!box.offsetParent)return;   /* hidden (2D or another tab): no drawing */
     controls.enabled=!api.covered();
-    if(MOT&&MOT.play){const now=performance.now(),dt=Math.min(0.1,(now-MOT.last)/1000);MOT.last=now;MOT.t+=dt*MOT.speed;frame(phaseAt(MOT.t,MOT.d.t))}else if(MOT)MOT.last=performance.now();
+    if(MOT&&MOT.play){const now=performance.now(),dt=Math.min(0.1,(now-MOT.last)/1000);MOT.last=now;MOT.t+=dt*MOT.speed;frame(phaseAt(MOT.t,MOT.d.t));glowStep()}else if(MOT)MOT.last=performance.now();
     if(controls.update())need=true;
     /* the point it turns around stays near the middle of the body (owner 0.19: "mais centralizado") */
     const t=controls.target,c=MOT?t.clone().clamp(MOT.tgt.clone().subScalar(0.5),MOT.tgt.clone().addScalar(0.5)):t.clone().clamp(BB.min,BB.max);if(!MOT){c.x=Math.max(-BW*0.2,Math.min(BW*0.2,c.x));c.z=Math.max(-0.08,Math.min(0.08,c.z))}if(!c.equals(t)){camera.position.add(c.clone().sub(t));t.copy(c);need=true}
@@ -663,9 +827,10 @@ vec4 w=modelMatrix*vec4(transformed,1.0);vx=w.x;vy=(modelMatrix*vec4(position,1.
     /* 0.77: the exercise movement — motion("agach"|"terra"|"supino", {deep, play, speed}) → false if the body is not
        ready; motion(null) stops (back to the A pose and the usual framing); play(on), speed(0.5|1); still(u) = still frame */
     motion(k,o){if(!k){motionStop();return true}return motionStart(k,o)},
-    play(on){if(MOT){MOT.play=!!on;MOT.last=performance.now()}},speed(x){if(MOT)MOT.speed=x},
+    play(on){if(MOT){MOT.play=!!on;MOT.last=performance.now()}},speed(x){if(MOT)MOT.speed=x},orbit(deg){orbit(deg)},glow(){return MOT?MOT.glow:null},erro(){return MOT?MOT.err:false},
     camPos(){return camera.position.toArray()},
-    still(u){if(MOT){MOT.play=false;frame(u)}},motionInfo(){return MOT?{key:MOT.key,play:MOT.play,speed:MOT.speed,u:MOT.u,t:MOT.t,bar:MOT.bar.position.toArray(),grip:MOT.grip,legGap:MOT.legs?MOT.bar.position.z-barClear(MOT,MOT.bar.position.y):null}:null},
+    still(u){if(MOT){MOT.play=false;frame(u);glowStep()}},motionInfo(){return MOT?{key:MOT.key,play:MOT.play,speed:MOT.speed,u:MOT.u,t:MOT.t,bar:MOT.bar?MOT.bar.position.toArray():null,grip:MOT.grip,legGap:MOT.legs&&MOT.bar?MOT.bar.position.z-barClear(MOT,MOT.bar.position.y):null,step:stepAt(MOT.t,MOT.d.t),steps:MOT.d.t.length,T:MOT.d.t,err:MOT.err}:null},
+    motions(){return Object.keys(MOV)},
     /* for checks/prints only: a thin rod between two points (stands in for a barbell until the equipment exists) */
     marca(id,a,b){scene.children.filter(o=>o.name==="mk_"+id).forEach(o=>{scene.remove(o);o.geometry.dispose()});if(!a)return need=true;
       const A=new THREE.Vector3().fromArray(a),B=new THREE.Vector3().fromArray(b),L=A.distanceTo(B);
